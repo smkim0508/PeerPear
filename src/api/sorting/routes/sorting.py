@@ -1,5 +1,4 @@
 # actual routes / API for sorting requests
-
 from flask import Blueprint, request
 
 # use blueprint to group routes
