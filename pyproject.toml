@@ -15,7 +15,12 @@ dependencies = [
     "psycopg[binary] (>=3.2.11,<4.0.0)",
     "alembic (>=1.17.0,<2.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
-    "pydantic (>=2.12.3,<3.0.0)"
+    "pydantic (>=2.12.3,<3.0.0)",
+    "uuid (>=1.30,<2.0)",
+    "logging (>=0.4.9.6,<0.5.0.0)",
+    "asyncio (>=4.0.0,<5.0.0)",
+    "redis (>=6.4.0,<7.0.0)",
+    "contextvars (>=2.4,<3.0)"
 ]
 
 
