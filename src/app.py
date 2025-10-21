@@ -4,14 +4,14 @@ from __future__ import annotations
 import os
 from flask import Flask, g, jsonify
 from flask_cors import CORS
-from .db.models.base.main_db import create_engine_and_sessionmaker
+from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
 
 from common.logging import logger
 
 # routes
-from .api.pairing.routes.pairing import pairing_bp
-from .api.sorting.routes.sorting import sorting_bp
+from api.pairing.routes.pairing import pairing_bp
+from api.sorting.routes.sorting import sorting_bp
 
 def create_app() -> Flask:
     """
