@@ -1,3 +1,1 @@
-from flask_sqlalchemy import SQLAlchemy
-
-main_db = SQLAlchemy() # reusable SQLAlchemy instance
+# main place for db, managed with Async SQLAlchemy Sessions

@@ -1,0 +1,23 @@
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Index
+from sqlalchemy.orm import mapped_column, relationship, Mapped
+from sqlalchemy.dialects.postgresql import ARRAY
+from .base import MainDB_Base
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
+
+# example user profile in main db, to be expanded as we add to our central user profile
+# NOTE: user maps to many hobbies, 
+class User(MainDB_Base):
+    __tablename__ = "user"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    first_name: Mapped[str] = mapped_column(String, nullable=False)
+    last_name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+
+    hobbies: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        nullable=False,
+        default=list,
+    )

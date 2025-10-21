@@ -10,9 +10,9 @@ The dependencies in this project is managed through poetry.
 
 3. Install all dependencies with `poetry install`
 
-4. Optionally, to add your own dependencies use `poetry add <dependency group>` to update the .toml and poetry lock files.
+4. Optionally, add your own dependencies with `poetry add <dependency group>` to update the .toml and poetry lock files.
 
 5. Run the main backend app locally using `poetry run python src/wsgi.py`
 
 ## Google Gemini API
-This project uses Google Gemini 2.5 Flash (temporarily) for the LLM client. To receieve an API KEY to run it locally, please visit: https://aistudio.google.com/ and set up your project.
+This project uses Google Gemini 2.0 Flash (temporarily) for the LLM client. To receieve an API KEY to run it locally, please visit: https://aistudio.google.com/ and set up your project
