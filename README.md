@@ -14,3 +14,5 @@ The dependencies in this project is managed through poetry.
 
 5. Run the main backend app using `poetry run python src/wsgi.py`
 
+## Google Gemini API
+This project uses Google Gemini 2.5 Flash (temporarily) for the LLM client. To receieve an API KEY to run it locally, please visit: https://aistudio.google.com/ and set up your project.
