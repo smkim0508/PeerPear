@@ -13,6 +13,7 @@ from protocols import RateLimitProvider
 
 # NOTE: this uses the public Gemini API with an API key, not Vertex AI.
 # Set up this client with API key during app initialization
+# TODO: "strict" JSON/Pydantic output is only supported for Vertex AI clients; set up manual validation to catch malformed JSON outputs before crashing Pydantic validation, or loosen validation.
 class AsyncGenAITypedClient(TypedLLMProtocol, ProvidesProviderInfo):
     def __init__(
         self,
