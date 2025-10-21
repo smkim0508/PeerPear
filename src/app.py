@@ -7,6 +7,8 @@ from flask_cors import CORS
 from .db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
 
+from common.logging import logger
+
 # routes
 from .api.pairing.routes.pairing import pairing_bp
 from .api.sorting.routes.sorting import sorting_bp
@@ -23,14 +25,18 @@ def create_app() -> Flask:
 
     # TODO: add core configuration for env here
     app.config.update(
-        API_KEY=os.getenv("", ""),
+        DATABASE_URL=os.getenv("DATABASE_URL", None),
     )
+    
+    if app.config["DATABASE_URL"] is not None:
+        logger.info(f"DATABASE IS NOT SET")
+        raise
 
     # Async SQLAlchemy setup during app start up
     # NOTE: type errors suppressed due to new flask version
     @app.before_serving # type: ignore[attr-defined]
     async def _startup():
-        engine, SessionLocal = create_engine_and_sessionmaker()
+        engine, SessionLocal = create_engine_and_sessionmaker(db_url=app.config["DATABASE_URL"])
         app.extensions["db"] = {"engine": engine, "SessionLocal": SessionLocal}
 
     #  dispose engine in app shutdown
