@@ -1,0 +1,1 @@
+# external dependencies such as Gemini API

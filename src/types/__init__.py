@@ -1,0 +1,1 @@
+# common Pydantic types shared across app

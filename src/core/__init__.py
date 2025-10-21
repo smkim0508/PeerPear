@@ -1,0 +1,1 @@
+# core holds logging for now, potentially some env setting mix-ins in the future

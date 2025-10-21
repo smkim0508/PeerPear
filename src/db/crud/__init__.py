@@ -1,0 +1,1 @@
+# used to create canonical, reusable CRUD operations for defined ORM models
