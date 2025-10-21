@@ -1,0 +1,24 @@
+[project]
+name = "peerpear"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Sungmin Kim",email = "sk3378@princeton.edu"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "flask (>=3.1.2,<4.0.0)",
+    "flask-cors (>=6.0.1,<7.0.0)",
+    "sqlalchemy (>=2.0.44,<3.0.0)",
+    "flask-sqlalchemy (>=3.1.1,<4.0.0)",
+    "psycopg[binary] (>=3.2.11,<4.0.0)",
+    "alembic (>=1.17.0,<2.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "pydantic (>=2.12.3,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
