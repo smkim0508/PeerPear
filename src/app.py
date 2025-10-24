@@ -23,23 +23,30 @@ def create_app() -> Flask:
     app = Flask(__name__)
     CORS(app)
 
-    # TODO: add core configuration for env here
-    app.config.update(
-        DATABASE_URL=os.getenv("DATABASE_URL", None),
-    )
-    
-    if app.config["DATABASE_URL"] is not None:
-        logger.info(f"DATABASE IS NOT SET")
-        raise
-
-    # Async SQLAlchemy setup during app start up
+    # sets up core services/db/clients during app start up
     # NOTE: type errors suppressed due to new flask version
     @app.before_serving # type: ignore[attr-defined]
     async def _startup():
-        engine, SessionLocal = create_engine_and_sessionmaker(db_url=app.config["DATABASE_URL"])
+
+        # TODO: add core configuration for env here
+        app.config.update(
+            MAIN_DB_URL=os.getenv("MAIN_DATABASE_URL", None),
+            GOOGLE_API_KEY=os.getenv("GOOGLE_GENAI_API_KEY", None),
+        )
+        
+        if app.config["MAIN_DB_URL"] is not None:
+            logger.info(f"DATABASE IS NOT SET")
+            raise
+
+        if app.config["GOOGLE_API_KEY"] is not None:
+            logger.info(f"GOOGLE API IS NOT SET")
+            raise
+        
+        # store the dependencies in app.extensions to link them with flask instance
+        engine, SessionLocal = create_engine_and_sessionmaker(db_url=app.config["MAIN_DB_URL"])
         app.extensions["db"] = {"engine": engine, "SessionLocal": SessionLocal}
 
-    #  dispose engine in app shutdown
+    # dispose engine in app shutdown
     @app.after_serving # type: ignore[attr-defined]
     async def _shutdown():
         engine = app.extensions["db"]["engine"]
