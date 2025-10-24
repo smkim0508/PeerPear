@@ -1,4 +1,8 @@
-export default function Header() {
+interface HeaderProps {
+  onLoginClick: () => void;
+}
+
+export default function Header({ onLoginClick }: HeaderProps) {
   return (
     <header className="bg-nav-dark text-white font-sans">
       <div className="max-w-[1200px] mx-auto px-8 py-3.5 flex items-center justify-between">
@@ -8,17 +12,17 @@ export default function Header() {
         </div>
         
         <nav className="absolute left-1/2 -translate-x-1/2 flex gap-6 items-center text-[15px] font-medium">
-          <a href="#" className="text-white no-underline">Dashboard</a>
-          <a href="#" className="text-white no-underline">Profile</a>
+          <a href="#" className="text-white no-underline">dashboard</a>
+          <a href="#" className="text-white no-underline">profile</a>
         </nav>
 
         <div>
-          <a
-            href="#"
-            className="inline-flex items-center bg-green text-[#1a1a1a] px-[18px] py-2 rounded-md text-[15px] font-semibold no-underline"
+          <button
+            onClick={onLoginClick}
+            className="inline-flex items-center bg-green text-[#1a1a1a] px-[18px] py-2 rounded-md text-[15px] font-semibold no-underline cursor-pointer border-none"
           >
-            Log in
-          </a>
+            log in
+          </button>
         </div>
       </div>
     </header>

@@ -3,7 +3,7 @@ import { Squiggle } from "./ui/Squiggle";
 function Card({ title, text, rotation }: { title: string; text: string; rotation: number }) {
   return (
     <div 
-      className="bg-green p-9 px-[30px] max-w-[225px] rounded-md shadow-lg transition-transform duration-200"
+      className="bg-green p-9 px-[30px] max-w-[225px] rounded-xl shadow-lg transition-transform duration-200"
       style={{ transform: `rotate(${rotation}deg)` }}
     >
       <h4 className="m-0 text-xl font-bold leading-snug text-[#0a0a0a]">{title}</h4>

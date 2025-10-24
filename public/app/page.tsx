@@ -1,15 +1,24 @@
+'use client';
+
+import { useState } from 'react';
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import Features from "../components/Features";
 import Footer from "../components/Footer";
+import LoginModal from "../components/LoginModal";
 
 export default function Home() {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const openLoginModal = () => setIsLoginModalOpen(true);
+  const closeLoginModal = () => setIsLoginModalOpen(false);
+
   return (
     <div className="font-sans min-h-screen flex flex-col">
-      <Header />
+      <Header onLoginClick={openLoginModal} />
 
       <main className="flex-1">
-        <Hero />
+        <Hero onTryNowClick={openLoginModal} />
         <Features />
 
         <section className="relative text-center bg-light-beige">
@@ -19,19 +28,20 @@ export default function Home() {
           </div>
           
           <div className="px-8 py-6 pb-18">
-            <h3 className="text-4xl m-0 font-extrabold italic text-[#0a0a0a] tracking-tight">
+            <h3 className="text-4xl m-0 mt-8 font-extrabold italic text-[rgb(10,10,10)] tracking-tight">
               Ready to simplify your pairings?
             </h3>
             <div className="mt-5">
-              <a href="#" className="inline-flex items-center bg-green text-[#1a1a1a] px-5 py-3 rounded-lg text-base font-bold no-underline">
+              <button onClick={openLoginModal} className="inline-flex items-center bg-green text-[#1a1a1a] px-5 py-3 rounded-lg text-base font-bold no-underline cursor-pointer border-none">
                 Get started
-              </a>
+              </button>
             </div>
           </div>
         </section>
       </main>
 
       <Footer />
+      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </div>
   );
 }

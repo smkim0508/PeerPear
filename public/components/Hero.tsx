@@ -1,6 +1,10 @@
 import { Squiggle } from "./ui/Squiggle";
 
-export default function Hero() {
+interface HeroProps {
+  onTryNowClick: () => void;
+}
+
+export default function Hero({ onTryNowClick }: HeroProps) {
   return (
     <section className="bg-light-beige relative font-sans">
       <div className="max-w-[1200px] mx-auto px-8 py-20 pb-16">
@@ -22,9 +26,9 @@ export default function Hero() {
           </p>
 
           <div className="mt-7 flex gap-3 justify-center">
-            <a href="#" className="inline-flex items-center bg-green px-5 py-3 rounded-lg text-base font-bold text-[#1a1a1a] no-underline">
+            <button onClick={onTryNowClick} className="inline-flex items-center bg-green px-5 py-3 rounded-lg text-base font-bold text-[#1a1a1a] no-underline cursor-pointer border-none">
               Try now
-            </a>
+            </button>
             <a href="#" className="inline-flex items-center bg-dark-beige px-5 py-3 rounded-lg text-base font-bold text-[#1a1a1a] no-underline">
               Learn more
             </a>
