@@ -1,5 +1,5 @@
 *.pyc
-*.env*
+*.env
 *.vscode
 auth_examples/
 .DS_Store
