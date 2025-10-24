@@ -6,9 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-
-
-
 class Organization(MainDB_Base):
     __tablename__ = "organizations"
 
@@ -16,9 +13,5 @@ class Organization(MainDB_Base):
         Integer, primary_key=True, autoincrement=True)
 
     orgname: Mapped[str] = mapped_column(String, nullable=False)
-    
+
     description: Mapped[str] = mapped_column(String, nullable=False)
-
-    
-
-
