@@ -14,8 +14,8 @@ class UserProfile(MainDB_Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"),nullable = False, unique = True)
-    gender = Mapped[str] = mapped_column(String,nullable = True)
-    class_year = Mapped[int] = mapped_column(Integer,nullable = False)
+    gender: Mapped[str] = mapped_column(String,nullable = True)
+    class_year: Mapped[int] = mapped_column(Integer,nullable = False)
     first_name: Mapped[str] = mapped_column(String, nullable=False)
     last_name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False)
