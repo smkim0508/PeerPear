@@ -7,7 +7,6 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.dialects.postgresql import JSONB
 
-
 class Response(MainDB_Base):
     __tablename__ = "responses"
 
@@ -16,7 +15,8 @@ class Response(MainDB_Base):
 
     question_id: Mapped[int] = mapped_column(
         ForeignKey("questions.id"), nullable=False, unique=True)
-    answer = Mapped[dict] = mapped_column(JSONB, nullable=True)
+    
+    answer: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id"), nullable=False, unique=True)

@@ -6,9 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-
-
-
 class User(MainDB_Base):
     __tablename__ = "user"
 
@@ -20,7 +17,7 @@ class User(MainDB_Base):
     last_name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False)
     events: Mapped[list[int]] = mapped_column(
-        ARRAY(int),
+        ARRAY(Integer),
         nullable=False,
         default=list,
     )

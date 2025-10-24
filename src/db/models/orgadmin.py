@@ -6,9 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-
-
-
 class OrgAdmin(MainDB_Base):
     __tablename__ = "orgadmins"
 

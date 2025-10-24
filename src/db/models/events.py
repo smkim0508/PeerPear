@@ -8,10 +8,6 @@ from sqlalchemy.orm import joinedload
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 
-
-
-
-
 class Event(MainDB_Base):
     __tablename__ = "events"
 
