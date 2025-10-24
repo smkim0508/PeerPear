@@ -1,4 +1,3 @@
-import React from "react";
 import { Squiggle } from "./ui/Squiggle";
 
 export default function Hero() {

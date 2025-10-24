@@ -1,4 +1,3 @@
-import React from "react";
 import { Squiggle } from "./ui/Squiggle";
 
 function Card({ title, text, rotation }: { title: string; text: string; rotation: number }) {
