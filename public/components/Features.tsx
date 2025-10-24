@@ -3,8 +3,14 @@ import { Squiggle } from "./ui/Squiggle";
 function Card({ title, text, rotation }: { title: string; text: string; rotation: number }) {
   return (
     <div 
-      className="bg-green p-9 px-[30px] max-w-[225px] rounded-xl shadow-lg transition-transform duration-200"
+      className="bg-green p-9 px-[30px] max-w-[225px] rounded-xl shadow-lg transition-all duration-300 cursor-pointer hover:scale-110 hover:shadow-2xl hover:brightness-105 hover:-translate-y-2"
       style={{ transform: `rotate(${rotation}deg)` }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = `rotate(0deg) translateY(-8px) scale(1.1)`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = `rotate(${rotation}deg) translateY(0) scale(1)`;
+      }}
     >
       <h4 className="m-0 text-xl font-bold leading-snug text-[#0a0a0a]">{title}</h4>
       <p className="mt-3 text-sm leading-normal text-[#1a1a1a] font-light">{text}</p>
@@ -14,7 +20,7 @@ function Card({ title, text, rotation }: { title: string; text: string; rotation
 
 export default function Features() {
   return (
-    <section className="relative bg-dark-beige font-sans">
+    <section className="relative bg-dark-beige font-sans" id="features">
       <div className="mx-auto px-8 py-15 pb-20 text-center">
         <h2 className="text-[56px] mx-auto font-extrabold text-[#0a0a0a] relative inline-block tracking-tight">
           Features

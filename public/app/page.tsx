@@ -32,7 +32,7 @@ export default function Home() {
               Ready to simplify your pairings?
             </h3>
             <div className="mt-5">
-              <button onClick={openLoginModal} className="inline-flex items-center bg-green text-[#1a1a1a] px-5 py-3 rounded-lg text-base font-bold no-underline cursor-pointer border-none">
+              <button onClick={openLoginModal} className="inline-flex items-center bg-green text-[#1a1a1a] px-5 py-3 rounded-lg text-base font-bold no-underline cursor-pointer border-none transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1">
                 Get started
               </button>
             </div>
