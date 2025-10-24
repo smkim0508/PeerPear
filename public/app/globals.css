@@ -3,11 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --green: #D7FF9C;
+  --nav-dark: #393D3F;
+  --light-beige: #EBECE4;
+  --dark-beige: #CCCEC1;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-green: var(--green);
+  --color-nav-dark: var(--nav-dark);
+  --color-light-beige: var(--light-beige);
+  --color-dark-beige: var(--dark-beige);
   --font-sans: var(--font-inter-sans);
 }
 
