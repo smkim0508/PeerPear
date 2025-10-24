@@ -5,4 +5,4 @@ from pydantic import BaseModel
 class UserProfile(BaseModel):
     name: str
     email: str
-    preferneces: list[str]
+    preferences: list[str]
