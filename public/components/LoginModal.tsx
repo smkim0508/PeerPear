@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -8,8 +9,25 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'student' | 'organization'>('student');
   const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleLogin = async() => {
+    try {
+      onClose();
+
+      if (activeTab === 'student') {
+        await router.push('/student');
+      }
+      else {
+        await router.push('/organization');
+      }
+    }
+    catch (error) {
+      console.log('Navigation error: ', error);
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -62,7 +80,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </button>
         </div>
 
-        <button className="w-full bg-[#D7FF9C] text-[#1a1a1a] px-5 py-2.5 rounded-xl text-base font-bold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-105 cursor-pointer border-none">
+        <button onClick={handleLogin} className="w-full bg-[#D7FF9C] text-[#1a1a1a] px-5 py-2.5 rounded-xl text-base font-bold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-105 cursor-pointer border-none">
           Log in with CAS
         </button>
       </div>
