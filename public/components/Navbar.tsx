@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/navigation-menu"
 import { CircleUserRound } from 'lucide-react';
 
-export default function Navbar() {
+interface HeaderProps {
+    onLoginClick: () => void;
+}
+
+export default function Navbar({ onLoginClick }: HeaderProps) {
     return (
         <div className="w-full bg-[#C3DD90]">
             <div className="flex items-center justify-between w-screen h-16 px-6">
@@ -18,7 +22,7 @@ export default function Navbar() {
                 </div>
                 <NavigationMenu>
                     <NavigationMenuList className="flex gap-6">
-                        <NavigationMenuItem className="bg-[#C3DD90]">
+                        {/* <NavigationMenuItem className="bg-[#C3DD90]">
                             <NavigationMenuTrigger className="bg-[#C3DD90]">Dashboard</NavigationMenuTrigger>
                             <NavigationMenuContent className="bg-[#C3DD90]">
                                 <div className="p-4 w-[200px]">
@@ -44,12 +48,10 @@ export default function Navbar() {
                                     </NavigationMenuLink>
                                 </div>
                             </NavigationMenuContent>
-                        </NavigationMenuItem>
+                        </NavigationMenuItem> */}
                     </NavigationMenuList>
                 </NavigationMenu>
-
-                {/* Login Button */}
-                <button className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2">
+                <button onClick={onLoginClick} className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2">
 
                     login
                     <CircleUserRound size={20} />
