@@ -6,6 +6,7 @@ import Hero from "../components/Hero";
 import Features from "../components/Features";
 import Footer from "../components/Footer";
 import LoginModal from "../components/LoginModal";
+import Navbar from '@/components/Navbar';
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -15,7 +16,9 @@ export default function Home() {
 
   return (
     <div className="font-sans min-h-screen flex flex-col">
-      <Header onLoginClick={openLoginModal} />
+      <Navbar onLoginClick={openLoginModal} userType='guest' />
+
+      {/* <Header onLoginClick={openLoginModal} /> */}
 
       <main className="flex-1">
         <Hero onTryNowClick={openLoginModal} />
@@ -26,7 +29,7 @@ export default function Home() {
           <div className="w-full leading-0">
             <img src="/wave-2.svg" alt="" className="block w-full" />
           </div>
-          
+
           <div className="px-8 py-6 pb-18">
             <h3 className="text-4xl m-0 mt-8 font-extrabold italic text-[rgb(10,10,10)] tracking-tight">
               Ready to simplify your pairings?
