@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <div className="font-sans min-h-screen flex flex-col">
-      <Navbar onLoginClick={openLoginModal} />
+      <Navbar onLoginClick={openLoginModal} userType='guest' />
 
       {/* <Header onLoginClick={openLoginModal} /> */}
 

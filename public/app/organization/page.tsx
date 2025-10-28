@@ -3,22 +3,12 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import { useRouter } from 'next/navigation';
 
 
 export default function StudentDashBoard() {
-    const router = useRouter();
-    const handleLogout = async () => {
-        try {
-            await router.push('/');
-        }
-        catch (error) {
-            console.log('Navigation error: ', error);
-        }
-    }
     return (
         <div className="font-sans min-h-screen flex flex-col">
-            <Navbar userType='student' onLogoutClick={handleLogout} />
+            <Navbar onLoginClick={() => { }} />
             <main className='flex-1'>
                 <section >
 
