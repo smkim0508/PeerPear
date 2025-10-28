@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useRouter } from 'next/navigation';
 import EventCard from "@/components/EventCard";
+import SearchBar from "@/components/SearchBar";
 
 
 export default function StudentDashBoard() {
@@ -20,15 +21,21 @@ export default function StudentDashBoard() {
     return (
         <div className="font-sans flex flex-col min-h-screen">
             <Navbar userType='student' onLogoutClick={handleLogout} />
-            <main className='m-4 p-6 grid grid-cols-4 gap-2 min-h-screen'>
-                <EventCard />
-                <EventCard />
-                <EventCard />
-                <EventCard />
-                <EventCard />
-                <EventCard />
-                <EventCard />
-                <EventCard />
+
+            <main className='m-4 p-6 flex-1 min-h-screen'>
+                <div className="max-w-7xl mx-auto">
+                    <SearchBar />
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                    <EventCard />
+                    <EventCard />
+                    <EventCard />
+                    <EventCard />
+                    <EventCard />
+                    <EventCard />
+                    <EventCard />
+                    <EventCard />
+                </div>
             </main>
             <Footer />
         </div>
