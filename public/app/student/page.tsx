@@ -7,6 +7,14 @@ import { useRouter } from 'next/navigation';
 import EventCard from "@/components/EventCard";
 import SearchBar from "@/components/SearchBar";
 
+type EventItem = {
+    id: number;
+    title: string;
+    organization: string;
+    endDate?: string;
+    description?: string;
+    // add more fields as needed
+}
 
 export default function StudentDashBoard() {
     const router = useRouter();
