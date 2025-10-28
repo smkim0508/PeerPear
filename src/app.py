@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from flask import Flask, g, jsonify
+from flask import Flask, g, jsonify, send_from_directory
 from flask_cors import CORS
 from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from common.logging import logger
 
 # routes
+from api.main_landing.routes.login import login_bp
 from api.pairing.routes.pairing import pairing_bp
 from api.sorting.routes.sorting import sorting_bp
 
@@ -63,10 +64,13 @@ def create_app() -> Flask:
             await g.db.__aexit__(None, None, None)
         return response
 
+    # main landing page for login
+    app.register_blueprint(login_bp, url_prefix="/")
+
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-
+    
     # check health with simple json output
     @app.get("/health")
     def health():
