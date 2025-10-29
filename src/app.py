@@ -1,11 +1,14 @@
 # main backend app
 from __future__ import annotations
 
+from urllib.parse import urlsplit
 import os
 from flask import Flask, g, jsonify, send_from_directory
 from flask_cors import CORS
 from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 
 from common.logging import logger
 
@@ -26,8 +29,18 @@ def create_app() -> Flask:
 
     # sets up core services/db/clients during app start up
     # TODO: add core configuration for env here
+
+    MAIN_DB_USER = os.getenv("MAIN_DB_USER")
+    MAIN_DB_PASSWORD = os.getenv("MAIN_DB_PASSWORD")
+    MAIN_DB_HOST = os.getenv("MAIN_DB_HOST")
+    MAIN_DB_PORT = os.getenv("MAIN_DB_PORT")
+    MAIN_DB_NAME = os.getenv("MAIN_DB_NAME")
+
+    MAIN_DB_URL = f"postgresql+asyncpg://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}"
+    
     app.config.update(
-        MAIN_DB_URL=os.getenv("MAIN_DB_URL", None),
+        # MAIN_DB_URL=os.getenv("MAIN_DB_URL", None),
+        MAIN_DB_URL=MAIN_DB_URL,
         GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY", None),
     )
     
@@ -71,10 +84,32 @@ def create_app() -> Flask:
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
     
-    # check health with simple json output
+    # check health for app dependencies and liveness
     @app.get("/health")
-    def health():
-        return {"ok": True}
+    async def health():
+
+        url = app.config["MAIN_DB_URL"]
+        parts = urlsplit(url)
+        masked = f"{parts.scheme}://{parts.username or ''}:***@{parts.hostname}:{parts.port}/{parts.path.lstrip('/')}"
+        logger.info("MAIN_DB_URL (masked): %s", masked)
+
+        db_status = False
+        try:
+            # g.db is an AsyncSession you opened in before_request
+            await g.db.execute(text("SELECT 1"))
+            ok = True
+        except Exception as e:
+            logger.exception("Health check DB failed: %s", e)
+
+        google_key_status = app.config.get("GOOGLE_API_KEY") is not None
+
+        ok = db_status and google_key_status
+
+        return {
+            "ok": ok,
+            "db": db_status,
+            "google_api_key": google_key_status
+        }, (200 if ok else 503)
 
     # handle common errors and return json responses
     @app.errorhandler(400)
