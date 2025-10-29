@@ -76,9 +76,9 @@ export default function Navbar({
         {userType === "guest" ? (
           <button
             onClick={onLoginClick}
-            className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2"
+            className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
           >
-            login
+            log in
             <CircleUserRound size={20} />
           </button>
         ) : (
