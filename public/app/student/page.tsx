@@ -31,7 +31,7 @@ export default function StudentDashBoard() {
             <Navbar userType='student' onLogoutClick={handleLogout} />
 
             <main className='m-4 p-6 flex-1 min-h-screen'>
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-7xl mx-auto mb-4">
                     <SearchBar />
                 </div>
                 <div className="grid grid-cols-4 gap-4">
