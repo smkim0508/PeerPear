@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PearSwitch from "./PearSwitch";
 
 export default function SearchBar() {
   const [activeTab, setActiveTab] = useState<"event" | "organization">("event");
@@ -19,9 +20,8 @@ export default function SearchBar() {
               <input
                 id="search"
                 type="text"
-                placeholder={`Search ${
-                  activeTab === "event" ? "events" : "organizations"
-                }...`}
+                placeholder={`Search ${activeTab === "event" ? "events" : "organizations"
+                  }...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
@@ -44,33 +44,13 @@ export default function SearchBar() {
           </div>
 
           {/* Filter buttons (right, fixed width) */}
-          <div className="inline-flex bg-[#CCCEC1] rounded-xl p-1.5 gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={() => setActiveTab("event")}
-              aria-pressed={activeTab === "event"}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                activeTab === "event"
-                  ? "bg-[#D7FF9C] text-[#1a1a1a] shadow-md scale-105"
-                  : "bg-transparent text-[#1a1a1a] hover:bg-[#b8baa8]"
-              }`}
-            >
-              Events
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("organization")}
-              aria-pressed={activeTab === "organization"}
-              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
-                activeTab === "organization"
-                  ? "bg-[#D7FF9C] text-[#1a1a1a] shadow-md scale-105"
-                  : "bg-transparent text-[#1a1a1a] hover:bg-[#b8baa8]"
-              }`}
-            >
-              Organizations
-            </button>
-          </div>
+          <PearSwitch
+            option1="event"
+            option2="organization"
+            activeOption={activeTab}
+            onOptionChange={(option) => setActiveTab(option as "event" | "organization")}
+            className="shrink-0"
+          />
         </div>
       </div>
     </div>
