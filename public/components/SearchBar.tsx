@@ -43,7 +43,6 @@ export default function SearchBar() {
             </div>
           </div>
 
-          {/* Filter buttons (right, fixed width) */}
           <PearSwitch
             option1="event"
             option2="organization"
