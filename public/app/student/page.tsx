@@ -44,14 +44,14 @@ export default function StudentDashBoard() {
           <SearchBar />
         </div>
         <div className="grid grid-cols-4 gap-4">
-          <EventCard />
-          <EventCard />
-          <EventCard />
-          <EventCard />
-          <EventCard />
-          <EventCard />
-          <EventCard />
-          <EventCard />
+          <EventCard event={events} />
+          <EventCard event={events} />
+          <EventCard event={events} />
+          <EventCard event={events} />
+          <EventCard event={events} />
+          <EventCard event={events} />
+          <EventCard event={events} />
+          <EventCard event={events} />
         </div>
       </main>
       <Footer />
