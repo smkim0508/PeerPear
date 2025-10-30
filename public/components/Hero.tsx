@@ -1,3 +1,4 @@
+import PearButton from "./PearButton";
 import { Squiggle } from "./ui/Squiggle";
 
 interface HeroProps {
@@ -26,11 +27,9 @@ export default function Hero({ onTryNowClick }: HeroProps) {
           </p>
 
           <div className="mt-7 flex gap-3 justify-center">
-            <button onClick={onTryNowClick} className="inline-flex items-center bg-green px-5 py-3 rounded-lg text-base font-bold text-[#1a1a1a] no-underline cursor-pointer border-none transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-105">
-              Try now
-            </button>
-            <a href="#features" className="inline-flex items-center bg-dark-beige px-5 py-3 rounded-lg text-base font-bold text-[#1a1a1a] no-underline transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-[#b8baa8]">
-              Learn more
+            <PearButton text="Try now" onClick={onTryNowClick} />
+            <a href="#features">
+              <PearButton text="Learn more" onClick={() => { }} dark />
             </a>
           </div>
         </div>
