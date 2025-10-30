@@ -7,6 +7,7 @@ import Features from "../components/Features";
 import Footer from "../components/Footer";
 import LoginModal from "../components/LoginModal";
 import Navbar from '@/components/Navbar';
+import PearButton from '@/components/PearButton';
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -35,6 +36,7 @@ export default function Home() {
               Ready to simplify your pairings?
             </h3>
             <div className="mt-5">
+              <PearButton text="Click Me!" />
               <button onClick={openLoginModal} className="inline-flex items-center bg-green text-[#1a1a1a] px-5 py-3 rounded-lg text-base font-bold no-underline cursor-pointer border-none transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1">
                 Get started
               </button>
