@@ -1,5 +1,6 @@
 # actual routes / API for pairing requests
 from flask import Blueprint, request
+from api import validate_model
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)
