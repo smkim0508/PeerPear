@@ -16,6 +16,8 @@ from common.logging import logger
 from api.main_landing.routes.login import login_bp
 from api.pairing.routes.pairing import pairing_bp
 from api.sorting.routes.sorting import sorting_bp
+from api.dashboard.routes.organization_dashboard import org_dashboard_bp
+from api.dashboard.routes.student_dashboard import student_dashboard_bp
 
 def create_app() -> Flask:
     """
@@ -83,6 +85,7 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
+    app.register_blueprint(student_dashboard_bp, url_prefix="/student-dashboard")
     
     # check health for app dependencies and liveness
     @app.get("/health")
