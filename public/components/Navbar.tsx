@@ -22,14 +22,17 @@ export default function Navbar({
   userType: propUserType,
 }: NavbarProps) {
   const { isAuthenticated, logout } = useAuth();
-  
+
   // Determine user type from auth context or localStorage or prop
   const getUserType = (): "student" | "organization" | "guest" => {
     if (propUserType) return propUserType;
     if (!isAuthenticated) return "guest";
-    
+
     // Check localStorage for user type preference
-    const storedUserType = localStorage.getItem('userType') as "student" | "organization" | null;
+    const storedUserType = localStorage.getItem("userType") as
+      | "student"
+      | "organization"
+      | null;
     return storedUserType || "student"; // Default to student if not specified
   };
 

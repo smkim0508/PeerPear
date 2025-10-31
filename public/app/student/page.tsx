@@ -56,7 +56,7 @@ export default function StudentDashBoard() {
       <div className="font-sans flex flex-col min-h-screen">
         <Navbar userType="student" />
 
-        <main className="m-4 p-6 flex-1 min-h-screen">
+        <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
           <div className="max-w-7xl mx-auto mb-6">            
             <SearchBar
               activeTab={activeTab}
@@ -65,7 +65,7 @@ export default function StudentDashBoard() {
               setSearchQuery={setSearchQuery}
             />
           </div>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
             {filteredEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
