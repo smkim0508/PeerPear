@@ -1,9 +1,11 @@
 # main landing page for students after logging in
-from flask import Blueprint, request, send_from_directory, jsonify
+from flask import Blueprint, request, send_from_directory, jsonify, g
 from common.types.events import PairingEvent, PairingResult
 from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
+from db.models.events import Event
+from sqlalchemy import inspect
 
 # use blueprint to group routes
 student_dashboard_bp = Blueprint("student_dashboard", __name__)
@@ -25,6 +27,31 @@ def static_files(filename):
 @student_dashboard_bp.get("/event-browse")
 def browse_events():
     # TODO: connect w/ db to return real events
+    rows = (
+        g.db.query(Event)
+        .filter(Event.active == True)
+        .all()
+    )
+
+    # convert SQL alchemy mapping to Pydantic
+    published_events: list[PublishedEvent] = []
+    for row in rows:
+        data = {c.key: getattr(row, c.key) for c in inspect(row).mapper.column_attrs}
+        print(data)
+        published_events.append(
+            PublishedEvent(
+                id=row.id,
+                title=getattr(row, "title", "Untitled Event"),
+                description=getattr(row, "description", ""),
+                image_url=getattr(
+                    row,
+                    "image_url",
+                    f"{request.host_url}student-dashboard/static/peerpear_logo.png",
+                ),
+                start_date=getattr(row, "created_at", datetime.now()),
+                end_date=getattr(row, "ends_at", datetime.now() + timedelta(days=1)),
+            )
+        )
 
     # dummy events below, to integrate FE w/ BE.
     pairing_event: PairingEvent = PairingEvent(
@@ -54,8 +81,9 @@ def browse_events():
         end_date=datetime.now(timezone.utc) +
         timedelta(weeks=3),  # set to 3 weeks
     )
-
-    pairing_event_response = EventBrowseResponse(
-        events=[dummy_event_1, dummy_event_2])
+    
+    # pairing_event_response = EventBrowseResponse(events=[dummy_event_1, dummy_event_2])
+    
+    pairing_event_response = EventBrowseResponse(events=published_events)
 
     return jsonify(pairing_event_response.model_dump())

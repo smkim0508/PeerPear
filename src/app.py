@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from urllib.parse import urlsplit
 import os
-from flask import Flask, g, jsonify, send_from_directory
+from flask import Flask, g, jsonify, send_from_directory, current_app
 from flask_cors import CORS
 from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
@@ -51,7 +51,9 @@ def create_app() -> Flask:
     MAIN_DB_PORT = os.getenv("MAIN_DB_PORT")
     MAIN_DB_NAME = os.getenv("MAIN_DB_NAME")
 
-    MAIN_DB_URL = f"postgresql+asyncpg://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}"
+    # (postgresql+asyncpg...) in the future for truly async application
+    # MAIN_DB_URL = f"postgresql+psycopg2://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}"
+    MAIN_DB_URL = f"postgresql+psycopg2://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}?sslmode=require"
     
     app.config.update(
         # MAIN_DB_URL=os.getenv("MAIN_DB_URL", None),
@@ -73,23 +75,23 @@ def create_app() -> Flask:
 
     # TODO: need to dispose of all app lifetime dependencies 
 
-    # open a single AsyncSession with each request
+    # open a single session with each request
     @app.before_request
-    async def _open_session():
-        SessionLocal = app.extensions["db"]["SessionLocal"]
-        g.db = await SessionLocal().__aenter__()
-
-    # close AsyncSession after each response
+    def _open_session():
+        SessionLocal = current_app.extensions["db"]["SessionLocal"]
+        g.db = SessionLocal()
+        
+    # close session after each response
     @app.after_request
-    async def _commit_close(response):
+    def _commit_close(response):
         # best-effort commit on 2xx/3xx; rollback otherwise
         try:
             if 200 <= response.status_code < 400:
-                await g.db.commit()
+                g.db.commit()
             else:
-                await g.db.rollback()
+                g.db.rollback()
         finally:
-            await g.db.__aexit__(None, None, None)
+            g.db.close()
         return response
 
     # authentication routes
@@ -102,18 +104,13 @@ def create_app() -> Flask:
     
     # check health for app dependencies and liveness
     @app.get("/health")
-    async def health():
-
-        url = app.config["MAIN_DB_URL"]
-        parts = urlsplit(url)
-        masked = f"{parts.scheme}://{parts.username or ''}:***@{parts.hostname}:{parts.port}/{parts.path.lstrip('/')}"
-        logger.info("MAIN_DB_URL (masked): %s", masked)
-
+    def health():
         db_status = False
         try:
             # g.db is an AsyncSession you opened in before_request
-            await g.db.execute(text("SELECT 1"))
+            g.db.execute(text("SELECT 1"))
             ok = True
+            db_status = True
         except Exception as e:
             logger.exception("Health check DB failed: %s", e)
 

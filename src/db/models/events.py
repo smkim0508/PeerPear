@@ -19,11 +19,6 @@ class Event(MainDB_Base):
     )
     ends_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
-
-
-
-    
-
-
