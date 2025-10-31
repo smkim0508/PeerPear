@@ -9,18 +9,32 @@ import {
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
 import { CircleUserRound } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface NavbarProps {
   onLoginClick?: () => void;
   onLogoutClick?: () => void;
-  userType: "student" | "organization" | "guest";
+  userType?: "student" | "organization" | "guest";
 }
 
 export default function Navbar({
   onLoginClick,
-  onLogoutClick,
-  userType,
+  userType: propUserType,
 }: NavbarProps) {
+  const { isAuthenticated, logout } = useAuth();
+  
+  // Determine user type from auth context or localStorage or prop
+  const getUserType = (): "student" | "organization" | "guest" => {
+    if (propUserType) return propUserType;
+    if (!isAuthenticated) return "guest";
+    
+    // Check localStorage for user type preference
+    const storedUserType = localStorage.getItem('userType') as "student" | "organization" | null;
+    return storedUserType || "student"; // Default to student if not specified
+  };
+
+  const userType = getUserType();
+
   return (
     <div className="w-full bg-[#C3DD90]">
       <div className="flex items-center justify-between w-screen h-16 px-6">
@@ -83,10 +97,10 @@ export default function Navbar({
           </button>
         ) : (
           <button
-            onClick={onLogoutClick}
-            className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2"
+            onClick={logout}
+            className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
           >
-            logout
+            log out
           </button>
         )}
       </div>

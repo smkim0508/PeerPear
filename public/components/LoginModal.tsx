@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { loginWithCAS } from '@/lib/auth';
 import PearButton from './PearButton';
 import PearSwitch from './PearSwitch';
 
@@ -18,16 +19,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const handleLogin = async () => {
     try {
       onClose();
-
-      if (activeTab === 'student') {
-        await router.push('/student');
-      }
-      else {
-        await router.push('/organization');
-      }
+      
+      // Store the user type preference in localStorage for after login redirect
+      localStorage.setItem('userType', activeTab);
+      
+      // Redirect to CAS login with the appropriate dashboard URL
+      const dashboardUrl = `${window.location.origin}/${activeTab}`;
+      loginWithCAS(dashboardUrl);
     }
     catch (error) {
-      console.log('Navigation error: ', error);
+      console.log('Login error: ', error);
     }
   }
 

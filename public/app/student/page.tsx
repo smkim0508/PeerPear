@@ -1,6 +1,8 @@
 "use client";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import SearchBar from "@/components/SearchBar";
@@ -9,15 +11,23 @@ import { useEffect, useState } from "react";
 
 export default function StudentDashBoard() {
   const router = useRouter();
+  const { user } = useAuth();
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [activeTab, setActiveTab] = useState<"event" | "organization">("event");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    // Store user type preference for navbar
+    localStorage.setItem('userType', 'student');
+    
     const fetchEvents = async () => {
       try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
         const res = await fetch(
-          "http://127.0.0.1:5000/student-dashboard/event-browse"
+          `${apiUrl}/student-dashboard/event-browse`,
+          {
+            credentials: 'include', // Include cookies for authentication
+          }
         );
         const data = await res.json();
         setEvents(data.events);
@@ -28,13 +38,6 @@ export default function StudentDashBoard() {
     };
     fetchEvents();
   }, []);
-  const handleLogout = async () => {
-    try {
-      await router.push("/");
-    } catch (error) {
-      console.log("Navigation error: ", error);
-    }
-  };
 
   // Rudimentary filtering logic TODO: FIX ORGANIZATION SEARCH + animate?
   const filteredEvents =
@@ -49,25 +52,27 @@ export default function StudentDashBoard() {
         });
 
   return (
-    <div className="font-sans flex flex-col min-h-screen">
-      <Navbar userType="student" onLogoutClick={handleLogout} />
+    <ProtectedRoute>
+      <div className="font-sans flex flex-col min-h-screen">
+        <Navbar userType="student" />
 
-      <main className="m-4 p-6 flex-1 min-h-screen">
-        <div className="max-w-7xl mx-auto mb-4">
-          <SearchBar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        </div>
-        <div className="grid grid-cols-4 gap-4">
-          {filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
-      </main>
-      <Footer />
-    </div>
+        <main className="m-4 p-6 flex-1 min-h-screen">
+          <div className="max-w-7xl mx-auto mb-6">            
+            <SearchBar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {filteredEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -18,6 +18,7 @@ from api.pairing.routes.pairing import pairing_bp
 from api.sorting.routes.sorting import sorting_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from api.dashboard.routes.student_dashboard import student_dashboard_bp
+from auth.routes.auth import auth_bp
 
 def create_app() -> Flask:
     """
@@ -27,7 +28,20 @@ def create_app() -> Flask:
     # load env vars
     load_dotenv()
     app = Flask(__name__)
-    CORS(app)
+    
+    # Configure CORS to allow requests from Next.js frontend
+    CORS(app, 
+         origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization"],
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+
+    # Configure session for CAS authentication
+    app.secret_key = os.getenv("SECRET_KEY", "blah-blah-change-for-prod-cos333")
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests
 
     # sets up core services/db/clients during app start up
     # TODO: add core configuration for env here
@@ -81,6 +95,9 @@ def create_app() -> Flask:
 
     # main landing page for login
     app.register_blueprint(login_bp, url_prefix="/")
+
+    # authentication routes
+    app.register_blueprint(auth_bp, url_prefix="/auth")
 
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
