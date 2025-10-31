@@ -1,6 +1,4 @@
 "use client";
-
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { useRouter } from "next/navigation";
@@ -12,6 +10,8 @@ import { useEffect, useState } from "react";
 export default function StudentDashBoard() {
   const router = useRouter();
   const [events, setEvents] = useState<PairingEvent[]>([]);
+  const [activeTab, setActiveTab] = useState<"event" | "organization">("event");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -35,17 +35,35 @@ export default function StudentDashBoard() {
       console.log("Navigation error: ", error);
     }
   };
+
+  // Rudimentary filtering logic TODO: FIX ORGANIZATION SEARCH + animate?
+  const filteredEvents =
+    activeTab == "event"
+      ? events.filter((event) => {
+          return event.title.toLowerCase().includes(searchQuery.toLowerCase());
+        })
+      : events.filter((event) => {
+          return String(event.organization_id)
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+        });
+
   return (
     <div className="font-sans flex flex-col min-h-screen">
       <Navbar userType="student" onLogoutClick={handleLogout} />
 
       <main className="m-4 p-6 flex-1 min-h-screen">
         <div className="max-w-7xl mx-auto mb-4">
-          <SearchBar />
+          <SearchBar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {events.map((event) => (
-            <EventCard key = {event.id} event={event} />
+          {filteredEvents.map((event) => (
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       </main>

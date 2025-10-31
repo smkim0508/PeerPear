@@ -3,9 +3,15 @@
 import { useState } from "react";
 import PearSwitch from "./PearSwitch";
 
-export default function SearchBar() {
-  const [activeTab, setActiveTab] = useState<"event" | "organization">("event");
-  const [searchQuery, setSearchQuery] = useState("");
+type SearchBarProps = {
+  activeTab: "event" | "organization";
+  setActiveTab: (tab: "event" | "organization") => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+};
+
+export default function SearchBar( { activeTab, setActiveTab, searchQuery, setSearchQuery }: SearchBarProps ) {
+
 
   return (
     <div className="w-full px-4">
