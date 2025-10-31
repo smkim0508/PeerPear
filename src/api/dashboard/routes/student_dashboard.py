@@ -11,14 +11,18 @@ from sqlalchemy import inspect
 student_dashboard_bp = Blueprint("student_dashboard", __name__)
 
 # TODO: change this to be the actual landing page
+
+
 @student_dashboard_bp.get("/")
 def foo():
     return "something"
+
 
 @student_dashboard_bp.get("/static/<path:filename>")
 def static_files(filename):
     print(f"filename: {filename}")
     return send_from_directory("assets/images", filename)
+
 
 @student_dashboard_bp.get("/event-browse")
 def browse_events():
@@ -55,12 +59,14 @@ def browse_events():
         organization_id=1,
         title="PeerPear Big-Sib Little-Sib",
         description="The annual mentorship program for PeerPear!",
-        image_url = f"{request.host_url}student-dashboard/static/peerpear_logo.png", # static right now
+        # static right now
+        image_url=f"{request.host_url}student-dashboard/static/peerpear_logo.png",
         start_date=datetime.now(timezone.utc),
-        end_date=datetime.now(timezone.utc) + timedelta(days=1), # set to tomorrow
+        end_date=datetime.now(timezone.utc) +
+        timedelta(days=1),  # set to tomorrow
         is_active=True,
-        participants=[1, 2, 3, 4], 
-        matches=PairingResult(groups=[[1,2], [3,4]]),
+        participants=[1, 2, 3, 4],
+        matches=PairingResult(groups=[[1, 2], [3, 4]]),
     )
 
     dummy_event_1 = PublishedEvent(**pairing_event.model_dump())
@@ -69,9 +75,11 @@ def browse_events():
         id=2,
         title="TigerFam pairings",
         description="The OG TigerFam pairing!",
-        image_url = f"{request.host_url}student-dashboard/static/peerpear_logo.png", # static
+        # static
+        image_url=f"{request.host_url}student-dashboard/static/peerpear_logo.png",
         start_date=datetime.now(timezone.utc),
-        end_date=datetime.now(timezone.utc) + timedelta(weeks=3), # set to 3 weeks
+        end_date=datetime.now(timezone.utc) +
+        timedelta(weeks=3),  # set to 3 weeks
     )
     
     # pairing_event_response = EventBrowseResponse(events=[dummy_event_1, dummy_event_2])
