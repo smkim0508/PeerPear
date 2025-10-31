@@ -21,7 +21,7 @@ export default function Navbar({
   onLoginClick,
   userType: propUserType,
 }: NavbarProps) {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
 
   // Determine user type from auth context or localStorage or prop
   const getUserType = (): "student" | "organization" | "guest" => {
@@ -90,22 +90,33 @@ export default function Navbar({
             <></>
           )}
         </NavigationMenu>
-        {userType === "guest" ? (
-          <button
-            onClick={onLoginClick}
-            className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
-          >
-            log in
-            <CircleUserRound size={20} />
-          </button>
-        ) : (
-          <button
-            onClick={logout}
-            className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
-          >
-            log out
-          </button>
-        )}
+        
+        <div className="flex items-center gap-3">
+          {isAuthenticated && (
+            <p className="text-black font-medium">
+              {user?.user_info.attributes?.displayname 
+                ? user.user_info.attributes.displayname.toString().toLowerCase() 
+                : ''
+              }
+            </p>
+          )}
+          {userType === "guest" ? (
+            <button
+              onClick={onLoginClick}
+              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              log in
+              <CircleUserRound size={20} />
+            </button>
+          ) : (
+            <button
+              onClick={logout}
+              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              log out
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
