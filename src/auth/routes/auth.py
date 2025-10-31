@@ -2,9 +2,8 @@ import urllib.request
 import urllib.parse
 import re
 import json
-import os
 from functools import wraps
-from flask import Blueprint, request, session, redirect, url_for, jsonify, current_app, abort
+from flask import Blueprint, request, session, redirect, jsonify, abort
 
 #-----------------------------------------------------------------------
 
@@ -174,9 +173,7 @@ def login():
 @auth_bp.route("/logout")
 def logout():
     """Clear session and redirect to logged out page"""
-    print(f"Before logout - session contents: {dict(session)}")
     session.clear()
-    print(f"After logout - session contents: {dict(session)}")
     return jsonify({"message": "Logged out successfully"})
 
 @auth_bp.route("/logout-cas")

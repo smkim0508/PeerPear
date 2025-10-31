@@ -13,7 +13,6 @@ from sqlalchemy import text
 from common.logging import logger
 
 # routes
-from api.main_landing.routes.login import login_bp
 from api.pairing.routes.pairing import pairing_bp
 from api.sorting.routes.sorting import sorting_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
@@ -92,9 +91,6 @@ def create_app() -> Flask:
         finally:
             await g.db.__aexit__(None, None, None)
         return response
-
-    # main landing page for login
-    app.register_blueprint(login_bp, url_prefix="/")
 
     # authentication routes
     app.register_blueprint(auth_bp, url_prefix="/auth")
