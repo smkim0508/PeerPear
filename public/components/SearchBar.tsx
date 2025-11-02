@@ -10,9 +10,12 @@ type SearchBarProps = {
   setSearchQuery: (query: string) => void;
 };
 
-export default function SearchBar( { activeTab, setActiveTab, searchQuery, setSearchQuery }: SearchBarProps ) {
-
-
+export default function SearchBar({
+  activeTab,
+  setActiveTab,
+  searchQuery,
+  setSearchQuery,
+}: SearchBarProps) {
   return (
     <div className="w-full px-4">
       <div className="w-full max-w-full mx-auto">
@@ -26,8 +29,9 @@ export default function SearchBar( { activeTab, setActiveTab, searchQuery, setSe
               <input
                 id="search"
                 type="text"
-                placeholder={`Search ${activeTab === "event" ? "events" : "organizations"
-                  }...`}
+                placeholder={`Search ${
+                  activeTab === "event" ? "events" : "organizations"
+                }...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
@@ -54,7 +58,9 @@ export default function SearchBar( { activeTab, setActiveTab, searchQuery, setSe
             option1="event"
             option2="organization"
             activeOption={activeTab}
-            onOptionChange={(option) => setActiveTab(option as "event" | "organization")}
+            onOptionChange={(option) =>
+              setActiveTab(option as "event" | "organization")
+            }
             className="shrink-0"
           />
         </div>

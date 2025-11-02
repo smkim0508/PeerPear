@@ -90,14 +90,13 @@ export default function Navbar({
             <></>
           )}
         </NavigationMenu>
-        
+
         <div className="flex items-center gap-3">
           {isAuthenticated && (
             <p className="text-black font-medium">
-              {user?.user_info.attributes?.displayname 
-                ? user.user_info.attributes.displayname.toString().toLowerCase() 
-                : ''
-              }
+              {user?.user_info.attributes?.displayname
+                ? user.user_info.attributes.displayname.toString().toLowerCase()
+                : ""}
             </p>
           )}
           {userType === "guest" ? (
