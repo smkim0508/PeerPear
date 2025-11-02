@@ -59,7 +59,7 @@ export default function Navbar({
                     asChild
                     className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
                   >
-                    <Link href="/">My Events</Link>
+                    <Link href="/student/myevents">My Events</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ) : (
@@ -82,7 +82,7 @@ export default function Navbar({
                     navigationMenuTriggerStyle()
                   }
                 >
-                  <Link href="/profile">Profile</Link>
+                  <Link href={`/${userType}/profile`}>Profile</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
