@@ -12,6 +12,6 @@ class Organization(MainDB_Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
 
-    orgname: Mapped[str] = mapped_column(String, nullable=False)
+    org_name: Mapped[str] = mapped_column(String, nullable=False)
 
     description: Mapped[str] = mapped_column(String, nullable=False)

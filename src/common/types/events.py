@@ -16,6 +16,7 @@ class PairingEvent(BaseModel):
     organization_id: int
     title: str
     description: str
+    organization_name: str
     image_url: str # TODO: not currently present in DB
     start_date: datetime
     end_date: datetime

@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from db.models.events import Event
+from db.models.organizations import Organization
 from sqlalchemy import inspect
 
 # use blueprint to group routes
@@ -28,28 +29,28 @@ def static_files(filename):
 def browse_events():
     # TODO: connect w/ db to return real events
     rows = (
-        g.db.query(Event)
+        g.db.query(Event, Organization)
+        .join(Organization, Event.organization_id == Organization.id)
         .filter(Event.active == True)
         .all()
     )
 
     # convert SQL alchemy mapping to Pydantic
     published_events: list[PublishedEvent] = []
-    for row in rows:
-        data = {c.key: getattr(row, c.key) for c in inspect(row).mapper.column_attrs}
-        print(data)
+    for event, org in rows:
         published_events.append(
             PublishedEvent(
-                id=row.id,
-                title=getattr(row, "title", "Untitled Event"),
-                description=getattr(row, "description", ""),
+                id=event.id,
+                title=getattr(event, "title", "Untitled Event"),
+                description=getattr(event, "description", ""),
+                organization_name=getattr(org, "org_name", "Unknown Organization"),
                 image_url=getattr(
-                    row,
+                    event,
                     "image_url",
                     f"{request.host_url}student-dashboard/static/peerpear_logo.png",
                 ),
-                start_date=getattr(row, "created_at", datetime.now()),
-                end_date=getattr(row, "ends_at", datetime.now() + timedelta(days=1)),
+                start_date=getattr(event, "created_at", datetime.now()),
+                end_date=getattr(event, "ends_at", datetime.now() + timedelta(days=1)),
             )
         )
 
@@ -61,6 +62,7 @@ def browse_events():
         description="The annual mentorship program for PeerPear!",
         # static right now
         image_url=f"{request.host_url}student-dashboard/static/peerpear_logo.png",
+        organization_name="PeerPear Org",
         start_date=datetime.now(timezone.utc),
         end_date=datetime.now(timezone.utc) +
         timedelta(days=1),  # set to tomorrow
@@ -76,6 +78,7 @@ def browse_events():
         title="TigerFam pairings",
         description="The OG TigerFam pairing!",
         # static
+        organization_name="Sungmin",
         image_url=f"{request.host_url}student-dashboard/static/peerpear_logo.png",
         start_date=datetime.now(timezone.utc),
         end_date=datetime.now(timezone.utc) +
