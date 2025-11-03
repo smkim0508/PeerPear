@@ -20,7 +20,7 @@ export default function EventCard({ event }: { event: PairingEvent }) {
     <Card className="flex flex-col bg-[#C3DD90] hover:bg-[#B5D07E] transition-colors duration-200 h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-bold line-clamp-2">
-          {event.title}
+          {event.title} - {event.organization_name}
         </CardTitle>
         <CardDescription className="text-sm text-gray-700 line-clamp-3">
           {event.description}
@@ -28,6 +28,7 @@ export default function EventCard({ event }: { event: PairingEvent }) {
       </CardHeader>
       <CardContent className="grow flex items-center justify-center p-4">
         <div className="relative w-full aspect-video">
+
           <Image
             className="rounded-sm object-cover"
             src="/event_image.png"
