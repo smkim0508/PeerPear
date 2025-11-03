@@ -10,6 +10,7 @@ class PublishedEvent(BaseModel):
     title: str
     description: str
     image_url: str
+    organization_name: str 
     start_date: datetime
     end_date: datetime
 

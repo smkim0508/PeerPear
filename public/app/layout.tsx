@@ -20,12 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${interSans.variable} antialiased`}
-      >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+      <body className={`${interSans.variable} antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

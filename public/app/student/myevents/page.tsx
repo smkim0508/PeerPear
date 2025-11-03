@@ -18,15 +18,17 @@ export default function StudentDashBoard() {
 
   useEffect(() => {
     // Store user type preference for navbar
-    localStorage.setItem("userType", "student");
-
+    localStorage.setItem('userType', 'student');
+    
     const fetchEvents = async () => {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-        const res = await fetch(`${apiUrl}/student-dashboard/event-browse`, {
-          credentials: "include", // Include cookies for authentication
-        });
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+        const res = await fetch(
+          `${apiUrl}/student-dashboard/event-browse`,
+          {
+            credentials: 'include', // Include cookies for authentication
+          }
+        );
         const data = await res.json();
         setEvents(data.events);
         console.log(data.events);
@@ -44,7 +46,7 @@ export default function StudentDashBoard() {
           return event.title.toLowerCase().includes(searchQuery.toLowerCase());
         })
       : events.filter((event) => {
-          return String(event.organization_name)
+          return String(event.organization_id)
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
         });
@@ -55,7 +57,7 @@ export default function StudentDashBoard() {
         <Navbar userType="student" />
 
         <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
-          <div className="max-w-7xl mx-auto mb-6">
+          <div className="max-w-7xl mx-auto mb-6">            
             <SearchBar
               activeTab={activeTab}
               setActiveTab={setActiveTab}

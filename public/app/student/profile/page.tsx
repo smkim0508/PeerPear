@@ -25,7 +25,9 @@ export default function ProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
@@ -48,7 +50,11 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen font-sans bg-[#f3f4ef]">
       <Navbar userType="student" />
       <main className="flex-1 p-10 max-w-4xl mx-auto">
-        <h1 className="text-6xl font-bold mb-12">Profile<br />Update</h1>
+        <h1 className="text-6xl font-bold mb-12">
+          Profile
+          <br />
+          Update
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-2 gap-8">

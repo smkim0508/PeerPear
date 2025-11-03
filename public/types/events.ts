@@ -5,6 +5,7 @@ export interface PairingResult {
 export interface PairingEvent {
   id: number;
   organization_id: number;
+  organization_name: string;
   title: string;
   description: string;
   image_url: string;      // keep snake_case if backend sends it that way

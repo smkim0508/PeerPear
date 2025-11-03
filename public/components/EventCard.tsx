@@ -19,11 +19,16 @@ export default function EventCard({ event }: { event: PairingEvent }) {
   return (
     <Card className="flex flex-col bg-[#C3DD90] hover:bg-[#B5D07E] transition-colors duration-200 h-full">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-bold line-clamp-2">{event.title}</CardTitle>
-        <CardDescription className="text-sm text-gray-700 line-clamp-3">{event.description}</CardDescription>
+        <CardTitle className="text-lg font-bold line-clamp-2">
+          {event.title} - {event.organization_name}
+        </CardTitle>
+        <CardDescription className="text-sm text-gray-700 line-clamp-3">
+          {event.description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="grow flex items-center justify-center p-4">
         <div className="relative w-full aspect-video">
+
           <Image
             className="rounded-sm object-cover"
             src="/event_image.png"
@@ -34,7 +39,9 @@ export default function EventCard({ event }: { event: PairingEvent }) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-3 pt-2">
-        <p className="text-sm text-gray-600 text-center">Time to event: {timeUntilEvent}</p>
+        <p className="text-sm text-gray-600 text-center">
+          Time to event: {timeUntilEvent}
+        </p>
         <button className="w-full inline-flex items-center justify-center bg-green text-[#1a1a1a] px-4 py-2 rounded-lg text-sm font-bold no-underline cursor-pointer border-none transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-105">
           Information
         </button>
