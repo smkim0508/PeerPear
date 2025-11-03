@@ -13,7 +13,6 @@ def create_engine_and_sessionmaker(db_url: str):
 
     engine = create_engine(
         db_url,
-        connect_args={"sslmode": "require"},
         pool_pre_ping=True,
         pool_size=10,
         max_overflow=20,
