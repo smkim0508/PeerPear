@@ -9,7 +9,9 @@ from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed, retry_if_exc
 from google import genai  # officially recommended import path
 
 from .protocols import PydanticModel, TypedLLMProtocol, ProvidesProviderInfo
-from protocols import RateLimitProvider
+from .protocols import RateLimitProvider
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 # NOTE: this uses the public Gemini API with an API key, not Vertex AI.
 # Set up this client with API key during app initialization
@@ -87,3 +89,37 @@ class AsyncGenAITypedClient(TypedLLMProtocol, ProvidesProviderInfo):
             f"acreate() reached unexpected fallthrough after {attempt_count} attempts; "
             f"retryer likely yielded no final exception and no success. last_exc={type(last_exception).__name__ if last_exception else None}"
         )
+    
+    def create_sync(
+        self,
+        response_model: Type[PydanticModel],
+        system_prompt: str,
+        user_prompt: str,
+        **kwargs,
+    ) -> PydanticModel:
+        """
+        Synchronous wrapper around acreate(), to be compatible with WSGI Flask endpoints (temporarily until ASGI FastAPI)
+
+        1) If no event loop is running in this thread: uses asyncio.run(coro).
+        2) If an event loop is running, runs the coroutine in a dedicated background thread with its own loop.
+        """
+        coro = self.acreate(
+            response_model=response_model,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            **kwargs,
+        )
+
+        try:
+            # Case 1: no loop running in this thread
+            asyncio.get_running_loop() # will raise RuntimeError if none
+        except RuntimeError:
+            return asyncio.run(coro)
+
+        # Case 2: a loop is already running in this thread -> run in a fresh loop on a worker thread
+        def _run():
+            return asyncio.run(coro)
+
+        with ThreadPoolExecutor(max_workers=1) as ex:
+            future = ex.submit(_run)
+            return future.result()

@@ -13,7 +13,7 @@ class Event(MainDB_Base):
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
-    organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id"),nullable = False, unique = True)
+    organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id"), nullable = False, unique = True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False
     )
