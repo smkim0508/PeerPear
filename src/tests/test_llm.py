@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import time
 from services.llm_service.llm_clients import __all__
 from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
 from pydantic import BaseModel
@@ -29,8 +30,9 @@ if __name__ == "__main__":
     I want you to solve a simple addition problem. What is 2 + 2?
     """
 
+    time_start = time.time()
     try:
-        llm_result = google_client.create_sync(
+        llm_result: IntegerResponse = google_client.create_sync(
             response_model=IntegerResponse,
             system_prompt=system_prompt,
             user_prompt=user_prompt,
@@ -38,5 +40,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Failed to retrieve proper results from LLM for reason: {e}")
         raise
+    time_end = time.time()
 
-    print(f"Successfully retrieved results from LLM: {llm_result}")
+    print(f"Successfully retrieved results from LLM in {time_end - time_start:.2f} seconds!")
+    print(f"Answer: {llm_result.answer}, Reasoning: {llm_result.reasoning}")
