@@ -1,4 +1,5 @@
 # actual routes / API for pairing requests
+from typing import Optional
 from flask import Blueprint, request, send_from_directory, jsonify, g
 from common.types.pairing import PairingEvent, PairingResult, PairedGroup
 from common.types.user import User, UserProfile, UserProfileFull
@@ -17,11 +18,15 @@ from app_types.api.response.pairing_response import PairingResponse
 pairing_bp = Blueprint("pairing", __name__)
 
 @pairing_bp.get("/")
-def pair_students_baseline(group_size: int, event_id: int):
+def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[int] = None):
 
     # load in global dependencies
     db_session = get_db_session()
     llm_client = get_llm()
+
+    # set as static values
+    group_size = 2
+    event_id = 1
 
     # NOTE: for now, the event_id is not used. Ideally, we should query the student ids associated with our event id to run this process.
     # dummy values below:

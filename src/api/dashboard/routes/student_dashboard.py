@@ -1,4 +1,5 @@
 # main landing page for students after logging in
+from typing import Optional
 from flask import Blueprint, request, send_from_directory, jsonify, g
 from common.types.pairing import PairingEvent, PairingResult, PairedGroup
 from common.types.user import User, UserProfile, UserProfileFull

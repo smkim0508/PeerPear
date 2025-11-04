@@ -11,4 +11,4 @@ def get_db_session():
     return g.db
 
 def get_llm():
-    return current_app.extensions["llm"]
+    return g.llm_client

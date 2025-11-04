@@ -9,6 +9,7 @@ from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
 
 from common.logging import logger
 
@@ -73,6 +74,10 @@ def create_app() -> Flask:
     engine, SessionLocal = create_engine_and_sessionmaker(db_url=app.config["MAIN_DB_URL"])
     app.extensions["db"] = {"engine": engine, "SessionLocal": SessionLocal}
 
+    # store llm client in app.extensions to link them with flask instance
+    llm_client = AsyncGenAITypedClient(api_key=app.config["GOOGLE_API_KEY"])
+    app.extensions["llm_client"] = llm_client
+
     # TODO: need to dispose of all app lifetime dependencies 
 
     # open a single session with each request
@@ -80,7 +85,7 @@ def create_app() -> Flask:
     def _open_session():
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal()
-        g.llm = current_app.extensions["llm"]
+        g.llm_client = current_app.extensions["llm_client"]
         
     # close session after each response
     @app.after_request
