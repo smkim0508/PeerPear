@@ -1,5 +1,6 @@
 # central place for pairing prompts
-# TODO: import appropriate Pydantic types to pass into user prompt, if necessary
+import json
+from common.types.user import User, UserProfile, UserProfileFull
 
 class BaselinePairingPrompts:
     """
@@ -175,12 +176,31 @@ class BaselinePairingPrompts:
     </FEW-SHOT EXAMPLES>
     """
 
-    # TODO: add appropriate args for user prompts
+    # lightweight user prompt helper to parse inputs
     @staticmethod
-    def get_base_group_pairing_user_prompt() -> str:
-        return f"""
-        You are a helpful assistant for pairing students in groups.
-        """
+    def get_base_group_pairing_user_prompt(
+        group_size: int,
+        students: list[UserProfile]
+    ) -> str:
+        payload = {
+            "group_size": group_size,
+            "students": [
+                {
+                    "student_id": s.id,
+                    "name": s.name,
+                    "profile_summary": s.profile_summary,
+                }
+                for s in students
+            ],
+        }
+
+        instruction = (
+            "Form balanced groups using the input below. "
+            "Maximize the minimum satisfaction across students, follow the group_size constraint, "
+            "avoid singletons, and return only PairingLLMOutput JSON.\n\n"
+        )
+
+        return instruction + json.dumps(payload, indent=2, ensure_ascii=False)
     
     base_partner_pairing_system_prompt = f"""
     You are a helpful assistant for pairing students in pairs of two.
