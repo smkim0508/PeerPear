@@ -21,7 +21,7 @@ export default function SearchBar({
       <div className="w-full max-w-full mx-auto">
         <div className="flex items-center gap-4 w-full">
           {/* Search input (left, fills remaining space) */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-56">
             <label htmlFor="search" className="sr-only">
               Search
             </label>
@@ -61,7 +61,7 @@ export default function SearchBar({
             onOptionChange={(option) =>
               setActiveTab(option as "event" | "organization")
             }
-            className="shrink-0"
+            className="shrink-0 mt-4"
           />
         </div>
       </div>
