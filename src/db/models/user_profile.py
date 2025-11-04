@@ -11,16 +11,13 @@ from sqlalchemy.orm import joinedload
 
 # ** by convention, ORM mapped tables should be named ___Table
 class UserProfileTable(MainDB_Base):
-    __tablename__ = "user_profile"
+    __tablename__ = "user_profiles"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"),nullable = False, unique = True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"),nullable = False, unique = True)
     gender: Mapped[str] = mapped_column(String,nullable = True)
     class_year: Mapped[int] = mapped_column(Integer,nullable = False)
-    first_name: Mapped[str] = mapped_column(String, nullable=False)
-    last_name: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String, nullable=False)
+    major: Mapped[str] = mapped_column(String,nullable = False)
 
     hobbies: Mapped[list[str]] = mapped_column(
         ARRAY(String),

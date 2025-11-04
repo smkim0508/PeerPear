@@ -19,31 +19,29 @@ from db.models.orgadmin import OrgAdmin
 def create_organization_data(session):
     organizations = [
         Organization(
-            name="AASA",
+            org_name="AASA",
             description="Asian American Student Association"
 
         ),
         Organization(
-            name="KSAP",
+            org_name="KSAP",
             description="Korean Student Association"
 
         ),
         Organization(
-            name="CS Club",
+            org_name="CS Club",
             description="Computer Science Club"
 
         ),
         Organization(
-            name="Dongkon's Club",
+            org_name="Dongkon's Club",
             description="We ride around in electric scooters"
 
         ),
         Organization(
-            name="Sungmins's Club",
+            org_name="Sungmins's Club",
             description="We cook delicious food!"
-
         )
-
     ]
 
     for org in organizations:
@@ -106,6 +104,7 @@ def create_user_data(session):
             username="gy4937",
             first_name="Gary",
             last_name="Yang",
+            phone_number="7188441945",
             email="gy4937@example.com",
             events=[1, 2]
         ),
@@ -115,12 +114,14 @@ def create_user_data(session):
             first_name="nadula",
             last_name="G",
             email="nadulag@example.com",
+            phone_number="1234567890",
             events=[1, 3]
         ),
         UserTable(
             username="JadenCutinha",
             first_name="Jaden",
             last_name="Cutinha",
+            phone_number="553323",
             email="jaden@example.com",
             events=[1]
         ),
@@ -128,6 +129,7 @@ def create_user_data(session):
             username="JocelynGradStudent",
             first_name="Jocelyn",
             last_name="GradStudent",
+            phone_number="4342462346",
             email="jocelyn@example.com",
             events=[1, 3]
         ),
@@ -156,7 +158,8 @@ def create_event_data(session):
         Event(
             title="Welcome Event",
             description="An event to welcome new members.",
-            date=datetime.now() - timedelta(days=7),
+            created_at=datetime.now(),
+            ends_at=datetime.now() + timedelta(days=7),
             organization_id=1,
             active=False,
             matches=[(1, 3), (2, 4)]
@@ -164,7 +167,8 @@ def create_event_data(session):
         Event(
             title="Tech Talk",
             description="A talk on how to break into web development.",
-            date=datetime.now() + timedelta(days=14),
+            created_at=datetime.now(),
+            ends_at=datetime.now() + timedelta(days=14),
             organization_id=3,
             active=True,
             matches=[]
@@ -172,7 +176,8 @@ def create_event_data(session):
         Event(
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
-            date=datetime.now() + timedelta(days=21),
+            created_at=datetime.now(),
+            ends_at=datetime.now() + timedelta(days=21),
             organization_id=2,
             active=True,
             matches=[]
@@ -192,6 +197,7 @@ def create_user_profile_data(session):
             user_id=1,
             gender="Male",
             class_year=2027,
+            major="Computer Science",
             hobbies=["gaming", "coding", "photography"]
 
         ),
@@ -199,6 +205,7 @@ def create_user_profile_data(session):
             user_id=2,
             gender="Male",
             class_year=2028,
+            major="Computer Science",
             hobbies=["coding", "traveling"]
         ),
 
@@ -206,24 +213,28 @@ def create_user_profile_data(session):
             user_id=3,
             gender="Male",
             class_year=2027,
+            major="Computer Science",
             hobbies=["music", "sports", "basketball"]
         ),
         UserProfileTable(
             user_id=4,
             gender="Female",
             class_year=2023,
+            major="Computer Science",
             hobbies=["reading", "writing", "grading", "research"]
         ),
         UserProfileTable(
             user_id=5,
             gender="Female",
             class_year=2027,
+            major="Economics",
             hobbies=["boba", "sculpting", "graphic design"]
         ),
         UserProfileTable(
             user_id=6,
             gender="Female",
             class_year=2025,
+            major="Economics",
             hobbies=["art", "traveling", "music"]
         )
     ]
@@ -292,7 +303,32 @@ def create_response_data(session):
     print("Dummy responses added.")
 
 
-def main():
+def fill_all_tables(engine):
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # warn users if they don't want to commit this action
+    print(
+        f"""
+        CREATING DUMMY DATA IN MAIN DB IN 3 SEC...
+        PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
+        """
+    )
+    time.sleep(3)
+
+    # Create data in correct dependency order
+    create_organization_data(session)
+    create_orgadmin_data(session)
+    create_user_data(session)
+    create_user_profile_data(session)
+    create_event_data(session)
+    create_question_data(session)
+    create_response_data(session)
+
+    print("Data created successfully!")
+
+if __name__ == "__main__":
     load_dotenv()
     MAIN_DB_USER = os.getenv("MAIN_DB_USER")
     MAIN_DB_PASSWORD = os.getenv("MAIN_DB_PASSWORD")
@@ -306,38 +342,9 @@ def main():
 
     try:
         engine = create_engine(MAIN_DB_URL)
-        Session = sessionmaker(bind=engine)
-        session = Session()
-
-        # warn users if they don't want to commit this action
-        print(
-            f"""
-            CREATING DUMMY DATA IN MAIN DB IN 3 SEC...
-            PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
-            """
-        )
-        time.sleep(3)
-
-        # Create data in correct dependency order
-        create_organization_data(session)
-        create_orgadmin_data(session)
-        create_user_data(session)
-        create_event_data(session)
-        create_user_profile_data(session)
-        create_question_data(session)
-        create_response_data(session)
-
-        print("Data created successfully!")
-
     except Exception as e:
-        print(f"Error creating dummy data: {e}")
-        if 'session' in locals():
-            session.rollback()
-    finally:
-        if 'session' in locals():
-            session.close()
+        print(f"Error connecting to database: {e}")
+        exit(1)
 
-
-if __name__ == "__main__":
-    main()
+    fill_all_tables(engine)
     

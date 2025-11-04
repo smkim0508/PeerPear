@@ -23,4 +23,4 @@ class Event(MainDB_Base):
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
-    organization: Mapped[Organization] = relationship("Organization", back_populates="events")
+    organization: Mapped[Organization] = relationship("Organization")
