@@ -10,6 +10,7 @@ import {
 import Image from "next/image";
 import type { PairingEvent } from "@/types/events";
 import { formatDistanceToNow, isPast } from "date-fns";
+import Link from "next/link";
 
 export default function EventCard({ event }: { event: PairingEvent }) {
   const timeUntilEvent = isPast(new Date(event.end_date))
@@ -43,7 +44,9 @@ export default function EventCard({ event }: { event: PairingEvent }) {
           Time to event: {timeUntilEvent}
         </p>
         <button className="w-full inline-flex items-center justify-center bg-green text-[#1a1a1a] px-4 py-2 rounded-lg text-sm font-bold no-underline cursor-pointer border-none transition-all duration-300 hover:scale-105 hover:shadow-lg hover:brightness-105">
-          Information
+          <Link href={`/events/${event.id}`} className="w-full h-full">
+            View Details
+          </Link>
         </button>
       </CardFooter>
     </Card>
