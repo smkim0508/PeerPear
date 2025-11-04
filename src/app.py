@@ -106,6 +106,11 @@ def create_app() -> Flask:
     # check health for app dependencies and liveness
     @app.get("/health")
     def health():
+        """
+        NOTE: This endpoint mostly checks db connection, and that LLM API Key is present.
+        LLM connection is not checked here due to rate limit quotas.
+        To verify LLM connection, please use the test_llm script under tests/
+        """
         db_status = False
         try:
             # g.db is an AsyncSession you opened in before_request

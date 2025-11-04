@@ -1,12 +1,20 @@
 from pydantic import BaseModel
 from datetime import datetime, timezone
+from common.types.user import User
+
+class PairedGroup(BaseModel):
+    """
+    Representation for a single paired group.
+    Couple be any number of students, represented by ids and names.
+    """
+    students: list[User]
 
 class PairingResult(BaseModel):
     """
     Canonical representation for pairing results.
-    Groups of two or more students by ids.
+    Groups of two or more students.
     """
-    groups: list[list[int]]
+    groups: list[PairedGroup]
 
 class PairingEvent(BaseModel):
     """

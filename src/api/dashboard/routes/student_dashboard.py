@@ -1,12 +1,14 @@
 # main landing page for students after logging in
 from flask import Blueprint, request, send_from_directory, jsonify, g
-from common.types.events import PairingEvent, PairingResult
+from common.types.pairing import PairingEvent, PairingResult, PairedGroup
+from common.types.user import User
 from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from db.models.events import Event
 from db.models.organizations import Organization
 from sqlalchemy import inspect
+from api.dependencies import get_db_session
 
 # use blueprint to group routes
 student_dashboard_bp = Blueprint("student_dashboard", __name__)
@@ -27,9 +29,11 @@ def static_files(filename):
 
 @student_dashboard_bp.get("/event-browse")
 def browse_events():
+
+    db_session = get_db_session()
     # TODO: connect w/ db to return real events
     rows = (
-        g.db.query(Event, Organization)
+        db_session.query(Event, Organization)
         .join(Organization, Event.organization_id == Organization.id)
         .filter(Event.active == True)
         .all()
@@ -68,7 +72,23 @@ def browse_events():
         timedelta(days=1),  # set to tomorrow
         is_active=True,
         participants=[1, 2, 3, 4],
-        matches=PairingResult(groups=[[1, 2], [3, 4]]),
+        matches=PairingResult(
+            groups=[
+                PairedGroup(
+                    students=[
+                        User(id=1, name="John"),
+                        User(id=2, name="Jane")
+                    ]
+                ),
+                PairedGroup(
+                    students=[
+                        User(id=3, name="Bob"),
+                        User(id=4, name="Alice")
+                    ]
+
+                )
+            ]
+        ),
     )
 
     dummy_event_1 = PublishedEvent(**pairing_event.model_dump())
