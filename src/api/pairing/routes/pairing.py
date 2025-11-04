@@ -18,15 +18,23 @@ from app_types.api.response.pairing_response import PairingResponse
 pairing_bp = Blueprint("pairing", __name__)
 
 @pairing_bp.get("/")
+# NOTE: the params are set optional for now, just to test locally without FE connection / setting up Postman
 def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[int] = None):
 
     # load in global dependencies
     db_session = get_db_session()
     llm_client = get_llm()
 
-    # set as static values
+    # NOTE: set as static values, should be passed in from front end
     group_size = 2
     event_id = 1
+
+    # users should not be able to request groups of size < 2
+    if group_size <= 1:
+        logger.warning(f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
+        return jsonify({"error": "Group size must be an integer greater than 1."}), 400
+    
+    # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
 
     # NOTE: for now, the event_id is not used. Ideally, we should query the student ids associated with our event id to run this process.
     # dummy values below:
@@ -47,4 +55,4 @@ def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[
         pairing_results=pairing_result
     )
 
-    return jsonify(pairing_event_response.model_dump())
+    return jsonify(pairing_event_response.model_dump()), 200
