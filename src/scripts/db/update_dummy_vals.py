@@ -9,10 +9,10 @@ import os
 from db import session
 from db.models.events import Event
 from db.models.organizations import Organization
-from db.models.user import User
-from db.models.user_profile import UserProfile
-from db.models.questions import Question
-from db.models.responses import Response
+from db.models.user import UserTable
+from db.models.user_profile import UserProfileTable
+from db.models.question import Question
+from db.models.response import Response
 from db.models.orgadmin import OrgAdmin
 
 
@@ -102,7 +102,7 @@ def create_orgadmin_data(session):
 
 def create_user_data(session):
     users = [
-        User(
+        UserTable(
             username="gy4937",
             first_name="Gary",
             last_name="Yang",
@@ -110,35 +110,35 @@ def create_user_data(session):
             events=[1, 2]
         ),
 
-        User(
+        UserTable(
             username="NadulaG",
             first_name="nadula",
             last_name="G",
             email="nadulag@example.com",
             events=[1, 3]
         ),
-        User(
+        UserTable(
             username="JadenCutinha",
             first_name="Jaden",
             last_name="Cutinha",
             email="jaden@example.com",
             events=[1]
         ),
-        User(
+        UserTable(
             username="JocelynGradStudent",
             first_name="Jocelyn",
             last_name="GradStudent",
             email="jocelyn@example.com",
             events=[1, 3]
         ),
-        User(
+        UserTable(
             username="Yukihhhh",
             first_name="Yuki",
             last_name="Huang",
             email="yuki@example.com",
             events=[]
         ),
-        User(
+        UserTable(
             username="AliceW",
             first_name="Alice",
             last_name="Wong",
@@ -188,39 +188,39 @@ def create_event_data(session):
 
 def create_user_profile_data(session):
     profiles = [
-        UserProfile(
+        UserProfileTable(
             user_id=1,
             gender="Male",
             class_year=2027,
             hobbies=["gaming", "coding", "photography"]
 
         ),
-        UserProfile(
+        UserProfileTable(
             user_id=2,
             gender="Male",
             class_year=2028,
             hobbies=["coding", "traveling"]
         ),
 
-        UserProfile(
+        UserProfileTable(
             user_id=3,
             gender="Male",
             class_year=2027,
             hobbies=["music", "sports", "basketball"]
         ),
-        UserProfile(
+        UserProfileTable(
             user_id=4,
             gender="Female",
             class_year=2023,
             hobbies=["reading", "writing", "grading", "research"]
         ),
-        UserProfile(
+        UserProfileTable(
             user_id=5,
             gender="Female",
             class_year=2027,
             hobbies=["boba", "sculpting", "graphic design"]
         ),
-        UserProfile(
+        UserProfileTable(
             user_id=6,
             gender="Female",
             class_year=2025,
@@ -340,3 +340,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
