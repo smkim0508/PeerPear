@@ -1,7 +1,12 @@
-from db.models.base import MainDB_Base
+from datetime import datetime, time, timedelta
+from requests import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 import time
+import os
+
+from db import session
 from db.models.events import Event
 from db.models.organizations import Organization
 from db.models.user import UserTable
@@ -10,25 +15,11 @@ from db.models.question import Question
 from db.models.response import Response
 from db.models.orgadmin import OrgAdmin
 
-from dotenv import load_dotenv
-import os
-
-# helper to delete all tables
-def delete_all_tables(engine):
-    print(list(MainDB_Base.metadata.tables.keys()))
-    print(f"WARNING: THIS WILL DELETE ALL TABLES IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
-    time.sleep(5)
-    MainDB_Base.metadata.drop_all(engine)
-
-# helper to delete a single table
-def delete_table(table_name, engine):
-    print(f"WARNING: THIS WILL DELETE TABLE {table_name} IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
-    time.sleep(5)
-    table = getattr(MainDB_Base, table_name)
-    table.__table__.drop(engine)
+from scripts.db.create_tables import create_all_tables
+from scripts.db.update_dummy_vals import fill_all_tables
+from scripts.db.delete_tables import delete_all_tables, delete_table 
 
 if __name__ == "__main__":
-    # one-off script to create tables
     load_dotenv()
     MAIN_DB_USER = os.getenv("MAIN_DB_USER")
     MAIN_DB_PASSWORD = os.getenv("MAIN_DB_PASSWORD")
@@ -36,8 +27,6 @@ if __name__ == "__main__":
     MAIN_DB_PORT = os.getenv("MAIN_DB_PORT")
     MAIN_DB_NAME = os.getenv("MAIN_DB_NAME")
 
-    # (postgresql+asyncpg...) in the future for truly async application
-    # MAIN_DB_URL = f"postgresql+psycopg2://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}"
     MAIN_DB_URL = f"postgresql+psycopg2://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}?sslmode=require"
 
     assert MAIN_DB_URL, "MAIN_DB_URL is not set"
@@ -48,6 +37,7 @@ if __name__ == "__main__":
         print(f"Error connecting to database: {e}")
         exit(1)
 
-    # NOTE: change below to determine which table(s) to delete
+    # NOTE: this scripts resets db by deleting, creating, and filling in dummy values
     delete_all_tables(engine)
-    # delete_table("user", engine)
+    create_all_tables(engine)
+    fill_all_tables(engine)

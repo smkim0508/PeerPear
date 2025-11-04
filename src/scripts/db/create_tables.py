@@ -2,10 +2,30 @@ from db.models.base import MainDB_Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import time
+from db.models.events import Event
+from db.models.organizations import Organization
+from db.models.user import UserTable
+from db.models.user_profile import UserProfileTable
+from db.models.question import Question
+from db.models.response import Response
+from db.models.orgadmin import OrgAdmin
 
 from dotenv import load_dotenv
 import os
 
+def create_all_tables(engine):
+    # warn users if they don't want to commit this action
+    print(
+        f"""
+        CREATING ALL TABLES WITH FOR MAIN DB IN 3 SEC...
+        PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
+        """
+    )
+    time.sleep(3)
+
+    MainDB_Base.metadata.create_all(engine)
+    print("Tables created successfully!")
+    
 if __name__ == "__main__":
     # one-off script to create tables
     load_dotenv()
@@ -27,14 +47,4 @@ if __name__ == "__main__":
         print(f"Error connecting to database: {e}")
         exit(1)
 
-    # warn users if they don't want to commit this action
-    print(
-        f"""
-        CREATING ALL TABLES WITH FOR MAIN DB IN 3 SEC...
-        PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
-        """
-    )
-    time.sleep(3)
-
-    MainDB_Base.metadata.create_all(engine)
-    print("Tables created successfully!")
+    create_all_tables(engine)

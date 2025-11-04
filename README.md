@@ -5,22 +5,7 @@ COS333 Project for Centralized, LLM-powered Group Pairing Platform
 The dependencies in this project are managed through poetry.
 
 0. Populate environment variables:
-Create a `.env` file in the `src` folder with the following content:
-```
-# Flask secret key for sessions
-SECRET_KEY=""
-
-# Google GenAI API
-GOOGLE_API_KEY=""
-
-# DB Settings
-MAIN_DB_URL=""
-MAIN_DB_USER=""
-MAIN_DB_PASSWORD=""
-MAIN_DB_HOST=""
-MAIN_DB_PORT=""
-MAIN_DB_NAME=""
-```
+Create a `.env` file in the `src` folder by referencing `src/.env.example`
 
 1. Install poetry following: https://python-poetry.org/docs/
 
@@ -34,10 +19,7 @@ MAIN_DB_NAME=""
 
 ## How to Run the Frontend (Locally):
 0. Populate environment variables:
-Create a `.env` file in the `public` folder with the following content:
-```
-NEXT_PUBLIC_API_URL=http://localhost:5001
-```
+Create a `.env` file in the `public` folder by referencing `public/.env.example`
 
 1. Navigate to the `public` folder: `cd public`
 

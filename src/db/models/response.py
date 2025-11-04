@@ -14,9 +14,9 @@ class Response(MainDB_Base):
         Integer, primary_key=True, autoincrement=True)
 
     question_id: Mapped[int] = mapped_column(
-        ForeignKey("questions.id"), nullable=False, unique=True)
+        ForeignKey("questions.id"), nullable=False)
     
     answer: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"), nullable=False, unique=True)
+        ForeignKey("users.id"), nullable=False)

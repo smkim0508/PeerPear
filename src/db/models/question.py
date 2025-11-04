@@ -18,4 +18,4 @@ class Question(MainDB_Base):
     options: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
     event_id: Mapped[int] = mapped_column(
-        ForeignKey("events.id"), nullable=False, unique=True)
+        ForeignKey("events.id"), nullable=False)
