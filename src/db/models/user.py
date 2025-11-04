@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-class User(MainDB_Base):
+# ** by convention, ORM mapped tables should be named ___Table
+class UserTable(MainDB_Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(

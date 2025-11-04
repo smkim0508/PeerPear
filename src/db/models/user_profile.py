@@ -7,8 +7,10 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
 # example user profile in main db, to be expanded as we add to our central user profile
-# NOTE: user maps to many hobbies, 
-class UserProfile(MainDB_Base):
+# NOTE: user maps to many hobbies
+
+# ** by convention, ORM mapped tables should be named ___Table
+class UserProfileTable(MainDB_Base):
     __tablename__ = "user_profile"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
