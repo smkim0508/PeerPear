@@ -18,7 +18,8 @@ class UserProfileFull(BaseModel):
 
 class UserProfile(BaseModel):
     """
-    User profile carrying basic information and semantically-parsed profile summary
+    User profile carrying basic information and semantically-parsed profile summary.
+    NOTE: this is the actual user profile that will be given to LLM as context.
     """
     id: int
     name: str
