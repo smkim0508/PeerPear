@@ -77,3 +77,36 @@ def update_event():
         return flask.jsonify({"error": "Event does not belong to the organization"}), 404
     
     # make the required updates, TBD
+
+@org_dashboard_bp.post("/createevent")
+def create_event():
+    organization_id = flask.request.args.get("organization_id")
+    
+    if organization_id is None:
+        return flask.jsonify({"error": "organization_id is required"}), 400
+    
+    create_at = datetime.now()
+    
+    title = flask.request.args.get("title", "Untitled Event")
+    description = flask.request.args.get("description", "")
+    image_url = flask.request.args.get(
+        "image_url",
+        f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
+    )
+    matches = []
+    active = True
+    days_duration = int(flask.request.args.get("days_duration", 1))
+    ends_at = create_at + timedelta(days=days_duration)
+    
+    new_event = Event(
+        organization_id=organization_id,
+        title=title,
+        description=description,
+        image_url=image_url,
+        created_at=create_at,
+        ends_at=ends_at,
+        matches=matches,
+        active=active,
+    )
+    g.db.add(new_event)
+    g.db.commit()
