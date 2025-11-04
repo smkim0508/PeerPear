@@ -37,7 +37,7 @@ def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
 
     # NOTE: for now, the event_id is not used. Ideally, we should query the student ids associated with our event id to run this process.
-    # dummy values below:
+    # dummy values below, the **intention** is that LLM should correctly pair up: (John + Bob); (Jane + Charlie); (Alice + Emily
     students = []
     students.append(UserProfile(id=1, name="John Doe", profile_summary="I like software engineering, building web apps. I love Python."))
     students.append(UserProfile(id=2, name="Jane Doe", profile_summary="Jane Doe is an athelete in the Rugby team."))
