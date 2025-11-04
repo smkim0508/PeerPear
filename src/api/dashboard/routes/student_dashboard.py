@@ -1,14 +1,15 @@
 # main landing page for students after logging in
 from flask import Blueprint, request, send_from_directory, jsonify, g
 from common.types.pairing import PairingEvent, PairingResult, PairedGroup
-from common.types.user import User
+from common.types.user import User, UserProfile, UserProfileFull
 from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from db.models.events import Event
 from db.models.organizations import Organization
 from sqlalchemy import inspect
-from api.dependencies import get_db_session
+from api.dependencies import get_db_session, get_llm
+from common.logging import logger
 
 # use blueprint to group routes
 student_dashboard_bp = Blueprint("student_dashboard", __name__)

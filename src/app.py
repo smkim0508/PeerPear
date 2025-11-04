@@ -80,7 +80,7 @@ def create_app() -> Flask:
     def _open_session():
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal()
-        # TODO: add LLM sessions here
+        g.llm = current_app.extensions["llm"]
         
     # close session after each response
     @app.after_request

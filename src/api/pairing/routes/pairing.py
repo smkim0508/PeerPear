@@ -1,11 +1,45 @@
 # actual routes / API for pairing requests
-from flask import Blueprint, request
+from flask import Blueprint, request, send_from_directory, jsonify, g
+from common.types.pairing import PairingEvent, PairingResult, PairedGroup
+from common.types.user import User, UserProfile, UserProfileFull
+from datetime import datetime, timezone, timedelta
 from api import validate_model
+from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
+from db.models.events import Event
+from db.models.organizations import Organization
+from sqlalchemy import inspect
+from api.dependencies import get_db_session, get_llm
+from common.logging import logger
+from modules.pairing.orchestrator import PairingOrchestrator
+from app_types.api.response.pairing_response import PairingResponse
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)
 
-# TODO: build the actual APIS
 @pairing_bp.get("/")
-def foo() -> str:
-    return "something"
+def pair_students_baseline(group_size: int, event_id: int):
+
+    # load in global dependencies
+    db_session = get_db_session()
+    llm_client = get_llm()
+
+    # NOTE: for now, the event_id is not used. Ideally, we should query the student ids associated with our event id to run this process.
+    # dummy values below:
+    students = []
+    students.append(UserProfile(id=1, name="John Doe", profile_summary="I like software engineering, building web apps. I love Python."))
+    students.append(UserProfile(id=2, name="Jane Doe", profile_summary="Jane Doe is an athelete in the Rugby team."))
+    students.append(UserProfile(id=3, name="Bob Smith", profile_summary="Bob likes to build machine learning models and apps."))
+    students.append(UserProfile(id=4, name="Alice Johnson", profile_summary="Alice Johnson loves to film vlogs eating food in Manhattan Chinatown."))
+    students.append(UserProfile(id=5, name="Charlie Brown", profile_summary="Charlie Brown plays basketball everyday. He also loves soccer."))
+    students.append(UserProfile(id=6, name="Emily Davis", profile_summary="Emily Davis is a chef and loves to cook for her friends."))
+
+    # initialize orhcestrator and repo
+    pairing_orchestrator = PairingOrchestrator(main_db_session=db_session, llm_client=llm_client)
+    pairing_result: PairingResult = pairing_orchestrator.pair_students_in_groups(students=students, group_size=group_size)
+
+    pairing_event_response = PairingResponse(
+        event_id=event_id,
+        pairing_results=pairing_result
+    )
+
+    return jsonify(pairing_event_response.model_dump())

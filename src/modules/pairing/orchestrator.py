@@ -16,10 +16,11 @@ class PairingOrchestrator(PairingRepository):
         # to map paired ids back to students later
         # NOTE: the output map is a lightweight User model with just the id and name.
         student_map = {student.id: User(id=student.id, name=student.name) for student in students}
-        
-        # NOTE: this logic should be handled in the api
+
+        # NOTE: this guardrail is also handled in API.
         if group_size <= 1:
             logger.warning(f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
+            return PairingResult(groups=[])
 
         # call LLM to get pairing result
         pairing_llm_output: PairingLLMOutput = self.llm_client.create_sync(
