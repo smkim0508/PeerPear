@@ -89,4 +89,4 @@ def browse_events():
     
     pairing_event_response = EventBrowseResponse(events=published_events)
 
-    return jsonify(pairing_event_response.model_dump())
+    return jsonify(pairing_event_response.model_dump()), 200
