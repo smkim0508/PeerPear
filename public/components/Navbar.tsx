@@ -59,7 +59,7 @@ export default function Navbar({
                     asChild
                     className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
                   >
-                    <Link href="/student/myevents">My Events</Link>
+                    <Link href="/student/events">My Events</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ) : (
