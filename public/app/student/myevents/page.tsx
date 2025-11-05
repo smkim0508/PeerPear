@@ -20,11 +20,13 @@ export default function StudentDashBoard() {
     // Store user type preference for navbar
     localStorage.setItem('userType', 'student');
     
-    const fetchEvents = async () => {
+    const fetchMyEvents = async () => {
       try {
+        // replace with actual user id later
+        const hardcodedUserId = 4;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
         const res = await fetch(
-          `${apiUrl}/student-dashboard/event-browse`,
+          `${apiUrl}/my_events_dashboard/my-event-browse?user_id=${hardcodedUserId}`,
           {
             credentials: 'include', // Include cookies for authentication
           }
@@ -36,7 +38,7 @@ export default function StudentDashBoard() {
         console.log("Error fetching events", err);
       }
     };
-    fetchEvents();
+    fetchMyEvents();
   }, []);
 
   // Rudimentary filtering logic TODO: FIX ORGANIZATION SEARCH + animate?
