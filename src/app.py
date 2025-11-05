@@ -18,6 +18,7 @@ from api.sorting.routes.sorting import sorting_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from api.dashboard.routes.my_events_dashboard import my_events_bp
 from api.dashboard.routes.student_dashboard import student_dashboard_bp
+from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from auth.routes.auth import auth_bp
 
 def create_app() -> Flask:
@@ -101,8 +102,9 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-    app.register_blueprint(student_dashboard_bp, url_prefix="/student-dashboard")
+    app.register_blueprint(student_dashboard_bp, url_prefix="/student_dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
+    app.register_blueprint(org_dashboard_bp, url_prefix = "/organization_dashboard")
 
     
     # check health for app dependencies and liveness

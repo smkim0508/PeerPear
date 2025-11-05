@@ -10,7 +10,7 @@ from sqlalchemy import select
 from db.models.organizations import Organization
 
 # use blueprint to group routes
-org_dashboard_bp = Blueprint("org_dashboard", __name__)
+org_dashboard_bp = Blueprint("organization_dashboard", __name__)
 
 @org_dashboard_bp.get("/")
 def foo():
@@ -20,6 +20,7 @@ def foo():
 def browse_events():
 
     organization_id = request.args.get("organization_id")
+    print(organization_id)
 
     if organization_id is None:
         return jsonify({"error": "organization_id is required"}), 400

@@ -7,15 +7,39 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import EventCard from "@/components/EventCard";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { PairingEvent } from "@/types/events";
+import { useEffect, useState } from "react";
 
 export default function OrganizationDashBoard() {
   const router = useRouter();
   const { user } = useAuth();
+  const [events, setEvents] = useState<PairingEvent[]>([]);
+  
+  // change later, hardcoded for testing
+  const organization_id = 1;
 
   useEffect(() => {
     // Store user type preference for navbar
-    localStorage.setItem('userType', 'organization');
+    localStorage.setItem("userType", "organization");
+
+    const fetchEvents = async () => {
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const res = await fetch(
+          `${apiUrl}/organization_dashboard/event-browse?organization_id=${organization_id}`,
+          {
+            credentials: "include", // Include cookies for authentication
+          }
+        );
+        const data = await res.json();
+        setEvents(data.events);
+        console.log(data.events);
+      } catch (err) {
+        console.log("Error fetching events", err);
+      }
+    };
+    fetchEvents();
   }, []);
 
   return (
@@ -31,6 +55,10 @@ export default function OrganizationDashBoard() {
           </div>
           <div className="grid grid-cols-4 gap-2">
             {/* Organization-specific content here */}
+
+            {/* this is just for testing*/}
+            {events.map((event) => (
+              <h1 key = {event.id} > {event.organization_name} </h1>))}
           </div>
         </main>
         <Footer />
