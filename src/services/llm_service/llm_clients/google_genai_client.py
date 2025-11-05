@@ -9,7 +9,7 @@ from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed, retry_if_exc
 from google import genai  # officially recommended import path
 
 from .protocols import PydanticModel, TypedLLMProtocol, ProvidesProviderInfo
-from protocols import RateLimitProvider
+from .protocols import RateLimitProvider
 
 # NOTE: this uses the public Gemini API with an API key, not Vertex AI.
 # Set up this client with API key during app initialization

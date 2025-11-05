@@ -16,6 +16,7 @@ from common.logging import logger
 from api.pairing.routes.pairing import pairing_bp
 from api.sorting.routes.sorting import sorting_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
+from api.dashboard.routes.my_events_dashboard import my_events_bp
 from api.dashboard.routes.student_dashboard import student_dashboard_bp
 from auth.routes.auth import auth_bp
 
@@ -101,6 +102,8 @@ def create_app() -> Flask:
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
     app.register_blueprint(student_dashboard_bp, url_prefix="/student-dashboard")
+    app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
+
     
     # check health for app dependencies and liveness
     @app.get("/health")
