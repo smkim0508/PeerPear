@@ -4,6 +4,7 @@ import os
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from db.models.events import Event
+from db.crud.events_crud import get_organization_events
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from db.models.organizations import Organization
@@ -22,39 +23,8 @@ def browse_events():
 
     if organization_id is None:
         return jsonify({"error": "organization_id is required"}), 400
-
-    published_events: list[PublishedEvent] = []
-
-    # NOTE: the image url doesn't exist in db right now, so it'll just default to placeholder
-    stmt = (
-        select(
-            Event.id,
-            Event.title,
-            Event.description,
-            Organization.org_name
-        )
-        .join(Organization, Event.organization_id == Organization.id)
-        .where(Event.organization_id == organization_id)
-    )
-
-    rows = g.db.execute(stmt).all()
-
-    for row in rows:
-        published_event = PublishedEvent(
-            id=row.id,
-            title=getattr(row, "title", "Untitled Event"),
-            description=getattr(row, "description", ""),
-            organization_name=getattr(row, "org_name", "Unknown Organization"),
-            image_url=getattr(
-                row,
-                "image_url",
-                f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
-            ),
-            start_date=getattr(row, "created_at", datetime.now()),
-            end_date=getattr(row, "ends_at", datetime.now() + timedelta(days=1)),
-        )
-
-        published_events.append(published_event)
+    # use helper to retrieve all events for the organization
+    published_events = get_organization_events(int(organization_id))
     pairing_event_response = EventBrowseResponse(events=published_events)
 
     return jsonify(pairing_event_response.model_dump()), 200
