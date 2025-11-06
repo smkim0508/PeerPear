@@ -47,7 +47,7 @@ export default function Navbar({
             alt="Logo"
             className="h-10 w-10 border-2 border-[#393D3F] rounded-lg p-1 bg-[#393D3F] transition-transform hover:rotate-12"
           />
-          <span className="text-black">peerpear</span>
+          <span className="text-black"><Link href="/">peerpear</Link></span>
         </div>
 
         <NavigationMenu>
@@ -57,7 +57,7 @@ export default function Navbar({
                 <NavigationMenuItem className="bg-[#C3DD90]">
                   <NavigationMenuLink
                     asChild
-                    className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
+                    className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
                   >
                     <Link href="/student/events">My Events</Link>
                   </NavigationMenuLink>
