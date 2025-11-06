@@ -159,7 +159,7 @@ def create_event_data(session):
             title="Welcome Event",
             description="An event to welcome new members.",
             start_date=datetime.now(),
-            ends_at=datetime.now() + timedelta(days=7),
+            end_date=datetime.now() + timedelta(days=7),
             organization_id=1,
             active=False,
             matches=[(1, 3), (2, 4)]
@@ -168,7 +168,7 @@ def create_event_data(session):
             title="Tech Talk",
             description="A talk on how to break into web development.",
             start_date=datetime.now(),
-            ends_at=datetime.now() + timedelta(days=14),
+            end_date=datetime.now() + timedelta(days=14),
             organization_id=3,
             active=True,
             matches=[]
@@ -177,7 +177,7 @@ def create_event_data(session):
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
             start_date=datetime.now(),
-            ends_at=datetime.now() + timedelta(days=21),
+            end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
             active=True,
             matches={}

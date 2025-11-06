@@ -38,7 +38,7 @@ def get_all_events() -> list[PublishedEvent]:
                     f"{request.host_url}student_dashboard/static/peerpear_logo.png",
                 ),
                 start_date=getattr(event, "start_date", datetime.now()),
-                end_date=getattr(event, "ends_at",
+                end_date=getattr(event, "end_date",
                                  datetime.now() + timedelta(days=1)),
             )
         )
@@ -67,7 +67,7 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
             organization_name=org.org_name or "Unknown Organization",
             image_url=f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
             start_date=event.start_date or datetime.now(),
-            end_date=event.ends_at or datetime.now() + timedelta(days=1),
+            end_date=event.end_date or datetime.now() + timedelta(days=1),
         )
         published_events.append(published_event)
     return published_events
@@ -123,7 +123,7 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
                 f"{request.host_url}student_dashboard/static/peerpear_logo.png",
             ),
             start_date=getattr(event, "start_date", datetime.now()),
-            end_date=getattr(event, "ends_at",
+            end_date=getattr(event, "end_date",
                              datetime.now() + timedelta(days=1)),
         )
 

@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS events (
     title TEXT NOT NULL,
     start_date TIMESTAMP DEFAULT NOW(),
     start_date TIMESTAMP DEFAULT NOW(),
-    ends_at TIMESTAMP,
+    end_date TIMESTAMP,
     active BOOLEAN,
     matching_requests JSON,
     participants --finish

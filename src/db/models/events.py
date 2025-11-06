@@ -20,7 +20,7 @@ class Event(MainDB_Base):
     start_date: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=False
     )
-    ends_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    end_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)

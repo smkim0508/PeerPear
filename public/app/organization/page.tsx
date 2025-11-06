@@ -19,9 +19,19 @@ export default function OrganizationDashBoard() {
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    "all" | "notStarted" | "active" | "ended"
+  >("all");
 
   // change later, hardcoded for testing
   const organization_id = 1;
+
+  const tabs = [
+    { label: "All Events", value: "all" },
+    { label: "Not Started", value: "notStarted" },
+    { label: "Active", value: "active" },
+    { label: "Ended", value: "ended" },
+  ];
 
   const fetchEvents = async () => {
     try {
@@ -53,6 +63,24 @@ export default function OrganizationDashBoard() {
     setTimeout(() => setShowSuccessAlert(false), 3000); // hide after 3s
   };
 
+  const today = new Date();
+  const filteredEvents = events.filter((event) => {
+    const start_date = new Date(event.start_date);
+    const end_date = new Date(event.end_date);
+
+    switch (activeTab) {
+      // need to fix active logic later
+      case "active":
+        return today >= start_date && today <= end_date;
+      case "notStarted":
+        return today < start_date;
+      case "ended":
+        return today > end_date;
+      default:
+        return true;
+    }
+  });
+
   return (
     <ProtectedRoute>
       <div className="font-sans flex flex-col min-h-screen">
@@ -62,7 +90,7 @@ export default function OrganizationDashBoard() {
             <h1 className="text-3xl font-bold mb-2">
               Welcome back, {user?.username}!
             </h1>
-            <p className="text-gray-600 mb-6">Organization Dashboard</p>
+
             <div className="flex justify-center my-8">
               <PearButton
                 text="Create New Event"
@@ -84,11 +112,27 @@ export default function OrganizationDashBoard() {
             </div>
           )}
 
+          <div className="flex justify-center gap-3 mb-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value as any)}
+                className={`relative px-4 py-2  text-sm font-medium border-b-2 transition-all duration-200 ${
+                  activeTab === tab.value
+                    ? "border-b-[#c4de90] text-[#4a6b1e]"
+                    : "border-b-transparent text-gray-600 hover:text-black hover:border-b-gray-300"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
-                      {events.map((event) => (
-                        <EventCard key={event.id} event={event} />
-                      ))}
-                    </div>
+            {filteredEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
           <CreateEventModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}

@@ -11,7 +11,7 @@ export interface PairingEvent {
   image_url: string;      // keep snake_case if backend sends it that way
   start_date: string;     // will come over JSON as ISO string
   end_date: string;
-  is_active: boolean;
+  active: boolean;
   participants: number[];
   matches: PairingResult;
 }

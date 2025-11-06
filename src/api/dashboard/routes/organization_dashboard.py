@@ -111,7 +111,7 @@ def create_event():
 
         # image_url=image_url,
         start_date=start_dt,
-        ends_at=end_dt,
+        end_date=end_dt,
         matches=matches,
         active=active,
     )
