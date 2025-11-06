@@ -26,7 +26,7 @@ def get_organization(organization_id):
 
     return jsonify({
         "id": profile.id,
-        "org_name": profile.org_name,
+        "organization_name": profile.org_name,
         "description": profile.description}), 200
 
 
