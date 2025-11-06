@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import PearButton from "./PearButton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { isBefore } from "date-fns";
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -49,10 +50,22 @@ export default function CreateEventModal({
       return;
     }
 
-    const start = new Date(formData.startDate);
-    const end = new Date(formData.endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const parseLocalDate = (dateStr: string) => {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      return new Date(year, month - 1, day); // monthIndex is 0-based
+    };
+
+    const start = parseLocalDate(formData.startDate);
+    const end = parseLocalDate(formData.endDate);
+
+   
+
+    const isBeforeToday = (date: Date) => {
+      const todayNoTime = new Date();
+      todayNoTime.setHours(0, 0, 0, 0);
+      return date < todayNoTime;
+    };
+
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       setDateAlert(true);
       setTimeout(() => setDateAlert(false), 3000);
@@ -60,7 +73,7 @@ export default function CreateEventModal({
     }
 
     // end before start OR either before today
-    if (end < start || start < today || end < today) {
+    if (end < start || isBeforeToday(start) || isBeforeToday(end)) {
       setDateAlert(true);
       return;
     }
@@ -165,7 +178,7 @@ export default function CreateEventModal({
             </AlertDescription>
             <button
               className="absolute top-2 right-3 text-red-500 hover:text-red-700"
-              onClick={() => setShowAlert(false)}
+              onClick={() => setDateAlert(false)}
             >
               ×
             </button>

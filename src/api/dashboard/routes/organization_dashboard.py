@@ -97,10 +97,10 @@ def create_event():
     except Exception:
         return jsonify({"error": "Invalid date format"}), 400
 
-    if end_dt < start_dt:
+    if end_dt.date() < start_dt.date():
         return jsonify({"error": "End date must be after start date"}), 400
 
-    if start_dt < datetime.now():
+    if start_dt.date() < datetime.now().date():
         return jsonify({"error": "Start date cannot be in the past"}), 400
 
     active = start_dt.date() == today_date
