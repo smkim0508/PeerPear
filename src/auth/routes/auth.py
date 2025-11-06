@@ -4,6 +4,7 @@ import re
 import json
 from functools import wraps
 from flask import Blueprint, request, session, redirect, jsonify, abort
+from db.crud.user_crud import get_or_create_user
 
 #-----------------------------------------------------------------------
 
@@ -61,6 +62,47 @@ def validate(ticket, service_url=None):
 
 #-----------------------------------------------------------------------
 
+def ensure_user_in_database(user_info):
+    """
+    Ensure that the authenticated user exists in the database.
+    Creates a new user record if one doesn't exist.
+    """
+    if not user_info or "user" not in user_info:
+        return None
+    
+    username = user_info["user"]
+    
+    # Extract additional information from CAS response if available
+    # Princeton CAS may provide additional attributes
+    first_name = user_info.get("attributes").get("givenname", [None])[0]
+    last_name = user_info.get("attributes").get("pudisplayname", [None])[0].split(",")[0]  # sn = surname in LDAP
+    email = user_info.get("attributes").get("mail", [f"{username}@princeton.edu"])[0]
+
+    # If names are not provided in CAS response, use defaults
+    if not first_name and not last_name:
+        # Split username if it contains common patterns
+        if "." in username:
+            parts = username.split(".")
+            first_name = parts[0].capitalize()
+            last_name = parts[-1].capitalize() if len(parts) > 1 else ""
+        else:
+            first_name = username.capitalize()
+            last_name = ""
+    
+    try:
+        user = get_or_create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email
+        )
+        return user
+    except Exception as e:
+        print(f"Error creating/updating user in database: {e}")
+        return None
+
+#-----------------------------------------------------------------------
+
 # Authenticate the user, and return the user's info.
 # Do not return unless the user is successfully authenticated.
 def authenticate(redirect_url=None):
@@ -69,6 +111,13 @@ def authenticate(redirect_url=None):
     # authenticated previously.  So return the username.
     if "user_info" in session:
         user_info = session.get("user_info")
+        
+        # Ensure user_id is in session (for backwards compatibility with existing sessions)
+        if "user_id" not in session:
+            db_user = ensure_user_in_database(user_info)
+            if db_user:
+                session["user_id"] = db_user.id
+        
         return user_info["user"]
 
     # If the request does not contain a login ticket, then redirect
@@ -94,8 +143,14 @@ def authenticate(redirect_url=None):
         abort(redirect(login_url))
 
     # The user is authenticated, so store the user_info in
-    # the session and return the username.
+    # the session and ensure they exist in the database
     session["user_info"] = user_info
+    
+    # Ensure user exists in database
+    db_user = ensure_user_in_database(user_info)
+    if db_user:
+        # Store the database user ID in session for easy access
+        session["user_id"] = db_user.id
     
     # Redirect to the specified URL or clean the current URL
     if redirect_url:
@@ -121,6 +176,22 @@ def get_username():
     if user_info is None:
         return None
     return user_info.get('user')
+
+#-----------------------------------------------------------------------
+
+def get_user_id():
+    """Get the current user's database ID from session"""
+    return session.get('user_id')
+
+#-----------------------------------------------------------------------
+
+def get_current_user_record():
+    """Get the current user's database record"""
+    from db.crud.user_crud import get_user_by_id
+    user_id = get_user_id()
+    if user_id is None:
+        return None
+    return get_user_by_id(user_id)
 
 #-----------------------------------------------------------------------
 
@@ -157,6 +228,13 @@ def login():
         if user_info:
             # Store user info in session
             session["user_info"] = user_info
+            
+            # Ensure user exists in database
+            db_user = ensure_user_in_database(user_info)
+            if db_user:
+                # Store the database user ID in session for easy access
+                session["user_id"] = db_user.id
+            
             # Redirect to the target URL
             return redirect(redirect_url)
         else:
@@ -193,11 +271,24 @@ def get_current_user():
         return jsonify({"error": "Not authenticated"}), 401
     
     user_info = get_user_info()
-    return jsonify({
+    db_user = get_current_user_record()
+    
+    response_data = {
         "authenticated": True,
         "username": get_username(),
         "user_info": user_info
-    })
+    }
+    
+    # Add database user information if available
+    if db_user:
+        response_data["user_id"] = db_user.id
+        response_data["first_name"] = db_user.first_name
+        response_data["last_name"] = db_user.last_name
+        response_data["email"] = db_user.email
+        response_data["phone_number"] = db_user.phone_number
+        response_data["events"] = db_user.events
+    
+    return jsonify(response_data)
 
 @auth_bp.route("/status")
 def auth_status():
