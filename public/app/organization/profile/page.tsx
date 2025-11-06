@@ -4,6 +4,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function ProfilePage() {
+    // Change this later
+    const organization_id  = 1 
+
+    
   return (
     <div className="flex flex-col min-h-screen font-sans bg-[#f3f4ef]">
       <Navbar userType="organization" />
