@@ -37,8 +37,8 @@ def get_all_events() -> list[PublishedEvent]:
                     "image_url",
                     f"{request.host_url}student_dashboard/static/peerpear_logo.png",
                 ),
-                start_date=getattr(event, "created_at", datetime.now()),
-                end_date=getattr(event, "ends_at",
+                start_date=getattr(event, "start_date", datetime.now()),
+                end_date=getattr(event, "end_date",
                                  datetime.now() + timedelta(days=1)),
             )
         )
@@ -52,23 +52,23 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     published_events: list[PublishedEvent] = []
 
     stmt = (
-    select(Event, Organization)
-    .join(Organization, Event.organization_id == Organization.id)
-    .where(Event.organization_id == organization_id)
+        select(Event, Organization)
+        .join(Organization, Event.organization_id == Organization.id)
+        .where(Event.organization_id == organization_id)
     )
 
     rows = db_session.execute(stmt).all()
 
     for event, org in rows:
         published_event = PublishedEvent(
-                id=event.id,
-                title=event.title or "Untitled Event",
-                description=event.description or "",
-                organization_name=org.org_name or "Unknown Organization",
-                image_url= f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
-                start_date=event.created_at or datetime.now(),
-                end_date=event.ends_at or datetime.now() + timedelta(days=1),
-            )
+            id=event.id,
+            title=event.title or "Untitled Event",
+            description=event.description or "",
+            organization_name=org.org_name or "Unknown Organization",
+            image_url=f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
+            start_date=event.start_date or datetime.now(),
+            end_date=event.end_date or datetime.now() + timedelta(days=1),
+        )
         published_events.append(published_event)
     return published_events
 
@@ -122,8 +122,8 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
                 "image_url",
                 f"{request.host_url}student_dashboard/static/peerpear_logo.png",
             ),
-            start_date=getattr(event, "created_at", datetime.now()),
-            end_date=getattr(event, "ends_at",
+            start_date=getattr(event, "start_date", datetime.now()),
+            end_date=getattr(event, "end_date",
                              datetime.now() + timedelta(days=1)),
         )
 

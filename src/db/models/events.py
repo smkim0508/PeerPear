@@ -9,16 +9,18 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from db.models.organizations import Organization
 
+
 class Event(MainDB_Base):
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
-    organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id"), nullable = False)
-    created_at: Mapped[datetime] = mapped_column(
+    organization_id: Mapped[int] = mapped_column(
+        ForeignKey("organizations.id"), nullable=False)
+    start_date: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=False
     )
-    ends_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    end_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
