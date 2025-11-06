@@ -87,10 +87,6 @@ export default function OrganizationDashBoard() {
         <Navbar userType="organization" />
         <main className="m-4 p-6 flex-1 min-h-screen">
           <div className="max-w-7xl mx-auto mb-6">
-            <h1 className="text-3xl font-bold mb-2">
-              Welcome back, {user?.username}!
-            </h1>
-
             <div className="flex justify-center my-8">
               <PearButton
                 text="Create New Event"
