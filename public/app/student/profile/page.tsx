@@ -5,15 +5,18 @@ import Footer from "@/components/Footer";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({
-    username: "",
     first_name: "",
     last_name: "",
     email: "",
     phone_number: "",
-    events: [] as number[],
+    gender: "",
+    other_gender: "",
+    class_year: "",
+    major: "",
+    hobbies: [] as string[],
   });
 
-  const [newEvent, setNewEvent] = useState("");
+  const [newHobby, setNewHobby] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,24 +32,24 @@ export default function ProfilePage() {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddEvent = () => {
-    const id = parseInt(newEvent.trim());
-    if (!isNaN(id) && !profile.events.includes(id)) {
-      setProfile((prev) => ({ ...prev, events: [...prev.events, id] }));
-      setNewEvent("");
+  const handleAddHobby = () => {
+    const trimmed = newHobby.trim();
+    if (trimmed && !profile.hobbies.includes(trimmed)) {
+      setProfile((prev) => ({ ...prev, hobbies: [...prev.hobbies, trimmed] }));
+      setNewHobby("");
     }
   };
 
-  const handleRemoveEvent = (id: number) => {
+  const handleRemoveHobby = (hobby: string) => {
     setProfile((prev) => ({
       ...prev,
-      events: prev.events.filter((e) => e !== id),
+      hobbies: prev.hobbies.filter((h) => h !== hobby),
     }));
   };
 
@@ -76,15 +79,6 @@ export default function ProfilePage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-2 gap-8">
-            <label className="text-xl font-semibold">Username:</label>
-            <input
-              name="username"
-              value={profile.username}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your username"
-            />
-
             <label className="text-xl font-semibold">First Name:</label>
             <input
               name="first_name"
@@ -122,20 +116,68 @@ export default function ProfilePage() {
               placeholder="Enter your phone number"
             />
 
-            {/* Dynamic Events Input */}
-            <label className="text-xl font-semibold">Events (IDs):</label>
+            <label className="text-xl font-semibold">Gender:</label>
+            <div>
+              <select
+                name="gender"
+                value={profile.gender}
+                onChange={handleChange}
+                className="border-b border-black bg-transparent text-lg focus:outline-none w-full"
+              >
+                <option value="">Select</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="Other">Other</option>
+              </select>
+
+              {profile.gender === "Other" && (
+                <input
+                  name="other_gender"
+                  value={profile.other_gender}
+                  onChange={handleChange}
+                  className="border-b border-black bg-transparent text-lg focus:outline-none mt-2 w-full"
+                  placeholder="Please specify"
+                />
+              )}
+            </div>
+
+            <label className="text-xl font-semibold">Class Year:</label>
+            <select
+              name="class_year"
+              value={profile.class_year}
+              onChange={handleChange}
+              className="border-b border-black bg-transparent text-lg focus:outline-none w-full"
+            >
+              <option value="">Select Year</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+
+            <label className="text-xl font-semibold">Major:</label>
+            <input
+              name="major"
+              value={profile.major}
+              onChange={handleChange}
+              className="border-b border-black bg-transparent text-lg focus:outline-none"
+              placeholder="Enter your major"
+            />
+
+            {/* Dynamic Hobbies List */}
+            <label className="text-xl font-semibold">Hobbies:</label>
             <div>
               <div className="flex items-center gap-4 mb-3">
                 <input
-                  type="number"
-                  value={newEvent}
-                  onChange={(e) => setNewEvent(e.target.value)}
+                  type="text"
+                  value={newHobby}
+                  onChange={(e) => setNewHobby(e.target.value)}
                   className="border-b border-black bg-transparent text-lg focus:outline-none w-1/2"
-                  placeholder="Enter event ID"
+                  placeholder="Enter a hobby"
                 />
                 <button
                   type="button"
-                  onClick={handleAddEvent}
+                  onClick={handleAddHobby}
                   className="px-4 py-2 bg-lime-600 text-white rounded hover:bg-lime-700 transition-all"
                 >
                   Add
@@ -143,16 +185,16 @@ export default function ProfilePage() {
               </div>
 
               <ul className="space-y-2">
-                {profile.events.length > 0 ? (
-                  profile.events.map((id) => (
+                {profile.hobbies.length > 0 ? (
+                  profile.hobbies.map((hobby) => (
                     <li
-                      key={id}
+                      key={hobby}
                       className="flex items-center justify-between bg-white border border-gray-300 px-4 py-2 rounded"
                     >
-                      <span>Event ID: {id}</span>
+                      <span>{hobby}</span>
                       <button
                         type="button"
-                        onClick={() => handleRemoveEvent(id)}
+                        onClick={() => handleRemoveHobby(hobby)}
                         className="text-red-600 hover:text-red-800 font-semibold"
                       >
                         Remove
@@ -160,7 +202,7 @@ export default function ProfilePage() {
                     </li>
                   ))
                 ) : (
-                  <p className="text-gray-500 italic">No events added yet.</p>
+                  <p className="text-gray-500 italic">No hobbies added yet.</p>
                 )}
               </ul>
             </div>
