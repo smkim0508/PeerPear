@@ -58,7 +58,7 @@ export default function StudentDashBoard() {
 
   return (
     <ProtectedRoute>
-      <div className="font-sans flex flex-col min-h-screen">
+      <div className="font-sans flex flex-col min-h-scree bg-">
         <Navbar userType="student" />
 
         <main className="text-center m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
