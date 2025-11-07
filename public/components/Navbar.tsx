@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { CircleUserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePathname } from "next/navigation";
 
 interface NavbarProps {
   onLoginClick?: () => void;
@@ -22,6 +23,7 @@ export default function Navbar({
   userType: propUserType,
 }: NavbarProps) {
   const { isAuthenticated, logout, user } = useAuth();
+  const pathname = usePathname();
 
   // Determine user type from auth context or localStorage or prop
   const getUserType = (): "student" | "organization" | "guest" => {
@@ -37,6 +39,10 @@ export default function Navbar({
   };
 
   const userType = getUserType();
+
+  const isActiveTab = (path: string): boolean => {
+    return pathname === path;
+  };
 
   return (
     <div className="w-full bg-[#C3DD90]">
@@ -54,27 +60,37 @@ export default function Navbar({
           {userType !== "guest" ? (
             <NavigationMenuList className="flex gap-6">
               {userType === "student" ? (
-                <NavigationMenuItem className="bg-[#C3DD90]">
+                <NavigationMenuItem className="bg-[#C3DD90] relative">
                   <NavigationMenuLink
                     asChild
                     className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
                   >
-                    <Link href="/student/events">My Events</Link>
+                    <Link href="/student/events" className="relative">
+                      My Events
+                      {isActiveTab("/student/events") && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                      )}
+                    </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ) : (
                 <></>
               )}
-              <NavigationMenuItem className="bg-[#C3DD90]">
+              <NavigationMenuItem className="bg-[#C3DD90] relative">
                 <NavigationMenuLink
                   asChild
                   className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
                 >
-                  <Link href={`/${userType}`}>Dashboard</Link>
+                  <Link href={`/${userType}`} className="relative">
+                    Dashboard
+                    {isActiveTab(`/${userType}`) && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                    )}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              <NavigationMenuItem>
+              <NavigationMenuItem className="relative">
                 <NavigationMenuLink
                   asChild
                   className={
@@ -82,7 +98,12 @@ export default function Navbar({
                     navigationMenuTriggerStyle()
                   }
                 >
-                  <Link href={`/${userType}/profile`}>Profile</Link>
+                  <Link href={`/${userType}/profile`} className="relative">
+                    Profile
+                    {isActiveTab(`/${userType}/profile`) && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                    )}
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
