@@ -40,6 +40,7 @@ def get_user_answers(question_ids: list[int], user_id: int):
     except SQLAlchemyError as e:
         print(f"Database error in get_user_answers: {e}")
         return {}
+<<<<<<< HEAD
 
 
 def submit_responses(event_id: int, user_id: int, responses: list[dict]):
@@ -78,3 +79,5 @@ def submit_responses(event_id: int, user_id: int, responses: list[dict]):
     except SQLAlchemyError as e:
         print(f"Database error in submit_responses: {e}")
         return "db_error"
+=======
+>>>>>>> f3c48574f16002c4fd38633c5ea46f66ea360b57
