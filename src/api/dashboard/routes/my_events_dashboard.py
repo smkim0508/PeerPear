@@ -32,7 +32,7 @@ def browse_events():
     if user_id is None:
         return jsonify({"error": "user_id is required"}), 400
     # use helper to retrieve all events
-    published_events = get_user_events(user_id)
+    published_events = get_user_events(int(user_id))
 
     # format events to responses
     pairing_event_response = EventBrowseResponse(events=published_events)

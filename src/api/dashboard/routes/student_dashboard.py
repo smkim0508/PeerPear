@@ -15,17 +15,14 @@ student_dashboard_bp = Blueprint("student_dashboard", __name__)
 
 # TODO: change this to be the actual landing page
 
-
 @student_dashboard_bp.get("/")
 def foo():
     return "something"
-
 
 @student_dashboard_bp.get("/static/<path:filename>")
 def static_files(filename):
     print(f"filename: {filename}")
     return send_from_directory("assets/images", filename)
-
 
 @student_dashboard_bp.get("/event-browse")
 def browse_events():

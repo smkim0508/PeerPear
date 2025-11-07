@@ -104,7 +104,6 @@ def create_app() -> Flask:
     app.register_blueprint(student_dashboard_bp, url_prefix="/student-dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
 
-    
     # check health for app dependencies and liveness
     @app.get("/health")
     def health():
