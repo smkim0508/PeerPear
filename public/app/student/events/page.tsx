@@ -62,7 +62,6 @@ export default function StudentDashBoard() {
         <Navbar userType="student" />
 
         <main className="text-center m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
-          <PearButton className="w-xl mb-6" text="Create New Event" onClick={() => router.push("/student/events/create")} />
           <div className="flex flex-col items-center max-w-7xl mx-auto mb-6">
             <PearSwitch
               options={["All Events", "Active", "Ended"]}
