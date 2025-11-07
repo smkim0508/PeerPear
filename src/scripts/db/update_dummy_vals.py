@@ -250,16 +250,16 @@ def create_question_data(session):
         Question(
             question="What is your favorite programming language?",
             options=["Python","Javascript","C++","Java"],
-            event_id=3
+            event_id=2
         ),
         Question(
             question="How many years of coding experience do you have?",
             options=["1","2","3","4","5+"],
-            event_id=3
+            event_id=2
         ),
         Question(
             question="What is your favorite Asian food?:",
-            event_id=2
+            event_id=1
         )
     ]
     for question in questions:
