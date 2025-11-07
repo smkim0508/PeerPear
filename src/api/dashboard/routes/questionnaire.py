@@ -7,11 +7,7 @@ from db.models.question import Question
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-<<<<<<< HEAD
 from db.crud.questionnaire_crud import get_questions, get_user_answers, submit_responses
-=======
-from db.crud.questionnaire_crud import get_questions, get_user_answers
->>>>>>> f3c48574f16002c4fd38633c5ea46f66ea360b57
 
 questionnaire_bp = Blueprint("questionnaire", __name__)
 
@@ -22,26 +18,16 @@ def get_questionnaire(event_id, user_id):
         return jsonify({"error": "event_id is required"}), 400
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
-<<<<<<< HEAD
 
     result = get_questions(event_id)
 
     if len(result) == 0:
         return jsonify({"error": "there are no questions associated with this event"}), 404
 
-=======
-        
-    result = get_questions(event_id)
-    
-    if len(result) == 0:
-                return jsonify({"error": "there are no questions associated with this event"}), 404
-            
->>>>>>> f3c48574f16002c4fd38633c5ea46f66ea360b57
     ids = []
     questions = []
     for q in result:
         ids.append(q.id)
-<<<<<<< HEAD
         questions.append(
             {
                 "id": q.id,
@@ -54,6 +40,7 @@ def get_questionnaire(event_id, user_id):
 
     answers = get_user_answers(ids, user_id)
     return jsonify({"questions": questions, "answers": answers}), 200
+
 
 @questionnaire_bp.put("/submit")
 def submit_questionnaire():
@@ -73,23 +60,3 @@ def submit_questionnaire():
     if result == "no_questions":
         return jsonify({"error": "This event has no questions"}), 404
     return jsonify({"error": "Database error while submitting response"}), 500
-=======
-        questions.append (
-            {
-              "id": q.id,
-              "question": q.question,
-              "options": q.options,
-              "event_id": q.event_id
-              
-            }
-        )
-    
-    answers = get_user_answers(ids,user_id)
-    return jsonify({"questions":questions,"answers": answers }), 200
-        
-
-        
-    
-@questionnaire_bp.put("/submit")
-def submit_questionnaire()
->>>>>>> f3c48574f16002c4fd38633c5ea46f66ea360b57
