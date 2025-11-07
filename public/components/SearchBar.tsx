@@ -29,9 +29,8 @@ export default function SearchBar({
               <input
                 id="search"
                 type="text"
-                placeholder={`Search ${
-                  activeTab === "event" ? "events" : "organizations"
-                }...`}
+                placeholder={`Search ${activeTab === "event" ? "events" : "organizations"
+                  }...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
@@ -55,8 +54,7 @@ export default function SearchBar({
 
           {/* Filter buttons (right, fixed width) */}
           <PearSwitch
-            option1="event"
-            option2="organization"
+            options={["event", "organization"]}
             activeOption={activeTab}
             onOptionChange={(option) =>
               setActiveTab(option as "event" | "organization")

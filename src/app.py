@@ -22,6 +22,7 @@ from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from api.dashboard.routes.organization_profile import org_profile_bp
 from api.dashboard.routes.questionnaire import questionnaire_bp
 
+from api.profile.routes.profile import user_profile_bp
 
 from auth.routes.auth import auth_bp
 
@@ -113,10 +114,10 @@ def create_app() -> Flask:
     app.register_blueprint(student_dashboard_bp,
                            url_prefix="/student_dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
-    app.register_blueprint(
-        org_dashboard_bp, url_prefix="/organization_dashboard")
+    app.register_blueprint(org_dashboard_bp, url_prefix="/organization_dashboard")
     app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
     app.register_blueprint(questionnaire_bp, url_prefix = "/questionnaire")
+    app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
 
     # check health for app dependencies and liveness
 
