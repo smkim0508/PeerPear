@@ -24,7 +24,7 @@ export default function StudentDashBoard() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-        const res = await fetch(`${apiUrl}/student-dashboard/event-browse`, {
+        const res = await fetch(`${apiUrl}/student_dashboard/event-browse`, {
           credentials: "include", // Include cookies for authentication
         });
         const data = await res.json();

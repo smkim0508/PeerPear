@@ -24,9 +24,9 @@ CREATE TABLE IF NOT EXISTS events (
     id SERIAL PRIMARY KEY,
     organization_id INT,
     title TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    created_at TIMESTAMP DEFAULT NOW(),
-    ends_at TIMESTAMP,
+    start_date TIMESTAMP DEFAULT NOW(),
+    start_date TIMESTAMP DEFAULT NOW(),
+    end_date TIMESTAMP,
     active BOOLEAN,
     matching_requests JSON,
     participants --finish

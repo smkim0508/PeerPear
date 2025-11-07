@@ -158,8 +158,8 @@ def create_event_data(session):
         Event(
             title="Welcome Event",
             description="An event to welcome new members.",
-            created_at=datetime.now(),
-            ends_at=datetime.now() + timedelta(days=7),
+            start_date=datetime.now(),
+            end_date=datetime.now() + timedelta(days=7),
             organization_id=1,
             active=False,
             matches=[(1, 3), (2, 4)]
@@ -167,8 +167,8 @@ def create_event_data(session):
         Event(
             title="Tech Talk",
             description="A talk on how to break into web development.",
-            created_at=datetime.now(),
-            ends_at=datetime.now() + timedelta(days=14),
+            start_date=datetime.now(),
+            end_date=datetime.now() + timedelta(days=14),
             organization_id=3,
             active=True,
             matches=[]
@@ -176,11 +176,11 @@ def create_event_data(session):
         Event(
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
-            created_at=datetime.now(),
-            ends_at=datetime.now() + timedelta(days=21),
+            start_date=datetime.now(),
+            end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
             active=True,
-            matches=[]
+            matches={}
         )
     ]
     for event in events:
@@ -328,6 +328,7 @@ def fill_all_tables(engine):
 
     print("Data created successfully!")
 
+
 if __name__ == "__main__":
     load_dotenv()
     MAIN_DB_USER = os.getenv("MAIN_DB_USER")
@@ -347,4 +348,3 @@ if __name__ == "__main__":
         exit(1)
 
     fill_all_tables(engine)
-    

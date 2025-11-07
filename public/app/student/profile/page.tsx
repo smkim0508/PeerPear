@@ -5,12 +5,15 @@ import Footer from "@/components/Footer";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({
-    name: "",
+    username: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    careerInterests: "",
-    hobbies: "",
-    photo: "",
+    phone_number: "",
+    events: [] as number[],
   });
+
+  const [newEvent, setNewEvent] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -30,6 +33,21 @@ export default function ProfilePage() {
   ) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddEvent = () => {
+    const id = parseInt(newEvent.trim());
+    if (!isNaN(id) && !profile.events.includes(id)) {
+      setProfile((prev) => ({ ...prev, events: [...prev.events, id] }));
+      setNewEvent("");
+    }
+  };
+
+  const handleRemoveEvent = (id: number) => {
+    setProfile((prev) => ({
+      ...prev,
+      events: prev.events.filter((e) => e !== id),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,13 +76,31 @@ export default function ProfilePage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-2 gap-8">
-            <label className="text-xl font-semibold">Name:</label>
+            <label className="text-xl font-semibold">Username:</label>
             <input
-              name="name"
-              value={profile.name}
+              name="username"
+              value={profile.username}
               onChange={handleChange}
               className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your name"
+              placeholder="Enter your username"
+            />
+
+            <label className="text-xl font-semibold">First Name:</label>
+            <input
+              name="first_name"
+              value={profile.first_name}
+              onChange={handleChange}
+              className="border-b border-black bg-transparent text-lg focus:outline-none"
+              placeholder="Enter your first name"
+            />
+
+            <label className="text-xl font-semibold">Last Name:</label>
+            <input
+              name="last_name"
+              value={profile.last_name}
+              onChange={handleChange}
+              className="border-b border-black bg-transparent text-lg focus:outline-none"
+              placeholder="Enter your last name"
             />
 
             <label className="text-xl font-semibold">Email:</label>
@@ -77,43 +113,58 @@ export default function ProfilePage() {
               placeholder="Enter your email"
             />
 
-            <label className="text-xl font-semibold">Career Interests:</label>
-            <textarea
-              name="careerInterests"
-              value={profile.careerInterests}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none resize-none"
-              placeholder="E.g. Software Engineering, Product Design"
-            />
-
-            <label className="text-xl font-semibold">Hobbies:</label>
-            <textarea
-              name="hobbies"
-              value={profile.hobbies}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none resize-none"
-              placeholder="E.g. Reading, Hiking, Drawing"
-            />
-
-            <label className="text-xl font-semibold">Photo URL:</label>
+            <label className="text-xl font-semibold">Phone Number:</label>
             <input
-              name="photo"
-              value={profile.photo}
+              name="phone_number"
+              value={profile.phone_number}
               onChange={handleChange}
               className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Paste a photo URL"
+              placeholder="Enter your phone number"
             />
-          </div>
 
-          {profile.photo && (
-            <div className="mt-8">
-              <img
-                src={profile.photo}
-                alt="Profile preview"
-                className="w-32 h-32 rounded-full object-cover border"
-              />
+            {/* Dynamic Events Input */}
+            <label className="text-xl font-semibold">Events (IDs):</label>
+            <div>
+              <div className="flex items-center gap-4 mb-3">
+                <input
+                  type="number"
+                  value={newEvent}
+                  onChange={(e) => setNewEvent(e.target.value)}
+                  className="border-b border-black bg-transparent text-lg focus:outline-none w-1/2"
+                  placeholder="Enter event ID"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddEvent}
+                  className="px-4 py-2 bg-lime-600 text-white rounded hover:bg-lime-700 transition-all"
+                >
+                  Add
+                </button>
+              </div>
+
+              <ul className="space-y-2">
+                {profile.events.length > 0 ? (
+                  profile.events.map((id) => (
+                    <li
+                      key={id}
+                      className="flex items-center justify-between bg-white border border-gray-300 px-4 py-2 rounded"
+                    >
+                      <span>Event ID: {id}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEvent(id)}
+                        className="text-red-600 hover:text-red-800 font-semibold"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">No events added yet.</p>
+                )}
+              </ul>
             </div>
-          )}
+          </div>
 
           <button
             type="submit"

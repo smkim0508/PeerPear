@@ -9,12 +9,14 @@ class PairedGroup(BaseModel):
     """
     students: list[User]
 
+
 class PairingResult(BaseModel):
     """
     Canonical representation for pairing results.
     Groups of two or more students.
     """
     groups: list[PairedGroup]
+
 
 class PairingEvent(BaseModel):
     """
@@ -25,9 +27,9 @@ class PairingEvent(BaseModel):
     title: str
     description: str
     organization_name: str
-    image_url: str # TODO: not currently present in DB
+    image_url: str  # TODO: not currently present in DB
     start_date: datetime
     end_date: datetime
-    is_active: bool
-    participants: list[int] # list of user ids
+    active: bool
+    participants: list[int]  # list of user ids
     matches: PairingResult

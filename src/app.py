@@ -17,8 +17,13 @@ from common.logging import logger
 from api.pairing.routes.pairing import pairing_bp
 from api.sorting.routes.sorting import sorting_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
+from api.dashboard.routes.my_events_dashboard import my_events_bp
 from api.dashboard.routes.student_dashboard import student_dashboard_bp
+from api.dashboard.routes.organization_dashboard import org_dashboard_bp
+from api.dashboard.routes.organization_profile import org_profile_bp
+
 from auth.routes.auth import auth_bp
+
 
 def create_app() -> Flask:
     """
@@ -28,18 +33,20 @@ def create_app() -> Flask:
     # load env vars
     load_dotenv()
     app = Flask(__name__)
-    
+
     # Configure CORS to allow requests from Next.js frontend
-    CORS(app, 
+    CORS(app,
          origins=["http://localhost:3000", "http://127.0.0.1:3000"],
          supports_credentials=True,
          allow_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
     # Configure session for CAS authentication
-    app.secret_key = os.getenv("SECRET_KEY", "blah-blah-change-for-prod-cos333")
+    app.secret_key = os.getenv(
+        "SECRET_KEY", "blah-blah-change-for-prod-cos333")
     app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+    # Set to True in production with HTTPS
+    app.config['SESSION_COOKIE_SECURE'] = False
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests
 
@@ -55,13 +62,13 @@ def create_app() -> Flask:
     # (postgresql+asyncpg...) in the future for truly async application
     # MAIN_DB_URL = f"postgresql+psycopg2://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}"
     MAIN_DB_URL = f"postgresql+psycopg2://{MAIN_DB_USER}:{MAIN_DB_PASSWORD}@{MAIN_DB_HOST}:{MAIN_DB_PORT}/{MAIN_DB_NAME}?sslmode=require"
-    
+
     app.config.update(
         # MAIN_DB_URL=os.getenv("MAIN_DB_URL", None),
         MAIN_DB_URL=MAIN_DB_URL,
         GOOGLE_API_KEY=os.getenv("GOOGLE_API_KEY", None),
     )
-    
+
     if app.config["MAIN_DB_URL"] is None:
         logger.info(f"DATABASE IS NOT SET")
         raise
@@ -69,16 +76,17 @@ def create_app() -> Flask:
     if app.config["GOOGLE_API_KEY"] is None:
         logger.info(f"GOOGLE API IS NOT SET")
         raise
-        
+
     # store the dependencies in app.extensions to link them with flask instance
-    engine, SessionLocal = create_engine_and_sessionmaker(db_url=app.config["MAIN_DB_URL"])
+    engine, SessionLocal = create_engine_and_sessionmaker(
+        db_url=app.config["MAIN_DB_URL"])
     app.extensions["db"] = {"engine": engine, "SessionLocal": SessionLocal}
 
     # store llm client in app.extensions to link them with flask instance
     llm_client = AsyncGenAITypedClient(api_key=app.config["GOOGLE_API_KEY"])
     app.extensions["llm_client"] = llm_client
 
-    # TODO: need to dispose of all app lifetime dependencies 
+    # TODO: need to dispose of all app lifetime dependencies
 
     # open a single session with each request
     @app.before_request
@@ -106,9 +114,15 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-    app.register_blueprint(student_dashboard_bp, url_prefix="/student-dashboard")
-    
+    app.register_blueprint(student_dashboard_bp,
+                           url_prefix="/student_dashboard")
+    app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
+    app.register_blueprint(
+        org_dashboard_bp, url_prefix="/organization_dashboard")
+    app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
+
     # check health for app dependencies and liveness
+
     @app.get("/health")
     def health():
         """
@@ -135,7 +149,7 @@ def create_app() -> Flask:
             "google_api_key": google_key_status
         }, (200 if ok else 503)
 
-    # handle common errors and return json responses
+       # handle common errors and return json responses
     @app.errorhandler(400)
     def bad_request(e):
         return jsonify(error="bad_request", detail=str(e)), 400
