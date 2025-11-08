@@ -181,6 +181,22 @@ def create_event_data(session):
             organization_id=2,
             status=EventStatus.PAIRING_PUBLISHED,
             matches=[]
+        ),
+        Event( # event id 5
+            title="PeerPear main event 2 - started",
+            description="This event has been published.",
+            end_date=datetime.now() + timedelta(days=21),
+            organization_id=1,
+            status=EventStatus.STARTED,
+            matches=[]
+        ),
+        Event( # event id 6
+            title="PeerPear main event 3 - not started",
+            description="This event has been published.",
+            end_date=datetime.now() + timedelta(days=21),
+            organization_id=1,
+            status=EventStatus.NOT_STARTED,
+            matches=[]
         )
     ]
     for event in events:
