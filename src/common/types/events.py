@@ -31,12 +31,7 @@ class PairingEvent(BaseModel):
     description: str
     organization_name: str
     image_url: str  # TODO: not currently present in DB
-    start_date: datetime # NOTE: deprecated, need to be removed
-
     end_date: datetime
     status: EventStatus
-
-    active: bool # NOTE: also deprecated, need to be removed
-
     participants: list[int]  # list of user ids
     matches: PairingResult

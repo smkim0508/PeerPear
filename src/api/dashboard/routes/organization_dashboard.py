@@ -5,10 +5,11 @@ from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from db.models.events import Event
 from db.crud.events_crud import get_organization_events
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import Organization
+from common.types.events import EventStatus, EventRole
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -16,8 +17,7 @@ org_dashboard_bp = Blueprint("organization_dashboard", __name__)
 
 @org_dashboard_bp.get("/")
 def foo():
-    return "something"
-
+    return "placeholder"
 
 @org_dashboard_bp.get("/event-browse")
 def browse_events():
@@ -67,8 +67,10 @@ def create_event():
     - title
     - description
     - image_url (optional)
-    - start_date
     - end_date
+
+    defaults:
+    - status = NOT_STARTED
     """
 
     data = request.get_json(silent=True) or {}
@@ -85,35 +87,29 @@ def create_event():
         f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
     )
 
-    today = datetime.now()
+    # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
+    today = datetime.now(timezone.utc)
     today_date = today.date()
     matches = {}
-    start_date = data.get("start_date")
     end_date = data.get("end_date")
 
+    # NOTE: try to parse the requested end date into standard datetime
     try:
-        start_dt = datetime.fromisoformat(start_date)
         end_dt = datetime.fromisoformat(end_date)
     except Exception:
         return jsonify({"error": "Invalid date format"}), 400
 
-    if end_dt.date() < start_dt.date():
-        return jsonify({"error": "End date must be after start date"}), 400
+    if end_dt.date() < today_date:
+        return jsonify({"error": "End date cannot be in the past"}), 400
 
-    if start_dt.date() < datetime.now().date():
-        return jsonify({"error": "Start date cannot be in the past"}), 400
-
-    active = start_dt.date() == today_date
     new_event = Event(
         organization_id=organization_id,
         title=title,
         description=description,
-
         # image_url=image_url,
-        start_date=start_dt,
         end_date=end_dt,
         matches=matches,
-        active=active,
+        status=EventStatus.NOT_STARTED,
     )
     try:
         g.db.add(new_event)
