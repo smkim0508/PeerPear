@@ -1,24 +1,30 @@
-from db.models.events import Event
+from db.models.events import Event, EventStatus
 from db.models.organizations import Organization
 from db.models.user import UserTable
-from sqlalchemy import inspect, select
+from sqlalchemy import inspect, select, or_
 from api.dependencies import get_db_session, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from flask import request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # helper to retrieve all events
 # NOTE: filtering is handled in FE
 
-
-def get_all_events() -> list[PublishedEvent]:
+def get_all_active_events() -> list[PublishedEvent]:
     # inits the global db session
     db_sesion = get_db_session()
 
+    # should be only events that are active
     rows = (
         db_sesion.query(Event, Organization)
         .join(Organization, Event.organization_id == Organization.id)
-        .filter(Event.active == True)
+        .where(Event.status==EventStatus.STARTED)
+        .where(
+            or_(
+                Event.end_date == None,
+                Event.end_date > datetime.now(timezone.utc) # use utc for comparison
+            )
+        )
         .all()
     )
 
@@ -37,9 +43,10 @@ def get_all_events() -> list[PublishedEvent]:
                     "image_url",
                     f"{request.host_url}student_dashboard/static/peerpear_logo.png",
                 ),
-                start_date=getattr(event, "start_date", datetime.now()),
+                start_date=getattr(event, "start_date", datetime.now(timezone.utc)),
                 end_date=getattr(event, "end_date",
-                                 datetime.now() + timedelta(days=1)),
+                    datetime.now(timezone.utc) + timedelta(days=1)
+                ),
             )
         )
 

@@ -8,7 +8,7 @@ from db.models.events import Event
 from db.models.organizations import Organization
 from sqlalchemy import inspect
 from api.dependencies import get_db_session, get_llm
-from db.crud.events_crud import get_all_events
+from db.crud.events_crud import get_all_active_events
 
 # use blueprint to group routes
 student_dashboard_bp = Blueprint("student_dashboard", __name__)
@@ -27,8 +27,8 @@ def static_files(filename):
 @student_dashboard_bp.get("/event-browse")
 def browse_events():
     
-    # use helper to retrieve all events
-    published_events = get_all_events()
+    # use helper to retrieve all active events
+    published_events = get_all_active_events()
 
     # format events to responses
     pairing_event_response = EventBrowseResponse(events=published_events)
