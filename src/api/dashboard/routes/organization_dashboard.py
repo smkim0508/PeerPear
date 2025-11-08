@@ -4,7 +4,7 @@ import os
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from db.models.events import Event
-from db.crud.events_crud import get_organization_events
+from db.crud.events_crud import get_organization_events, create_new_event
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -111,12 +111,14 @@ def create_event():
         matches=matches,
         status=EventStatus.NOT_STARTED,
     )
+    
+    # create the new event in db
     try:
-        g.db.add(new_event)
-        g.db.commit()
+        create_new_event(new_event)
     except SQLAlchemyError as e:
         g.db.rollback()
         print(str(e))
         return jsonify({"error": f"Database error"}), 500
+
     # NOTE: all routes should return some error/success message and HTTP status
     return jsonify({"message": "Event created successfully"}), 200

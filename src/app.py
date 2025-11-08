@@ -94,15 +94,9 @@ def create_app() -> Flask:
 
     # close session after each response
     @app.after_request
-    def _commit_close(response):
-        # best-effort commit on 2xx/3xx; rollback otherwise
-        try:
-            if 200 <= response.status_code < 400:
-                g.db.commit()
-            else:
-                g.db.rollback()
-        finally:
-            g.db.close()
+    def _close_session(response):
+        # close db connection safely, rollback occurs inside independent commit flows
+        g.db.close()
         return response
 
     # authentication routes

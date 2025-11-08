@@ -10,6 +10,11 @@ from datetime import datetime, timedelta, timezone
 # helper to retrieve all events
 # NOTE: filtering is handled in FE
 
+def create_new_event(event: Event):
+    db_session = get_db_session()
+    db_session.add(event)
+    db_session.commit()
+
 def get_all_active_events() -> list[PublishedEvent]:
     # inits the global db session
     db_sesion = get_db_session()
@@ -51,7 +56,6 @@ def get_all_active_events() -> list[PublishedEvent]:
         )
 
     return published_events
-
 
 def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     db_session = get_db_session()
