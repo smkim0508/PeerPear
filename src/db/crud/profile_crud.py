@@ -20,7 +20,8 @@ def get_user_profile(user_id: int) -> UserProfileTable | None:
         .where(UserProfileTable.user_id == user_id)
     )
 
-    result = db_session.execute(stmt).one_or_none()
+    with db_session() as session:
+        result = session.execute(stmt).one_or_none()
 
     return result
 
@@ -36,9 +37,11 @@ def create_user_profile(user_id: int, gender: Optional[str], class_year: int, ma
         hobbies=hobbies
     )
 
-    db_session.add(new_profile)
-    db_session.commit()
-    db_session.refresh(new_profile)
+    with db_session() as session:
+        session.add(new_profile)
+        session.commit()
+        session.refresh(new_profile)
+    
     return new_profile
 
 def update_user_profile(user_profile: UserProfile):
@@ -50,6 +53,8 @@ def update_user_profile(user_profile: UserProfile):
     for key, value in user_profile.model_dump(exclude_unset=True).items():
         setattr(profile, key, value)
 
-    db_session.commit()
-    db_session.refresh(profile) # re-retrieves the updated profile
+    with db_session() as session:
+        session.commit()
+        session.refresh(profile) # re-retrieves the updated profile
+
     return profile
