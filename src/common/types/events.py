@@ -3,16 +3,20 @@ from datetime import datetime, timezone
 from enum import Enum
 
 # enums to represent event status
+
+
 class EventStatus(Enum):
-    NOT_STARTED = "started"
-    STARTED = "not_started"
-    TERMINATED = "terminated"
-    PAIRING_PUBLISHED = "pairing_published"
+    NOT_STARTED = "NOT_STARTED"
+    STARTED = "STARTED"
+    TERMINATED = "TERMINATED"
+    PAIRING_PUBLISHED = "PAIRING_PUBLISHED"
+
 
 # enums to represent event roles, currently big and little siblings
 class EventRole(Enum):
     BIG_SIBLING = "big_sibling"
     LITTLE_SIBLING = "little_sibling"
+
 
 class PairingResult(BaseModel):
     """
@@ -20,6 +24,7 @@ class PairingResult(BaseModel):
     Groups of two or more students by ids.
     """
     groups: list[list[int]]
+
 
 class PairingEvent(BaseModel):
     """

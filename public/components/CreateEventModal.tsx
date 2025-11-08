@@ -108,7 +108,7 @@ export default function CreateEventModal({
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-        router.push(`/organization-dashboard/event/${newEventId}`);
+        router.push(`/events/${newEventId}`);
       }, 1500);
     } catch (err: any) {
       setSubmitError(err?.message || "Something went wrong");

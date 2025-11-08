@@ -57,7 +57,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
                 description=event.description or "",
                 organization_name=org.org_name or "Unknown Organization",
                 image_url=event.image_url or f"{request.host_url}student_dashboard/static/peerpear_logo.png",
-                status=event.status.name,
+                status=event.status,
                 end_date=event.end_date,
             )
         )
@@ -88,7 +88,7 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
                 image_url=event.image_url
                 or f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
                 end_date=event.end_date or datetime.now(timezone.utc),
-                status=event.status.name 
+                status=event.status
             )
         )
 
@@ -117,7 +117,7 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
                 description=event.description or "",
                 organization_name=org.org_name or "Unknown Organization",
                 image_url=f"{request.host_url}student_dashboard/static/peerpear_logo.png",
-                status=event.status.name,
+                status=event.status,
                 end_date=event.end_date,
             )
         )
@@ -147,7 +147,7 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
             organization_name=org_name,
             image_url=event.image_url or f"{request.host_url}student_dashboard/static/peerpear_logo.png",
             end_date=event.end_date or datetime.now(timezone.utc),
-            status=event.status.name if event.status else "NOT_STARTED",
+            status=event.status
         )
 
     return None

@@ -101,7 +101,7 @@ def create_event():
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)
     today_date = today.date()
-    matches = {}
+    matches = []
     end_date = data.get("end_date")
 
     # NOTE: try to parse the requested end date into standard datetime

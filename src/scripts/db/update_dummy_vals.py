@@ -172,7 +172,7 @@ def create_event_data(session):
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
             status=EventStatus.TERMINATED,
-            matches={}
+            matches=[]
         ),
         Event(
             title="PeerPear main event",
@@ -180,7 +180,7 @@ def create_event_data(session):
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
             status=EventStatus.PAIRING_PUBLISHED,
-            matches={}
+            matches=[]
         )
     ]
     for event in events:

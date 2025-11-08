@@ -27,7 +27,7 @@ export default function OrganizationDashBoard() {
   const tabOptions = [
     "All Events",
     "Not Started",
-    "Ended - Unpublished",
+    "Unpublished",
     "Published Matches",
   ];
 
@@ -39,9 +39,9 @@ export default function OrganizationDashBoard() {
         return "notStarted";
       case "Active":
         return "active";
-      case "Ended - Unpublished":
+      case "Unpublished":
         return "terminated";
-      case "Published Results":
+      case "Published Matches":
         return "published";
       default:
         return "all";
