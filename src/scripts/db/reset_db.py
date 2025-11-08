@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import time
 import os
 
-from db import session
 from db.models.events import Event, EventRegistrations
 from db.models.organizations import Organization
 from db.models.user import UserTable
