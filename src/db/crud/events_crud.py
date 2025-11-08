@@ -73,8 +73,8 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
             description=event.description or "",
             organization_name=org.org_name or "Unknown Organization",
             image_url=f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
-            start_date=event.start_date or datetime.now(),
-            end_date=event.end_date or datetime.now() + timedelta(days=1),
+            start_date=event.start_date or datetime.now(timezone.utc),
+            end_date=event.end_date or datetime.now(timezone.utc) + timedelta(days=1),
         )
         published_events.append(published_event)
     return published_events
@@ -129,9 +129,9 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
                 "image_url",
                 f"{request.host_url}student_dashboard/static/peerpear_logo.png",
             ),
-            start_date=getattr(event, "start_date", datetime.now()),
+            start_date=getattr(event, "start_date", datetime.now(timezone.utc)),
             end_date=getattr(event, "end_date",
-                             datetime.now() + timedelta(days=1)),
+                             datetime.now(timezone.utc) + timedelta(days=1)),
         )
 
         return published_event

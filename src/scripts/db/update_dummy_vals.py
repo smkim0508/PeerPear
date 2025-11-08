@@ -7,7 +7,7 @@ import time
 import os
 
 from db import session
-from db.models.events import Event
+from db.models.events import Event, EventRegistrations
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
@@ -15,6 +15,8 @@ from db.models.question import Question
 from db.models.response import Response
 from db.models.orgadmin import OrgAdmin
 
+from common.types.events import EventRole, EventStatus
+from common.types.user import ClassYear
 
 def create_organization_data(session):
     organizations = [
@@ -105,8 +107,7 @@ def create_user_data(session):
             first_name="Gary",
             last_name="Yang",
             phone_number="7188441945",
-            email="gy4937@example.com",
-            events=[1, 2]
+            email="gy4937@example.com"
         ),
 
         UserTable(
@@ -114,72 +115,71 @@ def create_user_data(session):
             first_name="nadula",
             last_name="G",
             email="nadulag@example.com",
-            phone_number="1234567890",
-            events=[1, 3]
+            phone_number="1234567890"
         ),
         UserTable(
             username="JadenCutinha",
             first_name="Jaden",
             last_name="Cutinha",
             phone_number="553323",
-            email="jaden@example.com",
-            events=[1]
+            email="jaden@example.com"
         ),
         UserTable(
             username="JocelynGradStudent",
             first_name="Jocelyn",
             last_name="GradStudent",
             phone_number="4342462346",
-            email="jocelyn@example.com",
-            events=[1, 3]
+            email="jocelyn@example.com"
         ),
         UserTable(
             username="Yukihhhh",
             first_name="Yuki",
             last_name="Huang",
-            email="yuki@example.com",
-            events=[]
+            email="yuki@example.com"
         ),
         UserTable(
             username="AliceW",
             first_name="Alice",
             last_name="Wong",
-            email="alice@example.com",
-            events=[2]
+            email="alice@example.com"
         )]
     for user in users:
         session.add(user)
     session.commit()
     print("Dummy users added.")
 
-
 def create_event_data(session):
     events = [
         Event(
             title="Welcome Event",
             description="An event to welcome new members.",
-            start_date=datetime.now(),
             end_date=datetime.now() + timedelta(days=7),
             organization_id=1,
-            active=False,
+            status=EventStatus.NOT_STARTED,
             matches=[(1, 3), (2, 4)]
         ),
         Event(
             title="Tech Talk",
-            description="A talk on how to break into web development.",
-            start_date=datetime.now(),
+            description="*This event started* A talk on how to break into web development.",
             end_date=datetime.now() + timedelta(days=14),
             organization_id=3,
-            active=True,
+            status=EventStatus.STARTED,
             matches=[]
         ),
         Event(
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
-            start_date=datetime.now(),
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
-            active=True,
+            status=EventStatus.TERMINATED,
+            matches={}
+        ),
+        Event(
+            title="PeerPear main event",
+            description="This event has been published.",
+            end_date=datetime.now() + timedelta(days=21),
+            organization_id=2,
+            status=EventStatus.PAIRING_PUBLISHED,
             matches={}
         )
     ]
@@ -188,52 +188,47 @@ def create_event_data(session):
     session.commit()
     print("Dummy events added.")
 
-# Why do we have firstname, lastname, email in user profile and user?
-
-
 def create_user_profile_data(session):
     profiles = [
         UserProfileTable(
             user_id=1,
             gender="Male",
-            class_year=2027,
+            class_year=ClassYear.JUNIOR,
             major="Computer Science",
             hobbies=["gaming", "coding", "photography"]
-
         ),
         UserProfileTable(
             user_id=2,
             gender="Male",
-            class_year=2028,
+            class_year=ClassYear.SOPHOMORE,
             major="Computer Science",
             hobbies=["coding", "traveling"]
         ),
-
         UserProfileTable(
             user_id=3,
             gender="Male",
-            class_year=2027,
+            class_year=ClassYear.FRESHMAN,
             major="Computer Science",
             hobbies=["music", "sports", "basketball"]
         ),
         UserProfileTable(
             user_id=4,
             gender="Female",
-            class_year=2023,
+            class_year=ClassYear.ALUMNI,
             major="Computer Science",
             hobbies=["reading", "writing", "grading", "research"]
         ),
         UserProfileTable(
             user_id=5,
             gender="Female",
-            class_year=2027,
+            class_year=ClassYear.PROFESSOR,
             major="Economics",
             hobbies=["boba", "sculpting", "graphic design"]
         ),
         UserProfileTable(
             user_id=6,
             gender="Female",
-            class_year=2025,
+            class_year=ClassYear.SENIOR,
             major="Economics",
             hobbies=["art", "traveling", "music"]
         )
@@ -243,7 +238,6 @@ def create_user_profile_data(session):
         session.add(profile)
     session.commit()
     print("Dummy user profiles added.")
-
 
 def create_question_data(session):
     questions = [
