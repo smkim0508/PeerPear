@@ -150,7 +150,7 @@ def create_user_data(session):
 
 def create_event_data(session):
     events = [
-        Event(
+        Event( # event id 1
             title="Welcome Event",
             description="An event to welcome new members.",
             end_date=datetime.now() + timedelta(days=7),
@@ -158,7 +158,7 @@ def create_event_data(session):
             status=EventStatus.NOT_STARTED,
             matches=[(1, 3), (2, 4)]
         ),
-        Event(
+        Event( # event id 2
             title="Tech Talk",
             description="*This event started* A talk on how to break into web development.",
             end_date=datetime.now() + timedelta(days=14),
@@ -166,7 +166,7 @@ def create_event_data(session):
             status=EventStatus.STARTED,
             matches=[]
         ),
-        Event(
+        Event( # event id 3
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
             end_date=datetime.now() + timedelta(days=21),
@@ -174,7 +174,7 @@ def create_event_data(session):
             status=EventStatus.TERMINATED,
             matches={}
         ),
-        Event(
+        Event( # event id 4
             title="PeerPear main event",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
@@ -187,6 +187,34 @@ def create_event_data(session):
         session.add(event)
     session.commit()
     print("Dummy events added.")
+
+def create_event_registration_data(session):
+    registrations = [
+        EventRegistrations(
+            user_id=1,
+            event_id=1,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrations(
+            user_id=2,
+            event_id=1,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        EventRegistrations(
+            user_id=3,
+            event_id=1,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrations(
+            user_id=4,
+            event_id=1,
+            role=EventRole.LITTLE_SIBLING
+        ),
+    ]
+    for registration in registrations:
+        session.add(registration)
+    session.commit()
+    print("Dummy event registrations added.")
 
 def create_user_profile_data(session):
     profiles = [
@@ -261,7 +289,6 @@ def create_question_data(session):
     session.commit()
     print("Dummy questions added.")
 
-
 def create_response_data(session):
     responses = [
         Response(
@@ -316,6 +343,7 @@ def fill_all_tables(engine):
     create_user_data(session)
     create_user_profile_data(session)
     create_event_data(session)
+    create_event_registration_data(session)
     create_question_data(session)
     create_response_data(session)
 

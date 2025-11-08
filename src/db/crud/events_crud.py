@@ -41,7 +41,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
         .filter(
             or_(
                 Event.end_date == None,
-                func.date(Event.end_date) >= today
+                func.date(Event.end_date) >= today # NOTE: compares date only, so any event ending today will be valid.
             )
         )
         .filter(Event.id.notin_(registered_event_ids))
