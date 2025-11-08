@@ -43,13 +43,14 @@ export default function StudentDashBoard() {
   }, []);
 
   // Filter events based on selected option
+
   const filteredEvents = events.filter((event) => {
     switch (filterOption) {
       case "Active":
         return event.status === "STARTED";
-      case "Terminated":
+      case "Ended": 
         return event.status === "TERMINATED";
-      case "Results Published":
+      case "Results Available": 
         return event.status === "PAIRING_PUBLISHED";
       case "All Events":
       default:
