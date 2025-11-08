@@ -19,16 +19,17 @@ export default function StudentDashBoard() {
 
   useEffect(() => {
     // Store user type preference for navbar
-    localStorage.setItem('userType', 'student');
+    localStorage.setItem("userType", "student");
 
     const fetchMyEvents = async () => {
       try {
         const hardcodedUserId = 4;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
         const res = await fetch(
           `${apiUrl}/my_events_dashboard/my-event-browse?user_id=${hardcodedUserId}`,
           {
-            credentials: 'include', // Include cookies for authentication
+            credentials: "include", // Include cookies for authentication
           }
         );
         const data = await res.json();
@@ -43,13 +44,13 @@ export default function StudentDashBoard() {
 
   // Filter events based on selected option
   const filteredEvents = events.filter((event) => {
-    const eventEndDate = new Date(event.end_date);
-
     switch (filterOption) {
       case "Active":
-        return !isPast(eventEndDate);
-      case "Ended":
-        return isPast(eventEndDate);
+        return event.status === "STARTED";
+      case "Terminated":
+        return event.status === "TERMINATED";
+      case "Results Published":
+        return event.status === "PAIRING_PUBLISHED";
       case "All Events":
       default:
         return true;
@@ -63,8 +64,11 @@ export default function StudentDashBoard() {
 
         <main className="text-center m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
           <div className="flex flex-col items-center max-w-7xl mx-auto mb-6">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">
+              My Registered Events
+            </h1>
             <PearSwitch
-              options={["All Events", "Active", "Ended"]}
+              options={["All Events", "Active", "Ended", "Results Available"]}
               activeOption={filterOption}
               onOptionChange={setFilterOption}
             />

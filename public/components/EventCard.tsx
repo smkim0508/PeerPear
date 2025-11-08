@@ -9,21 +9,58 @@ import {
 import Image from "next/image";
 import type { PairingEvent } from "@/types/events";
 import { formatDistanceToNow, isPast, format } from "date-fns";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import PearButton from "./PearButton";
 import { useRouter } from "next/navigation";
 
 export default function EventCard({ event }: { event: PairingEvent }) {
   const router = useRouter();
-  const startDate = new Date(event.start_date ?? event.end_date);
-  const endDate = new Date(event.end_date);
 
-  const timeUntilEvent = isPast(endDate)
-    ? "Event has ended"
-    : formatDistanceToNow(endDate, { addSuffix: true });
+  const endDate = event.end_date ? new Date(event.end_date) : null;
+  const hasEnded =
+    (endDate ? isPast(endDate) : false) ||
+    (event.status !== "STARTED" && event.status !== "NOT_STARTED");
 
-  const formattedDate = format(startDate, "MMM d, yyyy");
-  const formattedTime = format(startDate, "h:mm a");
+  const statusLabel = (() => {
+    if (event.status === "STARTED" && !hasEnded) return "Active";
+    if (event.status === "NOT_STARTED") return "Not Started";
+    if (event.status === "PAIRING_PUBLISHED") return "Results Published";
+    if (event.status === "TERMINATED" || hasEnded) return "Closed";
+    return "Unknown";
+  })();
+
+  const badgeColor = (() => {
+    switch (statusLabel) {
+      case "Active":
+        return "bg-green-100 text-green-700 border-green-400";
+      case "Not Started":
+        return "bg-yellow-100 text-yellow-700 border-yellow-400";
+      case "Results Published":
+        return "bg-blue-100 text-blue-700 border-blue-400";
+      case "Closed":
+        return "bg-gray-100 text-gray-700 border-gray-400";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-300";
+    }
+  })();
+
+  const timeUntilEvent = (() => {
+    if (event.status === "NOT_STARTED") {
+      return "Not started yet";
+    }
+    if (event.status === "STARTED" && !hasEnded && endDate) {
+      return `Ends ${formatDistanceToNow(endDate, { addSuffix: true })}`;
+    }
+    if (event.status === "PAIRING_PUBLISHED") {
+      return "Results published";
+    }
+    if (event.status === "TERMINATED" || hasEnded) {
+      return "Event has ended";
+    }
+    return "TBA";
+  })();
+
+  const formattedDate = endDate ? format(endDate, "MMM d, yyyy") : "TBA";
 
   const handleViewDetails = () => {
     router.push(`/events/${event.id}`);
@@ -46,7 +83,6 @@ export default function EventCard({ event }: { event: PairingEvent }) {
             {timeUntilEvent}
           </div>
         </div>
-
       </div>
 
       <div className="flex flex-col grow p-5">
@@ -64,10 +100,6 @@ export default function EventCard({ event }: { event: PairingEvent }) {
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               <span>{formattedDate}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              <span>{formattedTime}</span>
             </div>
           </div>
         </CardContent>

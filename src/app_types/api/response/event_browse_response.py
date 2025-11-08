@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone, timedelta
+from common.types.events import EventStatus
 
 class PublishedEvent(BaseModel):
     """
@@ -11,8 +12,8 @@ class PublishedEvent(BaseModel):
     description: str
     image_url: str
     organization_name: str 
-    start_date: datetime
     end_date: datetime
+    status: EventStatus 
 
 class EventBrowseResponse(BaseModel):
     """

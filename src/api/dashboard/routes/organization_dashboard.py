@@ -19,6 +19,7 @@ org_dashboard_bp = Blueprint("organization_dashboard", __name__)
 def foo():
     return "placeholder"
 
+
 @org_dashboard_bp.get("/event-browse")
 def browse_events():
 
@@ -27,15 +28,20 @@ def browse_events():
 
     if organization_id is None:
         return jsonify({"error": "organization_id is required"}), 400
+
+    try:
+        organization_id = int(organization_id)
+    except ValueError:
+        return jsonify({"error": "organization_id must be an integer"}), 400
+
     # use helper to retrieve all events for the organization
     published_events = get_organization_events(int(organization_id))
     pairing_event_response = EventBrowseResponse(events=published_events)
 
     return jsonify(pairing_event_response.model_dump()), 200
 
-# please look this over
 
-
+# NOT DONE
 @org_dashboard_bp.patch("/event")
 def update_event():
     organization_id = request.args.get("organization_id")
@@ -80,6 +86,11 @@ def create_event():
     if not organization_id:
         return jsonify({"error": "organization_id is required"}), 400
 
+    try:
+        organization_id = int(organization_id)
+    except ValueError:
+        return jsonify({"error": "organization_id must be an integer"}), 400
+
     title = data.get("title", "Untitled Event")
     description = data.get("description", "")
     image_url = data.get(
@@ -106,19 +117,17 @@ def create_event():
         organization_id=organization_id,
         title=title,
         description=description,
-        # image_url=image_url,
+        image_url=image_url,
         end_date=end_dt,
         matches=matches,
         status=EventStatus.NOT_STARTED,
     )
-    
+
     # create the new event in db
     try:
-        create_new_event(new_event)
+        create_new_event(new_event)  # This already commits
     except SQLAlchemyError as e:
-        g.db.rollback()
         print(str(e))
-        return jsonify({"error": f"Database error"}), 500
+        return jsonify({"error": "Database error"}), 500
 
-    # NOTE: all routes should return some error/success message and HTTP status
-    return jsonify({"message": "Event created successfully"}), 200
+    return jsonify({"message": "Event created successfully", "event_id": new_event.id}), 200
