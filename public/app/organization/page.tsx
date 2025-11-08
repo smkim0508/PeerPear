@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
 import PearButton from "@/components/PearButton";
+import PearSwitch from "@/components/PearSwitch";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export default function OrganizationDashBoard() {
@@ -19,19 +20,23 @@ export default function OrganizationDashBoard() {
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [activeTab, setActiveTab] = useState<
-    "all" | "notStarted" | "active" | "ended"
-  >("all");
+  const [activeTab, setActiveTab] = useState<string>("All Events");
 
   // change later, hardcoded for testing
   const organization_id = 1;
 
-  const tabs = [
-    { label: "All Events", value: "all" },
-    { label: "Not Started", value: "notStarted" },
-    { label: "Active", value: "active" },
-    { label: "Ended", value: "ended" },
-  ];
+  const tabOptions = ["All Events", "Not Started", "Active", "Ended"];
+
+
+  const getFilterValue = (tabName: string) => {
+    switch (tabName) {
+      case "All Events": return "all";
+      case "Not Started": return "notStarted";
+      case "Active": return "active";
+      case "Ended": return "ended";
+      default: return "all";
+    }
+  };
 
   const fetchEvents = async () => {
     try {
@@ -67,8 +72,9 @@ export default function OrganizationDashBoard() {
   const filteredEvents = events.filter((event) => {
     const start_date = new Date(event.start_date);
     const end_date = new Date(event.end_date);
+    const filterValue = getFilterValue(activeTab);
 
-    switch (activeTab) {
+    switch (filterValue) {
       // need to fix active logic later
       case "active":
         return today >= start_date && today <= end_date;
@@ -108,20 +114,12 @@ export default function OrganizationDashBoard() {
             </div>
           )}
 
-          <div className="flex justify-center gap-3 mb-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value as any)}
-                className={`relative px-4 py-2  text-sm font-medium border-b-2 transition-all duration-200 ${
-                  activeTab === tab.value
-                    ? "border-b-[#c4de90] text-[#4a6b1e]"
-                    : "border-b-transparent text-gray-600 hover:text-black hover:border-b-gray-300"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex justify-center mb-8">
+            <PearSwitch
+              options={tabOptions}
+              activeOption={activeTab}
+              onOptionChange={setActiveTab}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">

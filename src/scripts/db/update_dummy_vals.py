@@ -243,18 +243,17 @@ def create_question_data(session):
     questions = [
         Question(
             question="What is your favorite programming language?",
-            options={"A": "Python", "B": "JavaScript",
-                     "C": "Java", "D": "C++"},
-            event_id=3
+            options=["Python","Javascript","C++","Java"],
+            event_id=2
         ),
         Question(
             question="How many years of coding experience do you have?",
-            options={"A": "0-1", "B": "2-3", "C": "4-5", "D": "5+"},
-            event_id=3
+            options=["1","2","3","4","5+"],
+            event_id=2
         ),
         Question(
             question="What is your favorite Asian food?:",
-            event_id=2
+            event_id=1
         )
     ]
     for question in questions:
@@ -268,22 +267,22 @@ def create_response_data(session):
         Response(
             user_id=2,
             question_id=1,
-            answer="A"
+            answer="Python"
         ),
         Response(
             user_id=4,
             question_id=1,
-            answer="B"
+            answer="Javascript"
         ),
         Response(
             user_id=2,
             question_id=2,
-            answer="C"
+            answer="2"
         ),
         Response(
             user_id=4,
             question_id=2,
-            answer="D"
+            answer="Java"
         ),
         Response(
             user_id=1,

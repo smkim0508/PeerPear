@@ -14,7 +14,21 @@ from common.types.user import UserProfile
 # use blueprint to group routes
 user_profile_bp = Blueprint("user_profile", __name__)
 
-@user_profile_bp.get("/update-profile")
+@user_profile_bp.get("/student-profile")
+def get_profile():
+    user_id = request.args.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+
+    profile = get_user_profile(user_id)
+
+    if not profile:
+        return jsonify({"profile": {}}), 200
+
+    return jsonify({"profile": profile}), 200
+
+@user_profile_bp.post("/update-profile")
 def update_profile():
 
     profile_payload = request.get_json() # NOTE: retrieves the whole profile as json obj
