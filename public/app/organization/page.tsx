@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import PearButton from "@/components/PearButton";
 import PearSwitch from "@/components/PearSwitch";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { parseISO, isPast } from "date-fns";
 
 export default function OrganizationDashBoard() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function OrganizationDashBoard() {
   const tabOptions = [
     "All Events",
     "Not Started",
+    "Active",
     "Unpublished",
     "Published Matches",
   ];
@@ -77,19 +79,26 @@ export default function OrganizationDashBoard() {
   };
 
   const today = new Date();
+
   const filteredEvents = events.filter((event) => {
     const filterValue = getFilterValue(activeTab);
     const status = event.status?.toUpperCase?.() || "";
+    const endDate = event.end_date ? parseISO(event.end_date) : null;
+    const isEnded = endDate ? isPast(endDate) : false;
 
     switch (filterValue) {
       case "notStarted":
         return status === "NOT_STARTED";
+
       case "active":
-        return status === "STARTED";
+        return status === "STARTED" && !isEnded;
+
       case "terminated":
-        return status === "TERMINATED";
+        return status === "TERMINATED" || (status === "STARTED" && isEnded);
+
       case "published":
         return status === "PAIRING_PUBLISHED";
+
       default:
         return true;
     }
