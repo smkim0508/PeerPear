@@ -40,15 +40,16 @@ def create_app() -> Flask:
     app = Flask(__name__)
 
     # Configure CORS to allow requests from Next.js frontend
-    CORS(app,
-         origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-         supports_credentials=True,
-         allow_headers=["Content-Type", "Authorization"],
-         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+    CORS(
+        app,
+        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    )
 
     # Configure session for CAS authentication
-    app.secret_key = os.getenv(
-        "SECRET_KEY", "blah-blah-change-for-prod-cos333")
+    app.secret_key = os.getenv("SECRET_KEY", "blah-blah-change-for-prod-cos333") # TODO: this needs changing
     app.config['SESSION_TYPE'] = 'filesystem'
     # Set to True in production with HTTPS
     app.config['SESSION_COOKIE_SECURE'] = False
@@ -93,19 +94,13 @@ def create_app() -> Flask:
     @app.before_request
     def _open_session():
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
-        g.db = SessionLocal()
+        g.db = SessionLocal
 
     # close session after each response
     @app.after_request
-    def _commit_close(response):
-        # best-effort commit on 2xx/3xx; rollback otherwise
-        try:
-            if 200 <= response.status_code < 400:
-                g.db.commit()
-            else:
-                g.db.rollback()
-        finally:
-            g.db.close()
+    def _close_session(response):
+        # close db connection safely, rollback occurs inside independent commit flows
+        # NOTE: db conns are handled on request level
         return response
 
     # authentication routes
@@ -114,8 +109,7 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-    app.register_blueprint(student_dashboard_bp,
-                           url_prefix="/student_dashboard")
+    app.register_blueprint(student_dashboard_bp, url_prefix="/student_dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
     app.register_blueprint(org_dashboard_bp, url_prefix="/organization_dashboard")
     app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
@@ -124,13 +118,13 @@ def create_app() -> Flask:
     app.register_blueprint(event_data_bp, url_prefix="/event_data")
 
     # check health for app dependencies and liveness
-
     @app.get("/health")
     def health():
         db_status = False
         try:
-            # g.db is an AsyncSession you opened in before_request
-            g.db.execute(text("SELECT 1"))
+            # just check if connection is possible
+            with g.db() as session:
+                session.execute(text("SELECT 1"))
             ok = True
             db_status = True
         except Exception as e:

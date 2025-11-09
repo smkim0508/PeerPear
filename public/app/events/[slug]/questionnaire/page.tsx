@@ -51,7 +51,7 @@ export default function QuestionnairePage() {
     const get_questions = async () => {
       try {
         // HARDCODED FOR NOW
-        const event_id = 3;
+        const event_id = 2;
         const user_id = 2;
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -110,7 +110,7 @@ export default function QuestionnairePage() {
 
     try {
       // HARDCODED FOR NOW
-      const event_id = 3;
+      const event_id = 2;
       const user_id = 2;
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const responses = Object.entries(answers).map(

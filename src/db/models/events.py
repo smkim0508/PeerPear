@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Index, DateTime
+from sqlalchemy import Enum as SAEnum # to not get confused with actual Enum class
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from sqlalchemy.dialects.postgresql import ARRAY
 from .base import MainDB_Base
@@ -8,20 +9,46 @@ from sqlalchemy.orm import joinedload
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from db.models.organizations import Organization
+from enum import Enum
+from common.types.events import EventStatus, EventRole
 
 # main event table, representing each event
 class Event(MainDB_Base):
+    """
+    The SA ORM mapping for the event table.
+    Status of an event is represented with enum values.
+    At creation, it will default to NOT_STARTED, and an end date will be provided.
+    
+    When an event is "NOT_STARTED", custom questions can safely be added.
+    -> Once an event is anything but NOT_STARTED, questions will not be editable.
+
+    When an event is "STARTED" AND the current date is before the end date, users can register.
+
+    When an event is "TERMINATED", no more registrations can be made.
+    NOTE: when an event "times out" (i.e. the end date is passed), the event is still left as "STARTED".
+    - This status represents a manual termination of the event.
+
+    When an event is "PAIRING_PUBLISHED", the event is over and the results have been made public to attendees (users).
+    """
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
     organization_id: Mapped[int] = mapped_column(
         ForeignKey("organizations.id"), nullable=False)
-    start_date: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(), nullable=False
-    )
+    
+    # NOTE: start date is now deprecated
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    # sets the status as enum in db, with NOT_STARTED as default
+    status: Mapped[EventStatus] = mapped_column(
+        SAEnum(EventStatus, name="event_status_enum"), 
+        nullable=False, 
+        default=EventStatus.NOT_STARTED
+    )
+    
+    image_url: Mapped[str] = mapped_column(String, nullable=True)
+
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
@@ -41,5 +68,9 @@ class EventRegistrations(MainDB_Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=False
     )
-    status: Mapped[str] = mapped_column(String, nullable=False) # TODO: make enums
-    role: Mapped[str] = mapped_column(String, nullable=False) # TODO: make enums
+    # optional field that represents the user's role in the event, whether big / little
+    role: Mapped[EventRole] = mapped_column(
+        SAEnum(EventRole, name="event_role_enum"),
+        nullable=True,
+        default=None
+    )

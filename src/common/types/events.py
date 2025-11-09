@@ -1,5 +1,21 @@
 from pydantic import BaseModel
 from datetime import datetime, timezone
+from enum import Enum
+
+# enums to represent event status
+
+
+class EventStatus(Enum):
+    NOT_STARTED = "NOT_STARTED"
+    STARTED = "STARTED"
+    TERMINATED = "TERMINATED"
+    PAIRING_PUBLISHED = "PAIRING_PUBLISHED"
+
+
+# enums to represent event roles, currently big and little siblings
+class EventRole(Enum):
+    BIG_SIBLING = "big_sibling"
+    LITTLE_SIBLING = "little_sibling"
 
 
 class PairingResult(BaseModel):
@@ -20,8 +36,7 @@ class PairingEvent(BaseModel):
     description: str
     organization_name: str
     image_url: str  # TODO: not currently present in DB
-    start_date: datetime
     end_date: datetime
-    active: bool
+    status: EventStatus
     participants: list[int]  # list of user ids
     matches: PairingResult

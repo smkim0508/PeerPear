@@ -21,7 +21,7 @@ def get_profile():
     if not user_id:
         return jsonify({"error": "user_id required"}), 400
 
-    profile = get_user_profile(user_id)
+    profile = get_user_profile(int(user_id))
 
     if not profile:
         return jsonify({"profile": {}}), 200

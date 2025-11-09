@@ -5,6 +5,9 @@ from .base import MainDB_Base
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
+from enum import Enum
+from common.types.user import ClassYear
+from sqlalchemy import Enum as SAEnum
 
 # example user profile in main db, to be expanded as we add to our central user profile
 # NOTE: user maps to many hobbies
@@ -16,7 +19,10 @@ class UserProfileTable(MainDB_Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"),nullable = False, unique = True)
     gender: Mapped[str] = mapped_column(String,nullable = True)
-    class_year: Mapped[int] = mapped_column(Integer,nullable = False)
+    class_year: Mapped[ClassYear] = mapped_column(
+        SAEnum(ClassYear, name="class_year_enum"),
+        nullable = False
+    )
     major: Mapped[str] = mapped_column(String,nullable = False)
 
     hobbies: Mapped[list[str]] = mapped_column(

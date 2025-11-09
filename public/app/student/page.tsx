@@ -22,9 +22,11 @@ export default function StudentDashBoard() {
 
     const fetchEvents = async () => {
       try {
+        // HARDCODED
+        const user_id = 2
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-        const res = await fetch(`${apiUrl}/student_dashboard/event-browse`, {
+        const res = await fetch(`${apiUrl}/student_dashboard/event-browse?user_id=${user_id}`, {
           credentials: "include", // Include cookies for authentication
         });
         const data = await res.json();
