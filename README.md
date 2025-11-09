@@ -1,5 +1,5 @@
 # PeerPear
-COS333 Project for Centralized, LLM-powered Group Pairing Platform
+#### Centralized, LLM-powered Group Pairing Platform for Student Organizations.
 
 ## How to Run the Backend (Locally):
 The dependencies in this project are managed through poetry.
@@ -30,4 +30,7 @@ Create a `.env` file in the `public` folder by referencing `public/.env.example`
 4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## Google Gemini API
-This project uses Google Gemini 2.0 Flash (temporarily) for the LLM client. To receieve an API KEY to run it locally, please visit: https://aistudio.google.com/ and set up your project
+This project uses Google Gemini 2.0 Flash for the LLM client. To receieve an API KEY to run it locally, please visit: https://aistudio.google.com/ and set up your project
+
+## Contributing to the Project
+Before contributing to the backend services, please read [this document](/src/README.md) in detail.
