@@ -1,20 +1,34 @@
 # canonical DTO for a user with their preferences
 from pydantic import BaseModel
+from typing import Optional
+from enum import Enum
 
-# TODO: build this out based on our intended central user profile
+# internal mapping for class year, including grad, alum, prof for future uses.
+class ClassYear(Enum):
+    FRESHMAN = "Freshman"
+    SOPHOMORE = "Sophomore"
+    JUNIOR = "Junior"
+    SENIOR = "Senior"
+    GRADUATE = "Graduate"
+    ALUMNI = "Alumni"
+    PROFESSOR = "Professor"
 
 class UserProfileFull(BaseModel):
     """
-    Full user profile with all relevant information, mapped 1-to-1 with the form responses.
+    Full user profile with all relevant information, mapped 1-to-1 with the form responses (except for summary).
     TODO: add more fields as we build the form.
     """
     id: int
-    name: str
+    user_name: Optional[str] = None
+    first_name: str
+    last_name: str
     email: str
-    phone_number: str
-    preferences: list[str]
-    major: str # maybe store major as an enum to validate
-    profile_summary: str
+    phone_number: Optional[str] = None
+    gender: Optional[str] = None
+    class_year: ClassYear
+    major: Optional[str] = None
+    hobbies: list[str] # NOTE: technically could be NULLable but right now we define it as non-nullable
+    profile_summary: Optional[str] = None
 
 class UserProfile(BaseModel):
     """

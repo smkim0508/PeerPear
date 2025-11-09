@@ -15,7 +15,7 @@ class Question(MainDB_Base):
     
     question: Mapped[str] = mapped_column(String, nullable=False)
 
-    options: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    options: Mapped[list[str]] = mapped_column(JSONB, nullable=True)
 
     event_id: Mapped[int] = mapped_column(
         ForeignKey("events.id"), nullable=False)

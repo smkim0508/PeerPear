@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PearButton from "./PearButton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { isBefore } from "date-fns";
+import { useRouter } from "next/navigation";
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -20,11 +20,12 @@ export default function CreateEventModal({
   organization_id,
   onSuccess,
 }: CreateEventModalProps) {
+  const router = useRouter();
+
   const [isAnimating, setIsAnimating] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    startDate: new Date().toISOString().split("T")[0], // default = today
     endDate: "",
     imageUrl: "",
   });
@@ -32,6 +33,7 @@ export default function CreateEventModal({
   const [dateAlert, setDateAlert] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -52,28 +54,13 @@ export default function CreateEventModal({
 
     const parseLocalDate = (dateStr: string) => {
       const [year, month, day] = dateStr.split("-").map(Number);
-      return new Date(year, month - 1, day); // monthIndex is 0-based
+      return new Date(year, month - 1, day);
     };
 
-    const start = parseLocalDate(formData.startDate);
     const end = parseLocalDate(formData.endDate);
 
-   
-
-    const isBeforeToday = (date: Date) => {
-      const todayNoTime = new Date();
-      todayNoTime.setHours(0, 0, 0, 0);
-      return date < todayNoTime;
-    };
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      setDateAlert(true);
-      setTimeout(() => setDateAlert(false), 3000);
-      return;
-    }
-
-    // end before start OR either before today
-    if (end < start || isBeforeToday(start) || isBeforeToday(end)) {
+    // validate end date
+    if (end <= new Date()) {
       setDateAlert(true);
       return;
     }
@@ -83,10 +70,11 @@ export default function CreateEventModal({
 
     // create the dictionary object to send over
     const newEvent = {
-      ...formData,
-      start_date: new Date(formData.startDate).toISOString().split("T")[0],
-      end_date: new Date(formData.endDate).toISOString().split("T")[0],
       organization_id: organization_id,
+      title: formData.title,
+      description: formData.description,
+      image_url: formData.imageUrl || "",
+      end_date: new Date(formData.endDate).toISOString(),
     };
 
     try {
@@ -108,16 +96,20 @@ export default function CreateEventModal({
       setFormData({
         title: "",
         description: "",
-        startDate: new Date().toISOString().split("T")[0], // default = today
         endDate: "",
         imageUrl: "",
       });
 
-      if (onSuccess) onSuccess();
+      const data = await res.json();
+      const newEventId = data.event_id;
+
+      setSuccessMessage("Event created successfully!");
 
       setTimeout(() => {
+        setSuccessMessage(null);
         onClose();
-      }, 800);
+        router.push(`/events/${newEventId}`);
+      }, 1500);
     } catch (err: any) {
       setSubmitError(err?.message || "Something went wrong");
     } finally {
@@ -156,7 +148,8 @@ export default function CreateEventModal({
               Missing fields
             </AlertTitle>
             <AlertDescription className="text-red-600">
-              Please fill out all required fields before submitting.
+              Please include a title, description, and valid end date before
+              submitting.
             </AlertDescription>
             <button
               className="absolute top-2 right-3 text-red-500 hover:text-red-700"
@@ -173,8 +166,7 @@ export default function CreateEventModal({
               Invalid Dates
             </AlertTitle>
             <AlertDescription className="text-red-600">
-              Please make sure both dates are after today, and the end date is
-              after the start date.
+              Please make sure the end date is later than today.
             </AlertDescription>
             <button
               className="absolute top-2 right-3 text-red-500 hover:text-red-700"
@@ -182,6 +174,17 @@ export default function CreateEventModal({
             >
               ×
             </button>
+          </Alert>
+        )}
+
+        {successMessage && (
+          <Alert className="mt-4 mb-4 border-green-400 bg-green-50">
+            <AlertTitle className="font-semibold text-green-700">
+              Success!
+            </AlertTitle>
+            <AlertDescription className="text-green-600">
+              {successMessage}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -223,17 +226,6 @@ export default function CreateEventModal({
             setFormData({ ...formData, description: e.target.value })
           }
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
-        />
-        <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          Start Date
-        </label>
-        <input
-          value={formData.startDate}
-          onChange={(e) =>
-            setFormData({ ...formData, startDate: e.target.value })
-          }
-          type="date"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           End Date

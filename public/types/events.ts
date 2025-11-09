@@ -9,10 +9,8 @@ export interface PairingEvent {
   title: string;
   description: string;
   image_url: string;      // keep snake_case if backend sends it that way
-  start_date: string;     // will come over JSON as ISO string
-  end_date: string;
-  active: boolean;
-  participants: number[];
+  end_date: string | null;
+  status: "NOT_STARTED" | "STARTED" | "TERMINATED" | "PAIRING_PUBLISHED"; // event state enum
   matches: PairingResult;
 }
 

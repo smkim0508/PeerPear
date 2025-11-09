@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import Organization
+from common.types.db_status import DBStatus
 
 # use blueprint to group routes
 org_profile_bp = Blueprint("organization_profile", __name__)
@@ -37,10 +38,10 @@ def update_organization(organization_id):
 
     result = update_organization_profile(data)
 
-    if result == "success":
+    if result == DBStatus.SUCCESS.value:
         return jsonify({"message": "Organization updated successfully"}), 200
-    elif result == "onf":
+    elif not result:
         return jsonify({"message": "Organization does not exist"}), 404
     else:
-        print(result)
+        print(result) # error otherwise
         return jsonify({"message": "Database error"}), 500
