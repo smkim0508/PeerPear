@@ -1,12 +1,12 @@
 from sqlalchemy import select
 from db.models.user import UserTable
-from api.dependencies import get_db_session
+from api.dependencies import get_db_sessionmaker
 from typing import Optional
 
 
 def get_user_by_username(username: str) -> Optional[UserTable]:
     """Get a user by their username."""
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
     
     stmt = select(UserTable).where(UserTable.username == username)
 
@@ -17,7 +17,7 @@ def get_user_by_username(username: str) -> Optional[UserTable]:
 
 def get_user_by_id(user_id: int) -> Optional[UserTable]:
     """Get a user by their ID."""
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
     
     stmt = select(UserTable).where(UserTable.id == user_id)
 
@@ -28,7 +28,7 @@ def get_user_by_id(user_id: int) -> Optional[UserTable]:
 
 def create_user(username: str, first_name: str, last_name: str, email: str, phone_number: Optional[str] = None) -> UserTable:
     """Create a new user in the database."""
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
     
     new_user = UserTable(
         username=username,

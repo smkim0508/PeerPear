@@ -2,7 +2,7 @@ from db.models.events import Event, EventStatus, EventRegistrations
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
-from api.dependencies import get_db_session, get_llm
+from api.dependencies import get_db_sessionmaker, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from flask import request
 from datetime import datetime, timedelta, timezone, date
@@ -13,7 +13,7 @@ from sqlalchemy import func
 
 
 def create_new_event(event: Event):
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
     with db_session() as session:
         session.add(event)
         session.commit()
@@ -23,7 +23,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
     Returns all events that are STARTED and not yet past their end_date,
     excluding events the given user is already registered for.
     """
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     with db_session() as session:
         # Subquery: get all event_ids the user has registered for
@@ -66,7 +66,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
     return published_events
 
 def get_organization_events(organization_id: int) -> list[PublishedEvent]:
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     stmt = (
         select(Event, Organization)
@@ -97,7 +97,7 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
 
 def get_user_events(user_id: int) -> list[PublishedEvent]:
 
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     stmt = (select(Event, Organization)
             .join(EventRegistrations, Event.id == EventRegistrations.event_id)
@@ -127,7 +127,7 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
 
 def get_event_by_id(event_id: int) -> PublishedEvent | None:
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     stmt = (
         select(Event, Organization)

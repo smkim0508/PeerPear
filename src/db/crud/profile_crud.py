@@ -5,7 +5,7 @@ from typing import Optional
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from sqlalchemy import inspect, select
-from api.dependencies import get_db_session, get_llm
+from api.dependencies import get_db_sessionmaker, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from flask import request
 from datetime import datetime, timedelta
@@ -13,7 +13,7 @@ from common.types.user import UserProfile
 
 # returns a row from the UserProfileTable given a user id
 def get_user_profile(user_id: int) -> UserProfileTable | None:
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     stmt = (
         select(UserProfileTable)
@@ -26,7 +26,7 @@ def get_user_profile(user_id: int) -> UserProfileTable | None:
     return result
 
 def create_user_profile(user_id: int, gender: Optional[str], class_year: int, major: Optional[str], hobbies=list[str]):
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     # NOTE: SQLAlchemy handles None mapped to NULL
     new_profile = UserProfileTable(
@@ -45,7 +45,7 @@ def create_user_profile(user_id: int, gender: Optional[str], class_year: int, ma
     return new_profile
 
 def update_user_profile(user_profile: UserProfile):
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     # retrieves the user profile from db, updates it locally in Python and re-enters to db
     profile = get_user_profile(user_profile.id)

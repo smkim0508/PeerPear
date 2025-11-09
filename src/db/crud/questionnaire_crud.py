@@ -2,13 +2,13 @@
 from db.models.question import Question
 from db.models.response import Response
 from sqlalchemy import select
-from api.dependencies import get_db_session
+from api.dependencies import get_db_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 
 
 def get_questions(event_id: int):
     """Fetch all questions for a given event."""
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     try:
         with db_session() as session:
@@ -32,7 +32,7 @@ def _get_answer(question_id: int, user_id: int, session):
 
 def get_user_answers(question_ids: list[int], user_id: int):
     """Fetch all answers for a user's responses to given questions."""
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     try:
         with db_session() as session:
@@ -49,7 +49,7 @@ def get_user_answers(question_ids: list[int], user_id: int):
 
 def submit_responses(event_id: int, user_id: int, responses: list[dict]):
     """Insert or update responses for a questionnaire."""
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
     questions = get_questions(event_id)
 
     if not questions:

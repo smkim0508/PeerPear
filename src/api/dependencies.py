@@ -7,7 +7,7 @@ from flask import current_app, g
 from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-def get_db_session():
+def get_db_sessionmaker():
     return g.db # NOTE: this is a session maker that hasn't been initialized yet, must be called in process.
 
 def get_llm():

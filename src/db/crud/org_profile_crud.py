@@ -1,12 +1,12 @@
 from db.models.organizations import Organization
 from sqlalchemy import select
-from api.dependencies import get_db_session
+from api.dependencies import get_db_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional
 from common.types.db_status import DBStatus
 
 def get_organization_profile(organization_id: int) -> Optional[Organization]:
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     stmt = select(Organization).where(Organization.id == organization_id)
     
@@ -20,7 +20,7 @@ def update_organization_profile(data: dict) -> Optional[str]:
     if not organization_id:
         return "error: missing organization_id"
 
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
 
     org_stmt = select(Organization).where(Organization.id == organization_id)
 

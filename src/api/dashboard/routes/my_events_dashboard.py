@@ -7,7 +7,7 @@ from app_types.api.response.event_browse_response import EventBrowseResponse, Pu
 from db.models.events import Event
 from db.models.organizations import Organization
 from sqlalchemy import inspect
-from api.dependencies import get_db_session, get_llm
+from api.dependencies import get_db_sessionmaker, get_llm
 from db.crud.events_crud import get_user_events
 # use blueprint to group routes
 my_events_bp = Blueprint("my_events", __name__)
