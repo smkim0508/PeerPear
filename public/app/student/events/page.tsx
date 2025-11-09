@@ -10,6 +10,7 @@ import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
 import { isPast } from "date-fns";
 import PearButton from "@/components/PearButton";
+import { parseISO } from "date-fns";
 
 export default function StudentDashBoard() {
   const router = useRouter();
@@ -45,13 +46,22 @@ export default function StudentDashBoard() {
   // Filter events based on selected option
 
   const filteredEvents = events.filter((event) => {
+    const endDate = event.end_date ? parseISO(event.end_date) : null;
+    const isEnded = endDate ? isPast(endDate) : false;
+
     switch (filterOption) {
       case "Active":
-        return event.status === "STARTED";
-      case "Ended": 
-        return event.status === "TERMINATED";
-      case "Results Available": 
+        // Show STARTED events that are still ongoing
+        return event.status === "STARTED" && !isEnded;
+
+      case "Ended":
+        // Either manually terminated or auto-ended (past end_date)
+        return event.status === "TERMINATED" || isEnded;
+
+      case "Results Available":
+        // Explicitly published events
         return event.status === "PAIRING_PUBLISHED";
+
       case "All Events":
       default:
         return true;
@@ -63,7 +73,7 @@ export default function StudentDashBoard() {
       <div className="font-sans flex flex-col min-h-screen">
         <Navbar userType="student" />
 
-        <main className="text-center m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
+        <main className=" m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
           <div className="flex flex-col items-center max-w-7xl mx-auto mb-6">
             <h1 className="text-3xl font-bold mb-6 text-gray-800">
               My Registered Events
