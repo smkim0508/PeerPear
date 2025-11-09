@@ -9,7 +9,7 @@ from app_types.api.response.event_browse_response import EventBrowseResponse, Pu
 from db.models.events import Event
 from db.models.organizations import Organization
 from sqlalchemy import inspect
-from api.dependencies import get_db_session, get_llm
+from api.dependencies import get_db_sessionmaker, get_llm
 from common.logging import logger
 from modules.pairing.orchestrator import PairingOrchestrator
 from app_types.api.response.pairing_response import PairingResponse
@@ -24,7 +24,7 @@ def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[
     # TODO: make this work with request.args, and also add db crud helper to query values given event id
 
     # load in global dependencies
-    db_session = get_db_session()
+    db_session = get_db_sessionmaker()
     llm_client = get_llm()
 
     # NOTE: set as static values, should be passed in from front end
