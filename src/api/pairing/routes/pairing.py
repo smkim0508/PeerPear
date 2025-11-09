@@ -22,6 +22,7 @@ pairing_bp = Blueprint("pairing", __name__)
 def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[int] = None):
 
     # TODO: make this work with request.args, and also add db crud helper to query values given event id
+    
 
     # load in global dependencies
     db_session = get_db_sessionmaker()

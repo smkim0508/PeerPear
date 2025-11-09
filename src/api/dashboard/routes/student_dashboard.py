@@ -16,19 +16,16 @@ from common.logging import logger
 # use blueprint to group routes
 student_dashboard_bp = Blueprint("student_dashboard", __name__)
 
-# TODO: change this to be the actual landing page
-
-
+# TODO: this endpoint needs to be changed?
 @student_dashboard_bp.get("/")
 def foo():
     return "something"
 
-
+# NOTE: temporary endpoint for serving static image
 @student_dashboard_bp.get("/static/<path:filename>")
 def static_files(filename):
     print(f"filename: {filename}")
     return send_from_directory("assets/images", filename)
-
 
 @student_dashboard_bp.get("/event-browse")
 def browse_events():

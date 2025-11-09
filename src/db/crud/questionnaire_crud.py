@@ -4,7 +4,7 @@ from db.models.response import Response
 from sqlalchemy import select
 from api.dependencies import get_db_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-
+from common.types.user import UserProfileFull, User, UserProfile
 
 def get_questions(event_id: int):
     """Fetch all questions for a given event."""
@@ -46,8 +46,7 @@ def get_user_answers(question_ids: list[int], user_id: int):
         print(f"Database error in get_user_answers: {e}")
         return {}
 
-
-def submit_responses(event_id: int, user_id: int, responses: list[dict]):
+def submit_responses(event_id: int, user_id: int, responses: dict):
     """Insert or update responses for a questionnaire."""
     db_session = get_db_sessionmaker()
     questions = get_questions(event_id)
@@ -58,7 +57,6 @@ def submit_responses(event_id: int, user_id: int, responses: list[dict]):
     try:
         with db_session() as session:
             response_map = {r["question_id"]: r["answer"] for r in responses}
-
             
             if any(response_map.get(q.id) is None for q in questions):
                 return "form"
