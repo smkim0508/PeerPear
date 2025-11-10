@@ -7,7 +7,7 @@ import time
 import os
 
 from db import session
-from db.models.events import Event, EventRegistrations
+from db.models.events import EventTable, EventRegistrationsTable
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
@@ -150,7 +150,7 @@ def create_user_data(session):
 
 def create_event_data(session):
     events = [
-        Event( # event id 1
+        EventTable( # event id 1
             title="Welcome Event",
             description="An event to welcome new members.",
             end_date=datetime.now() + timedelta(days=7),
@@ -158,7 +158,7 @@ def create_event_data(session):
             status=EventStatus.NOT_STARTED,
             matches=[(1, 3), (2, 4)]
         ),
-        Event( # event id 2
+        EventTable( # event id 2
             title="Tech Talk",
             description="*This event started* A talk on how to break into web development.",
             end_date=datetime.now() + timedelta(days=14),
@@ -166,7 +166,7 @@ def create_event_data(session):
             status=EventStatus.STARTED,
             matches=[]
         ),
-        Event( # event id 3
+        EventTable( # event id 3
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
             end_date=datetime.now() + timedelta(days=21),
@@ -174,7 +174,7 @@ def create_event_data(session):
             status=EventStatus.TERMINATED,
             matches=[]
         ),
-        Event( # event id 4
+        EventTable( # event id 4
             title="PeerPear main event",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
@@ -182,7 +182,7 @@ def create_event_data(session):
             status=EventStatus.PAIRING_PUBLISHED,
             matches=[]
         ),
-        Event( # event id 5
+        EventTable( # event id 5
             title="PeerPear main event 2 - started",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
@@ -190,7 +190,7 @@ def create_event_data(session):
             status=EventStatus.STARTED,
             matches=[]
         ),
-        Event( # event id 6
+        EventTable( # event id 6
             title="PeerPear main event 3 - not started",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
@@ -206,22 +206,22 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     registrations = [
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=1,
             event_id=1,
             role=EventRole.BIG_SIBLING
         ),
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=2,
             event_id=1,
             role=EventRole.LITTLE_SIBLING
         ),
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=3,
             event_id=1,
             role=EventRole.BIG_SIBLING
         ),
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=4,
             event_id=1,
             role=EventRole.LITTLE_SIBLING

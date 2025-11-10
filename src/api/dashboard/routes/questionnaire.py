@@ -1,7 +1,7 @@
 from flask import Blueprint, request, send_from_directory, jsonify, g
 import os
 from api import validate_model
-from db.models.events import Event
+from db.models.events import EventTable
 from db.models.response import Response
 from db.models.question import Question
 from datetime import datetime, timedelta
@@ -60,7 +60,7 @@ def get_questionnaire(event_id, user_id):
         )
     except ValidationError as e:
         return jsonify({"error": "invalid form responses"}), 400
-        
+
 """
 @questionnaire_bp.put("/submit")
 def submit_questionnaire():

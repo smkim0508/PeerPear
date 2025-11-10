@@ -3,7 +3,7 @@ from flask import Blueprint, request, send_from_directory, jsonify, g
 import os
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
+from db.models.events import EventTable
 from db.crud.profile_crud import update_user_profile, get_user_profile
 from datetime import datetime, timedelta
 from sqlalchemy import select

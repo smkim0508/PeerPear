@@ -3,7 +3,7 @@ from flask import Blueprint, request, send_from_directory, jsonify, g
 import os
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
+from db.models.events import EventTable
 from db.crud.events_crud import get_organization_events, create_new_event
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
@@ -48,7 +48,7 @@ def update_event():
         return jsonify({"error": "organization_id and event_id are required"}), 400
 
     # Check if the event exists and belongs to the organization
-    event = g.db.query(Event).filter(Event.id == event_id).first()
+    event = g.db.query(EventTable).filter(EventTable.id == event_id).first()
 
     if event is None:
         return jsonify({"error": "Event not found"}), 404
@@ -110,7 +110,7 @@ def create_event():
     if end_dt.date() < today_date:
         return jsonify({"error": "End date cannot be in the past"}), 400
 
-    new_event = Event(
+    new_event = EventTable(
         organization_id=organization_id,
         title=title,
         description=description,

@@ -4,7 +4,7 @@ from common.types.pairing_event import PairingEvent, PairingResult
 from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
+from db.models.events import EventTable
 from db.models.organizations import Organization
 from sqlalchemy import inspect
 from api.dependencies import get_db_sessionmaker, get_llm

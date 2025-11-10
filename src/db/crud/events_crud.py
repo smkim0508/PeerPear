@@ -1,4 +1,4 @@
-from db.models.events import Event, EventStatus, EventRegistrations
+from db.models.events import EventTable, EventStatus, EventRegistrationsTable
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
@@ -11,7 +11,7 @@ from sqlalchemy import func
 # helper to retrieve all events
 # NOTE: filtering is handled in FE
 
-def create_new_event(event: Event):
+def create_new_event(event: EventTable):
     db_session = get_db_sessionmaker()
     with db_session() as session:
         session.add(event)
@@ -27,24 +27,24 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
     with db_session() as session:
         # Subquery: get all event_ids the user has registered for
         registered_event_ids = (
-            session.query(EventRegistrations.event_id)
-            .filter(EventRegistrations.user_id == user_id)
+            session.query(EventRegistrationsTable.event_id)
+            .filter(EventRegistrationsTable.user_id == user_id)
             .subquery()
         )
 
         # Main query: only events that are active and not past end_date
         today = date.today()  # compare date only, not time
         rows = (
-            session.query(Event, Organization)
-            .join(Organization, Event.organization_id == Organization.id)
-            .filter(Event.status == EventStatus.STARTED)
+            session.query(EventTable, Organization)
+            .join(Organization, EventTable.organization_id == Organization.id)
+            .filter(EventTable.status == EventStatus.STARTED)
             .filter(
                 or_(
-                    Event.end_date == None,
-                    func.date(Event.end_date) >= today # NOTE: compares date only, so any event ending today will be valid.
+                    EventTable.end_date == None,
+                    func.date(EventTable.end_date) >= today # NOTE: compares date only, so any event ending today will be valid.
                 )
             )
-            .filter(Event.id.notin_(registered_event_ids))
+            .filter(EventTable.id.notin_(registered_event_ids))
             .all()
         )
 
@@ -68,9 +68,9 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     db_session = get_db_sessionmaker()
 
     stmt = (
-        select(Event, Organization)
-        .join(Organization, Event.organization_id == Organization.id)
-        .where(Event.organization_id == organization_id)
+        select(EventTable, Organization)
+        .join(Organization, EventTable.organization_id == Organization.id)
+        .where(EventTable.organization_id == organization_id)
     )
 
     with db_session() as session:
@@ -98,10 +98,10 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
     db_session = get_db_sessionmaker()
 
-    stmt = (select(Event, Organization)
-            .join(EventRegistrations, Event.id == EventRegistrations.event_id)
-            .join(Organization, Event.organization_id == Organization.id)
-            .where(EventRegistrations.user_id == user_id)
+    stmt = (select(EventTable, Organization)
+            .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
+            .join(Organization, EventTable.organization_id == Organization.id)
+            .where(EventRegistrationsTable.user_id == user_id)
             )
 
     with db_session() as session:
@@ -129,9 +129,9 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
     db_session = get_db_sessionmaker()
 
     stmt = (
-        select(Event, Organization)
-        .join(Organization, Event.organization_id == Organization.id)
-        .where(Event.id == event_id)
+        select(EventTable, Organization)
+        .join(Organization, EventTable.organization_id == Organization.id)
+        .where(EventTable.id == event_id)
     )
 
     with db_session() as session:

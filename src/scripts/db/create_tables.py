@@ -2,7 +2,7 @@ from db.models.base import MainDB_Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import time
-from db.models.events import Event
+from db.models.events import EventTable
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
