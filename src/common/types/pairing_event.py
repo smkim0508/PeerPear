@@ -39,7 +39,7 @@ class PairingEvent(BaseModel):
     organization_id: int
     title: str
     description: str
-    organization: Optional[OrganizationProfile] = None
+    # organization: Optional[OrganizationProfile] = None
     image_url: Optional[str] = None  # TODO: not currently present in DB
     end_date: datetime
     status: EventStatus

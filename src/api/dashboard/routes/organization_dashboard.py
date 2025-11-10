@@ -99,7 +99,6 @@ def create_event():
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)
     today_date = today.date()
-    matches = []
     end_date = data.get("end_date")
 
     # NOTE: try to parse the requested end date into standard datetime
@@ -111,16 +110,6 @@ def create_event():
     if end_dt.date() < today_date:
         return jsonify({"error": "End date cannot be in the past"}), 400
 
-    new_event = EventTable(
-        organization_id=organization_id,
-        title=title,
-        description=description,
-        image_url=image_url,
-        end_date=end_dt,
-        matches=matches,
-        status=EventStatus.NOT_STARTED,
-    )
-
     new_event = PairingEvent(
         organization_id=organization_id,
         title=title,
@@ -128,7 +117,7 @@ def create_event():
         image_url=image_url,
         end_date=end_dt,
         status=EventStatus.NOT_STARTED,
-        matches=PairingResult(groups=[])
+        matches=PairingResult(groups=[]) # initially no matches
     )
 
     # create the new event in db

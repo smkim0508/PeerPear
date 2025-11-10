@@ -30,3 +30,5 @@ class UserProfileTable(MainDB_Base):
         nullable=False,
         default=list,
     )
+
+    profile_summary: Mapped[str] = mapped_column(String,nullable = True)

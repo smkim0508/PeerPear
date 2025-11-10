@@ -25,7 +25,8 @@ def get_user_profile(user_id: int) -> Optional[UserProfileFull]:
             UserProfileTable.gender,
             UserProfileTable.class_year,
             UserProfileTable.major,
-            UserProfileTable.hobbies
+            UserProfileTable.hobbies,
+            UserProfileTable.profile_summary
         )
         .join(UserProfileTable, UserTable.id == UserProfileTable.user_id)
         .where(UserTable.id == user_id)
@@ -47,7 +48,8 @@ def get_user_profile(user_id: int) -> Optional[UserProfileFull]:
         gender=result.gender,
         class_year=result.class_year,
         major=result.major,
-        hobbies=result.hobbies
+        hobbies=result.hobbies,
+        profile_summary=result.profile_summary
     )
 
     return user_profile
@@ -79,7 +81,7 @@ def update_user_profile(user_profile: UserProfileFull):
 
     # parse payload into user table and user profile
     user_fields = {"first_name", "last_name", "email", "phone_number", "username"}
-    profile_fields = {"gender", "class_year", "major", "hobbies"}
+    profile_fields = {"gender", "class_year", "major", "hobbies"} # profile summary is only generated, not input
 
     user_values = {k: v for k, v in payload.items() if k in user_fields}
     profile_values = {k: v for k, v in payload.items() if k in profile_fields}
