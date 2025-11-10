@@ -17,10 +17,9 @@ interface EventInfo {
 
 export default function EventQuestionsPage() {
   //HARDCODED
-  const event_id = 3;
+  const event_id = 2;
   const router = useRouter();
 
-  const [eventInfo, setEventInfo] = useState<EventInfo | null>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,12 +29,11 @@ export default function EventQuestionsPage() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-        const res = await fetch(`${apiUrl}/event_data/${event_id}/questions`);
+        const res = await fetch(`${apiUrl}/question_management/${event_id}`);
         const data = await res.json();
 
         if (res.ok) {
           setQuestions(data.questions || []);
-          setEventInfo(data.event);
         } else {
           setError(data.error || "Failed to load questions.");
         }
@@ -54,9 +52,7 @@ export default function EventQuestionsPage() {
       <Navbar userType="organization" />
       <div className="min-h-screen bg-[#EBECE4] p-8">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold mb-4 ">
-            {eventInfo ? `${eventInfo.title} Questions` : "Event Questions"}
-          </h1>
+          <h1 className="text-3xl font-bold mb-4 ">Event Questions</h1>
           <p className="text-gray-600 mb-8">
             Manage the questions participants will answer for this event.
           </p>

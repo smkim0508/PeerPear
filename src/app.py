@@ -21,8 +21,7 @@ from api.dashboard.routes.student_dashboard import student_dashboard_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from api.dashboard.routes.organization_profile import org_profile_bp
 from api.dashboard.routes.questionnaire import questionnaire_bp
-from api.event.event_data import event_data_bp
-
+from api.dashboard.routes.question_management import question_management_bp
 
 
 from api.profile.routes.profile import user_profile_bp
@@ -49,7 +48,9 @@ def create_app() -> Flask:
     )
 
     # Configure session for CAS authentication
-    app.secret_key = os.getenv("SECRET_KEY", "blah-blah-change-for-prod-cos333") # TODO: this needs changing
+    # TODO: this needs changing
+    app.secret_key = os.getenv(
+        "SECRET_KEY", "blah-blah-change-for-prod-cos333")
     app.config['SESSION_TYPE'] = 'filesystem'
     # Set to True in production with HTTPS
     app.config['SESSION_COOKIE_SECURE'] = False
@@ -109,15 +110,19 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-    app.register_blueprint(student_dashboard_bp, url_prefix="/student_dashboard")
+    app.register_blueprint(student_dashboard_bp,
+                           url_prefix="/student_dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
-    app.register_blueprint(org_dashboard_bp, url_prefix="/organization_dashboard")
+    app.register_blueprint(
+        org_dashboard_bp, url_prefix="/organization_dashboard")
     app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
-    app.register_blueprint(questionnaire_bp, url_prefix = "/questionnaire")
+    app.register_blueprint(questionnaire_bp, url_prefix="/questionnaire")
     app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
-    app.register_blueprint(event_data_bp, url_prefix="/event_data")
+    app.register_blueprint(question_management_bp,
+                           url_prefix="/question_management")
 
     # check health for app dependencies and liveness
+
     @app.get("/health")
     def health():
         db_status = False
