@@ -7,11 +7,12 @@ from app_types.api.response.event_browse_response import EventBrowseResponse, Pu
 from flask import request
 from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
+from common.types.registration import EventRegistration
 
-def create_new_registration(event: EventTable):
+def create_new_registration(registration: EventRegistration):
     db_session = get_db_sessionmaker()
     with db_session() as session:
-        session.add(event)
+        session.add(registration)
         session.commit()
 
 def get_all_active_events(user_id: int) -> list[PublishedEvent]:

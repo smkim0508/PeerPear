@@ -7,15 +7,23 @@ from app_types.api.response.event_browse_response import EventBrowseResponse, Pu
 from flask import request
 from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
+from common.types.pairing_event import PairingEvent
+from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
 
 # helper to retrieve all events
 # NOTE: filtering is handled in FE
 
-def create_new_event(event: EventTable):
+def create_new_event(event: PairingEvent) -> PairingEvent:
     db_session = get_db_sessionmaker()
     with db_session() as session:
-        session.add(event)
+        db_event = dto_to_orm(event, EventTable)
+        session.add(db_event)
         session.commit()
+
+        session.refresh(db_event) # refreshes DB ORM
+        
+        # returns the newly-mapped event DTO
+        return PairingEvent.model_validate(db_event)
 
 def get_all_active_events(user_id: int) -> list[PublishedEvent]:
     """

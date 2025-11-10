@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from datetime import datetime, timezone
 from enum import Enum
 from common.types.user import User
+from common.types.organization import OrganizationProfile
+from typing import Optional
 
 # enums to represent event status
 class EventStatus(Enum):
@@ -31,15 +33,15 @@ class PairingResult(BaseModel):
 
 class PairingEvent(BaseModel):
     """
-    Canonical representation for an event for group/partner pairing.
+    Canonical DTO representation for an event w/ group/partner pairing.
     """
-    id: int
+    id: Optional[int] = None # missing at creation time since db autoincrements
     organization_id: int
     title: str
     description: str
-    organization_name: str
-    image_url: str  # TODO: not currently present in DB
+    organization: Optional[OrganizationProfile] = None
+    image_url: Optional[str] = None  # TODO: not currently present in DB
     end_date: datetime
     status: EventStatus
-    participants: list[int]  # list of user ids
-    matches: PairingResult
+    participants: Optional[list[int]] = None # list of user ids
+    matches: Optional[PairingResult] = None

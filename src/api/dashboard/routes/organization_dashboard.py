@@ -9,7 +9,8 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import OrganizationTable
-from common.types.pairing_event import EventStatus, EventRole
+from common.types.pairing_event import EventStatus, EventRole, PairingEvent, PairingResult
+from common.logging import logger
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -120,9 +121,20 @@ def create_event():
         status=EventStatus.NOT_STARTED,
     )
 
+    new_event = PairingEvent(
+        organization_id=organization_id,
+        title=title,
+        description=description,
+        image_url=image_url,
+        end_date=end_dt,
+        status=EventStatus.NOT_STARTED,
+        matches=PairingResult(groups=[])
+    )
+
     # create the new event in db
     try:
-        create_new_event(new_event)  # This already commits
+        updated_event = create_new_event(new_event) # This already commits
+        logger.info(f"Event created: {updated_event}")
     except SQLAlchemyError as e:
         print(str(e))
         return jsonify({"error": "Database error"}), 500
