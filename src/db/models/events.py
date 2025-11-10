@@ -52,7 +52,7 @@ class EventTable(MainDB_Base):
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
-    organization: Mapped[OrganizationTable] = relationship("Organization")
+    organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
 
 # table representing each unique user + event pair, which is defined as a registration
 # NOTE: allows for easily querying users attending events.
