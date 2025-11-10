@@ -8,39 +8,39 @@ import os
 
 from db import session
 from db.models.events import EventTable, EventRegistrationsTable
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
-from db.models.question import Question
-from db.models.response import Response
-from db.models.orgadmin import OrgAdmin
+from db.models.question import QuestionTable
+from db.models.response import ResponseTable
+from db.models.orgadmin import OrgAdminTable
 
 from common.types.pairing_event import EventRole, EventStatus
 from common.types.user import ClassYear
 
 def create_organization_data(session):
     organizations = [
-        Organization(
+        OrganizationTable(
             org_name="AASA",
             description="Asian American Student Association"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="KSAP",
             description="Korean Student Association"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="CS Club",
             description="Computer Science Club"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="Dongkon's Club",
             description="We ride around in electric scooters"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="Sungmins's Club",
             description="We cook delicious food!"
         )
@@ -54,37 +54,37 @@ def create_organization_data(session):
 
 def create_orgadmin_data(session):
     # Fetch organizations to link with org admins
-    organizations = session.query(Organization).all()
+    organizations = session.query(OrganizationTable).all()
     org_admins = [
-        OrgAdmin(
+        OrgAdminTable(
             username="sungmink",
             first_name="Sungmin",
             last_name="Kim",
             email="sungmink@example.com",
             organization_id=2
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="HenryL",
             first_name="Henry",
             last_name="Li",
             email="henrylee@example.com",
             organization_id=1
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="Sk3378",
             first_name="Sungmin",
             last_name="Kim",
             email="sungminkother@example.com",
             organization_id=5
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="Robert",
             first_name="Rober",
             last_name="Dondero",
             email="rdondero@example.com",
             organization_id=3
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="dkkkkk",
             first_name="Dongkon",
             last_name="Lee",
@@ -285,17 +285,17 @@ def create_user_profile_data(session):
 
 def create_question_data(session):
     questions = [
-        Question(
+        QuestionTable(
             question="What is your favorite programming language?",
             options=["Python","Javascript","C++","Java"],
             event_id=2
         ),
-        Question(
+        QuestionTable(
             question="How many years of coding experience do you have?",
             options=["1","2","3","4","5+"],
             event_id=2
         ),
-        Question(
+        QuestionTable(
             question="What is your favorite Asian food?:",
             event_id=1
         )
@@ -307,27 +307,27 @@ def create_question_data(session):
 
 def create_response_data(session):
     responses = [
-        Response(
+        ResponseTable(
             user_id=2,
             question_id=1,
             answer="Python"
         ),
-        Response(
+        ResponseTable(
             user_id=4,
             question_id=1,
             answer="Javascript"
         ),
-        Response(
+        ResponseTable(
             user_id=2,
             question_id=2,
             answer="2"
         ),
-        Response(
+        ResponseTable(
             user_id=4,
             question_id=2,
             answer="Java"
         ),
-        Response(
+        ResponseTable(
             user_id=1,
             question_id=3,
             answer="Noodles"

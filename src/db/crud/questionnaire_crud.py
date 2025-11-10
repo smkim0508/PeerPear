@@ -1,6 +1,6 @@
 # db/crud/questionnaire_crud.py
-from db.models.question import Question
-from db.models.response import Response
+from db.models.question import QuestionTable
+from db.models.response import ResponseTable
 from sqlalchemy import select
 from api.dependencies import get_db_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,7 +12,7 @@ def get_questions(event_id: int):
 
     try:
         with db_session() as session:
-            stmt = select(Question).where(Question.event_id == event_id)
+            stmt = select(QuestionTable).where(QuestionTable.event_id == event_id)
             result = session.execute(stmt).scalars().all()
             return result
     except SQLAlchemyError as e:
@@ -24,8 +24,8 @@ def _get_answer(question_id: int, user_id: int, session):
     Fetch a single answer for a given question/user pair.
     Receives the db session from parent caller to preserve mapping.
     """
-    stmt = select(Response.answer).where(
-        (Response.user_id == user_id) & (Response.question_id == question_id)
+    stmt = select(ResponseTable.answer).where(
+        (ResponseTable.user_id == user_id) & (ResponseTable.question_id == question_id)
     )
     result = session.execute(stmt).scalar_one_or_none()
     return result
@@ -66,15 +66,15 @@ def submit_responses(event_id: int, user_id: int, responses: dict):
                 ans = response_map.get(qid)
                
                 existing = session.execute(
-                    select(Response).where(
-                        (Response.user_id == user_id) & (Response.question_id == qid)
+                    select(ResponseTable).where(
+                        (ResponseTable.user_id == user_id) & (ResponseTable.question_id == qid)
                     )
                 ).scalar_one_or_none()
 
                 if existing:
                     existing.answer = ans
                 else:
-                    session.add(Response(question_id=qid, answer=ans, user_id=user_id))
+                    session.add(ResponseTable(question_id=qid, answer=ans, user_id=user_id))
 
             session.commit()
             return "success"

@@ -8,7 +8,7 @@ from db.crud.events_crud import get_organization_events, create_new_event
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from common.types.pairing_event import EventStatus, EventRole
 
 # use blueprint to group routes

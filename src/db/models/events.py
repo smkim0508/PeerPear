@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from enum import Enum
 from common.types.pairing_event import EventStatus, EventRole
 
@@ -52,7 +52,7 @@ class EventTable(MainDB_Base):
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
-    organization: Mapped[Organization] = relationship("Organization")
+    organization: Mapped[OrganizationTable] = relationship("Organization")
 
 # table representing each unique user + event pair, which is defined as a registration
 # NOTE: allows for easily querying users attending events.

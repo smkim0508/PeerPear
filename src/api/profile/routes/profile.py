@@ -8,7 +8,7 @@ from db.crud.profile_crud import update_user_profile, get_user_profile
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from common.types.user import UserProfile, UserProfileFull, User
 from common.logging import logger
 

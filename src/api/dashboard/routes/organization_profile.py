@@ -8,8 +8,9 @@ from db.crud.org_profile_crud import get_organization_profile, update_organizati
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from common.types.db_status import DBStatus
+from common.types.organization import OrganizationProfile
 
 # use blueprint to group routes
 org_profile_bp = Blueprint("organization_profile", __name__)
@@ -19,7 +20,7 @@ def get_organization(organization_id):
     if not organization_id:
         return jsonify({"error": "organization_id is required"}), 400
 
-    profile = get_organization_profile(organization_id)
+    profile: OrganizationProfile | None = get_organization_profile(organization_id)
 
     if not profile:
         return jsonify({"error": "organization not found"}), 404

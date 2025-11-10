@@ -7,12 +7,12 @@ import time
 import os
 
 from db.models.events import EventTable, EventRegistrationsTable
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
-from db.models.question import Question
-from db.models.response import Response
-from db.models.orgadmin import OrgAdmin
+from db.models.question import QuestionTable
+from db.models.response import ResponseTable
+from db.models.orgadmin import OrgAdminTable
 
 from scripts.db.create_tables import create_all_tables
 from scripts.db.update_dummy_vals import fill_all_tables

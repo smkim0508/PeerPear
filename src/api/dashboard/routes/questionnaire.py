@@ -2,8 +2,8 @@ from flask import Blueprint, request, send_from_directory, jsonify, g
 import os
 from api import validate_model
 from db.models.events import EventTable
-from db.models.response import Response
-from db.models.question import Question
+from db.models.response import ResponseTable
+from db.models.question import QuestionTable
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError

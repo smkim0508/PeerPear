@@ -1,5 +1,5 @@
 from db.models.events import EventTable, EventStatus, EventRegistrationsTable
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
 from api.dependencies import get_db_sessionmaker, get_llm
@@ -35,8 +35,8 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
         # Main query: only events that are active and not past end_date
         today = date.today()  # compare date only, not time
         rows = (
-            session.query(EventTable, Organization)
-            .join(Organization, EventTable.organization_id == Organization.id)
+            session.query(EventTable, OrganizationTable)
+            .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
             .filter(EventTable.status == EventStatus.STARTED)
             .filter(
                 or_(
@@ -68,8 +68,8 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     db_session = get_db_sessionmaker()
 
     stmt = (
-        select(EventTable, Organization)
-        .join(Organization, EventTable.organization_id == Organization.id)
+        select(EventTable, OrganizationTable)
+        .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
         .where(EventTable.organization_id == organization_id)
     )
 
@@ -98,9 +98,9 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
     db_session = get_db_sessionmaker()
 
-    stmt = (select(EventTable, Organization)
+    stmt = (select(EventTable, OrganizationTable)
             .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
-            .join(Organization, EventTable.organization_id == Organization.id)
+            .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
             .where(EventRegistrationsTable.user_id == user_id)
             )
 
@@ -129,8 +129,8 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
     db_session = get_db_sessionmaker()
 
     stmt = (
-        select(EventTable, Organization)
-        .join(Organization, EventTable.organization_id == Organization.id)
+        select(EventTable, OrganizationTable)
+        .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
         .where(EventTable.id == event_id)
     )
 

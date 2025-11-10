@@ -1,7 +1,7 @@
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
 from typing import Optional
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, update
 from api.dependencies import get_db_sessionmaker, get_llm
