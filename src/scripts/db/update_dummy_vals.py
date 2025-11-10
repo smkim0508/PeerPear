@@ -15,7 +15,7 @@ from db.models.question import Question
 from db.models.response import Response
 from db.models.orgadmin import OrgAdmin
 
-from common.types.events import EventRole, EventStatus
+from common.types.pairing_event import EventRole, EventStatus
 from common.types.user import ClassYear
 
 def create_organization_data(session):

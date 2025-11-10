@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import Organization
-from common.types.pairing import EventStatus, EventRole
+from common.types.pairing_event import EventStatus, EventRole
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -38,8 +38,7 @@ def browse_events():
 
     return jsonify(pairing_event_response.model_dump()), 200
 
-
-# NOT DONE
+# NOTE: NOT DONE
 @org_dashboard_bp.patch("/event")
 def update_event():
     organization_id = request.args.get("organization_id")

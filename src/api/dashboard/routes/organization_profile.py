@@ -14,7 +14,6 @@ from common.types.db_status import DBStatus
 # use blueprint to group routes
 org_profile_bp = Blueprint("organization_profile", __name__)
 
-
 @org_profile_bp.get("/profile/<int:organization_id>")
 def get_organization(organization_id):
     if not organization_id:
@@ -29,7 +28,6 @@ def get_organization(organization_id):
         "id": profile.id,
         "organization_name": profile.org_name,
         "description": profile.description}), 200
-
 
 @org_profile_bp.put("/profile/<int:organization_id>")
 def update_organization(organization_id):

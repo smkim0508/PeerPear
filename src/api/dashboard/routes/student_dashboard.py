@@ -1,7 +1,7 @@
 # main landing page for students after logging in
 from typing import Optional
 from flask import Blueprint, request, send_from_directory, jsonify, g
-from common.types.pairing import PairingEvent, PairingResult, PairedGroup
+from common.types.pairing_event import PairingEvent, PairingResult, PairedGroup
 from common.types.user import User, UserProfile, UserProfileFull
 from datetime import datetime, timezone, timedelta
 from api import validate_model

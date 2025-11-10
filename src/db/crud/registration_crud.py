@@ -1,4 +1,4 @@
-from db.models.events import Event, EventStatus, EventRegistrations
+from db.models.events import EventTable, EventStatus, EventRegistrations
 from db.models.organizations import Organization
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
@@ -8,10 +8,7 @@ from flask import request
 from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
 
-# helper to retrieve all events
-# NOTE: filtering is handled in FE
-
-def create_new_event(event: Event):
+def create_new_registration(event: EventTable):
     db_session = get_db_sessionmaker()
     with db_session() as session:
         session.add(event)

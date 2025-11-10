@@ -1,7 +1,7 @@
 # actual routes / API for pairing requests
 from typing import Optional
 from flask import Blueprint, request, send_from_directory, jsonify, g
-from common.types.pairing import PairingEvent, PairingResult, PairedGroup
+from common.types.pairing_event import PairingEvent, PairingResult, PairedGroup
 from common.types.user import User, UserProfile, UserProfileFull
 from datetime import datetime, timezone, timedelta
 from api import validate_model
@@ -19,18 +19,14 @@ pairing_bp = Blueprint("pairing", __name__)
 
 @pairing_bp.get("/")
 # NOTE: the params are set optional for now, just to test locally without FE connection / setting up Postman
-def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[int] = None):
+def pair_students_baseline():
 
-    # TODO: make this work with request.args, and also add db crud helper to query values given event id
-    
+    group_size = request.args.get("group_size", default=2, type=int)
+    event_id = request.args.get("event_id", default=1, type=int)
 
     # load in global dependencies
     db_session = get_db_sessionmaker()
     llm_client = get_llm()
-
-    # NOTE: set as static values, should be passed in from front end
-    group_size = 2
-    event_id = 1
 
     # users should not be able to request groups of size < 2
     if group_size <= 1:
@@ -40,6 +36,9 @@ def pair_students_baseline(group_size: Optional[int] = None, event_id: Optional[
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
 
     # NOTE: for now, the event_id is not used. Ideally, we should query the student ids associated with our event id to run this process.
+
+    # query student ids associated with event
+
     # dummy values below, the **intention** is that LLM should correctly pair up: (John + Bob); (Jane + Charlie); (Alice + Emily
     students = []
     students.append(UserProfile(id=1, name="John Doe", profile_summary="I like software engineering, building web apps. I love Python."))

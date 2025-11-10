@@ -1,6 +1,6 @@
 # main orchestrator for the pairing logic/process
 from typing import List
-from common.types.pairing import PairingResult, PairedGroup
+from common.types.pairing_event import PairingResult, PairedGroup
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.pairing_repository import PairingRepository
 from common.types.user import User, UserProfile, UserProfileFull

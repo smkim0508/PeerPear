@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from db.models.organizations import Organization
 from enum import Enum
-from common.types.events import EventStatus, EventRole
+from common.types.pairing_event import EventStatus, EventRole
 
 # main event table, representing each event
 class Event(MainDB_Base):

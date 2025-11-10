@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone, timedelta
-from common.types.events import EventStatus
+from common.types.pairing_event import EventStatus
 
 
 class PublishedEvent(BaseModel):
