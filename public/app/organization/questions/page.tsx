@@ -4,6 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { PearAlert } from "@/components/PearAlert";
+import PearButton from "@/components/PearButton";
+import CreateQuestionModal from "@/components/ui/CreateQuestionModal";
 
 interface EventInfo {
   id: number;
@@ -22,30 +24,29 @@ export default function EventQuestionsPage() {
 
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen,setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchQuestions() {
-      try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-        const res = await fetch(`${apiUrl}/question_management/${event_id}`);
-        const data = await res.json();
+  fetchQuestions();
+}, [event_id]);
 
-        if (res.ok) {
-          setQuestions(data.questions || []);
-        } else {
-          setError(data.error || "Failed to load questions.");
-        }
-      } catch (err) {
-        setError("Server error fetching questions.");
-      } finally {
-        setLoading(false);
-      }
+const fetchQuestions = async () => {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+    const res = await fetch(`${apiUrl}/question_management/${event_id}`);
+    const data = await res.json();
+    if (res.ok) {
+      setQuestions(data.questions || []);
+    } else {
+      setError(data.error || "Failed to load questions.");
     }
-
-    if (event_id) fetchQuestions();
-  }, [event_id]);
+  } catch (err) {
+    setError("Server error fetching questions.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
@@ -56,6 +57,14 @@ export default function EventQuestionsPage() {
           <p className="text-gray-600 mb-8">
             Manage the questions participants will answer for this event.
           </p>
+
+          <div className="flex justify-center my-8">
+                        <PearButton
+                          text="Add a Question"
+                          className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
+                          onClick={() => setIsModalOpen(true)}
+                        />
+                      </div>
 
           {loading && <p>Loading questions...</p>}
           {error && <PearAlert type="error" message={error} />}
@@ -87,7 +96,14 @@ export default function EventQuestionsPage() {
               ))}
             </ul>
           )}
+          <CreateQuestionModal
+                      isOpen={isModalOpen}
+                      onClose={() => setIsModalOpen(false)}
+                      event_id={event_id}
+                      onSuccess={fetchQuestions}
+                    />
         </div>
+  
       </div>
     </>
   );

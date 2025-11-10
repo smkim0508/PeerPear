@@ -84,7 +84,7 @@ export default function CreateEventModal({
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newEvent),
+          body: JSON.stringify(newEvent)
         }
       );
 
