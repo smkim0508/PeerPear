@@ -61,7 +61,7 @@ def get_user_answers(question_ids: list[int], user_id: int) -> list[Answer]:
                 answers.append(answer)
         return answers
 
-def submit_responses(event_id: int, user_id: int, responses: dict):
+def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
     """Insert or update responses for a questionnaire."""
     db_session = get_db_sessionmaker()
     questions = get_questions(event_id)
@@ -69,31 +69,25 @@ def submit_responses(event_id: int, user_id: int, responses: dict):
     if not questions:
         return "no_questions"
 
-    try:
-        with db_session() as session:
-            response_map = {r["question_id"]: r["answer"] for r in responses}
-            
-            if any(response_map.get(q.id) is None for q in questions):
-                return "form"
-            
-            for q in questions:
-                qid = q.id
-                ans = response_map.get(qid)
-               
-                existing = session.execute(
-                    select(ResponseTable).where(
-                        (ResponseTable.user_id == user_id) & (ResponseTable.question_id == qid)
-                    )
-                ).scalar_one_or_none()
+    with db_session() as session:
+        # NOTE: temporarily, this forces all questions in form to be answered. Technically, some should be required and some not.
+        if any([not r.answer for r in responses]):
+            return "form"
+        
+        for r in responses:
+            ans = r.answer
+            qid = r.question_id
 
-                if existing:
-                    existing.answer = ans
-                else:
-                    session.add(ResponseTable(question_id=qid, answer=ans, user_id=user_id))
+            existing = session.execute(
+                select(ResponseTable).where(
+                    (ResponseTable.user_id == user_id) & (ResponseTable.question_id == qid)
+                )
+            ).scalar_one_or_none()
 
-            session.commit()
-            return "success"
+            if existing:
+                existing.answer = ans
+            else:
+                session.add(ResponseTable(question_id=qid, answer=ans, user_id=user_id))
 
-    except SQLAlchemyError as e:
-        print(f"Database error in submit_responses: {e}")
-        return "db_error"
+        session.commit()
+        return "success"

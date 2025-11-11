@@ -45,21 +45,41 @@ def get_questionnaire(event_id, user_id):
 
 @questionnaire_bp.put("/submit")
 def submit_questionnaire():
-    data = request.get_json(silent=True) or {}
-    event_id = data.get("event_id")
-    user_id = data.get("user_id")
-    form_responses = data.get("responses")
+    payload = request.get_json(silent=True)
+
+    logger.info(f"payload: {payload}")
+    if not payload:
+        return jsonify({"error": "missing required fields"}), 400
+    
+    event_id = payload.get("event_id")
+    user_id = payload.get("user_id")
+
+    form_responses = payload.get("responses")
+
+    response_list: list[Answer] = []
+    for response in form_responses:
+        # formats the json response into Pydantic
+        response_list.append(
+            Answer(
+                question_id=response["question_id"],
+                answer=response["answer"]
+            )
+        )
 
     if not all([event_id, user_id, form_responses]):
-        return jsonify({"error": "missing required fields"}), 400
+        return jsonify({"error": "invalid form responses"}), 400
     
     if not(isinstance(event_id, int) and isinstance(user_id, int)):
         return jsonify({"error": "event_id and user_id must be integers"}), 400
     
-    if not(isinstance(form_responses, dict)):
-        return jsonify({"error": "responses must be a dictionary"}), 400
+    logger.info(f"form responses: {form_responses}")
 
-    result = submit_responses(event_id, user_id, form_responses)
+    try:
+        result = submit_responses(event_id, user_id, response_list)
+    except Exception as e:
+        logger.error(f"Error submitting responses: {e}")
+        return jsonify(generic_error_response), 500
+    
     if result == "success":
         return jsonify({"message": "Form submitted successfully"}), 200
     if result == "form":
