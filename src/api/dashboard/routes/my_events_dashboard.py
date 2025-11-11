@@ -1,11 +1,11 @@
 # main landing page for students after logging in
 from flask import Blueprint, request, send_from_directory, jsonify, g
-from common.types.events import PairingEvent, PairingResult
+from common.types.pairing_event import PairingEvent, PairingResult
 from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
-from db.models.organizations import Organization
+from db.models.events import EventTable
+from db.models.organizations import OrganizationTable
 from sqlalchemy import inspect
 from api.dependencies import get_db_sessionmaker, get_llm
 from db.crud.events_crud import get_user_events
@@ -37,4 +37,4 @@ def browse_events():
     # format events to responses
     pairing_event_response = EventBrowseResponse(events=published_events)
 
-    return jsonify(pairing_event_response.model_dump()), 200
+    return jsonify(pairing_event_response.model_dump(mode="json")), 200

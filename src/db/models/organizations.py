@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-class Organization(MainDB_Base):
+class OrganizationTable(MainDB_Base):
     __tablename__ = "organizations"
 
     id: Mapped[int] = mapped_column(

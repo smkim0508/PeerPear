@@ -3,8 +3,21 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+interface Profile {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  gender: string;
+  other_gender: string;
+  class_year: string | null; // can be null since dropdown
+  major: string;
+  hobbies: string[];
+}
+
 export default function ProfilePage() {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<Profile>({
     user_id: "1", // hardcoded for now
     first_name: "",
     last_name: "",
@@ -24,7 +37,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/student-profile?user_id=${profile.user_id}`
+          `http://localhost:5001/user-profile/student-profile?user_id=${profile.user_id}`
         );
         const data = await res.json();
         if (data.profile) {
@@ -68,12 +81,12 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveMessage("");
-
+    
     try {
       // convert class_year to number or null
       const payload = {
         ...profile,
-        class_year: profile.class_year ? parseInt(profile.class_year) : null,
+        class_year: profile.class_year || null,
       };
 
       const res = await fetch("http://localhost:5001/user-profile/update-profile", {
@@ -83,13 +96,13 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        setSaveMessage("✅ Profile saved successfully!");
+        setSaveMessage("Profile saved successfully!");
       } else {
-        setSaveMessage("⚠️ Error saving profile. Please try again.");
+        setSaveMessage("Error saving profile. Please try again.");
       }
     } catch (err) {
       console.error("Error updating profile:", err);
-      setSaveMessage("⚠️ Error saving profile. Please try again.");
+      setSaveMessage("Error saving profile. Please try again.");
     }
   };
 
@@ -120,13 +133,22 @@ export default function ProfilePage() {
             />
 
             <label className="text-xl font-semibold">Class Year:</label>
-            <input
-              name="class_year"
-              value={profile.class_year}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your class year"
-            />
+
+            <select
+                id="class_year"
+                name="class_year"
+                value={profile.class_year || ""}
+                className="border-b border-black bg-transparent text-lg focus:outline-none"
+                onChange={(e) =>
+                    setProfile({ ...profile, class_year: e.target.value || null })
+                }
+                >
+                <option value="" disabled hidden>Select class year</option>
+                <option value="Freshman">Freshman</option>
+                <option value="Sophomore">Sophomore</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+            </select>
 
             <label className="text-xl font-semibold">Major:</label>
             <input
@@ -147,7 +169,7 @@ export default function ProfilePage() {
                 className="border-b border-black bg-transparent text-lg focus:outline-none flex-1"
                 placeholder="Add a hobby"
               />
-              <button type="button" onClick={handleAddHobby} className="px-4 py-2 bg-blue-500 text-white rounded">
+              <button type="button" onClick={handleAddHobby} className="px-4 py-2 bg-[#393D3F] text-white rounded">
                 Add
               </button>
             </div>
@@ -160,11 +182,10 @@ export default function ProfilePage() {
               ))}
             </div>
           </div>
-
-          <button type="submit" className="px-6 py-3 bg-green-500 text-white rounded text-lg">
-            Save Profile
-          </button>
-
+            <button type="submit" className="px-6 py-3 bg-[#95D28F] text-white rounded text-lg">
+                Save Profile
+            </button>
+              {/* This save message *could* be slightly adjusted to reduce buffer spacing */}
           {saveMessage && <p className="mt-4 text-lg">{saveMessage}</p>}
         </form>
       </main>

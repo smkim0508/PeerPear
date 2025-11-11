@@ -11,4 +11,4 @@ def get_db_sessionmaker():
     return g.db # NOTE: this is a session maker that hasn't been initialized yet, must be called in process.
 
 def get_llm():
-    return current_app.extensions["llm"]
+    return g.llm_client

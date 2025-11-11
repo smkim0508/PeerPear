@@ -8,12 +8,12 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from enum import Enum
-from common.types.events import EventStatus, EventRole
+from common.types.pairing_event import EventStatus, EventRole
 
 # main event table, representing each event
-class Event(MainDB_Base):
+class EventTable(MainDB_Base):
     """
     The SA ORM mapping for the event table.
     Status of an event is represented with enum values.
@@ -52,11 +52,11 @@ class Event(MainDB_Base):
     title: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
-    organization: Mapped[Organization] = relationship("Organization")
+    organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
 
 # table representing each unique user + event pair, which is defined as a registration
 # NOTE: allows for easily querying users attending events.
-class EventRegistrations(MainDB_Base):
+class EventRegistrationsTable(MainDB_Base):
     __tablename__ = "event_registrations"
 
     id: Mapped[int] = mapped_column(

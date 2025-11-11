@@ -2,13 +2,13 @@ from db.models.base import MainDB_Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import time
-from db.models.events import Event, EventRegistrations
-from db.models.organizations import Organization
+from db.models.events import EventTable, EventRegistrationsTable
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
-from db.models.question import Question
-from db.models.response import Response
-from db.models.orgadmin import OrgAdmin
+from db.models.question import QuestionTable
+from db.models.response import ResponseTable
+from db.models.orgadmin import OrgAdminTable
 
 from dotenv import load_dotenv
 import os
