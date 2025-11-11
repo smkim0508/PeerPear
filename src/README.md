@@ -60,4 +60,4 @@ Please use poetry to manage all backend dependencies. To add a new dependency, s
 
 ### Dependencies for Heroku
 
-Heroku uses a manually-exported `requirements.txt` file at root to manage dependencies. Whenever you add a new dependency to poetry, please update the `requirements.txt` file by executing `poetry export -f requirements.txt --without-hashes -o ../requirements.txt` in the project root.
+Heroku uses a manually-exported `requirements.txt` file at root to manage dependencies. Whenever you add a new dependency to poetry, please update the `requirements.txt` file by executing `poetry export -f requirements.txt --without-hashes -o ../requirements.txt` in the project `/src` directory.
