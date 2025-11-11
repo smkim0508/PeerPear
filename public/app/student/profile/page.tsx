@@ -33,7 +33,6 @@ export default function ProfilePage() {
   const [newHobby, setNewHobby] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
 
-  // ✅ Fetch profile from backend when page loads
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -83,13 +82,13 @@ export default function ProfilePage() {
     }));
   };
 
-  // ✅ Submit profile changes
+  // Submit profile changes
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveMessage("");
     
     try {
-      // convert class_year to number or null
+      // convert class_year to enum
       const payload = {
         ...profile,
         class_year: profile.class_year || null,
