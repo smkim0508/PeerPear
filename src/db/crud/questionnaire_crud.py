@@ -5,7 +5,9 @@ from sqlalchemy import select
 from api.dependencies import get_db_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from common.types.user import UserProfileFull, User, UserProfile
-from common.types.questionnaire import Question
+from common.types.questionnaire import Question, Answer
+from common.logging import logger
+from typing import Optional
 
 def get_questions(event_id: int) -> list[Question]:
     """Fetch all questions for a given event."""
@@ -25,9 +27,9 @@ def get_questions(event_id: int) -> list[Question]:
                     event_id=q.event_id
                 )
             )
-        return result
+        return questions
 
-def _get_answer(question_id: int, user_id: int, session):
+def _get_answer(question_id: int, user_id: int, session) -> Optional[Answer]:
     """
     Fetch a single answer for a given question/user pair.
     Receives the db session from parent caller to preserve mapping.
@@ -37,23 +39,27 @@ def _get_answer(question_id: int, user_id: int, session):
         (ResponseTable.user_id == user_id) & (ResponseTable.question_id == question_id)
     )
     result = session.execute(stmt).scalar_one_or_none()
-    return result
 
-def get_user_answers(question_ids: list[int], user_id: int):
+    if not result:
+        return None
+    
+    answer = Answer(
+        question_id=question_id,
+        answer=result
+    )
+    return answer
+
+def get_user_answers(question_ids: list[int], user_id: int) -> list[Answer]:
     """Fetch all answers for a user's responses to given questions."""
     db_session = get_db_sessionmaker()
 
-    try:
-        with db_session() as session:
-            answers = {}
-            for q_id in question_ids:
-                answer = _get_answer(q_id, user_id, session)
-                if answer:
-                    answers[q_id] = answer
-            return answers
-    except SQLAlchemyError as e:
-        print(f"Database error in get_user_answers: {e}")
-        return {}
+    with db_session() as session:
+        answers = []
+        for q_id in question_ids:
+            answer = _get_answer(q_id, user_id, session)
+            if answer:
+                answers.append(answer)
+        return answers
 
 def submit_responses(event_id: int, user_id: int, responses: dict):
     """Insert or update responses for a questionnaire."""

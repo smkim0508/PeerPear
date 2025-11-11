@@ -34,8 +34,14 @@ def get_questionnaire(event_id, user_id):
 
     ids = [q.id for q in questions]
 
-    answers = get_user_answers(ids, user_id)
-    return jsonify({"questions": questions, "answers": answers}), 200
+    try:
+        answers = get_user_answers(ids, user_id)
+    except Exception as e:
+        logger.error(f"Error retrieving answers: {e}")
+        return jsonify(generic_error_response), 500
+
+    # format questions & answers
+    return jsonify({"questions": [q.model_dump(mode="json") for q in questions], "answers": [a.model_dump(mode="json") for a in answers]}), 200
 
 @questionnaire_bp.put("/submit")
 def submit_questionnaire():
