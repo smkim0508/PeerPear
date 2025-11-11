@@ -206,6 +206,7 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     registrations = [
+        # event 1 with 4 registrations
         EventRegistrationsTable(
             user_id=1,
             event_id=1,
@@ -226,6 +227,32 @@ def create_event_registration_data(session):
             event_id=1,
             role=EventRole.LITTLE_SIBLING
         ),
+        # event 2 with 5 registrations
+        EventRegistrationsTable(
+            user_id=1,
+            event_id=2,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=2,
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=3,
+            event_id=2,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=4,
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=5,
+            event_id=2,
+            role=EventRole.BIG_SIBLING
+        )
     ]
     for registration in registrations:
         session.add(registration)

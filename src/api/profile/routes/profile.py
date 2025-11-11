@@ -27,7 +27,7 @@ def get_profile():
     if not profile:
         return jsonify({"profile": {}}), 200 # returns an empty profile
 
-    return jsonify({"profile": profile.model_dump()}), 200
+    return jsonify({"profile": profile.model_dump(mode="json")}), 200 # NOTE: mode set to json to allow enums to be converted
 
 @user_profile_bp.post("/update-profile")
 def update_profile():
