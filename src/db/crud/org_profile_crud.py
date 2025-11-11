@@ -12,7 +12,7 @@ def get_organization_profile(organization_id: int) -> Optional[OrganizationProfi
     stmt = select(OrganizationTable).where(OrganizationTable.id == organization_id)
     
     with db_session() as session: 
-        result = db_session.execute(stmt).scalar_one_or_none() 
+        result = session.execute(stmt).scalar_one_or_none() 
 
         if result is None:
             return None
