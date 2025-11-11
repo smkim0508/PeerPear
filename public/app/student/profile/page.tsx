@@ -37,7 +37,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/student-profile?user_id=${profile.user_id}`
+          `http://localhost:5001/user-profile/student-profile?user_id=${profile.user_id}`
         );
         const data = await res.json();
         if (data.profile) {
@@ -96,13 +96,13 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        setSaveMessage("✅ Profile saved successfully!");
+        setSaveMessage("Profile saved successfully!");
       } else {
-        setSaveMessage("⚠️ Error saving profile. Please try again.");
+        setSaveMessage("Error saving profile. Please try again.");
       }
     } catch (err) {
       console.error("Error updating profile:", err);
-      setSaveMessage("⚠️ Error saving profile. Please try again.");
+      setSaveMessage("Error saving profile. Please try again.");
     }
   };
 
@@ -177,7 +177,7 @@ export default function ProfilePage() {
                 className="border-b border-black bg-transparent text-lg focus:outline-none flex-1"
                 placeholder="Add a hobby"
               />
-              <button type="button" onClick={handleAddHobby} className="px-4 py-2 bg-blue-500 text-white rounded">
+              <button type="button" onClick={handleAddHobby} className="px-4 py-2 bg-[#393D3F] text-white rounded">
                 Add
               </button>
             </div>
@@ -190,11 +190,9 @@ export default function ProfilePage() {
               ))}
             </div>
           </div>
-
-          <button type="submit" className="px-6 py-3 bg-green-500 text-white rounded text-lg">
-            Save Profile
-          </button>
-
+            <button type="submit" className="px-6 py-3 bg-[#95D28F] text-white rounded text-lg">
+                Save Profile
+            </button>
           {saveMessage && <p className="mt-4 text-lg">{saveMessage}</p>}
         </form>
       </main>
