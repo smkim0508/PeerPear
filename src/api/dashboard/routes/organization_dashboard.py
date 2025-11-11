@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import OrganizationTable
 from common.types.pairing_event import EventStatus, EventRole, PairingEvent, PairingResult
 from common.logging import logger
+from common.error_response import generic_error_response
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -34,12 +35,16 @@ def browse_events():
         return jsonify({"error": "organization_id must be an integer"}), 400
 
     # use helper to retrieve all events for the organization
-    published_events = get_organization_events(int(organization_id))
+    try:
+        published_events = get_organization_events(organization_id)
+    except Exception as e:
+        logger.error(f"Error retrieving events: {e}")
+        return jsonify(generic_error_response), 500
+    
     pairing_event_response = EventBrowseResponse(events=published_events)
-
     return jsonify(pairing_event_response.model_dump(mode="json")), 200
 
-# NOTE: NOT DONE
+# NOTE: NOT DONE - should also use CRUD operations with DTO / ORM conversion
 @org_dashboard_bp.patch("/event")
 def update_event():
     organization_id = request.args.get("organization_id")
@@ -60,8 +65,6 @@ def update_event():
     # TODO: actually update the events
     return jsonify({"message": "Event updated successfully"}), 200
 
-
-# NOTE: by convention, use "-" to split words in routes
 @org_dashboard_bp.post("/create-event")
 def create_event():
     """
@@ -125,7 +128,10 @@ def create_event():
         updated_event = create_new_event(new_event) # This already commits
         logger.info(f"Event created: {updated_event}")
     except SQLAlchemyError as e:
-        print(str(e))
-        return jsonify({"error": "Database error"}), 500
+        logger.error(f"Database error: {e}")
+        return jsonify(generic_error_response), 500
+    except Exception as e:
+        logger.error(f"Unknown error: {e}")
+        return jsonify(generic_error_response), 500
 
     return jsonify({"message": "Event created successfully", "event_id": new_event.id}), 200

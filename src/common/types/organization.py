@@ -9,4 +9,4 @@ class OrganizationProfile(BaseModel):
     """
     id: int
     org_name: str
-    description: str
+    description: Optional[str] = None

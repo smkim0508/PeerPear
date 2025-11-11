@@ -11,6 +11,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import OrganizationTable
 from common.types.db_status import DBStatus
 from common.types.organization import OrganizationProfile
+from common.logging import logger
+from common.error_response import generic_error_response
 
 # use blueprint to group routes
 org_profile_bp = Blueprint("organization_profile", __name__)
@@ -32,15 +34,36 @@ def get_organization(organization_id):
 
 @org_profile_bp.put("/profile/<int:organization_id>")
 def update_organization(organization_id):
-    data = request.get_json(silent=True) or {}
-    data["organization_id"] = organization_id  
 
-    result = update_organization_profile(data)
+    org_profile_payload = request.get_json(silent=True)
+
+    if not org_profile_payload:
+        return jsonify({"error": "invalid form responses"}), 400
+    
+    org_id = organization_id or org_profile_payload.get("id")
+    org_name = org_profile_payload.get("org_name")
+    description = org_profile_payload.get("description")
+
+    if not org_id:
+        return jsonify({"error": "organization_id is required"}), 400
+
+    # create DTO from payload
+    org_profile = OrganizationProfile(
+        id=org_id,
+        org_name=org_name,
+        description=description
+    )
+
+    logger.info(f"org profile data: {org_profile}")
+
+    # NOTE: this returns a success/fail status, not the updated profile
+    result = update_organization_profile(org_profile)
 
     if result == DBStatus.SUCCESS.value:
         return jsonify({"message": "Organization updated successfully"}), 200
     elif not result:
         return jsonify({"message": "Organization does not exist"}), 404
     else:
-        print(result) # error otherwise
-        return jsonify({"message": "Database error"}), 500
+        # internal error otherwise
+        logger.error(f"Unknown error: {result}")
+        return jsonify(generic_error_response), 500

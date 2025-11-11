@@ -9,11 +9,11 @@ from db.models.organizations import OrganizationTable
 from sqlalchemy import inspect
 from api.dependencies import get_db_sessionmaker, get_llm
 from db.crud.events_crud import get_user_events
+from common.logging import logger
+from common.error_response import generic_error_response
+
 # use blueprint to group routes
 my_events_bp = Blueprint("my_events", __name__)
-
-# TODO: change this to be the actual landing page
-
 
 @my_events_bp.get("/")
 def foo():
@@ -32,7 +32,11 @@ def browse_events():
     if user_id is None:
         return jsonify({"error": "user_id is required"}), 400
     # use helper to retrieve all events
-    published_events = get_user_events(int(user_id))
+    try:
+        published_events = get_user_events(int(user_id))
+    except Exception as e:
+        logger.error(f"Error retrieving events: {e}")
+        return jsonify(generic_error_response), 500
 
     # format events to responses
     pairing_event_response = EventBrowseResponse(events=published_events)

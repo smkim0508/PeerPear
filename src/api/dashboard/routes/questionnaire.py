@@ -9,7 +9,10 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.crud.questionnaire_crud import get_questions, get_user_answers, submit_responses
 from common.types.user import UserProfileFull, User, UserProfile
+from common.types.questionnaire import Question, Answer
 from pydantic import ValidationError
+from common.logging import logger
+from common.error_response import generic_error_response
 
 questionnaire_bp = Blueprint("questionnaire", __name__)
 
@@ -20,48 +23,20 @@ def get_questionnaire(event_id, user_id):
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
 
-    result = get_questions(event_id)
+    try:
+        questions: list[Question] = get_questions(event_id)
+    except Exception as e:
+        logger.error(f"Error retrieving questions: {e}")
+        return jsonify(generic_error_response), 500
 
-    if len(result) == 0:
+    if len(questions) == 0:
         return jsonify({"error": "there are no questions associated with this event"}), 404
 
-    ids = []
-    questions = []
-    for q in result:
-        ids.append(q.id)
-        questions.append(
-            {
-                "id": q.id,
-                "question": q.question,
-                "options": q.options,
-                "event_id": q.event_id
-
-            }
-        )
+    ids = [q.id for q in questions]
 
     answers = get_user_answers(ids, user_id)
     return jsonify({"questions": questions, "answers": answers}), 200
 
-"""
-
-# TODO: should verify that each field is valid
-    try:
-        responses_formatted = UserProfileFull(
-            id=user_id,
-            user_name=form_responses["username"],
-            first_name=form_responses["first_name"],
-            last_name=form_responses["last_name"],
-            email=form_responses["email"],
-            phone_number=form_responses["phone_number"],
-            gender=form_responses["gender"],
-            class_year=form_responses["class_year"],
-            major=form_responses["major"],
-            hobbies=form_responses["hobbies"]
-        )
-    except ValidationError as e:
-        return jsonify({"error": "invalid form responses"}), 400
-
-"""
 @questionnaire_bp.put("/submit")
 def submit_questionnaire():
     data = request.get_json(silent=True) or {}
