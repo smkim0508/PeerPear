@@ -1,10 +1,22 @@
 # canonical DTO for a user with their preferences
 from pydantic import BaseModel
 from typing import Optional
+from enum import Enum
 
-class UserProfile(BaseModel):
+# internal mapping for class year, including grad, alum, prof for future uses.
+class ClassYear(Enum):
+    FRESHMAN = "Freshman"
+    SOPHOMORE = "Sophomore"
+    JUNIOR = "Junior"
+    SENIOR = "Senior"
+    GRADUATE = "Graduate"
+    ALUMNI = "Alumni"
+    PROFESSOR = "Professor"
+
+class UserProfileFull(BaseModel):
     """
-    Canonical DTO for User Profile, as defined by the updable central profile
+    Full user profile with all relevant information, mapped 1-to-1 with the form responses (except for summary).
+    TODO: add more fields as we build the form.
     """
     id: int
     user_name: Optional[str] = None
@@ -13,6 +25,23 @@ class UserProfile(BaseModel):
     email: str
     phone_number: Optional[str] = None
     gender: Optional[str] = None
-    class_year: int
+    class_year: ClassYear
     major: Optional[str] = None
-    hobbies: list[str] # NOTE: technically could be NULLable, but right now we defined it as non-nullable
+    hobbies: list[str] # NOTE: technically could be NULLable but right now we define it as non-nullable
+    profile_summary: Optional[str] = None
+
+class UserProfile(BaseModel):
+    """
+    User profile carrying basic information and semantically-parsed profile summary.
+    NOTE: this is the actual user profile that will be given to LLM as context.
+    """
+    id: int
+    name: str
+    profile_summary: str
+
+class User(BaseModel):
+    """
+    Lightweight representation of a single user, which holds just their id and name
+    """
+    id: int
+    name: str

@@ -18,10 +18,3 @@ class UserTable(MainDB_Base):
     last_name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=False)
     phone_number: Mapped[str] = mapped_column(String, nullable=True)
-    events: Mapped[list[int]] = mapped_column(
-        ARRAY(Integer),
-        nullable=False,
-        default=list,
-    )
-
-    # organzations/ init_response_id may not be needed?

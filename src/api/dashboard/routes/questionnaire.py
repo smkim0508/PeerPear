@@ -1,16 +1,17 @@
 from flask import Blueprint, request, send_from_directory, jsonify, g
 import os
 from api import validate_model
-from db.models.events import Event
-from db.models.response import Response
-from db.models.question import Question
+from db.models.events import EventTable
+from db.models.response import ResponseTable
+from db.models.question import QuestionTable
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.crud.questionnaire_crud import get_questions, get_user_answers, submit_responses
+from common.types.user import UserProfileFull, User, UserProfile
+from pydantic import ValidationError
 
 questionnaire_bp = Blueprint("questionnaire", __name__)
-
 
 @questionnaire_bp.get("/<int:event_id>/<int:user_id>")
 def get_questionnaire(event_id, user_id):
@@ -41,18 +42,43 @@ def get_questionnaire(event_id, user_id):
     answers = get_user_answers(ids, user_id)
     return jsonify({"questions": questions, "answers": answers}), 200
 
+"""
 
+# TODO: should verify that each field is valid
+    try:
+        responses_formatted = UserProfileFull(
+            id=user_id,
+            user_name=form_responses["username"],
+            first_name=form_responses["first_name"],
+            last_name=form_responses["last_name"],
+            email=form_responses["email"],
+            phone_number=form_responses["phone_number"],
+            gender=form_responses["gender"],
+            class_year=form_responses["class_year"],
+            major=form_responses["major"],
+            hobbies=form_responses["hobbies"]
+        )
+    except ValidationError as e:
+        return jsonify({"error": "invalid form responses"}), 400
+
+"""
 @questionnaire_bp.put("/submit")
 def submit_questionnaire():
     data = request.get_json(silent=True) or {}
     event_id = data.get("event_id")
     user_id = data.get("user_id")
-    responses = data.get("responses")
+    form_responses = data.get("responses")
 
-    if not all([event_id, user_id, responses]):
-        return jsonify({"error": "Missing required fields"}), 400
+    if not all([event_id, user_id, form_responses]):
+        return jsonify({"error": "missing required fields"}), 400
+    
+    if not(isinstance(event_id, int) and isinstance(user_id, int)):
+        return jsonify({"error": "event_id and user_id must be integers"}), 400
+    
+    if not(isinstance(form_responses, dict)):
+        return jsonify({"error": "responses must be a dictionary"}), 400
 
-    result = submit_responses(event_id, user_id, responses)
+    result = submit_responses(event_id, user_id, form_responses)
     if result == "success":
         return jsonify({"message": "Form submitted successfully"}), 200
     if result == "form":

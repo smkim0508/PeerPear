@@ -7,38 +7,40 @@ import time
 import os
 
 from db import session
-from db.models.events import Event
-from db.models.organizations import Organization
+from db.models.events import EventTable, EventRegistrationsTable
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
-from db.models.question import Question
-from db.models.response import Response
-from db.models.orgadmin import OrgAdmin
+from db.models.question import QuestionTable
+from db.models.response import ResponseTable
+from db.models.orgadmin import OrgAdminTable
 
+from common.types.pairing_event import EventRole, EventStatus
+from common.types.user import ClassYear
 
 def create_organization_data(session):
     organizations = [
-        Organization(
+        OrganizationTable(
             org_name="AASA",
             description="Asian American Student Association"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="KSAP",
             description="Korean Student Association"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="CS Club",
             description="Computer Science Club"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="Dongkon's Club",
             description="We ride around in electric scooters"
 
         ),
-        Organization(
+        OrganizationTable(
             org_name="Sungmins's Club",
             description="We cook delicious food!"
         )
@@ -52,37 +54,37 @@ def create_organization_data(session):
 
 def create_orgadmin_data(session):
     # Fetch organizations to link with org admins
-    organizations = session.query(Organization).all()
+    organizations = session.query(OrganizationTable).all()
     org_admins = [
-        OrgAdmin(
+        OrgAdminTable(
             username="sungmink",
             first_name="Sungmin",
             last_name="Kim",
             email="sungmink@example.com",
             organization_id=2
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="HenryL",
             first_name="Henry",
             last_name="Li",
             email="henrylee@example.com",
             organization_id=1
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="Sk3378",
             first_name="Sungmin",
             last_name="Kim",
             email="sungminkother@example.com",
             organization_id=5
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="Robert",
             first_name="Rober",
             last_name="Dondero",
             email="rdondero@example.com",
             organization_id=3
         ),
-        OrgAdmin(
+        OrgAdminTable(
             username="dkkkkk",
             first_name="Dongkon",
             last_name="Lee",
@@ -105,8 +107,7 @@ def create_user_data(session):
             first_name="Gary",
             last_name="Yang",
             phone_number="7188441945",
-            email="gy4937@example.com",
-            events=[1, 2]
+            email="gy4937@example.com"
         ),
 
         UserTable(
@@ -114,73 +115,88 @@ def create_user_data(session):
             first_name="nadula",
             last_name="G",
             email="nadulag@example.com",
-            phone_number="1234567890",
-            events=[1, 3]
+            phone_number="1234567890"
         ),
         UserTable(
             username="JadenCutinha",
             first_name="Jaden",
             last_name="Cutinha",
             phone_number="553323",
-            email="jaden@example.com",
-            events=[1]
+            email="jaden@example.com"
         ),
         UserTable(
             username="JocelynGradStudent",
             first_name="Jocelyn",
             last_name="GradStudent",
             phone_number="4342462346",
-            email="jocelyn@example.com",
-            events=[1, 3]
+            email="jocelyn@example.com"
         ),
         UserTable(
             username="Yukihhhh",
             first_name="Yuki",
             last_name="Huang",
-            email="yuki@example.com",
-            events=[]
+            email="yuki@example.com"
         ),
         UserTable(
             username="AliceW",
             first_name="Alice",
             last_name="Wong",
-            email="alice@example.com",
-            events=[2]
+            email="alice@example.com"
         )]
     for user in users:
         session.add(user)
     session.commit()
     print("Dummy users added.")
 
-
 def create_event_data(session):
     events = [
-        Event(
+        EventTable( # event id 1
             title="Welcome Event",
             description="An event to welcome new members.",
-            start_date=datetime.now(),
             end_date=datetime.now() + timedelta(days=7),
             organization_id=1,
-            active=False,
+            status=EventStatus.NOT_STARTED,
             matches=[(1, 3), (2, 4)]
         ),
-        Event(
+        EventTable( # event id 2
             title="Tech Talk",
-            description="A talk on how to break into web development.",
-            start_date=datetime.now(),
+            description="*This event started* A talk on how to break into web development.",
             end_date=datetime.now() + timedelta(days=14),
             organization_id=3,
-            active=True,
+            status=EventStatus.STARTED,
             matches=[]
         ),
-        Event(
+        EventTable( # event id 3
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
-            start_date=datetime.now(),
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
-            active=True,
-            matches={}
+            status=EventStatus.TERMINATED,
+            matches=[]
+        ),
+        EventTable( # event id 4
+            title="PeerPear main event",
+            description="This event has been published.",
+            end_date=datetime.now() + timedelta(days=21),
+            organization_id=2,
+            status=EventStatus.PAIRING_PUBLISHED,
+            matches=[]
+        ),
+        EventTable( # event id 5
+            title="PeerPear main event 2 - started",
+            description="This event has been published.",
+            end_date=datetime.now() + timedelta(days=21),
+            organization_id=1,
+            status=EventStatus.STARTED,
+            matches=[]
+        ),
+        EventTable( # event id 6
+            title="PeerPear main event 3 - not started",
+            description="This event has been published.",
+            end_date=datetime.now() + timedelta(days=21),
+            organization_id=1,
+            status=EventStatus.NOT_STARTED,
+            matches=[]
         )
     ]
     for event in events:
@@ -188,52 +204,102 @@ def create_event_data(session):
     session.commit()
     print("Dummy events added.")
 
-# Why do we have firstname, lastname, email in user profile and user?
-
+def create_event_registration_data(session):
+    registrations = [
+        # event 1 with 4 registrations
+        EventRegistrationsTable(
+            user_id=1,
+            event_id=1,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=2,
+            event_id=1,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=3,
+            event_id=1,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=4,
+            event_id=1,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        # event 2 with 5 registrations
+        EventRegistrationsTable(
+            user_id=1,
+            event_id=2,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=2,
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=3,
+            event_id=2,
+            role=EventRole.BIG_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=4,
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING
+        ),
+        EventRegistrationsTable(
+            user_id=5,
+            event_id=2,
+            role=EventRole.BIG_SIBLING
+        )
+    ]
+    for registration in registrations:
+        session.add(registration)
+    session.commit()
+    print("Dummy event registrations added.")
 
 def create_user_profile_data(session):
     profiles = [
         UserProfileTable(
             user_id=1,
             gender="Male",
-            class_year=2027,
+            class_year=ClassYear.JUNIOR,
             major="Computer Science",
             hobbies=["gaming", "coding", "photography"]
-
         ),
         UserProfileTable(
             user_id=2,
             gender="Male",
-            class_year=2028,
+            class_year=ClassYear.SOPHOMORE,
             major="Computer Science",
             hobbies=["coding", "traveling"]
         ),
-
         UserProfileTable(
             user_id=3,
             gender="Male",
-            class_year=2027,
+            class_year=ClassYear.FRESHMAN,
             major="Computer Science",
             hobbies=["music", "sports", "basketball"]
         ),
         UserProfileTable(
             user_id=4,
             gender="Female",
-            class_year=2023,
+            class_year=ClassYear.ALUMNI,
             major="Computer Science",
             hobbies=["reading", "writing", "grading", "research"]
         ),
         UserProfileTable(
             user_id=5,
             gender="Female",
-            class_year=2027,
+            class_year=ClassYear.PROFESSOR,
             major="Economics",
             hobbies=["boba", "sculpting", "graphic design"]
         ),
         UserProfileTable(
             user_id=6,
             gender="Female",
-            class_year=2025,
+            class_year=ClassYear.SENIOR,
             major="Economics",
             hobbies=["art", "traveling", "music"]
         )
@@ -244,22 +310,21 @@ def create_user_profile_data(session):
     session.commit()
     print("Dummy user profiles added.")
 
-
 def create_question_data(session):
     questions = [
-        Question(
+        QuestionTable(
             question="What is your favorite programming language?",
             options=["Python","Javascript","C++","Java"],
-            event_id=3
+            event_id=2
         ),
-        Question(
+        QuestionTable(
             question="How many years of coding experience do you have?",
             options=["1","2","3","4","5+"],
-            event_id=3
-        ),
-        Question(
-            question="What is your favorite Asian food?:",
             event_id=2
+        ),
+        QuestionTable(
+            question="What is your favorite Asian food?:",
+            event_id=1
         )
     ]
     for question in questions:
@@ -267,30 +332,29 @@ def create_question_data(session):
     session.commit()
     print("Dummy questions added.")
 
-
 def create_response_data(session):
     responses = [
-        Response(
+        ResponseTable(
             user_id=2,
             question_id=1,
             answer="Python"
         ),
-        Response(
+        ResponseTable(
             user_id=4,
             question_id=1,
             answer="Javascript"
         ),
-        Response(
+        ResponseTable(
             user_id=2,
             question_id=2,
             answer="2"
         ),
-        Response(
+        ResponseTable(
             user_id=4,
             question_id=2,
             answer="Java"
         ),
-        Response(
+        ResponseTable(
             user_id=1,
             question_id=3,
             answer="Noodles"
@@ -322,6 +386,7 @@ def fill_all_tables(engine):
     create_user_data(session)
     create_user_profile_data(session)
     create_event_data(session)
+    create_event_registration_data(session)
     create_question_data(session)
     create_response_data(session)
 

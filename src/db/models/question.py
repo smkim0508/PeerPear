@@ -7,7 +7,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 from sqlalchemy.dialects.postgresql import JSONB
 
-class Question(MainDB_Base):
+class QuestionTable(MainDB_Base):
     __tablename__ = "questions"
 
     id: Mapped[int] = mapped_column(

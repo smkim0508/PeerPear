@@ -3,9 +3,27 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+interface Profile {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  gender: string;
+  other_gender: string;
+  class_year: string | null; // can be null since dropdown
+  major: string;
+  hobbies: string[];
+}
+
 export default function ProfilePage() {
+<<<<<<< HEAD
   const [profile, setProfile] = useState({
     user_id: "1", // for now hardcoded, ideally fetched from auth/session
+=======
+  const [profile, setProfile] = useState<Profile>({
+    user_id: "1", // hardcoded for now
+>>>>>>> eb4a5980a800d65d803698396282b63295c1da7b
     first_name: "",
     last_name: "",
     email: "",
@@ -25,7 +43,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5001/student-profile?user_id=${profile.user_id}`
+          `http://localhost:5001/user-profile/student-profile?user_id=${profile.user_id}`
         );
         const data = await res.json();
 
@@ -74,22 +92,32 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveMessage("");
-
+    
     try {
+<<<<<<< HEAD
       const res = await fetch("http://localhost:5001/update-profile", {
+=======
+      // convert class_year to number or null
+      const payload = {
+        ...profile,
+        class_year: profile.class_year || null,
+      };
+
+      const res = await fetch("http://localhost:5001/user-profile/update-profile", {
+>>>>>>> eb4a5980a800d65d803698396282b63295c1da7b
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profile),
       });
 
       if (res.ok) {
-        setSaveMessage("✅ Profile saved successfully!");
+        setSaveMessage("Profile saved successfully!");
       } else {
-        setSaveMessage("⚠️ Error saving profile. Please try again.");
+        setSaveMessage("Error saving profile. Please try again.");
       }
     } catch (err) {
       console.error("Error updating profile:", err);
-      setSaveMessage("⚠️ Error saving profile. Please try again.");
+      setSaveMessage("Error saving profile. Please try again.");
     }
   };
 
@@ -123,6 +151,7 @@ export default function ProfilePage() {
               placeholder="Enter your last name"
             />
 
+<<<<<<< HEAD
             <label className="text-xl font-semibold">Email:</label>
             <input
               name="email"
@@ -179,6 +208,24 @@ export default function ProfilePage() {
               <option value="2027">2027</option>
               <option value="2028">2028</option>
               <option value="2029">2029</option>
+=======
+            <label className="text-xl font-semibold">Class Year:</label>
+
+            <select
+                id="class_year"
+                name="class_year"
+                value={profile.class_year || ""}
+                className="border-b border-black bg-transparent text-lg focus:outline-none"
+                onChange={(e) =>
+                    setProfile({ ...profile, class_year: e.target.value || null })
+                }
+                >
+                <option value="" disabled hidden>Select class year</option>
+                <option value="Freshman">Freshman</option>
+                <option value="Sophomore">Sophomore</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+>>>>>>> eb4a5980a800d65d803698396282b63295c1da7b
             </select>
 
             <label className="text-xl font-semibold">Major:</label>
@@ -192,6 +239,7 @@ export default function ProfilePage() {
 
             {/* Dynamic Hobbies List */}
             <label className="text-xl font-semibold">Hobbies:</label>
+<<<<<<< HEAD
             <div>
               <div className="flex items-center gap-4 mb-3">
                 <input
@@ -248,6 +296,33 @@ export default function ProfilePage() {
               </p>
             )}
           </div>
+=======
+            <div className="flex gap-2 mt-2">
+              <input
+                value={newHobby}
+                onChange={(e) => setNewHobby(e.target.value)}
+                className="border-b border-black bg-transparent text-lg focus:outline-none flex-1"
+                placeholder="Add a hobby"
+              />
+              <button type="button" onClick={handleAddHobby} className="px-4 py-2 bg-[#393D3F] text-white rounded">
+                Add
+              </button>
+            </div>
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {profile.hobbies.map((hobby) => (
+                <span key={hobby} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
+                  {hobby}
+                  <button type="button" onClick={() => handleRemoveHobby(hobby)}>×</button>
+                </span>
+              ))}
+            </div>
+          </div>
+            <button type="submit" className="px-6 py-3 bg-[#95D28F] text-white rounded text-lg">
+                Save Profile
+            </button>
+              {/* This save message *could* be slightly adjusted to reduce buffer spacing */}
+          {saveMessage && <p className="mt-4 text-lg">{saveMessage}</p>}
+>>>>>>> eb4a5980a800d65d803698396282b63295c1da7b
         </form>
       </main>
       <Footer />

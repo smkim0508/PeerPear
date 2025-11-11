@@ -1,4 +1,5 @@
-# dispatcher for LLM clients, currently only Google Vertex AI, but scalable to other LLM providers
+# dispatcher for LLM clients, currently only Google Gemini AI, but scalable to other LLM providers
+# NOTE: this generic LLM wrapper is not necessary right now since we only have Google Gemini for service.
 
 from enum import Enum, auto
 from typing import Type, TypeVar
