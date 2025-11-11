@@ -53,7 +53,7 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
                 UserProfile(
                     id=user.id,
                     name="".join([user.first_name, " ", user.last_name]), # joins first and last name
-                    profile_summary=profile.profile_summary
+                    profile_summary=profile.profile_summary or ""
                 )
             )
 

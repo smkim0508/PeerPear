@@ -30,6 +30,7 @@ class PairingResult(BaseModel):
     Groups of two or more students.
     """
     groups: list[PairedGroup]
+    llm_reasoning: Optional[str] = None
 
 class PairingEvent(BaseModel):
     """

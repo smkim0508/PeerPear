@@ -10,4 +10,3 @@ class PairingResponse(BaseModel):
     """
     event_id: int
     pairing_results: PairingResult
-    

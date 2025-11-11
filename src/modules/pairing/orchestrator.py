@@ -34,13 +34,15 @@ class PairingOrchestrator(PairingRepository):
 
         logger.info(f"Pairing results: {pairing_llm_output.groups}, reasoning: {pairing_llm_output.reasoning}")
 
-        return PairingResult(groups=[
-            PairedGroup(
-                students=[
-                    student_map[student_id]
-                    for student_id in group
-                ]
-            )
-            for group in pairing_llm_output.groups
-        ])
-    
+        return PairingResult(
+            groups=[
+                PairedGroup(
+                    students=[
+                        student_map[student_id]
+                        for student_id in group
+                    ]
+                )
+                for group in pairing_llm_output.groups
+            ],
+            llm_reasoning=pairing_llm_output.reasoning
+        )

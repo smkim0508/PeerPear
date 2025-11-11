@@ -27,7 +27,7 @@ def pair_students_baseline():
     
     # pass args through request
     group_size = request.args.get("group_size", default=2, type=int)
-    event_id = request.args.get("event_id", default=1, type=int)
+    event_id = request.args.get("event_id", default=2, type=int)
 
     # users should not be able to request groups of size < 2
     if group_size <= 1:
