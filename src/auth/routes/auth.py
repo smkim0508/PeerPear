@@ -286,7 +286,6 @@ def get_current_user():
         response_data["last_name"] = db_user.last_name
         response_data["email"] = db_user.email
         response_data["phone_number"] = db_user.phone_number
-        response_data["events"] = db_user.events
     
     return jsonify(response_data)
 

@@ -4,12 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, Database } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PearButton from "@/components/PearButton";
 import {
   Calendar,
@@ -103,12 +98,13 @@ export default function EventPage({ params }: EventPageProps) {
 
     const fetchParticipants = async () => {
       const { data, error } = await supabase
-        .from("users")
-        .select("id, username, full_name, avatar_url")
-        .contains("events", [eventId]); 
+        .from("event_registrations")
+        .select("id, user_id, role")
+        .eq("event_id", eventId);
 
       if (!error && data) {
         setParticipants(data);
+        console.log("Participants data:", data);
       } else {
         console.error("Error fetching participants:", error);
       }
@@ -192,11 +188,13 @@ export default function EventPage({ params }: EventPageProps) {
 
     const { data, error } = await supabase
       .from("responses")
-      .select(`
+      .select(
+        `
         answer,
         question_id,
         questions (question)
-      `)
+      `
+      )
       .eq("user_id", user.id)
       .eq("event_id", eventId);
 
@@ -243,8 +241,7 @@ export default function EventPage({ params }: EventPageProps) {
     ? new Date(event.end_date) < new Date()
     : false;
   const hasQuestions = event.questions && event.questions.length > 0;
-  const hasCompletedQuestionnaire =
-    hasQuestions && userResponses.length > 0;
+  const hasCompletedQuestionnaire = hasQuestions && userResponses.length > 0;
 
   return (
     <ProtectedRoute>
@@ -376,9 +373,7 @@ export default function EventPage({ params }: EventPageProps) {
                           onClick={handleUnregister}
                           dark
                           className={`w-full ${
-                            isRegistering
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
+                            isRegistering ? "opacity-50 cursor-not-allowed" : ""
                           }`}
                         />
                       </div>
@@ -431,9 +426,7 @@ export default function EventPage({ params }: EventPageProps) {
               Questionnaire Answers
             </h3>
             {userAnswers.length === 0 ? (
-              <p className="text-gray-600 text-center">
-                No answers submitted.
-              </p>
+              <p className="text-gray-600 text-center">No answers submitted.</p>
             ) : (
               <div className="space-y-4 max-h-80 overflow-y-auto">
                 {userAnswers.map((ans, idx) => (
