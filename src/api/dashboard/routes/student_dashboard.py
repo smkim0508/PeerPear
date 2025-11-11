@@ -36,4 +36,4 @@ def browse_events():
     published_events = get_all_active_events(user_id)
 
     response = EventBrowseResponse(events=published_events)
-    return jsonify(response.model_dump()), 200
+    return jsonify(response.model_dump(mode="json")), 200

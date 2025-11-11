@@ -37,4 +37,4 @@ def browse_events():
     # format events to responses
     pairing_event_response = EventBrowseResponse(events=published_events)
 
-    return jsonify(pairing_event_response.model_dump()), 200
+    return jsonify(pairing_event_response.model_dump(mode="json")), 200

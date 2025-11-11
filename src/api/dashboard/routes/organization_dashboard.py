@@ -37,7 +37,7 @@ def browse_events():
     published_events = get_organization_events(int(organization_id))
     pairing_event_response = EventBrowseResponse(events=published_events)
 
-    return jsonify(pairing_event_response.model_dump()), 200
+    return jsonify(pairing_event_response.model_dump(mode="json")), 200
 
 # NOTE: NOT DONE
 @org_dashboard_bp.patch("/event")

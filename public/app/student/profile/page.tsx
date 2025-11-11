@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveMessage("");
-
+    
     try {
       // convert class_year to number or null
       const payload = {
@@ -150,14 +150,6 @@ export default function ProfilePage() {
                 <option value="Senior">Senior</option>
             </select>
 
-            {/* <input
-              name="class_year"
-              value={profile.class_year}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your class year"
-            /> */}
-
             <label className="text-xl font-semibold">Major:</label>
             <input
               name="major"
@@ -193,6 +185,7 @@ export default function ProfilePage() {
             <button type="submit" className="px-6 py-3 bg-[#95D28F] text-white rounded text-lg">
                 Save Profile
             </button>
+              {/* This save message *could* be slightly adjusted to reduce buffer spacing */}
           {saveMessage && <p className="mt-4 text-lg">{saveMessage}</p>}
         </form>
       </main>

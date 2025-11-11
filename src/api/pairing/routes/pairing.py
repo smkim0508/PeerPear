@@ -25,7 +25,7 @@ def pair_students_baseline():
     db_session = get_db_sessionmaker()
     llm_client = get_llm()
     
-    # pass args through request
+    # NOTE: pass args through request, currently has defaults set
     group_size = request.args.get("group_size", default=2, type=int)
     event_id = request.args.get("event_id", default=2, type=int)
 
@@ -50,7 +50,7 @@ def pair_students_baseline():
         pairing_results=pairing_result
     )
 
-    return jsonify(pairing_event_response.model_dump()), 200
+    return jsonify(pairing_event_response.model_dump(mode="json")), 200
 
 # NOTE: temporary testing endpoint to see LLM functionality with small pairing.
 @pairing_bp.get("/test")
@@ -88,4 +88,4 @@ def pair_students_test():
         pairing_results=pairing_result
     )
 
-    return jsonify(pairing_event_response.model_dump()), 200
+    return jsonify(pairing_event_response.model_dump(mode="json")), 200
