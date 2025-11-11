@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from urllib.parse import urlsplit
 import os
-from flask import Flask, g, jsonify, send_from_directory, current_app
+from flask import Flask, g, jsonify, send_from_directory, current_app, request, redirect
 from flask_cors import CORS
 from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
@@ -95,6 +95,14 @@ def create_app() -> Flask:
     # open a single session with each request
     @app.before_request
     def _open_session():
+        # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
+        is_running_locally = "//localhost:" in request.url_root
+        is_using_https = request.is_secure
+        if (not is_running_locally) and (not is_using_https):
+            url = request.url.replace("http://", "https://", 1)
+            return redirect(url, code=301)
+
+        # once verified, open session for db and llm client
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
         g.llm_client = current_app.extensions["llm_client"]
