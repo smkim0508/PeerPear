@@ -32,7 +32,10 @@ def get_profile():
 @user_profile_bp.post("/update-profile")
 def update_profile():
 
-    profile_payload = request.get_json() # NOTE: retrieves the whole profile as json obj
+    profile_payload = request.get_json(silent=True) # NOTE: retrieves the whole profile as json obj
+
+    if not profile_payload:
+        return jsonify({"error": "invalid form responses"}), 400
 
     user_id = profile_payload.get("user_id")
     first_name = profile_payload.get("first_name")
@@ -43,8 +46,6 @@ def update_profile():
     class_year = profile_payload.get("class_year")
     major = profile_payload.get("major")
     hobbies = profile_payload.get("hobbies")
-
-    logger.info(f"user id: {user_id}, first_name: {first_name}, last_name: {last_name}, email: {email}, phone_number: {phone_number}, gender: {gender}, class_year: {class_year}, major: {major}, hobbies: {hobbies}")
 
     user_profile = UserProfileFull(
         id=user_id,
@@ -58,14 +59,11 @@ def update_profile():
         hobbies=hobbies
     )
 
-    # logging to check
-    logger.info(f"user id: {user_id}, first_name: {first_name}, last_name: {last_name}, email: {email}, phone_number: {phone_number}, gender: {gender}, class_year: {class_year}, major: {major}, hobbies: {hobbies}")
-
-    # if any of the fields are none, do not touch it in db
-
     try:
         updated_profile = update_user_profile(user_profile=user_profile)
-    except:
+        logger.info(f"updated profile: {updated_profile}") # NOTE: nothing is being done with updated profile right now
+    except Exception as e:
+        logger.error(f"Error updating user profile: {e}")
         return jsonify({"error": "invalid form responses"}), 400
 
     return jsonify({"message": "Profile updated successfully"}), 200

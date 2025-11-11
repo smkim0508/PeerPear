@@ -66,8 +66,18 @@ export default function QuestionnairePage() {
         const data = await res.json();
 
         if (res.ok) {
-          setQuestions(data.questions);
-          setAnswers(data.answers);
+            setQuestions(data.questions);
+            // normalized answers are set, since the API returns them as an array
+            // NEED VERIFICATION AFTER IMPLEMENTING FRONTEND
+            const normalizedAnswers: Record<number, string> = (data.answers || []).reduce(
+                (acc: Record<number, string>, item: { question_id: number; answer: string }) => {
+                    acc[item.question_id] = item.answer;
+                    return acc;
+                },
+                {}
+            );
+            setAnswers(normalizedAnswers);
+            // setAnswers(data.answers);
         } else {
           console.error("Error from server:", data.error);
           setError(data.error || "Failed to load questions");

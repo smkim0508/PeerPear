@@ -16,7 +16,7 @@ class ResponseTable(MainDB_Base):
     question_id: Mapped[int] = mapped_column(
         ForeignKey("questions.id"), nullable=False)
     
-    answer: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    answer: Mapped[str] = mapped_column(String, nullable=True)
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), nullable=False)
