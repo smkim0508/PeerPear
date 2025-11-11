@@ -57,3 +57,7 @@ Below are some useful conventions when contributing to the backend service for c
 ## Dependency Management
 
 Please use poetry to manage all backend dependencies. To add a new dependency, simply run `poetry add <dependency-group>`. If needed, refresh local dependencies by running `poetry install`.
+
+### Dependencies for Heroku
+
+Heroku uses a manually-exported `requirements.txt` file at root to manage dependencies. Whenever you add a new dependency to poetry, please update the `requirements.txt` file by executing `poetry export -f requirements.txt --without-hashes -o ../requirements.txt` in the project root.
