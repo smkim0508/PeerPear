@@ -44,6 +44,8 @@ def update_profile():
     major = profile_payload.get("major")
     hobbies = profile_payload.get("hobbies")
 
+    logger.info(f"user id: {user_id}, first_name: {first_name}, last_name: {last_name}, email: {email}, phone_number: {phone_number}, gender: {gender}, class_year: {class_year}, major: {major}, hobbies: {hobbies}")
+
     user_profile = UserProfileFull(
         id=user_id,
         first_name=first_name,
