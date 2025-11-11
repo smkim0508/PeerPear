@@ -3,8 +3,21 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+interface Profile {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  gender: string;
+  other_gender: string;
+  class_year: string | null; // can be null since dropdown
+  major: string;
+  hobbies: string[];
+}
+
 export default function ProfilePage() {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<Profile>({
     user_id: "1", // hardcoded for now
     first_name: "",
     last_name: "",
@@ -73,7 +86,7 @@ export default function ProfilePage() {
       // convert class_year to number or null
       const payload = {
         ...profile,
-        class_year: profile.class_year ? parseInt(profile.class_year) : null,
+        class_year: profile.class_year || null,
       };
 
       const res = await fetch("http://localhost:5001/user-profile/update-profile", {
@@ -120,13 +133,30 @@ export default function ProfilePage() {
             />
 
             <label className="text-xl font-semibold">Class Year:</label>
-            <input
+
+            <select
+                id="class_year"
+                name="class_year"
+                value={profile.class_year || ""}
+                className="border-b border-black bg-transparent text-lg focus:outline-none"
+                onChange={(e) =>
+                    setProfile({ ...profile, class_year: e.target.value || null })
+                }
+                >
+                <option value="" disabled hidden>Select class year</option>
+                <option value="Freshman">Freshman</option>
+                <option value="Sophomore">Sophomore</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+            </select>
+
+            {/* <input
               name="class_year"
               value={profile.class_year}
               onChange={handleChange}
               className="border-b border-black bg-transparent text-lg focus:outline-none"
               placeholder="Enter your class year"
-            />
+            /> */}
 
             <label className="text-xl font-semibold">Major:</label>
             <input
