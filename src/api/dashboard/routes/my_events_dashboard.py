@@ -1,16 +1,10 @@
 # main landing page for students after logging in
-from flask import Blueprint, request, send_from_directory, jsonify, g
-from common.types.pairing_event import PairingEvent, PairingResult
-from datetime import datetime, timezone, timedelta
-from api import validate_model
-from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import EventTable
-from db.models.organizations import OrganizationTable
-from sqlalchemy import inspect
-from api.dependencies import get_db_sessionmaker, get_llm
+from flask import Blueprint, send_from_directory, jsonify, session
+from app_types.api.response.event_browse_response import EventBrowseResponse
 from db.crud.events_crud import get_user_events
 from common.logging import logger
 from common.error_response import generic_error_response
+from auth.routes.auth import require_auth
 
 # use blueprint to group routes
 my_events_bp = Blueprint("my_events", __name__)
@@ -27,10 +21,14 @@ def static_files(filename):
 
 
 @my_events_bp.get("/my-event-browse")
+@require_auth
 def browse_events():
-    user_id = request.args.get("user_id")
+    # Get user_id from session instead of query parameter
+    user_id = session.get("user_id")
+    
     if user_id is None:
-        return jsonify({"error": "user_id is required"}), 400
+        return jsonify({"error": "User not authenticated or user_id not found in session"}), 401
+    
     # use helper to retrieve all events
     try:
         published_events = get_user_events(int(user_id))
