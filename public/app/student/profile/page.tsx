@@ -12,7 +12,7 @@ interface Profile {
   phone_number: string;
   gender: string;
   other_gender: string;
-  class_year: string | null; // can be null since dropdown
+  class_year: string | null;
   major: string;
   hobbies: string[];
 }
@@ -20,22 +20,18 @@ interface Profile {
 export default function ProfilePage() {
   const { user, refreshAuth } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
-
   const [newHobby, setNewHobby] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
 
+  // ✅ FIXED: make sure user_id is always a number
   useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
+    if (!user?.id) return;
 
     setProfile((prev) => {
-      if (prev) {
-        return prev;
-      }
+      if (prev) return prev;
 
       return {
-        user_id: user.id,
+        user_id: user.id ?? 0, // <-- ensures a number, not undefined
         first_name: user.firstName || "",
         last_name: user.lastName || "",
         email: user.email || "",
@@ -51,24 +47,20 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user?.id) {
-        return;
-      }
+      if (!user?.id) return;
 
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
         const res = await fetch(
           `${apiUrl}/user-profile/student-profile?user_id=${user.id}`,
-          {
-            credentials: "include",
-          }
+          { credentials: "include" }
         );
         const data = await res.json();
 
         if (data.profile && Object.keys(data.profile).length > 0) {
           setProfile((prev) => ({
-            user_id: user.id,
+            user_id: user.id ?? 0, // ✅ consistent typing fix
             first_name: data.profile.first_name || prev?.first_name || "",
             last_name: data.profile.last_name || prev?.last_name || "",
             email: data.profile.email || prev?.email || "",

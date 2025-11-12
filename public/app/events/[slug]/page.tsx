@@ -114,26 +114,32 @@ export default function EventPage({ params }: EventPageProps) {
     user?.userType === "organization" ||
     user?.user_info?.user_type === "organization";
 
-  useEffect(() => {
-    if (!eventId || !isOrganizationUser) return;
-    if (!supabase) return;
-
-    const fetchParticipants = async () => {
-      const { data, error } = await supabase
-        .from("event_registrations")
-        .select("id, user_id, role, avatar_url, username, full_name")
-        .eq("event_id", eventId);
-
-      if (!error && data) {
-        setParticipants(data);
-        console.log("Participants data:", data);
-      } else {
-        console.error("Error fetching participants:", error);
+    useEffect(() => {
+      if (!eventId || !isOrganizationUser) return;
+    
+      if (!supabase) {
+        console.error("Supabase client not initialized");
+        return;
       }
-    };
-
-    fetchParticipants();
-  }, [eventId, isOrganizationUser]);
+    
+      const fetchParticipants = async () => {
+        if (!supabase) return;
+    
+        const { data, error } = await supabase
+          .from("event_registrations")
+          .select("id, user_id, role, avatar_url, username, full_name")
+          .eq("event_id", eventId);
+    
+        if (!error && data) {
+          setParticipants(data);
+          console.log("Participants data:", data);
+        } else {
+          console.error("Error fetching participants:", error);
+        }
+      };
+    
+      fetchParticipants();
+    }, [eventId, isOrganizationUser, supabase]);
 
   const handleRegister = async () => {
     if (!user || !event) return;
