@@ -61,22 +61,6 @@ export default function ProtectedRoute({
       return;
     }
 
-    if (inferredUserType === "student") {
-      if (user?.profileComplete === false) {
-        router.replace("/student/profile?onboarding=1");
-        return;
-      }
-    } else if (inferredUserType === "organization") {
-      const needsOrgProfile =
-        user?.organizationProfileComplete === false ||
-        user?.organizationProfileComplete === undefined;
-
-      if (needsOrgProfile) {
-        router.replace("/organization/profile?onboarding=1");
-        return;
-      }
-    }
-
     setProfileChecked(true);
   }, [
     inferredUserType,
