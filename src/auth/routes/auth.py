@@ -4,12 +4,7 @@ import re
 import json
 from functools import wraps
 from flask import Blueprint, request, session, redirect, jsonify, abort
-from sqlalchemy import select
-from api.dependencies import get_db_sessionmaker
 from db.crud.user_crud import get_or_create_user
-from db.models.user_profile import UserProfileTable
-from db.models.orgadmin import OrgAdminTable
-from db.models.organizations import OrganizationTable
 
 #-----------------------------------------------------------------------
 
@@ -285,52 +280,12 @@ def get_current_user():
     }
     
     # Add database user information if available
-    profile_complete = None
-    organization_profile_complete = None
-    organization_id = None
-    inferred_user_type = None
-
     if db_user:
         response_data["user_id"] = db_user.id
         response_data["first_name"] = db_user.first_name
         response_data["last_name"] = db_user.last_name
         response_data["email"] = db_user.email
         response_data["phone_number"] = db_user.phone_number
-
-        db_session = get_db_sessionmaker()
-        with db_session() as session:
-            user_profile = session.execute(
-                select(UserProfileTable).where(UserProfileTable.user_id == db_user.id)
-            ).scalar_one_or_none()
-            profile_complete = user_profile is not None
-
-            org_admin = session.execute(
-                select(OrgAdminTable).where(OrgAdminTable.username == db_user.username)
-            ).scalar_one_or_none()
-
-            if org_admin:
-                inferred_user_type = "organization"
-                organization_id = org_admin.organization_id
-                organization = session.execute(
-                    select(OrganizationTable).where(OrganizationTable.id == organization_id)
-                ).scalar_one_or_none()
-                organization_profile_complete = bool(
-                    organization and organization.description
-                )
-            else:
-                inferred_user_type = "student"
-
-    if profile_complete is not None:
-        response_data["profile_complete"] = profile_complete
-
-    if organization_id is not None:
-        response_data["organization_id"] = organization_id
-
-    if organization_profile_complete is not None:
-        response_data["organization_profile_complete"] = organization_profile_complete
-
-    if inferred_user_type is not None:
-        response_data["user_type"] = inferred_user_type
     
     return jsonify(response_data)
 
