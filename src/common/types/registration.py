@@ -10,5 +10,5 @@ class EventRegistration(BaseModel):
     event_id: int
     user_id: int
     created_at: datetime
-    role: EventRole
+    role: EventRole | None = None
     valid_registration: bool

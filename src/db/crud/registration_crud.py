@@ -143,7 +143,7 @@ def get_registration_status(event_id: int, user_id: int):
         return {
             "registered": True,
             "valid_registration": reg_dto.valid_registration,
-            "role": reg_dto.role.value,
+            "role": reg_dto.role.value if reg_dto.role else None,
             "registration": reg_dto.model_dump(mode="json")
         }
 

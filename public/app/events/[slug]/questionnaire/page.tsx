@@ -7,6 +7,11 @@ import { Label } from "@/components/ui/label";
 import { use, useEffect, useState } from "react";
 import { PearAlert } from "@/components/PearAlert";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
+interface QuestionnairePageProps {
+  params: Promise<{ slug: string }>;
+}
 
 function validateAnswers(questions: any[], answers: Record<number, string>) {
   const invalidAnswers = [];
@@ -28,8 +33,10 @@ function validateAnswers(questions: any[], answers: Record<number, string>) {
   return invalidAnswers;
 }
 
-export default function QuestionnairePage() {
+export default function QuestionnairePage({ params }: QuestionnairePageProps) {
+  const { slug } = use(params);
   const router = useRouter();
+  const { user } = useAuth();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +47,8 @@ export default function QuestionnairePage() {
     message: string;
   } | null>(null);
   const [validRegistration, setValidRegistration] = useState(false);
-  const event_id = 2;
-  const user_id = 2;
+  const event_id = parseInt(slug);
+  const user_id = user?.id;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
   const handleAnswerChange = (questionId: number, newValue: string) => {
@@ -51,8 +58,60 @@ export default function QuestionnairePage() {
     }));
   };
 
+  const get_questions = async () => {
+    if (!user_id) {
+      setError("User not authenticated");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${apiUrl}/questionnaire/${event_id}/${user_id}`,
+        {
+          credentials: "include", // Include cookies for authentication
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setQuestions(data.questions);
+        // normalized answers are set, since the API returns them as an array
+        // NEED VERIFICATION AFTER IMPLEMENTING FRONTEND
+        const normalizedAnswers: Record<number, string> = (
+          data.answers || []
+        ).reduce(
+          (
+            acc: Record<number, string>,
+            item: { question_id: number; answer: string }
+          ) => {
+            acc[item.question_id] = item.answer;
+            return acc;
+          },
+          {}
+        );
+        setAnswers(normalizedAnswers);
+        // setAnswers(data.answers);
+      } else {
+        console.error("Error from server:", data.error);
+        setError(data.error || "Failed to load questions");
+      }
+    } catch (err) {
+      console.log("Error fetching events", err);
+      setError("Failed to fetch questions");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const verify_registration = async () => {
+      if (!user_id) {
+        console.log("User ID not available yet");
+        return;
+      }
+
       try {
         const res = await fetch(
           `${apiUrl}/event_registration/status/${event_id}/${user_id}`,
@@ -71,50 +130,21 @@ export default function QuestionnairePage() {
         await get_questions();
       } catch (err) {
         console.log("Error retrieving registration", err);
+        // Even if registration check fails, try to load questions
+        await get_questions();
       }
     };
-    verify_registration();
-    const get_questions = async () => {
-      try {
-        const res = await fetch(
-          `${apiUrl}/questionnaire/${event_id}/${user_id}`,
-          {
-            credentials: "include", // Include cookies for authentication
-          }
-        );
-
-        const data = await res.json();
-
-        if (res.ok) {
-          setQuestions(data.questions);
-          // normalized answers are set, since the API returns them as an array
-          // NEED VERIFICATION AFTER IMPLEMENTING FRONTEND
-          const normalizedAnswers: Record<number, string> = (
-            data.answers || []
-          ).reduce(
-            (
-              acc: Record<number, string>,
-              item: { question_id: number; answer: string }
-            ) => {
-              acc[item.question_id] = item.answer;
-              return acc;
-            },
-            {}
-          );
-          setAnswers(normalizedAnswers);
-          // setAnswers(data.answers);
-        } else {
-          console.error("Error from server:", data.error);
-          setError(data.error || "Failed to load questions");
-        }
-      } catch (err) {
-        console.log("Error fetching events", err);
-        setError("Failed to fetch questions");
-      } finally {
-        setLoading(false);
-      }
-    };
-  }, []);
+    
+    if (event_id && !isNaN(event_id) && user_id) {
+      verify_registration();
+    } else if (!user_id && user === null) {
+      // User is not authenticated, redirect to login
+      router.push(`/events/${event_id}`);
+    } else if (isNaN(event_id)) {
+      setError("Invalid event ID");
+      setLoading(false);
+    }
+  }, [event_id, user_id, apiUrl, router, user]);
 
   useEffect(() => {
     console.log("Current questions", questions);
@@ -122,6 +152,14 @@ export default function QuestionnairePage() {
   }, [answers, questions]);
 
   const handleSubmit = async () => {
+    if (!user_id) {
+      setAlert({
+        type: "error",
+        message: "User not authenticated. Please log in and try again.",
+      });
+      return;
+    }
+
     if (!termsAccepted) {
       setAlert({
         type: "error",
@@ -142,10 +180,6 @@ export default function QuestionnairePage() {
     }
 
     try {
-      // HARDCODED FOR NOW
-      const event_id = 2;
-      const user_id = 2;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const responses = Object.entries(answers).map(
         ([question_id, answer]) => ({
           question_id: Number(question_id),
