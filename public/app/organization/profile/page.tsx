@@ -109,7 +109,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Card */}
-        <div className="bg-green rounded-xl shadow-lg p-8 transition-all duration-300 hover:shadow-2xl hover:brightness-105 mb-8">
+        <div className="bg-[#C3DD90] rounded-xl shadow-lg p-8 transition-all duration-300 hover:shadow-2xl hover:brightness-105 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <div className="bg-white rounded-full p-3 shadow-md">
