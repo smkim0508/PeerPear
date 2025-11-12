@@ -14,8 +14,8 @@ class EventStatus(Enum):
 
 # enums to represent event roles, currently big and little siblings
 class EventRole(Enum):
-    BIG_SIBLING = "big_sibling"
-    LITTLE_SIBLING = "little_sibling"
+    BIG_SIBLING = "BIG_SIBLING"
+    LITTLE_SIBLING = "LITTLE_SIBLING"
 
 class PairedGroup(BaseModel):
     """
