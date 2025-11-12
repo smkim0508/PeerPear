@@ -43,6 +43,26 @@ def create_user(username: str, first_name: str, last_name: str, email: str, phon
         session.commit()
         session.refresh(new_user)
         return new_user
+    
+def create_user_profile(user: UserTable, gender: str, class_year: str, major: str, hobbies: list[str], profile_summary: Optional[str] = None):
+    """Create a user profile for the given user."""
+    from db.models.user_profile import UserProfileTable  # Import here to avoid circular dependency
+    db_session = get_db_sessionmaker()
+    
+    new_profile = UserProfileTable(
+        user_id=user.id,
+        gender=gender,
+        class_year=class_year,
+        major=major,
+        hobbies=hobbies,
+        profile_summary=profile_summary,)
+    
+    with db_session() as session:
+        session.add(new_profile)
+        session.commit()
+        session.refresh(new_profile)
+        return new_profile
+    
 
 def get_or_create_user(username: str, first_name: str, last_name: str, email: str, phone_number: Optional[str] = None) -> UserTable:
     """Get existing user or create a new one if they don't exist."""
@@ -52,4 +72,6 @@ def get_or_create_user(username: str, first_name: str, last_name: str, email: st
         return existing_user
     
     # if user doesn't exist, create new one
-    return create_user(username, first_name, last_name, email, phone_number)
+    user = create_user(username, first_name, last_name, email, phone_number)
+    create_user_profile(user, None, None, None, [], None)
+    return user

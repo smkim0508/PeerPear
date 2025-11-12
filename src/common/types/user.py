@@ -25,7 +25,7 @@ class UserProfileFull(BaseModel):
     email: str
     phone_number: Optional[str] = None
     gender: Optional[str] = None
-    class_year: ClassYear
+    class_year: ClassYear | None = None
     major: Optional[str] = None
     hobbies: list[str] # NOTE: technically could be NULLable but right now we define it as non-nullable
     profile_summary: Optional[str] = None
