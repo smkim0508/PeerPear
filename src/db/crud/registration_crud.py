@@ -64,21 +64,21 @@ def create_new_registration(event_id: int, user_id: int):
         else:
             role = EventRole.BIG_SIBLING
 
-        registration = EventRegistration(
+        db_registration = EventRegistrationsTable(
             user_id=user_id,
             event_id=event_id,
             created_at=datetime.now(),
             role=role,
-            valid_registration=not has_questions
+            valid_registration=not has_questions,
         )
 
-        db_registration = dto_to_orm(registration, EventRegistrationsTable)
         session.add(db_registration)
         session.commit()
 
         session.refresh(db_registration)
 
-        return EventRegistration.model_validate(db_registration)
+        reg_dto = orm_to_dto(db_registration, EventRegistration)
+        return reg_dto.model_dump(mode="json")
 
 
 def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfile]]:
@@ -135,14 +135,16 @@ def get_registration_status(event_id: int, user_id: int):
 
         if not registration:
             return {"registered": False}
+        print(registration.role)
 
-        reg_dto = orm_to_dto(registration, EventRegistration)
+        reg_dto = EventRegistration.model_validate(
+            registration, from_attributes=True)
 
         return {
             "registered": True,
             "valid_registration": reg_dto.valid_registration,
             "role": reg_dto.role.value,
-            "registration": reg_dto.model_dump()
+            "registration": reg_dto.model_dump(mode="json")
         }
 
 
@@ -170,4 +172,5 @@ def mark_valid(event_id: int, user_id: int):
         session.commit()
         session.refresh(registration)
 
-        return EventRegistration.model_validate(registration)
+        reg_dto = orm_to_dto(registration, EventRegistration)
+        return reg_dto.model_dump(mode="json")

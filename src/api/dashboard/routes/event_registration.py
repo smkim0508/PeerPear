@@ -12,6 +12,21 @@ from pydantic import ValidationError
 event_registration_bp = Blueprint("event_registration", __name__)
 
 
+def validate_int_inputs(event_id, user_id=None):
+    try:
+        event_id = int(event_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    if user_id is not None:
+        try:
+            user_id = int(user_id)
+        except (ValueError, TypeError):
+            return jsonify({"error": "user_id must be an integer"}), 400
+
+    return None
+
+
 @event_registration_bp.post("/register")
 def register_for_event():
 
@@ -23,6 +38,10 @@ def register_for_event():
 
     if not user_id or not event_id:
         return jsonify({"error": "user_id and event_id are required"}), 400
+
+    error = validate_int_inputs(event_id, user_id)
+    if error:
+        return error
 
     try:
         result = create_new_registration(event_id=event_id, user_id=user_id)
@@ -37,10 +56,13 @@ def register_for_event():
 
 
 @event_registration_bp.get("/status/<int:event_id>/<int:user_id>")
-def get_registration_status_route(event_id,user_id):
+def get_registration_status_route(event_id, user_id):
 
     if not event_id or not user_id:
         return jsonify({"error": "event_id and user_id are required"}), 400
+    error = validate_int_inputs(event_id, user_id)
+    if error:
+        return error
 
     try:
         result = get_registration_status(event_id, user_id)
@@ -61,6 +83,10 @@ def mark_valid_registration():
 
     event_id = payload.get("event_id")
     user_id = payload.get("user_id")
+
+    error = validate_int_inputs(event_id, user_id)
+    if error:
+        return error
 
     try:
         result = mark_valid(event_id, user_id)
