@@ -120,7 +120,7 @@ export default function Navbar({
           {isAuthenticated && (
             <p className="text-black font-medium">
               {user?.user_info.attributes?.displayname
-                ? user.user_info.attributes.displayname.toString().toLowerCase()
+                ? `${user.user_info.attributes.displayname.toString().toLowerCase()} (${userType})`
                 : ""}
             </p>
           )}

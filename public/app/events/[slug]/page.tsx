@@ -207,6 +207,8 @@ export default function EventPage({ params }: EventPageProps) {
     setSelectedUser(selectedUser);
     setIsModalOpen(true);
 
+    setUserAnswers([]); // Clear previous answers
+
     try {
       // Get user's responses for this event
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -353,11 +355,6 @@ export default function EventPage({ params }: EventPageProps) {
                             className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
                             onClick={() => handleUserClick(u)}
                           >
-                            <img
-                              src={u.avatar_url || "/default-avatar.png"}
-                              alt={u.username}
-                              className="w-16 h-16 rounded-full mx-auto mb-3"
-                            />
                             <h3 className="text-center font-semibold text-lg text-nav-dark">
                               {u.full_name || u.username}
                             </h3>
@@ -464,20 +461,15 @@ export default function EventPage({ params }: EventPageProps) {
 
       {/* === User Modal (only for organization) === */}
       {isOrganizationUser && isModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#00000078] flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
             <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer"
               onClick={() => setIsModalOpen(false)}
             >
               ✕
             </button>
             <div className="text-center mb-6">
-              <img
-                src={selectedUser.avatar_url || "/default-avatar.png"}
-                alt={selectedUser.username}
-                className="w-20 h-20 rounded-full mx-auto mb-3"
-              />
               <h2 className="text-2xl font-bold text-nav-dark">
                 {selectedUser.full_name || selectedUser.username}
               </h2>

@@ -21,7 +21,8 @@ export default function OrganizationDashBoard() {
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("All Events");
-  const organizationId = user?.organizationId ?? 1;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const tabOptions = [
     "All Events",
@@ -48,29 +49,46 @@ export default function OrganizationDashBoard() {
     }
   };
 
-  const fetchEvents = async (id: number) => {
+  const fetchEvents = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const res = await fetch(
-        `${apiUrl}/organization_dashboard/event-browse?organization_id=${id}`,
+        `${apiUrl}/organization_dashboard/event-browse`,
         {
           credentials: "include", // Include cookies for authentication
         }
       );
+      
+      if (!res.ok) {
+        if (res.status === 401) {
+          setError("Please log in to view events.");
+        } else if (res.status === 403) {
+          setError("You do not have permission to access organization events.");
+        } else {
+          setError("Failed to load events. Please try again.");
+        }
+        return;
+      }
+      
       const data = await res.json();
       setEvents(data.events);
       console.log(data.events);
     } catch (err) {
       console.log("Error fetching events", err);
+      setError("Failed to load events. Please check your connection.");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEvents(organizationId);
-  }, [organizationId]);
+    fetchEvents();
+  }, []);
 
   const handleEventSuccess = async () => {
-    await fetchEvents(organizationId);
+    await fetchEvents();
   };
 
   const today = new Date();
@@ -130,7 +148,6 @@ export default function OrganizationDashBoard() {
           <CreateEventModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            organization_id={organizationId}
             onSuccess={handleEventSuccess}
           />
         </main>
