@@ -43,6 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = await getCurrentUser();
         setUser(userData);
         setIsAuthenticated(true);
+        if (userData?.userType) {
+          localStorage.setItem("userType", userData.userType);
+        }
       } else {
         setUser(null);
         setIsAuthenticated(false);

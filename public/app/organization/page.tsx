@@ -21,9 +21,7 @@ export default function OrganizationDashBoard() {
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("All Events");
-
-  // change later, hardcoded for testing
-  const organization_id = 1;
+  const organizationId = user?.organizationId ?? 1;
 
   const tabOptions = [
     "All Events",
@@ -50,11 +48,11 @@ export default function OrganizationDashBoard() {
     }
   };
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (id: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const res = await fetch(
-        `${apiUrl}/organization_dashboard/event-browse?organization_id=${organization_id}`,
+        `${apiUrl}/organization_dashboard/event-browse?organization_id=${id}`,
         {
           credentials: "include", // Include cookies for authentication
         }
@@ -68,14 +66,11 @@ export default function OrganizationDashBoard() {
   };
 
   useEffect(() => {
-    // Store user type preference for navbar
-    localStorage.setItem("userType", "organization");
-
-    fetchEvents();
-  }, []);
+    fetchEvents(organizationId);
+  }, [organizationId]);
 
   const handleEventSuccess = async () => {
-    await fetchEvents();
+    await fetchEvents(organizationId);
   };
 
   const today = new Date();
@@ -135,7 +130,7 @@ export default function OrganizationDashBoard() {
           <CreateEventModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            organization_id={organization_id}
+            organization_id={organizationId}
             onSuccess={handleEventSuccess}
           />
         </main>

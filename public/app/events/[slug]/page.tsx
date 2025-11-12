@@ -51,10 +51,25 @@ export default function EventPage({ params }: EventPageProps) {
   const eventId = parseInt(slug);
 
   useEffect(() => {
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      setIsLoading(false);
+      return;
+    }
     fetchEvent();
   }, [eventId, user]);
 
   const fetchEvent = async () => {
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -95,28 +110,45 @@ export default function EventPage({ params }: EventPageProps) {
   };
 
   // Fetch participants only for organizations
-  useEffect(() => {
-    if (!eventId || user?.user_info?.user_type !== "organization") return;
+  const isOrganizationUser =
+    user?.userType === "organization" ||
+    user?.user_info?.user_type === "organization";
 
-    const fetchParticipants = async () => {
-      const { data, error } = await supabase
-        .from("event_registrations")
-        .select("id, user_id, role, avatar_url, username, full_name")
-        .eq("event_id", eventId);
-
-      if (!error && data) {
-        setParticipants(data);
-        console.log("Participants data:", data);
-      } else {
-        console.error("Error fetching participants:", error);
+    useEffect(() => {
+      if (!eventId || !isOrganizationUser) return;
+    
+      if (!supabase) {
+        console.error("Supabase client not initialized");
+        return;
       }
-    };
-
-    fetchParticipants();
-  }, [eventId, user]);
+    
+      const fetchParticipants = async () => {
+        if (!supabase) return;
+    
+        const { data, error } = await supabase
+          .from("event_registrations")
+          .select("id, user_id, role, avatar_url, username, full_name")
+          .eq("event_id", eventId);
+    
+        if (!error && data) {
+          setParticipants(data);
+          console.log("Participants data:", data);
+        } else {
+          console.error("Error fetching participants:", error);
+        }
+      };
+    
+      fetchParticipants();
+    }, [eventId, isOrganizationUser, supabase]);
 
   const handleRegister = async () => {
     if (!user || !event) return;
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      return;
+    }
 
     setIsRegistering(true);
     try {
@@ -152,6 +184,12 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleUnregister = async () => {
     if (!user || !event) return;
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      return;
+    }
 
     setIsRegistering(true);
     try {
@@ -187,6 +225,13 @@ export default function EventPage({ params }: EventPageProps) {
   const handleUserClick = async (user: any) => {
     setSelectedUser(user);
     setIsModalOpen(true);
+
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      return;
+    }
 
     const { data, error } = await supabase
       .from("responses")
@@ -310,7 +355,7 @@ export default function EventPage({ params }: EventPageProps) {
               )}
 
               {/* === Participants Section (only for organization) === */}
-              {user?.user_info?.user_type === "organization" && (
+              {isOrganizationUser && (
                 <Card className="shadow-lg border-0 bg-white rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
@@ -401,7 +446,7 @@ export default function EventPage({ params }: EventPageProps) {
       </div>
 
       {/* === User Modal (only for organization) === */}
-      {user?.user_info?.user_type === "organization" && isModalOpen && selectedUser && (
+      {isOrganizationUser && isModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
             <button

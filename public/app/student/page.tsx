@@ -17,18 +17,20 @@ export default function StudentDashBoard() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    // Store user type preference for navbar
-    localStorage.setItem("userType", "student");
+    if (!user?.id) {
+      return;
+    }
 
     const fetchEvents = async () => {
       try {
-        // HARDCODED
-        const user_id = 2
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-        const res = await fetch(`${apiUrl}/student_dashboard/event-browse?user_id=${user_id}`, {
-          credentials: "include", // Include cookies for authentication
-        });
+        const res = await fetch(
+          `${apiUrl}/student_dashboard/event-browse?user_id=${user.id}`,
+          {
+            credentials: "include", // Include cookies for authentication
+          }
+        );
         const data = await res.json();
         setEvents(data.events);
         console.log(data.events);
@@ -37,7 +39,7 @@ export default function StudentDashBoard() {
       }
     };
     fetchEvents();
-  }, []);
+  }, [user?.id]);
 
   // Rudimentary filtering logic TODO: FIX ORGANIZATION SEARCH + animate?
   const filteredEvents =
