@@ -21,9 +21,9 @@ class UserProfileTable(MainDB_Base):
     gender: Mapped[str] = mapped_column(String,nullable = True)
     class_year: Mapped[ClassYear] = mapped_column(
         SAEnum(ClassYear, name="class_year_enum"),
-        nullable = False
+        nullable = True
     )
-    major: Mapped[str] = mapped_column(String,nullable = False)
+    major: Mapped[str] = mapped_column(String,nullable = True)
 
     hobbies: Mapped[list[str]] = mapped_column(
         ARRAY(String),
