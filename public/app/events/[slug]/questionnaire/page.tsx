@@ -39,6 +39,10 @@ export default function QuestionnairePage() {
     type: "error" | "success";
     message: string;
   } | null>(null);
+  const [validRegistration, setValidRegistration] = useState(false);
+  const event_id = 2;
+  const user_id = 2;
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
   const handleAnswerChange = (questionId: number, newValue: string) => {
     setAnswers((prev) => ({
@@ -48,14 +52,30 @@ export default function QuestionnairePage() {
   };
 
   useEffect(() => {
+    const verify_registration = async () => {
+      try {
+        const res = await fetch(
+          `${apiUrl}/event_registration/status/${event_id}/${user_id}`,
+          {
+            credentials: "include",
+          }
+        );
+
+        const data = await res.json();
+        if (!res.ok || !data.registered) {
+          router.push(`/events/${event_id}`);
+          return;
+        }
+
+        setValidRegistration(data.valid_registration);
+        await get_questions();
+      } catch (err) {
+        console.log("Error retrieving registration", err);
+      }
+    };
+    verify_registration();
     const get_questions = async () => {
       try {
-        // HARDCODED FOR NOW
-        const event_id = 2;
-        const user_id = 2;
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-
         const res = await fetch(
           `${apiUrl}/questionnaire/${event_id}/${user_id}`,
           {
@@ -66,18 +86,23 @@ export default function QuestionnairePage() {
         const data = await res.json();
 
         if (res.ok) {
-            setQuestions(data.questions);
-            // normalized answers are set, since the API returns them as an array
-            // NEED VERIFICATION AFTER IMPLEMENTING FRONTEND
-            const normalizedAnswers: Record<number, string> = (data.answers || []).reduce(
-                (acc: Record<number, string>, item: { question_id: number; answer: string }) => {
-                    acc[item.question_id] = item.answer;
-                    return acc;
-                },
-                {}
-            );
-            setAnswers(normalizedAnswers);
-            // setAnswers(data.answers);
+          setQuestions(data.questions);
+          // normalized answers are set, since the API returns them as an array
+          // NEED VERIFICATION AFTER IMPLEMENTING FRONTEND
+          const normalizedAnswers: Record<number, string> = (
+            data.answers || []
+          ).reduce(
+            (
+              acc: Record<number, string>,
+              item: { question_id: number; answer: string }
+            ) => {
+              acc[item.question_id] = item.answer;
+              return acc;
+            },
+            {}
+          );
+          setAnswers(normalizedAnswers);
+          // setAnswers(data.answers);
         } else {
           console.error("Error from server:", data.error);
           setError(data.error || "Failed to load questions");
@@ -89,8 +114,6 @@ export default function QuestionnairePage() {
         setLoading(false);
       }
     };
-
-    get_questions();
   }, []);
 
   useEffect(() => {
@@ -142,6 +165,9 @@ export default function QuestionnairePage() {
 
       const data = await res.json();
       if (res.ok) {
+        if (!validRegistration) {
+          handleValidateRegistration();
+        }
         setAlert({
           type: "success",
           message: "Questionnaire submitted successfully!",
@@ -160,6 +186,35 @@ export default function QuestionnairePage() {
       setAlert({
         type: "error",
         message: "Server error. Please try again later.",
+      });
+    }
+  };
+
+  const handleValidateRegistration = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/event_registration/mark-valid`, {
+        credentials: "include",
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event_id, user_id }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        console.error("Failed to mark registration valid:", data.error);
+        setAlert({
+          type: "error",
+          message: "Failed to finalize registration status.",
+        });
+        return;
+      }
+
+      setValidRegistration(true);
+    } catch (err) {
+      console.error("Error marking registration valid:", err);
+      setAlert({
+        type: "error",
+        message: "Server error finalizing registration.",
       });
     }
   };
@@ -327,7 +382,11 @@ export default function QuestionnairePage() {
                   <div className="flex justify-center">
                     <PearButton
                       onClick={handleSubmit}
-                      text="Submit Questionnaire"
+                      text={
+                        validRegistration
+                          ? "Update Questionnaire"
+                          : "Submit Questionnaire"
+                      }
                       className="px-8 py-3 text-lg font-semibold min-w-[200px]"
                     />
                   </div>
