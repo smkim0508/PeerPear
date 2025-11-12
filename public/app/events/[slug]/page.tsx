@@ -60,6 +60,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [userResponses, setUserResponses] = useState<UserResponse[]>([]);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [questionnaireCompleted, setQuestionnaireCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -109,6 +110,22 @@ export default function EventPage({ params }: EventPageProps) {
       if (isRegistered) {
         const responses = await getUserEventResponses(user.username, eventId);
         setUserResponses(responses);
+        
+        // Check questionnaire completion status
+        if (user?.id) {
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+          const statusResponse = await fetch(
+            `${API_BASE_URL}/event_registration/status/${eventId}/${user.id}`,
+            { credentials: "include" }
+          );
+          
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            setQuestionnaireCompleted(statusData.valid_registration || false);
+          }
+        }
+      } else {
+        setQuestionnaireCompleted(false);
       }
     } catch (err) {
       console.error("Error checking registration:", err);
@@ -148,9 +165,13 @@ export default function EventPage({ params }: EventPageProps) {
       }
 
       setIsRegistered(true);
-
+      
+      // Set questionnaire completion status
       if (event.questions && event.questions.length > 0) {
+        setQuestionnaireCompleted(false); // New registration needs questionnaire
         router.push(`/events/${eventId}/questionnaire`);
+      } else {
+        setQuestionnaireCompleted(true); // No questionnaire needed
       }
     } catch (err) {
       console.error("Registration error:", err);
@@ -173,6 +194,7 @@ export default function EventPage({ params }: EventPageProps) {
 
       setIsRegistered(false);
       setUserResponses([]);
+      setQuestionnaireCompleted(false);
     } catch (err) {
       console.error("Unregistration error:", err);
       setError("Failed to unregister");
@@ -356,7 +378,7 @@ export default function EventPage({ params }: EventPageProps) {
                     Registration
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-8">
+                <CardContent>
                   <div className="text-center">
                     {isRegistered ? (
                       <div className="space-y-4">
@@ -366,6 +388,44 @@ export default function EventPage({ params }: EventPageProps) {
                             You're registered!
                           </span>
                         </div>
+
+                        {/* Questionnaire Status */}
+                        {event?.questions && event.questions.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="border-t border-gray-200 pt-4">
+                              <h3 className="font-semibold text-lg text-nav-dark mb-3">
+                                Questionnaire
+                              </h3>
+                              {questionnaireCompleted ? (
+                                <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
+                                  <CheckCircle className="h-5 w-5" />
+                                  <span className="font-medium">Completed</span>
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
+                                    <XCircle className="h-5 w-5" />
+                                    <span className="font-medium">Incomplete</span>
+                                  </div>
+                                  <PearButton
+                                    text="Complete Questionnaire"
+                                    onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                    className="w-full"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                            
+                            {questionnaireCompleted && (
+                              <PearButton
+                                text="View/Edit Questionnaire"
+                                onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                dark
+                                className="w-full"
+                              />
+                            )}
+                          </div>
+                        )}
 
                         <PearButton
                           text={
