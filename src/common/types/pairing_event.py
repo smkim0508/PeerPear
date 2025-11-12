@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime, timezone
 from enum import Enum
 from common.types.user import User
@@ -36,6 +36,8 @@ class PairingEvent(BaseModel):
     """
     Canonical DTO representation for an event w/ group/partner pairing.
     """
+    model_config = ConfigDict(from_attributes=True)  
+    
     id: Optional[int] = None # missing at creation time since db autoincrements
     organization_id: int
     title: str

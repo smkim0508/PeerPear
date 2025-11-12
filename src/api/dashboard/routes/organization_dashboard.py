@@ -134,4 +134,4 @@ def create_event():
         logger.error(f"Unknown error: {e}")
         return jsonify(generic_error_response), 500
 
-    return jsonify({"message": "Event created successfully", "event_id": new_event.id}), 200
+    return jsonify({"message": "Event created successfully", "event_id": updated_event.id}), 200
