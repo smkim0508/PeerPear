@@ -23,6 +23,7 @@ from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from api.dashboard.routes.organization_profile import org_profile_bp
 from api.dashboard.routes.questionnaire import questionnaire_bp
 from api.dashboard.routes.event_registration import event_registration_bp
+from api.events.routes.events import events_bp
 
 from api.profile.routes.profile import user_profile_bp
 
@@ -133,6 +134,7 @@ def create_app() -> Flask:
     app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
     app.register_blueprint(event_registration_bp,
                            url_prefix="/event_registration")
+    app.register_blueprint(events_bp, url_prefix="/events")
 
     # check health for app dependencies and liveness
     @app.get("/health")

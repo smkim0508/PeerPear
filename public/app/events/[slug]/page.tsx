@@ -2,7 +2,6 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, Database } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PearButton from "@/components/PearButton";
@@ -18,13 +17,36 @@ import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { fetchEventById, checkUserRegistration, registerUserForEvent, unregisterUserFromEvent, getUserEventResponses, getEventParticipants } from "@/lib/events";
 
-type Event = Database["public"]["Tables"]["events"]["Row"] & {
-  organizations: Database["public"]["Tables"]["organizations"]["Row"];
-  questions: Database["public"]["Tables"]["questions"]["Row"][];
+type Event = {
+  id: number;
+  organization_id: number;
+  created_at: string;
+  ends_at: string | null;
+  active: boolean;
+  title: string | null;
+  description: string | null;
+  matches: any | null;
+  organizations: {
+    id: number;
+    org_name: string;
+    description: string;
+  };
+  questions: {
+    id: number;
+    question: string;
+    options: any | null;
+    event_id: number;
+  }[];
 };
 
-type UserResponse = Database["public"]["Tables"]["responses"]["Row"];
+type UserResponse = {
+  id: number;
+  question_id: number;
+  answer: any | null;
+  user_id: number;
+};
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -51,56 +73,24 @@ export default function EventPage({ params }: EventPageProps) {
   const eventId = parseInt(slug);
 
   useEffect(() => {
-    if (!supabase) {
-      setError(
-        "Event data service is not configured. Please set Supabase environment variables."
-      );
-      setIsLoading(false);
-      return;
-    }
     fetchEvent();
+    if (user?.username) {
+      checkRegistration();
+    }
   }, [eventId, user]);
 
   const fetchEvent = async () => {
-    if (!supabase) {
-      setError(
-        "Event data service is not configured. Please set Supabase environment variables."
-      );
-      setIsLoading(false);
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
 
-      const { data: eventData, error: eventError } = await supabase
-        .from("events")
-        .select(
-          `
-          *,
-          organizations (
-            id,
-            org_name,
-            description
-          ),
-          questions (
-            id,
-            question,
-            options,
-            event_id
-          )
-        `
-        )
-        .eq("id", eventId)
-        .single();
-
-      if (eventError) {
+      const eventData = await fetchEventById(eventId);
+      if (!eventData) {
         setError("Event not found");
         return;
       }
 
-      setEvent(eventData as Event);
+      setEvent(eventData);
     } catch (err) {
       console.error("Error:", err);
       setError("Failed to load event");
@@ -109,65 +99,53 @@ export default function EventPage({ params }: EventPageProps) {
     }
   };
 
+  const checkRegistration = async () => {
+    if (!user?.username) return;
+    
+    try {
+      const isRegistered = await checkUserRegistration(user.username, eventId);
+      setIsRegistered(isRegistered);
+      
+      if (isRegistered) {
+        const responses = await getUserEventResponses(user.username, eventId);
+        setUserResponses(responses);
+      }
+    } catch (err) {
+      console.error("Error checking registration:", err);
+    }
+  };
+
   // Fetch participants only for organizations
   const isOrganizationUser =
     user?.userType === "organization" ||
     user?.user_info?.user_type === "organization";
 
-    useEffect(() => {
-      if (!eventId || !isOrganizationUser) return;
-    
-      if (!supabase) {
-        console.error("Supabase client not initialized");
-        return;
+  useEffect(() => {
+    if (!eventId || !isOrganizationUser) return;
+
+    const fetchParticipants = async () => {
+      try {
+        const data = await getEventParticipants(eventId);
+        setParticipants(data);
+        console.log("Participants data:", data);
+      } catch (error) {
+        console.error("Error fetching participants:", error);
       }
-    
-      const fetchParticipants = async () => {
-        if (!supabase) return;
-    
-        const { data, error } = await supabase
-          .from("event_registrations")
-          .select("id, user_id, role, avatar_url, username, full_name")
-          .eq("event_id", eventId);
-    
-        if (!error && data) {
-          setParticipants(data);
-          console.log("Participants data:", data);
-        } else {
-          console.error("Error fetching participants:", error);
-        }
-      };
-    
-      fetchParticipants();
-    }, [eventId, isOrganizationUser, supabase]);
+    };
+
+    fetchParticipants();
+  }, [eventId, isOrganizationUser]);
 
   const handleRegister = async () => {
     if (!user || !event) return;
-    if (!supabase) {
-      setError(
-        "Event data service is not configured. Please set Supabase environment variables."
-      );
-      return;
-    }
 
     setIsRegistering(true);
     try {
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("id, events")
-        .eq("username", user.username)
-        .single();
-
-      if (userError) throw new Error("User not found");
-
-      const updatedEvents = [...(userData.events || []), eventId];
-
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ events: updatedEvents })
-        .eq("id", userData.id);
-
-      if (updateError) throw new Error("Failed to register");
+      const success = await registerUserForEvent(user.username, eventId);
+      
+      if (!success) {
+        throw new Error("Failed to register");
+      }
 
       setIsRegistered(true);
 
@@ -184,33 +162,14 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleUnregister = async () => {
     if (!user || !event) return;
-    if (!supabase) {
-      setError(
-        "Event data service is not configured. Please set Supabase environment variables."
-      );
-      return;
-    }
 
     setIsRegistering(true);
     try {
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("id, events")
-        .eq("username", user.username)
-        .single();
-
-      if (userError) throw new Error("User not found");
-
-      const updatedEvents = (userData.events || []).filter(
-        (id: number) => id !== eventId
-      );
-
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ events: updatedEvents })
-        .eq("id", userData.id);
-
-      if (updateError) throw new Error("Failed to unregister");
+      const success = await unregisterUserFromEvent(user.username, eventId);
+      
+      if (!success) {
+        throw new Error("Failed to unregister");
+      }
 
       setIsRegistered(false);
       setUserResponses([]);
@@ -222,32 +181,30 @@ export default function EventPage({ params }: EventPageProps) {
     }
   };
 
-  const handleUserClick = async (user: any) => {
-    setSelectedUser(user);
+  const handleUserClick = async (selectedUser: any) => {
+    setSelectedUser(selectedUser);
     setIsModalOpen(true);
 
-    if (!supabase) {
-      setError(
-        "Event data service is not configured. Please set Supabase environment variables."
-      );
-      return;
-    }
+    try {
+      // Get user's responses for this event
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(`${API_BASE_URL}/questionnaire/${eventId}/${selectedUser.user_id}`, {
+        credentials: 'include',
+      });
 
-    const { data, error } = await supabase
-      .from("responses")
-      .select(
-        `
-        answer,
-        question_id,
-        questions (question)
-      `
-      )
-      .eq("user_id", user.id)
-      .eq("event_id", eventId);
-
-    if (!error && data) {
-      setUserAnswers(data);
-    } else {
+      if (response.ok) {
+        const data = await response.json();
+        // Transform the data to match expected format
+        const formattedAnswers = data.answers?.map((answer: any) => ({
+          answer: answer.answer,
+          question_id: answer.question_id,
+          questions: { question: data.questions?.find((q: any) => q.id === answer.question_id)?.question || "" }
+        })) || [];
+        setUserAnswers(formattedAnswers);
+      } else {
+        console.error("Error fetching user answers:", response.statusText);
+      }
+    } catch (error) {
       console.error("Error fetching user answers:", error);
     }
   };

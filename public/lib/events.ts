@@ -1,5 +1,6 @@
-import { supabase } from '@/lib/supabase';
 import { DatabaseEvent, Organization, Question, UserResponse, User } from '@/types/events';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 export interface EventWithDetails extends DatabaseEvent {
   organizations: Organization;
@@ -10,35 +11,17 @@ export interface EventWithDetails extends DatabaseEvent {
  * Fetch a single event with organization and questions
  */
 export async function fetchEventById(eventId: number): Promise<EventWithDetails | null> {
-  if (!supabase) {
-    console.warn('Supabase not configured. fetchEventById returning null.');
-    return null;
-  }
   try {
-    const { data, error } = await supabase
-      .from('events')
-      .select(`
-        *,
-        organizations (
-          id,
-          org_name,
-          description
-        ),
-        questions (
-          id,
-          question,
-          options,
-          event_id
-        )
-      `)
-      .eq('id', eventId)
-      .single();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+      credentials: 'include',
+    });
 
-    if (error) {
-      console.error('Error fetching event:', error);
+    if (!response.ok) {
+      console.error('Error fetching event:', response.statusText);
       return null;
     }
 
+    const data = await response.json();
     return data as EventWithDetails;
   } catch (err) {
     console.error('Error in fetchEventById:', err);
@@ -50,35 +33,17 @@ export async function fetchEventById(eventId: number): Promise<EventWithDetails 
  * Fetch all active events with organization details
  */
 export async function fetchActiveEvents(): Promise<EventWithDetails[]> {
-  if (!supabase) {
-    console.warn('Supabase not configured. fetchActiveEvents returning empty array.');
-    return [];
-  }
   try {
-    const { data, error } = await supabase
-      .from('events')
-      .select(`
-        *,
-        organizations (
-          id,
-          org_name,
-          description
-        ),
-        questions (
-          id,
-          question,
-          options,
-          event_id
-        )
-      `)
-      .eq('active', true)
-      .order('created_at', { ascending: false });
+    const response = await fetch(`${API_BASE_URL}/events/active`, {
+      credentials: 'include',
+    });
 
-    if (error) {
-      console.error('Error fetching active events:', error);
+    if (!response.ok) {
+      console.error('Error fetching active events:', response.statusText);
       return [];
     }
 
+    const data = await response.json();
     return data as EventWithDetails[];
   } catch (err) {
     console.error('Error in fetchActiveEvents:', err);
@@ -90,22 +55,18 @@ export async function fetchActiveEvents(): Promise<EventWithDetails[]> {
  * Check if a user is registered for an event
  */
 export async function checkUserRegistration(username: string, eventId: number): Promise<boolean> {
-  if (!supabase) {
-    console.warn('Supabase not configured. checkUserRegistration returning false.');
-    return false;
-  }
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('events')
-      .eq('username', username)
-      .single();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/registration/${username}`, {
+      credentials: 'include',
+    });
 
-    if (error || !data) {
+    if (!response.ok) {
+      console.error('Error checking user registration:', response.statusText);
       return false;
     }
 
-    return data.events?.includes(eventId) ?? false;
+    const data = await response.json();
+    return data.registered ?? false;
   } catch (err) {
     console.error('Error checking user registration:', err);
     return false;
@@ -116,33 +77,18 @@ export async function checkUserRegistration(username: string, eventId: number): 
  * Register a user for an event
  */
 export async function registerUserForEvent(username: string, eventId: number): Promise<boolean> {
-  if (!supabase) {
-    console.warn('Supabase not configured. registerUserForEvent returning false.');
-    return false;
-  }
   try {
-    // Get current user data
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, events')
-      .eq('username', username)
-      .single();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ username }),
+    });
 
-    if (userError || !userData) {
-      console.error('User not found:', userError);
-      return false;
-    }
-
-    // Add event to user's events array
-    const updatedEvents = [...(userData.events || []), eventId];
-    
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ events: updatedEvents })
-      .eq('id', userData.id);
-
-    if (updateError) {
-      console.error('Error registering user:', updateError);
+    if (!response.ok) {
+      console.error('Error registering user:', response.statusText);
       return false;
     }
 
@@ -157,49 +103,19 @@ export async function registerUserForEvent(username: string, eventId: number): P
  * Unregister a user from an event
  */
 export async function unregisterUserFromEvent(username: string, eventId: number): Promise<boolean> {
-  if (!supabase) {
-    console.warn('Supabase not configured. unregisterUserFromEvent returning false.');
-    return false;
-  }
   try {
-    // Get current user data
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id, events')
-      .eq('username', username)
-      .single();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/register`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ username }),
+    });
 
-    if (userError || !userData) {
-      console.error('User not found:', userError);
+    if (!response.ok) {
+      console.error('Error unregistering user:', response.statusText);
       return false;
-    }
-
-    // Remove event from user's events array
-    const updatedEvents = (userData.events || []).filter((id: number) => id !== eventId);
-    
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ events: updatedEvents })
-      .eq('id', userData.id);
-
-    if (updateError) {
-      console.error('Error unregistering user:', updateError);
-      return false;
-    }
-
-    // Also remove any responses the user made for this event
-    const { data: questions } = await supabase
-      .from('questions')
-      .select('id')
-      .eq('event_id', eventId);
-
-    if (questions && questions.length > 0) {
-      const questionIds = questions.map(q => q.id);
-      await supabase
-        .from('responses')
-        .delete()
-        .eq('user_id', userData.id)
-        .in('question_id', questionIds);
     }
 
     return true;
@@ -213,47 +129,18 @@ export async function unregisterUserFromEvent(username: string, eventId: number)
  * Get user's responses for an event
  */
 export async function getUserEventResponses(username: string, eventId: number): Promise<UserResponse[]> {
-  if (!supabase) {
-    console.warn('Supabase not configured. getUserEventResponses returning empty array.');
-    return [];
-  }
   try {
-    // Get user ID
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', username)
-      .single();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/responses/${username}`, {
+      credentials: 'include',
+    });
 
-    if (userError || !userData) {
+    if (!response.ok) {
+      console.error('Error fetching responses:', response.statusText);
       return [];
     }
 
-    // Get questions for this event
-    const { data: questions, error: questionsError } = await supabase
-      .from('questions')
-      .select('id')
-      .eq('event_id', eventId);
-
-    if (questionsError || !questions || questions.length === 0) {
-      return [];
-    }
-
-    const questionIds = questions.map(q => q.id);
-
-    // Get user's responses
-    const { data: responses, error: responsesError } = await supabase
-      .from('responses')
-      .select('*')
-      .eq('user_id', userData.id)
-      .in('question_id', questionIds);
-
-    if (responsesError) {
-      console.error('Error fetching responses:', responsesError);
-      return [];
-    }
-
-    return responses || [];
+    const data = await response.json();
+    return data || [];
   } catch (err) {
     console.error('Error in getUserEventResponses:', err);
     return [];
@@ -263,38 +150,19 @@ export async function getUserEventResponses(username: string, eventId: number): 
 /**
  * Submit user responses for event questions
  */
-export async function submitEventResponses(username: string, responses: { questionId: number; answer: any }[]): Promise<boolean> {
-  if (!supabase) {
-    console.warn('Supabase not configured. submitEventResponses returning false.');
-    return false;
-  }
+export async function submitEventResponses(username: string, eventId: number, responses: { questionId: number; answer: any }[]): Promise<boolean> {
   try {
-    // Get user ID
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', username)
-      .single();
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/responses`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ username, responses }),
+    });
 
-    if (userError || !userData) {
-      console.error('User not found:', userError);
-      return false;
-    }
-
-    // Prepare responses for insertion
-    const responseData = responses.map(response => ({
-      question_id: response.questionId,
-      user_id: userData.id,
-      answer: response.answer
-    }));
-
-    // Insert responses
-    const { error: insertError } = await supabase
-      .from('responses')
-      .insert(responseData);
-
-    if (insertError) {
-      console.error('Error inserting responses:', insertError);
+    if (!response.ok) {
+      console.error('Error submitting responses:', response.statusText);
       return false;
     }
 
@@ -302,5 +170,27 @@ export async function submitEventResponses(username: string, responses: { questi
   } catch (err) {
     console.error('Error in submitEventResponses:', err);
     return false;
+  }
+}
+
+/**
+ * Get event participants (for organization users)
+ */
+export async function getEventParticipants(eventId: number): Promise<any[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/participants`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      console.error('Error fetching participants:', response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data || [];
+  } catch (err) {
+    console.error('Error in getEventParticipants:', err);
+    return [];
   }
 }
