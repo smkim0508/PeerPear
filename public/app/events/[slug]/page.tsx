@@ -42,6 +42,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
+  // Organization-only section states
   const [participants, setParticipants] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [userAnswers, setUserAnswers] = useState<any[]>([]);
@@ -93,13 +94,14 @@ export default function EventPage({ params }: EventPageProps) {
     }
   };
 
+  // Fetch participants only for organizations
   useEffect(() => {
-    if (!eventId) return;
+    if (!eventId || user?.user_info?.user_type !== "organization") return;
 
     const fetchParticipants = async () => {
       const { data, error } = await supabase
         .from("event_registrations")
-        .select("id, user_id, role")
+        .select("id, user_id, role, avatar_url, username, full_name")
         .eq("event_id", eventId);
 
       if (!error && data) {
@@ -111,7 +113,7 @@ export default function EventPage({ params }: EventPageProps) {
     };
 
     fetchParticipants();
-  }, [eventId]);
+  }, [eventId, user]);
 
   const handleRegister = async () => {
     if (!user || !event) return;
@@ -236,12 +238,7 @@ export default function EventPage({ params }: EventPageProps) {
     );
   }
 
-  const isEventActive = event.active;
-  const hasEnded = event.end_date
-    ? new Date(event.end_date) < new Date()
-    : false;
   const hasQuestions = event.questions && event.questions.length > 0;
-  const hasCompletedQuestionnaire = hasQuestions && userResponses.length > 0;
 
   return (
     <ProtectedRoute>
@@ -312,39 +309,41 @@ export default function EventPage({ params }: EventPageProps) {
                 </Card>
               )}
 
-              {/* Participants Section */}
-              <Card className="shadow-lg border-0 bg-white rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                    <Users className="h-7 w-7" />
-                    Participants
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {participants.length === 0 ? (
-                    <p className="text-gray-600">No participants yet.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {participants.map((u) => (
-                        <div
-                          key={u.id}
-                          className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
-                          onClick={() => handleUserClick(u)}
-                        >
-                          <img
-                            src={u.avatar_url || "/default-avatar.png"}
-                            alt={u.username}
-                            className="w-16 h-16 rounded-full mx-auto mb-3"
-                          />
-                          <h3 className="text-center font-semibold text-lg text-nav-dark">
-                            {u.full_name || u.username}
-                          </h3>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {/* === Participants Section (only for organization) === */}
+              {user?.user_info?.user_type === "organization" && (
+                <Card className="shadow-lg border-0 bg-white rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                      <Users className="h-7 w-7" />
+                      Participants
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {participants.length === 0 ? (
+                      <p className="text-gray-600">No participants yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {participants.map((u) => (
+                          <div
+                            key={u.id}
+                            className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
+                            onClick={() => handleUserClick(u)}
+                          >
+                            <img
+                              src={u.avatar_url || "/default-avatar.png"}
+                              alt={u.username}
+                              className="w-16 h-16 rounded-full mx-auto mb-3"
+                            />
+                            <h3 className="text-center font-semibold text-lg text-nav-dark">
+                              {u.full_name || u.username}
+                            </h3>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* === RIGHT SIDEBAR === */}
@@ -401,8 +400,8 @@ export default function EventPage({ params }: EventPageProps) {
         <Footer />
       </div>
 
-      {/* User Modal */}
-      {isModalOpen && selectedUser && (
+      {/* === User Modal (only for organization) === */}
+      {user?.user_info?.user_type === "organization" && isModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
             <button
