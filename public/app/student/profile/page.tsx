@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
+import { Squiggle } from "@/components/ui/Squiggle";
+import { User, Mail, Phone, BookOpen, GraduationCap, Heart } from "lucide-react";
 
 interface Profile {
   user_id: number;
@@ -22,6 +24,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [newHobby, setNewHobby] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // ✅ FIXED: make sure user_id is always a number
   useEffect(() => {
@@ -116,7 +119,10 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveMessage("");
+    setIsLoading(true);
+    
     if (!profile) {
+      setIsLoading(false);
       return;
     }
     
@@ -137,7 +143,7 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        setSaveMessage("Profile saved successfully!");
+        setSaveMessage("Profile saved successfully! 🎉");
         await refreshAuth();
       } else {
         setSaveMessage("Error saving profile. Please try again.");
@@ -145,103 +151,245 @@ export default function ProfilePage() {
     } catch (err) {
       console.error("Error updating profile:", err);
       setSaveMessage("Error saving profile. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   if (!user?.id || !profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen font-sans bg-[#f3f4ef]">
-        <p>Loading profile...</p>
+      <div className="flex items-center justify-center min-h-screen font-sans bg-light-beige">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-nav-dark border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-nav-dark">Loading your profile...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-[#f3f4ef]">
+    <div className="flex flex-col min-h-screen font-sans bg-light-beige">
       <Navbar userType="student" />
-      <main className="flex-1 p-10 max-w-4xl mx-auto">
-        <h1 className="text-6xl font-bold mb-12">
-          Profile
-          <br />
-          Update
-        </h1>
+      
+      {/* Hero Section */}
+      <div className="bg-linear-to-br from-light-beige to-dark-beige relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-8 py-16 text-center">
+          <h1 className="text-6xl md:text-7xl font-extrabold text-[#0a0a0a] tracking-tight mb-4">
+            Your{" "}
+            <span className="relative inline-block whitespace-nowrap">
+              Profile
+              <Squiggle width={225} className="left-0 right-0 -bottom-2" />
+            </span>
+          </h1>
+          <p className="text-xl text-[#1a1a1a] max-w-2xl mx-auto leading-relaxed">
+            Tell us about yourself! This information helps us create better matches
+            and makes you part of the PeerPear community.
+          </p>
+        </div>
+      </div>
 
+      {/* Main Content */}
+      <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
         <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-2 gap-8">
-            <label className="text-xl font-semibold">First Name:</label>
-            <input
-              name="first_name"
-              value={profile.first_name}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your first name"
-            />
-
-            <label className="text-xl font-semibold">Last Name:</label>
-            <input
-              name="last_name"
-              value={profile.last_name}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your last name"
-            />
-
-            <label className="text-xl font-semibold">Class Year:</label>
-
-            <select
-                id="class_year"
-                name="class_year"
-                value={profile.class_year || ""}
-                className="border-b border-black bg-transparent text-lg focus:outline-none"
-                onChange={(e) =>
-                    setProfile({ ...profile, class_year: e.target.value || null })
-                }
-                >
-                <option value="" disabled hidden>Select class year</option>
-                <option value="Freshman">Freshman</option>
-                <option value="Sophomore">Sophomore</option>
-                <option value="Junior">Junior</option>
-                <option value="Senior">Senior</option>
-            </select>
-
-            <label className="text-xl font-semibold">Major:</label>
-            <input
-              name="major"
-              value={profile.major}
-              onChange={handleChange}
-              className="border-b border-black bg-transparent text-lg focus:outline-none"
-              placeholder="Enter your major"
-            />
-
-            {/* Dynamic Hobbies List */}
-            <label className="text-xl font-semibold">Hobbies:</label>
-            <div className="flex gap-2 mt-2">
-              <input
-                value={newHobby}
-                onChange={(e) => setNewHobby(e.target.value)}
-                className="border-b border-black bg-transparent text-lg focus:outline-none flex-1"
-                placeholder="Add a hobby"
-              />
-              <button type="button" onClick={handleAddHobby} className="px-4 py-2 bg-[#393D3F] text-white rounded">
-                Add
-              </button>
+          {/* Personal Information Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-green rounded-full flex items-center justify-center">
+                <User className="w-6 h-6 text-nav-dark" />
+              </div>
+              <h2 className="text-3xl font-bold text-nav-dark">Personal Information</h2>
             </div>
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {profile.hobbies.map((hobby) => (
-                <span key={hobby} className="px-3 py-1 bg-gray-200 rounded-full flex items-center gap-2">
-                  {hobby}
-                  <button type="button" onClick={() => handleRemoveHobby(hobby)}>×</button>
-                </span>
-              ))}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  First Name
+                </label>
+                <input
+                  name="first_name"
+                  value={profile.first_name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green transition-colors"
+                  placeholder="Enter your first name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Last Name
+                </label>
+                <input
+                  name="last_name"
+                  value={profile.last_name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green transition-colors"
+                  placeholder="Enter your last name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  value={profile.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-gray-50 text-lg cursor-not-allowed"
+                  placeholder="Your email address"
+                  disabled
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  Phone Number
+                </label>
+                <input
+                  name="phone_number"
+                  type="tel"
+                  value={profile.phone_number}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green transition-colors"
+                  placeholder="Your phone number"
+                />
+              </div>
             </div>
           </div>
-            <button type="submit" className="px-6 py-3 bg-[#95D28F] text-white rounded text-lg">
-                Save Profile
+
+          {/* Academic Information Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-green rounded-full flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-nav-dark" />
+              </div>
+              <h2 className="text-3xl font-bold text-nav-dark">Academic Information</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  Class Year
+                </label>
+                <select
+                  name="class_year"
+                  value={profile.class_year || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green transition-colors"
+                >
+                  <option value="" disabled>Select your class year</option>
+                  <option value="Freshman">Freshman</option>
+                  <option value="Sophomore">Sophomore</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Senior">Senior</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Major
+                </label>
+                <input
+                  name="major"
+                  value={profile.major}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green transition-colors"
+                  placeholder="Your field of study"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Interests & Hobbies Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 bg-green rounded-full flex items-center justify-center">
+                <Heart className="w-6 h-6 text-nav-dark" />
+              </div>
+              <h2 className="text-3xl font-bold text-nav-dark">Interests & Hobbies</h2>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex gap-3">
+                <input
+                  value={newHobby}
+                  onChange={(e) => setNewHobby(e.target.value)}
+                  className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green transition-colors"
+                  placeholder="Add a hobby or interest..."
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddHobby())}
+                />
+                <button 
+                  type="button" 
+                  onClick={handleAddHobby} 
+                  className="px-6 py-3 bg-green text-nav-dark font-semibold rounded-lg hover:scale-105 hover:shadow-lg transition-all duration-300"
+                >
+                  Add
+                </button>
+              </div>
+              
+              {profile.hobbies.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-lg font-semibold text-nav-dark">Your hobbies:</p>
+                  <div className="flex flex-wrap gap-3">
+                    {profile.hobbies.map((hobby) => (
+                      <span 
+                        key={hobby} 
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green/20 border-2 border-green rounded-full text-nav-dark font-medium hover:bg-green/30 transition-colors"
+                      >
+                        <Heart className="w-4 h-4" />
+                        {hobby}
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveHobby(hobby)}
+                          className="w-5 h-5 rounded-full bg-nav-dark/20 hover:bg-nav-dark/40 flex items-center justify-center text-nav-dark font-bold transition-colors"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="text-center space-y-4">
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="inline-flex items-center justify-center px-8 py-4 bg-green text-nav-dark font-bold text-lg rounded-lg cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl hover:brightness-105 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-nav-dark border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Saving Profile...
+                </>
+              ) : (
+                "Save Profile"
+              )}
             </button>
-              {/* This save message *could* be slightly adjusted to reduce buffer spacing */}
-          {saveMessage && <p className="mt-4 text-lg">{saveMessage}</p>}
+            
+            {saveMessage && (
+              <div className={`p-4 rounded-lg text-center font-semibold ${
+                saveMessage.includes("successfully") 
+                  ? "bg-green text-nav-dark" 
+                  : "bg-red-100 text-red-800"
+              }`}>
+                {saveMessage}
+              </div>
+            )}
+          </div>
         </form>
       </main>
+      
       <Footer />
     </div>
   );
