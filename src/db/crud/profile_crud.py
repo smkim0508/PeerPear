@@ -1,6 +1,6 @@
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
-from typing import Optional
+from typing import Optional, List
 from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, update
@@ -8,7 +8,7 @@ from api.dependencies import get_db_sessionmaker, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from flask import request
 from datetime import datetime, timedelta
-from common.types.user import UserProfile, UserProfileFull, User
+from common.types.user import UserProfile, UserProfileFull, User, ClassYear
 
 # returns a row from the UserProfileTable given a user id
 def get_user_profile(user_id: int) -> Optional[UserProfileFull]:
@@ -54,15 +54,23 @@ def get_user_profile(user_id: int) -> Optional[UserProfileFull]:
 
     return user_profile
 
-def create_user_profile(user_id: int, gender: Optional[str], class_year: int, major: Optional[str], hobbies=list[str]):
+def create_user_profile(
+        user_id: int,
+        gender: Optional[str],
+        class_year: ClassYear,
+        major: Optional[str],
+        hobbies: Optional[List[str]] = None):
     db_session = get_db_sessionmaker()
 
     # NOTE: SQLAlchemy handles None mapped to NULL
+    hobbies = hobbies or []
+    major_value = major or ""
+
     new_profile = UserProfileTable(
         user_id=user_id,
         gender=gender,
         class_year=class_year,
-        major=major,
+        major=major_value,
         hobbies=hobbies
     )
 
@@ -88,6 +96,10 @@ def update_user_profile(user_profile: UserProfileFull):
 
     # execute update on both tables
     with db_session() as session:
+        existing_profile = session.execute(
+            select(UserProfileTable).where(UserProfileTable.user_id == user_profile.id)
+        ).scalar_one_or_none()
+
         if user_values:
             session.execute(
                 update(UserTable)
@@ -95,11 +107,22 @@ def update_user_profile(user_profile: UserProfileFull):
                 .values(**user_values)
             )
 
-        if profile_values:
-            session.execute(
-                update(UserProfileTable)
-                .where(UserProfileTable.user_id == user_profile.id)
-                .values(**profile_values)
+        if existing_profile:
+            if profile_values:
+                session.execute(
+                    update(UserProfileTable)
+                    .where(UserProfileTable.user_id == user_profile.id)
+                    .values(**profile_values)
+                )
+        else:
+            session.add(
+                UserProfileTable(
+                    user_id=user_profile.id,
+                    gender=user_profile.gender,
+                    class_year=user_profile.class_year,
+                    major=user_profile.major or "",
+                    hobbies=user_profile.hobbies or [],
+                )
             )
 
         session.commit()

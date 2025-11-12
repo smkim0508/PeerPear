@@ -1,9 +1,22 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+let client: SupabaseClient | null = null
+
+if (supabaseUrl && supabaseAnonKey) {
+  client = createClient(supabaseUrl, supabaseAnonKey)
+} else {
+  if (typeof window !== "undefined") {
+    console.warn(
+      "Supabase environment variables are not set. Supabase features will be disabled."
+    )
+  }
+}
+
+export const supabase = client
+export const isSupabaseConfigured = !!client
 
 // Database types based on the schema
 export interface Database {

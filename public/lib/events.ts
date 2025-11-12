@@ -10,6 +10,10 @@ export interface EventWithDetails extends DatabaseEvent {
  * Fetch a single event with organization and questions
  */
 export async function fetchEventById(eventId: number): Promise<EventWithDetails | null> {
+  if (!supabase) {
+    console.warn('Supabase not configured. fetchEventById returning null.');
+    return null;
+  }
   try {
     const { data, error } = await supabase
       .from('events')
@@ -46,6 +50,10 @@ export async function fetchEventById(eventId: number): Promise<EventWithDetails 
  * Fetch all active events with organization details
  */
 export async function fetchActiveEvents(): Promise<EventWithDetails[]> {
+  if (!supabase) {
+    console.warn('Supabase not configured. fetchActiveEvents returning empty array.');
+    return [];
+  }
   try {
     const { data, error } = await supabase
       .from('events')
@@ -82,6 +90,10 @@ export async function fetchActiveEvents(): Promise<EventWithDetails[]> {
  * Check if a user is registered for an event
  */
 export async function checkUserRegistration(username: string, eventId: number): Promise<boolean> {
+  if (!supabase) {
+    console.warn('Supabase not configured. checkUserRegistration returning false.');
+    return false;
+  }
   try {
     const { data, error } = await supabase
       .from('users')
@@ -104,6 +116,10 @@ export async function checkUserRegistration(username: string, eventId: number): 
  * Register a user for an event
  */
 export async function registerUserForEvent(username: string, eventId: number): Promise<boolean> {
+  if (!supabase) {
+    console.warn('Supabase not configured. registerUserForEvent returning false.');
+    return false;
+  }
   try {
     // Get current user data
     const { data: userData, error: userError } = await supabase
@@ -141,6 +157,10 @@ export async function registerUserForEvent(username: string, eventId: number): P
  * Unregister a user from an event
  */
 export async function unregisterUserFromEvent(username: string, eventId: number): Promise<boolean> {
+  if (!supabase) {
+    console.warn('Supabase not configured. unregisterUserFromEvent returning false.');
+    return false;
+  }
   try {
     // Get current user data
     const { data: userData, error: userError } = await supabase
@@ -193,6 +213,10 @@ export async function unregisterUserFromEvent(username: string, eventId: number)
  * Get user's responses for an event
  */
 export async function getUserEventResponses(username: string, eventId: number): Promise<UserResponse[]> {
+  if (!supabase) {
+    console.warn('Supabase not configured. getUserEventResponses returning empty array.');
+    return [];
+  }
   try {
     // Get user ID
     const { data: userData, error: userError } = await supabase
@@ -240,6 +264,10 @@ export async function getUserEventResponses(username: string, eventId: number): 
  * Submit user responses for event questions
  */
 export async function submitEventResponses(username: string, responses: { questionId: number; answer: any }[]): Promise<boolean> {
+  if (!supabase) {
+    console.warn('Supabase not configured. submitEventResponses returning false.');
+    return false;
+  }
   try {
     // Get user ID
     const { data: userData, error: userError } = await supabase

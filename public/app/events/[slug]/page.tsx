@@ -51,10 +51,25 @@ export default function EventPage({ params }: EventPageProps) {
   const eventId = parseInt(slug);
 
   useEffect(() => {
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      setIsLoading(false);
+      return;
+    }
     fetchEvent();
   }, [eventId, user]);
 
   const fetchEvent = async () => {
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -95,8 +110,13 @@ export default function EventPage({ params }: EventPageProps) {
   };
 
   // Fetch participants only for organizations
+  const isOrganizationUser =
+    user?.userType === "organization" ||
+    user?.user_info?.user_type === "organization";
+
   useEffect(() => {
-    if (!eventId || user?.user_info?.user_type !== "organization") return;
+    if (!eventId || !isOrganizationUser) return;
+    if (!supabase) return;
 
     const fetchParticipants = async () => {
       const { data, error } = await supabase
@@ -113,10 +133,16 @@ export default function EventPage({ params }: EventPageProps) {
     };
 
     fetchParticipants();
-  }, [eventId, user]);
+  }, [eventId, isOrganizationUser]);
 
   const handleRegister = async () => {
     if (!user || !event) return;
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      return;
+    }
 
     setIsRegistering(true);
     try {
@@ -152,6 +178,12 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleUnregister = async () => {
     if (!user || !event) return;
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      return;
+    }
 
     setIsRegistering(true);
     try {
@@ -187,6 +219,13 @@ export default function EventPage({ params }: EventPageProps) {
   const handleUserClick = async (user: any) => {
     setSelectedUser(user);
     setIsModalOpen(true);
+
+    if (!supabase) {
+      setError(
+        "Event data service is not configured. Please set Supabase environment variables."
+      );
+      return;
+    }
 
     const { data, error } = await supabase
       .from("responses")
@@ -310,7 +349,7 @@ export default function EventPage({ params }: EventPageProps) {
               )}
 
               {/* === Participants Section (only for organization) === */}
-              {user?.user_info?.user_type === "organization" && (
+              {isOrganizationUser && (
                 <Card className="shadow-lg border-0 bg-white rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
@@ -401,7 +440,7 @@ export default function EventPage({ params }: EventPageProps) {
       </div>
 
       {/* === User Modal (only for organization) === */}
-      {user?.user_info?.user_type === "organization" && isModalOpen && selectedUser && (
+      {isOrganizationUser && isModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
             <button

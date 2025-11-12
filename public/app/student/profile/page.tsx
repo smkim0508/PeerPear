@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Profile {
-  user_id: string;
+  user_id: number;
   first_name: string;
   last_name: string;
   email: string;
@@ -17,35 +18,66 @@ interface Profile {
 }
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<Profile>({
-    user_id: "1", // hardcoded for now
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone_number: "",
-    gender: "",
-    other_gender: "",
-    class_year: "",
-    major: "",
-    hobbies: [] as string[],
-  });
+  const { user, refreshAuth } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const [newHobby, setNewHobby] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
+
+    setProfile((prev) => {
+      if (prev) {
+        return prev;
+      }
+
+      return {
+        user_id: user.id,
+        first_name: user.firstName || "",
+        last_name: user.lastName || "",
+        email: user.email || "",
+        phone_number: user.phoneNumber || "",
+        gender: "",
+        other_gender: "",
+        class_year: "",
+        major: "",
+        hobbies: [],
+      };
+    });
+  }, [user]);
+
+  useEffect(() => {
     const fetchProfile = async () => {
+      if (!user?.id) {
+        return;
+      }
+
       try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
         const res = await fetch(
-          `http://localhost:5001/user-profile/student-profile?user_id=${profile.user_id}`
+          `${apiUrl}/user-profile/student-profile?user_id=${user.id}`,
+          {
+            credentials: "include",
+          }
         );
         const data = await res.json();
 
-        if (data.profile) {
-          // Merge existing data into the state
+        if (data.profile && Object.keys(data.profile).length > 0) {
           setProfile((prev) => ({
-            ...prev,
-            ...data.profile,
+            user_id: user.id,
+            first_name: data.profile.first_name || prev?.first_name || "",
+            last_name: data.profile.last_name || prev?.last_name || "",
+            email: data.profile.email || prev?.email || "",
+            phone_number:
+              data.profile.phone_number || prev?.phone_number || "",
+            gender: data.profile.gender || "",
+            other_gender: "",
+            class_year: data.profile.class_year || "",
+            major: data.profile.major || "",
             hobbies: data.profile.hobbies || [],
           }));
         }
@@ -55,37 +87,46 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, []);
+  }, [user?.id]);
 
   // Handle input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
+    setProfile((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
   // Add hobby to list
   const handleAddHobby = () => {
     const trimmed = newHobby.trim();
-    if (trimmed && !profile.hobbies.includes(trimmed)) {
-      setProfile((prev) => ({ ...prev, hobbies: [...prev.hobbies, trimmed] }));
+    if (trimmed && profile && !profile.hobbies.includes(trimmed)) {
+      setProfile((prev) =>
+        prev ? { ...prev, hobbies: [...prev.hobbies, trimmed] } : prev
+      );
       setNewHobby("");
     }
   };
 
   // Remove hobby from list
   const handleRemoveHobby = (hobby: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      hobbies: prev.hobbies.filter((h) => h !== hobby),
-    }));
+    setProfile((prev) =>
+      prev
+        ? {
+            ...prev,
+            hobbies: prev.hobbies.filter((h) => h !== hobby),
+          }
+        : prev
+    );
   };
 
   // Submit profile changes
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveMessage("");
+    if (!profile) {
+      return;
+    }
     
     try {
       // convert class_year to enum
@@ -94,14 +135,18 @@ export default function ProfilePage() {
         class_year: profile.class_year || null,
       };
 
-      const res = await fetch("http://localhost:5001/user-profile/update-profile", {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const res = await fetch(`${apiUrl}/user-profile/update-profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        credentials: "include",
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setSaveMessage("Profile saved successfully!");
+        await refreshAuth();
       } else {
         setSaveMessage("Error saving profile. Please try again.");
       }
@@ -110,6 +155,14 @@ export default function ProfilePage() {
       setSaveMessage("Error saving profile. Please try again.");
     }
   };
+
+  if (!user?.id || !profile) {
+    return (
+      <div className="flex items-center justify-center min-h-screen font-sans bg-[#f3f4ef]">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-[#f3f4ef]">

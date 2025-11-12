@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { describe } from "node:test";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfilePage() {
-  // Change this later
-  const organization_id = 1;
+  const { user, refreshAuth } = useAuth();
+  const organizationId = user?.organizationId ?? 1;
 
   const [orgName, setOrgName] = useState("");
   const [editName, setEditName] = useState("");
@@ -14,13 +14,20 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!organizationId) {
+      return;
+    }
+
     const fetchProfile = async () => {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
         const res = await fetch(
-          `${apiUrl}/organization_profile/profile/${organization_id}`
+          `${apiUrl}/organization_profile/profile/${organizationId}`,
+          {
+            credentials: "include",
+          }
         );
         const data = await res.json();
 
@@ -38,18 +45,22 @@ export default function ProfilePage() {
       }
     };
     fetchProfile();
-  }, []);
+  }, [organizationId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!organizationId) {
+      return;
+    }
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
       const res = await fetch(
-        `${apiUrl}/organization_profile/profile/${organization_id}`,
+        `${apiUrl}/organization_profile/profile/${organizationId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             org_name: editName,
             description: orgDescription,
@@ -61,6 +72,7 @@ export default function ProfilePage() {
       if (res.ok) {
         setMessage(data.message || "Profile updated successfully");
         setOrgName(editName);
+        await refreshAuth();
       } else {
         setMessage(data.message || "Failed to update profile");
       }
@@ -73,7 +85,9 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen font-sans bg-[#f3f4ef]">
       <Navbar userType="organization" />
       <main className="flex-1 p-10 max-w-4xl mx-auto">
-        <h1 className="text-5xl font-bold mb-8 text-[#4a6b1e]">{orgName}</h1>
+        <h1 className="text-5xl font-bold mb-8 text-[#4a6b1e]">
+          {orgName || "Organization Profile"}
+        </h1>
 
         <form
           onSubmit={handleSubmit}
