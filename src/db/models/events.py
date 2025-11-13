@@ -52,8 +52,8 @@ class EventTable(MainDB_Base):
 
     image_url: Mapped[str] = mapped_column(String, nullable=True)
 
-    title: Mapped[str] = mapped_column(String, nullable=True)
-    description: Mapped[str] = mapped_column(String, nullable=True)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=False)
     matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
     organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
 
@@ -80,4 +80,5 @@ class EventRegistrationsTable(MainDB_Base):
         default=None
     )
     valid_registration: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False)
+        Boolean, nullable=False, default=False
+    )

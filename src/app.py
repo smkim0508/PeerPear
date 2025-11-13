@@ -99,12 +99,16 @@ def create_app() -> Flask:
     # open a single session with each request
     @app.before_request
     def _open_session():
-        # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
-        is_running_locally = "//localhost:" in request.url_root
-        is_using_https = request.is_secure
-        if (not is_running_locally) and (not is_using_https):
-            url = request.url.replace("http://", "https://", 1)
-            return redirect(url, code=301)
+        # print(f"request url: {request.url_root}")
+        # # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
+        # is_running_locally = "//localhost:" in request.url_root or "//127.0.0.1:" in request.url_root
+        # is_using_https = request.is_secure
+        # if (not is_running_locally) and (not is_using_https):
+        #     url = request.url.replace("http://", "https://", 1)
+        #     print(f'redirecting to {url}')
+        #     return redirect(url, code=301)
+
+        # print(f"hello")
 
         # once verified, open session for db and llm client
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
@@ -124,16 +128,13 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-    app.register_blueprint(student_dashboard_bp,
-                           url_prefix="/student_dashboard")
+    app.register_blueprint(student_dashboard_bp, url_prefix="/student_dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
-    app.register_blueprint(
-        org_dashboard_bp, url_prefix="/organization_dashboard")
+    app.register_blueprint(org_dashboard_bp, url_prefix="/organization_dashboard")
     app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
     app.register_blueprint(questionnaire_bp, url_prefix="/questionnaire")
     app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
-    app.register_blueprint(event_registration_bp,
-                           url_prefix="/event_registration")
+    app.register_blueprint(event_registration_bp, url_prefix="/event_registration")
     app.register_blueprint(events_bp, url_prefix="/events")
 
     # check health for app dependencies and liveness

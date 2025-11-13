@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
+from common.types.pairing_event import EventRole
 
 # internal mapping for class year, including grad, alum, prof for future uses.
 class ClassYear(Enum):
@@ -37,11 +38,16 @@ class UserProfile(BaseModel):
     """
     id: int
     name: str
+    email: str
+    role: Optional[EventRole] = None
     profile_summary: str
 
 class User(BaseModel):
     """
-    Lightweight representation of a single user, which holds just their id and name
+    Lightweight representation of a single user, which holds just their id, name, email.
+    NOTE: this is technically a shallow copy of the UserProfile class without summary.
     """
     id: int
     name: str
+    email: str
+    role: Optional[EventRole] = None

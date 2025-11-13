@@ -44,7 +44,7 @@ def create_user(username: str, first_name: str, last_name: str, email: str, phon
         session.refresh(new_user)
         return new_user
     
-def create_user_profile(user: UserTable, gender: str, class_year: str, major: str, hobbies: list[str], profile_summary: Optional[str] = None):
+def create_user_profile(user: UserTable, gender: Optional[str], class_year: Optional[str], major: Optional[str], hobbies: Optional[list[str]], profile_summary: Optional[str] = None):
     """Create a user profile for the given user."""
     from db.models.user_profile import UserProfileTable  # Import here to avoid circular dependency
     db_session = get_db_sessionmaker()
@@ -63,7 +63,6 @@ def create_user_profile(user: UserTable, gender: str, class_year: str, major: st
         session.refresh(new_profile)
         return new_profile
     
-
 def get_or_create_user(username: str, first_name: str, last_name: str, email: str, phone_number: Optional[str] = None) -> UserTable:
     """Get existing user or create a new one if they don't exist."""
     existing_user = get_user_by_username(username)
@@ -73,5 +72,5 @@ def get_or_create_user(username: str, first_name: str, last_name: str, email: st
     
     # if user doesn't exist, create new one
     user = create_user(username, first_name, last_name, email, phone_number)
-    create_user_profile(user, None, None, None, [], None)
+    create_user_profile(user, None, None, None, [], None) # TODO: this needs to be reviewed -- should be consistent with user profile fields in db, and enum validation for classyear
     return user

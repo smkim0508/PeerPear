@@ -14,6 +14,7 @@ from common.logging import logger
 from modules.pairing.orchestrator import PairingOrchestrator
 from app_types.api.response.pairing_response import PairingResponse
 from db.crud.registration_crud import get_all_registered_users_for_event
+from common.types.pairing_event import EventRole
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)
@@ -72,12 +73,12 @@ def pair_students_test():
 
     # dummy values below, the **intention** is that LLM should correctly pair up: (John + Bob); (Jane + Charlie); (Alice + Emily
     students = []
-    students.append(UserProfile(id=1, name="John Doe", profile_summary="I like software engineering, building web apps. I love Python."))
-    students.append(UserProfile(id=2, name="Jane Doe", profile_summary="Jane Doe is an athelete in the Rugby team."))
-    students.append(UserProfile(id=3, name="Bob Smith", profile_summary="Bob likes to build machine learning models and apps."))
-    students.append(UserProfile(id=4, name="Alice Johnson", profile_summary="Alice Johnson loves to film vlogs eating food in Manhattan Chinatown."))
-    students.append(UserProfile(id=5, name="Charlie Brown", profile_summary="Charlie Brown plays basketball everyday. He also loves soccer."))
-    students.append(UserProfile(id=6, name="Emily Davis", profile_summary="Emily Davis is a chef and loves to cook for her friends."))
+    students.append(UserProfile(id=1, name="John Doe", email="johndoe@me.com", role=EventRole.BIG_SIBLING, profile_summary="I like software engineering, building web apps. I love Python."))
+    students.append(UserProfile(id=2, name="Jane Doe", email="janedoe@me.com", role=EventRole.BIG_SIBLING, profile_summary="Jane Doe is an athelete in the Rugby team."))
+    students.append(UserProfile(id=3, name="Bob Smith", email="bobsmith@me.com", role=EventRole.LITTLE_SIBLING,profile_summary="Bob likes to build machine learning models and apps."))
+    students.append(UserProfile(id=4, name="Alice Johnson", email="alicejohnson@me.com", role=EventRole.LITTLE_SIBLING, profile_summary="Alice Johnson loves to film vlogs eating food in Manhattan Chinatown."))
+    students.append(UserProfile(id=5, name="Charlie Brown", email="charliebrown@me.com", role=EventRole.LITTLE_SIBLING, profile_summary="Charlie Brown plays basketball everyday. He also loves soccer."))
+    students.append(UserProfile(id=6, name="Emily Davis", email="emilydavis@me.com", role=EventRole.BIG_SIBLING, profile_summary="Emily Davis is a chef and loves to cook for her friends."))
 
     # initialize orhcestrator and repo
     pairing_orchestrator = PairingOrchestrator(main_db_session=db_session, llm_client=llm_client)

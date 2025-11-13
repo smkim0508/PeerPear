@@ -12,12 +12,11 @@ from common.error_response import generic_error_response
 
 events_bp = Blueprint("events", __name__)
 
-
 @events_bp.get("/<int:event_id>")
 def get_event_details(event_id: int):
     """
     Get event details including organization and questions
-    Replaces fetchEventById from frontend
+    NOTE: Replaces fetchEventById from frontend
     """
     try:
         db_session = get_db_sessionmaker()
@@ -77,7 +76,7 @@ def get_event_details(event_id: int):
 def get_active_events():
     """
     Get all active events with organization details
-    Replaces fetchActiveEvents from frontend
+    NOTE: Replaces fetchActiveEvents from frontend
     """
     try:
         db_session = get_db_sessionmaker()
@@ -136,7 +135,7 @@ def get_active_events():
 def check_user_registration(event_id: int, username: str):
     """
     Check if a user is registered for an event
-    Replaces checkUserRegistration from frontend
+    NOTE: Replaces checkUserRegistration from frontend
     """
     try:
         db_session = get_db_sessionmaker()
@@ -172,7 +171,7 @@ def check_user_registration(event_id: int, username: str):
 def register_user_for_event(event_id: int):
     """
     Register a user for an event
-    Replaces registerUserForEvent from frontend
+    NOTE: Replaces registerUserForEvent from frontend
     """
     try:
         payload = request.get_json(silent=True) or {}
@@ -224,7 +223,7 @@ def register_user_for_event(event_id: int):
 def unregister_user_from_event(event_id: int):
     """
     Unregister a user from an event
-    Replaces unregisterUserFromEvent from frontend
+    NOTE: Replaces unregisterUserFromEvent from frontend
     """
     try:
         payload = request.get_json(silent=True) or {}
@@ -286,7 +285,7 @@ def unregister_user_from_event(event_id: int):
 def get_user_event_responses(event_id: int, username: str):
     """
     Get user's responses for an event
-    Replaces getUserEventResponses from frontend
+    NOTE: Replaces getUserEventResponses from frontend
     """
     try:
         db_session = get_db_sessionmaker()
@@ -336,7 +335,7 @@ def get_user_event_responses(event_id: int, username: str):
 def submit_event_responses(event_id: int):
     """
     Submit user responses for event questions
-    Replaces submitEventResponses from frontend
+    NOTE: Replaces submitEventResponses from frontend
     """
     try:
         payload = request.get_json(silent=True) or {}
@@ -383,7 +382,7 @@ def submit_event_responses(event_id: int):
 def get_event_participants(event_id: int):
     """
     Get participants for an event (for organization users)
-    Replaces the participants fetching logic from frontend
+    NOTE: Replaces the participants fetching logic from frontend
     """
     try:
         db_session = get_db_sessionmaker()

@@ -84,8 +84,9 @@ def create_new_registration(event_id: int, user_id: int):
 def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfile]]:
     """
     Retrieves all *users* that are registered for a given event id.
-    NOTE: not to be mixed with actual registration details.
+    NOTE: not to be confused with retrieving actual registration details.
     - Each user holds minimal user profile info needed for LLM pairing.
+    - Some users may be "registered", but their registration status might be incomplete, which we filter.
     """
     db_session = get_db_sessionmaker()
 
@@ -94,6 +95,7 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
         .join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserProfileTable.user_id)
         .join(UserTable, UserTable.id == UserProfileTable.user_id)
         .where(EventRegistrationsTable.event_id == event_id)
+        .where(EventRegistrationsTable.valid_registration == True) # verifies if registration is complete
     )
 
     user_profiles: list[UserProfile] = []
@@ -107,6 +109,8 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
                     id=user.id,
                     # joins first and last name
                     name="".join([user.first_name, " ", user.last_name]),
+                    email=user.email,
+                    role=reg.role,
                     profile_summary=profile.profile_summary or ""
                 )
             )

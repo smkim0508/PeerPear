@@ -14,8 +14,8 @@ from common.logging import logger
 class PairingOrchestrator(PairingRepository):
     def pair_students_in_groups(self, students: list[UserProfile], group_size: int) -> PairingResult:
         # to map paired ids back to students later
-        # NOTE: the output map is a lightweight User model with just the id and name.
-        student_map = {student.id: User(id=student.id, name=student.name) for student in students}
+        # NOTE: the output map is a lightweight User model excluding the profile summary.
+        student_map = {student.id: User(id=student.id, name=student.name, email=student.email, role=student.role) for student in students}
 
         # NOTE: this guardrail is also handled in API.
         if group_size <= 1:
