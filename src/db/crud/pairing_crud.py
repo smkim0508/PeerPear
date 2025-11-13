@@ -38,7 +38,7 @@ def store_new_pairing(pairing_result: PairingResult, event_id: int):
 def get_pairings_for_event(event_id: int) -> tuple[Optional[dict], Optional[list[PairedGroup]]]:
     db_session = get_db_sessionmaker()
 
-    with db_session as session:
+    with db_session() as session:
         event = session.scalar(
             select(EventTable)
             .where(EventTable.id == event_id)
