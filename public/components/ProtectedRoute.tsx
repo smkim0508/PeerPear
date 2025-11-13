@@ -29,13 +29,9 @@ export default function ProtectedRoute({
   const [profileChecked, setProfileChecked] = useState(false);
   const storedUserType =
     typeof window !== "undefined"
-      ? (localStorage.getItem("userType") as
-          | "student"
-          | "organization"
-          | null)
+      ? (localStorage.getItem("userType") as "student" | "organization" | null)
       : null;
-  const inferredUserType =
-    user?.userType || storedUserType || ("student" as const);
+  const inferredUserType = storedUserType;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && redirectToLogin) {
@@ -70,7 +66,6 @@ export default function ProtectedRoute({
     router,
     user?.organizationProfileComplete,
     user?.profileComplete,
-    user?.userType,
   ]);
 
   // Show loading state while checking authentication
