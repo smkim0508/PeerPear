@@ -27,6 +27,7 @@ import {
   unregisterUserFromEvent,
   getUserEventResponses,
   getEventParticipants,
+  autoTerminateEvent,
 } from "@/lib/events";
 
 type Event = {
@@ -74,6 +75,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [checkedAutoTerminate, setCheckedAutoTerminate] = useState(false);
 
   // Organization-only section states
   const [participants, setParticipants] = useState<any[]>([]);
@@ -120,12 +122,16 @@ export default function EventPage({ params }: EventPageProps) {
       setIsLoading(true);
       setError(null);
 
+      if (!checkedAutoTerminate) {
+        setCheckedAutoTerminate(true);
+        await autoTerminateEvent(eventId);
+      }
+
       const eventData = await fetchEventById(eventId);
       if (!eventData) {
         setError("Event not found");
         return;
       }
-
       setEvent(eventData);
     } catch (err) {
       console.error("Error:", err);

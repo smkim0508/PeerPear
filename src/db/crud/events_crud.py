@@ -214,27 +214,26 @@ def validate_event_and_admin(session, event_id: int, user_id: int):
     event = session.scalar(
         select(EventTable).where(EventTable.id == event_id)
     )
-    
+
     if not event:
         return None, {"error": "Event not found", "status": 404}
-    
+
     org_admin = session.scalar(
-            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
-        )
+        select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+    )
 
     if org_admin is None:
-        return None, {"error": "User is not an organization admin", "status":403}
+        return None, {"error": "User is not an organization admin", "status": 403}
 
     organization_id = org_admin.organization_id
 
-    
-
-    if  event.organization_id != organization_id:
+    if event.organization_id != organization_id:
         return None, {"error": "Organization does not own this event", "status": 403}
 
     return event, None
 
 # Starts an event
+
 
 def start_event(event_id: int, user_id: int):
 
@@ -271,7 +270,6 @@ def end_event(event_id: int, user_id: int):
         if event.status not in [EventStatus.STARTED, EventStatus.NOT_STARTED]:
             return {"error": "Event cannot be ended from the current state", "status": 400}
 
-
         if event.status == EventStatus.NOT_STARTED and (not event.end_date or event.end_date.date() > current_date):
             return {"error": "Event has not reached its end date and has not started", "status": 400}
 
@@ -303,3 +301,28 @@ def publish_event(event_id: int, user_id: int):
         session_instance.commit()
 
         return {"message": "Event pairings published successfully", "event_id": event_id}
+
+def auto_terminate(event_id: int):
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session_instance:
+        event = session_instance.scalar(
+            select(EventTable).where(EventTable.id == event_id)
+        )
+
+        if not event:
+            return   {"error": "Event not found", "status": 404}
+
+        today = date.today()
+
+        if event.status not in [EventStatus.STARTED, EventStatus.NOT_STARTED]:
+            return {"message": "Event already terminated", "status": 200}
+
+        if not event.end_date or event.end_date.date() > today:
+            return {"message": "Event has not reached its end date yet", "status": 200}
+
+        event.status = EventStatus.TERMINATED
+
+        session_instance.commit()
+
+        return {"message": "Event ended successfully", "event_id": event_id}

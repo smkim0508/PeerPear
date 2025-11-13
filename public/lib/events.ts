@@ -199,3 +199,20 @@ export async function getEventParticipants(eventId: number): Promise<any[]> {
     return [];
   }
 }
+
+export async function autoTerminateEvent(eventId: number)  {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/event_status/auto-terminate/${eventId}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok)
+        console.error("Error auto-terminating event", response.statusText);
+    } catch (err) {
+      console.error("Error auto-terminating event", err);
+    }
+  };
