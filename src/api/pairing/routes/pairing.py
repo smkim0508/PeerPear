@@ -115,8 +115,7 @@ def pair_students_test():
 @pairing_bp.get("/event/<int:event_id>")
 def get_event_pairings(event_id):
 
-    if not event_id:
-        return jsonify({"error": "event_id and user_id are required"}), 400
+    
     try:
         event_id = int(event_id)
     except (ValueError, TypeError):
@@ -129,45 +128,45 @@ def get_event_pairings(event_id):
             event = session.scalar(
                 select(EventTable).where(EventTable.id == event_id))
 
-        if not event:
-            return {"error": "Event not found", "status": 404}
+            if not event:
+                return jsonify({"error": "Event not found"}), 404
 
-        if not event.matches or len(event.matches) == 0:
-            return jsonify({"error": "No matches were found"}), 404
+            if not event.matches or len(event.matches) == 0:
+                return jsonify({"error": "No matches were found"}), 404
 
-        all_users = set()
+            all_users = set()
 
-        for group in event.matches:
-            for userid in group:
-                all_users.add(userid)
+            for group in event.matches:
+                for userid in group:
+                    all_users.add(userid)
 
-        users = (session.query(UserTable, EventRegistrationsTable).join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserTable.id)
-                 .filter(
-            EventRegistrationsTable.event_id == event_id,
-            UserTable.id.in_(all_users)
-        )
-            .all()
-        )
+            users = (session.query(UserTable, EventRegistrationsTable).join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserTable.id)
+                    .filter(
+                EventRegistrationsTable.event_id == event_id,
+                UserTable.id.in_(all_users)
+            )
+                .all()
+            )
 
-        user_map = {user.id:
-                    User(
-                        id=user.id,
-                        name=f"{user.first_name} {user.last_name}",
-                        email=user.email,
-                        role=registration.role
-                    ) for user, registration in users}
+            user_map = {user.id:
+                        User(
+                            id=user.id,
+                            name=f"{user.first_name} {user.last_name}",
+                            email=user.email,
+                            role=registration.role
+                        ) for user, registration in users}
 
-        paired_groups: list[PairedGroup] = []
+            paired_groups: list[PairedGroup] = []
 
-        for group in event.matches:
-            group_users = [user_map[user_id]
-                           for user_id in group if user_id in user_map]
-            paired_groups.append(PairedGroup(students=group_users))
+            for group in event.matches:
+                group_users = [user_map[user_id]
+                            for user_id in group if user_id in user_map]
+                paired_groups.append(PairedGroup(students=group_users))
 
-        response = PairingResponse(event_id=event_id, pairing_results=PairingResult(
-            groups=paired_groups, llm_reasoning=None))
-        
-        return jsonify(response.model_dump(mode="json")), 200
+            response = PairingResponse(event_id=event_id, pairing_results=PairingResult(
+                groups=paired_groups, llm_reasoning=None))
+            
+            return jsonify(response.model_dump(mode="json")), 200
 
     except Exception as e:
         logger.error(f"Error getting matches of an event: {e}")
