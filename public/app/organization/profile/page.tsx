@@ -15,42 +15,27 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setIsLoading(true);
-        setError(null);
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-        const res = await fetch(
-          `${apiUrl}/organization_profile/profile`,
-          {
-            credentials: "include",
-          }
-        );
-        
-        if (!res.ok) {
-          if (res.status === 401) {
-            setError("Please log in to view organization profile.");
-          } else if (res.status === 403) {
-            setError("You do not have permission to access organization profile.");
-          } else {
-            setError("Failed to load organization profile.");
-          }
-          return;
-        }
-        
+        const res = await fetch(`${apiUrl}/organization_profile/profile`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) return;
+
         const data = await res.json();
-        setOrgName(data.organization_name);
-        setOrgDescription(data.description);
-        setEditName(data.organization_name);
-        console.log(orgName);
-        console.log(orgDescription);
+        setOrgName(data.organization_name || "");
+        setEditName(data.organization_name || "");
+        setOrgDescription(data.description || "");
       } catch (error) {
-        setError("Network error while loading organization profile");
+        console.error("Network error while loading organization profile:", error);
       } finally {
         setIsLoading(false);
       }
@@ -60,39 +45,46 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    const newErrors: { [key: string]: boolean } = {};
+    if (!editName.trim()) newErrors.org_name = true;
+    if (!orgDescription.trim()) newErrors.description = true;
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      setMessage("Some required fields are empty. Please fill them in.");
+      return;
+    }
+
     setIsLoading(true);
-    setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-      const res = await fetch(
-        `${apiUrl}/organization_profile/profile`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            org_name: editName,
-            description: orgDescription,
-          }),
-        }
-      );
+      const res = await fetch(`${apiUrl}/organization_profile/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          org_name: editName,
+          description: orgDescription,
+        }),
+      });
 
       const data = await res.json();
       if (res.ok) {
-        setMessage(data.message || "Profile updated successfully");
+        setMessage(data.message || "Profile updated successfully!");
         setOrgName(editName);
         setIsEditing(false);
         await refreshAuth();
-        
-        // Clear message after 3 seconds
+
         setTimeout(() => setMessage(null), 3000);
       } else {
-        setMessage(data.message || "Failed to update profile");
+        setMessage(data.message || "Failed to update profile.");
       }
     } catch (err) {
-      setMessage("Network error while updating organization profile");
+      console.error("Error updating organization profile:", err);
+      setMessage("Error saving profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +119,7 @@ export default function ProfilePage() {
                 <p className="text-[#1a1a1a] font-medium">Organization Details</p>
               </div>
             </div>
-            
+
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
@@ -144,36 +136,46 @@ export default function ProfilePage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
-                    Organization Name
+                    Organization Name <span className="text-red-600">*</span>
                   </label>
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full p-4 border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-white bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium"
+                    className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${
+                      errors.org_name
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-white focus:ring-white"
+                    }`}
                     placeholder="Enter organization name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
-                    Status
+                    Status <span className="text-red-600">*</span>
                   </label>
                   <div className="p-4 bg-white/60 rounded-lg border-2 border-white">
-                    <span className="text-[#1a1a1a] font-medium">Active Organization</span>
+                    <span className="text-[#1a1a1a] font-medium">
+                      Active Organization
+                    </span>
                   </div>
                 </div>
               </div>
 
               <div>
                 <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
-                  Description
+                  Description <span className="text-red-600">*</span>
                 </label>
                 <textarea
                   value={orgDescription}
                   onChange={(e) => setOrgDescription(e.target.value)}
                   rows={4}
-                  className="w-full p-4 border-2 border-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-white bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none"
+                  className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none ${
+                    errors.description
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-white focus:ring-white"
+                  }`}
                   placeholder="Tell us about your organization..."
                 />
               </div>
@@ -187,30 +189,49 @@ export default function ProfilePage() {
                   <Save className="w-4 h-4" />
                   {isLoading ? "Saving..." : "Save Changes"}
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={() => {
                     setIsEditing(false);
                     setEditName(orgName);
                     setMessage(null);
+                    setErrors({});
                   }}
                   className="cursor-pointer bg-white hover:bg-gray-50 text-[#1a1a1a] px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 >
                   Cancel
                 </button>
               </div>
+
+              {message && (
+                <div
+                  className={`p-4 rounded-lg text-center font-semibold ${
+                    message.includes("success")
+                      ? "bg-green text-nav-dark"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {message}
+                </div>
+              )}
             </form>
           ) : (
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">Organization Name</h3>
-                  <p className="text-[#1a1a1a] font-medium text-xl">{orgName || "Not set"}</p>
+                  <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">
+                    Organization Name
+                  </h3>
+                  <p className="text-[#1a1a1a] font-medium text-xl">
+                    {orgName || "Not set"}
+                  </p>
                 </div>
-                
+
                 <div>
-                  <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">Status</h3>
+                  <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">
+                    Status
+                  </h3>
                   <span className="inline-flex items-center gap-2 bg-white/60 px-4 py-2 rounded-lg">
                     <CheckCircle className="w-4 h-4 text-green-600" />
                     <span className="text-[#1a1a1a] font-medium">Active</span>
@@ -219,41 +240,24 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">Description</h3>
+                <h3 className="text-lg font-semibold text-[#0a0a0a] mb-2">
+                  Description
+                </h3>
                 <p className="text-[#1a1a1a] font-medium leading-relaxed">
-                  {orgDescription || "No description provided yet. Click 'Edit Profile' to add one."}
+                  {orgDescription ||
+                    "No description provided yet. Click 'Edit Profile' to add one."}
                 </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Message Display */}
-        {message && (
-          <div className={`rounded-xl p-6 flex items-center gap-4 transition-all duration-300 hover:scale-105 ${
-            message.includes("successfully") || message.includes("success")
-              ? "bg-green border-2 border-white"
-              : "bg-red-100 border-2 border-red-300"
-          }`}>
-            {message.includes("successfully") || message.includes("success") ? (
-              <CheckCircle className="w-6 h-6 text-green-600 shrink-0" />
-            ) : (
-              <AlertCircle className="w-6 h-6 text-red-600 shrink-0" />
-            )}
-            <p className={`font-semibold ${
-              message.includes("successfully") || message.includes("success")
-                ? "text-[#0a0a0a]"
-                : "text-red-800"
-            }`}>
-              {message}
-            </p>
-          </div>
-        )}
-
         {/* Additional Info Cards */}
         <div className="grid md:grid-cols-1 gap-6 mt-8">
           <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105">
-            <h3 className="text-xl font-bold text-[#0a0a0a] mb-3">Need Help?</h3>
+            <h3 className="text-xl font-bold text-[#0a0a0a] mb-3">
+              Need Help?
+            </h3>
             <p className="text-[#1a1a1a] mb-4">
               Having trouble with your profile? Check out our help resources.
             </p>
