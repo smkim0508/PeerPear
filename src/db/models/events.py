@@ -11,7 +11,7 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import JSONB
 from db.models.organizations import OrganizationTable
 from enum import Enum
-from common.types.pairing_event import EventStatus, EventRole
+from common.types.event_enums import EventStatus, EventRole
 
 # main event table, representing each event
 
