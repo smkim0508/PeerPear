@@ -25,6 +25,8 @@ def store_new_pairing(pairing_result: PairingResult, event_id: int):
         # NOTE: shouldn't happen, since already validated in parent caller, but just in case
         if not event:
             raise ValueError(f"Event {event_id} not found")
+        # initially, the llm pairing and user-edited pairing are the same
         event.matches = groups_by_ids
+        event.llm_matches = groups_by_ids
         session.add(event)
         session.commit()
