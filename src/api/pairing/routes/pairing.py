@@ -131,20 +131,17 @@ def get_event_pairings(event_id):
         return jsonify({"error": "event_id must be an integer"}), 400
 
     try:
-        client_error_msg, paired_groups = get_pairings_for_event(event_id)
+        client_error_msg, pairing_result = get_pairings_for_event(event_id)
         
         if client_error_msg:
             return jsonify(client_error_msg), 404
 
-        if not paired_groups:
+        if not pairing_result:
             return jsonify({"error": "No matches were found"}), 404
 
         response = PairingResponse(
             event_id=event_id,
-            pairing_results=PairingResult(
-                groups=paired_groups,
-                llm_reasoning=None
-            )
+            pairing_results=pairing_result
         )
         return jsonify(response.model_dump(mode="json")), 200
 
@@ -228,8 +225,13 @@ def get_student_match(event_id: int):
                 )
 
             paired_group = PairedGroup(students=group)
-            response = PairingResponse(event_id=event_id, pairing_results=PairingResult(
-                groups=[paired_group], llm_reasoning=None))
+            response = PairingResponse(
+                event_id=event_id,
+                pairing_results=PairingResult(
+                    groups=[paired_group],
+                    llm_reasoning=event.llm_reasoning
+                )
+            )
 
             return jsonify(response.model_dump(mode="json")), 200
 

@@ -31,11 +31,12 @@ def store_new_pairing(pairing_result: PairingResult, event_id: int):
         # initially, the llm pairing and user-edited pairing are the same
         event.matches = groups_by_ids
         event.llm_matches = groups_by_ids
+        event.llm_reasoning = pairing_result.llm_reasoning
         session.add(event)
         session.commit()
 
 # returns an optional error message on fail, and a pairing result
-def get_pairings_for_event(event_id: int) -> tuple[Optional[dict], Optional[list[PairedGroup]]]:
+def get_pairings_for_event(event_id: int) -> tuple[Optional[dict], Optional[PairingResult]]:
     db_session = get_db_sessionmaker()
 
     with db_session() as session:
@@ -78,8 +79,13 @@ def get_pairings_for_event(event_id: int) -> tuple[Optional[dict], Optional[list
 
         paired_groups: list[PairedGroup] = []
 
-        for group in event.matches:
+        for group in event.matches: # NOTE: this is from the actual matches field, not the llm matches.
             group_users = [user_map[user_id] for user_id in group if user_id in user_map]
             paired_groups.append(PairedGroup(students=group_users))
 
-        return None, paired_groups
+        pairing_result = PairingResult(
+            groups=paired_groups,
+            llm_reasoning=event.llm_reasoning
+        )
+
+        return None, pairing_result
