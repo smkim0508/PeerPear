@@ -58,6 +58,7 @@ class EventTable(MainDB_Base):
     # NOTE: matches in DB is a 2D array of integer user ids. At each query, the user info is retrieved from DB.
     llm_matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # the original LLM pairing
     matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # user-edited pairing
+    llm_reasoning: Mapped[str] = mapped_column(String, nullable=True) # the LLM's reasoning for the pairing, for users to evaluate how well it did
     organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
 
 # table representing each unique user + event pair, which is defined as a registration
