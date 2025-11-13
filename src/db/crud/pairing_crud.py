@@ -45,10 +45,10 @@ def get_pairings_for_event(event_id: int) -> tuple[Optional[dict], Optional[list
         )
 
         if not event:
-            return {"error": "Event not found", "status": 404}, None
+            return {"error": "Event not found"}, None
 
         if not event.matches or len(event.matches) == 0:
-            return {"error": "No matches were found", "status": 404}, None
+            return {"error": "No matches were found"}, None
 
         all_users = set()
 
