@@ -43,7 +43,7 @@ def create_app() -> Flask:
     # Configure CORS to allow requests from Next.js frontend
     CORS(
         app,
-        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://peerpear.vercel.app"],
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
