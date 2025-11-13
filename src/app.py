@@ -24,6 +24,7 @@ from api.dashboard.routes.organization_profile import org_profile_bp
 from api.dashboard.routes.questionnaire import questionnaire_bp
 from api.dashboard.routes.event_registration import event_registration_bp
 from api.events.routes.events import events_bp
+from api.events.routes.event_status import event_status_bp
 
 from api.profile.routes.profile import user_profile_bp
 
@@ -128,14 +129,18 @@ def create_app() -> Flask:
     # use blueprints for routing apis
     app.register_blueprint(pairing_bp, url_prefix="/pairing")
     app.register_blueprint(sorting_bp, url_prefix="/sorting")
-    app.register_blueprint(student_dashboard_bp, url_prefix="/student_dashboard")
+    app.register_blueprint(student_dashboard_bp,
+                           url_prefix="/student_dashboard")
     app.register_blueprint(my_events_bp, url_prefix="/my_events_dashboard")
-    app.register_blueprint(org_dashboard_bp, url_prefix="/organization_dashboard")
+    app.register_blueprint(
+        org_dashboard_bp, url_prefix="/organization_dashboard")
     app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
     app.register_blueprint(questionnaire_bp, url_prefix="/questionnaire")
     app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
-    app.register_blueprint(event_registration_bp, url_prefix="/event_registration")
+    app.register_blueprint(event_registration_bp,
+                           url_prefix="/event_registration")
     app.register_blueprint(events_bp, url_prefix="/events")
+    app.register_blueprint(event_status_bp, url_prefix="/event_status")
 
     # check health for app dependencies and liveness
     @app.get("/health")

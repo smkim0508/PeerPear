@@ -4,7 +4,7 @@ from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
 from api.dependencies import get_db_sessionmaker, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from flask import request
+from flask import request, jsonify
 from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
 from common.types.pairing_event import PairingEvent
@@ -13,6 +13,7 @@ from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
 # helper to retrieve all events
 # NOTE: filtering is handled in FE
 
+
 def create_new_event(event: PairingEvent) -> PairingEvent:
     db_session = get_db_sessionmaker()
     with db_session() as session:
@@ -20,10 +21,11 @@ def create_new_event(event: PairingEvent) -> PairingEvent:
         session.add(db_event)
         session.commit()
 
-        session.refresh(db_event) # refreshes DB ORM
-        
+        session.refresh(db_event)  # refreshes DB ORM
+
         # returns the newly-mapped event DTO
         return PairingEvent.model_validate(db_event)
+
 
 def get_all_active_events(user_id: int) -> list[PublishedEvent]:
     """
@@ -49,7 +51,8 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
             .filter(
                 or_(
                     EventTable.end_date == None,
-                    func.date(EventTable.end_date) >= today # NOTE: compares date only, so any event ending today will be valid.
+                    # NOTE: compares date only, so any event ending today will be valid.
+                    func.date(EventTable.end_date) >= today
                 )
             )
             .filter(EventTable.id.notin_(registered_event_ids))
@@ -72,6 +75,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
 
     return published_events
 
+
 def get_all_active_events_unfiltered() -> list[PublishedEvent]:
     """
     Returns all events that are STARTED and not yet past their end_date,
@@ -89,7 +93,8 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
             .filter(
                 or_(
                     EventTable.end_date == None,
-                    func.date(EventTable.end_date) >= today # NOTE: compares date only, so any event ending today will be valid.
+                    # NOTE: compares date only, so any event ending today will be valid.
+                    func.date(EventTable.end_date) >= today
                 )
             )
             .all()
@@ -110,6 +115,7 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
             )
 
     return published_events
+
 
 def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     db_session = get_db_sessionmaker()
@@ -140,6 +146,7 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
             )
 
     return published_events
+
 
 def get_user_events(user_id: int) -> list[PublishedEvent]:
 
@@ -199,3 +206,89 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
             )
 
     return None
+
+
+def validate_event_and_org(session, event_id: int, organization_id: int):
+
+    event = session.scalar(
+        select(EventTable).where(EventTable.id == event_id)
+    )
+
+    if not event:
+        return None, {"error": "Event not found", "status": 404}
+
+    if  event.organization_id != organization_id:
+        return None, {"error": "Organization does not own this event", "status": 403}
+
+    return event, None
+
+# Starts an event
+
+
+def start_event(event_id: int, organization_id: int):
+
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+        event, error = validate_event_and_org(
+            session, event_id, organization_id)
+
+        if error:
+            return error
+
+        if event.status != EventStatus.NOT_STARTED:
+            return {"error": "Event cannot be started from the current state", "status": 400}
+
+        event.status = EventStatus.STARTED
+
+        session.commit()
+
+        return {"message": "Event started successfully", "event_id": event_id}
+
+
+def end_event(event_id: int, organization_id: int):
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+        event, error = validate_event_and_org(
+            session, event_id, organization_id)
+
+        if error:
+            return error
+        current_date = date.today()
+
+        if event.status not in [EventStatus.STARTED, EventStatus.NOT_STARTED]:
+            return {"error": "Event cannot be ended from the current state", "status": 400}
+
+
+        if event.status == EventStatus.NOT_STARTED and (not event.end_date or event.end_date.date() > current_date):
+            return {"error": "Event has not reached its end date and has not started", "status": 400}
+
+        event.status = EventStatus.TERMINATED
+
+        session.commit()
+
+        return {"message": "Event ended successfully", "event_id": event_id}
+
+
+def publish_event(event_id: int, organization_id: int):
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+        event, error = validate_event_and_org(
+            session, event_id, organization_id)
+
+        if error:
+            return error
+
+        if event.status != EventStatus.TERMINATED:
+            return {"error": "Event cannot be published from the current state", "status": 400}
+
+        if not event.matches:
+            return {"error": "There are no pairings to be published", "status": 400}
+
+        event.status = EventStatus.PAIRING_PUBLISHED
+
+        session.commit()
+
+        return {"message": "Event pairings published successfully", "event_id": event_id}
