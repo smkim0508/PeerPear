@@ -125,7 +125,7 @@ def get_event_pairings(event_id):
     try:
         db_session = get_db_sessionmaker()
 
-        with db_session as session:
+        with db_session() as session:
             event = session.scalar(
                 select(EventTable).where(EventTable.id == event_id))
 
@@ -144,7 +144,7 @@ def get_event_pairings(event_id):
         users = (session.query(UserTable, EventRegistrationsTable).join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserTable.id)
                  .filter(
             EventRegistrationsTable.event_id == event_id,
-            UserTable.id.in_(get_all_registered_users_for_event)
+            UserTable.id.in_(all_users)
         )
             .all()
         )
