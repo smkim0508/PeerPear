@@ -115,7 +115,6 @@ def pair_students_test():
 @pairing_bp.get("/event/<int:event_id>")
 def get_event_pairings(event_id):
 
-    
     try:
         event_id = int(event_id)
     except (ValueError, TypeError):
@@ -141,7 +140,7 @@ def get_event_pairings(event_id):
                     all_users.add(userid)
 
             users = (session.query(UserTable, EventRegistrationsTable).join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserTable.id)
-                    .filter(
+                     .filter(
                 EventRegistrationsTable.event_id == event_id,
                 UserTable.id.in_(all_users)
             )
@@ -160,14 +159,105 @@ def get_event_pairings(event_id):
 
             for group in event.matches:
                 group_users = [user_map[user_id]
-                            for user_id in group if user_id in user_map]
+                               for user_id in group if user_id in user_map]
                 paired_groups.append(PairedGroup(students=group_users))
 
             response = PairingResponse(event_id=event_id, pairing_results=PairingResult(
                 groups=paired_groups, llm_reasoning=None))
-            
+
             return jsonify(response.model_dump(mode="json")), 200
 
     except Exception as e:
         logger.error(f"Error getting matches of an event: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@pairing_bp.get("/event/<int:event_id>/my-match")
+def get_student_match(event_id: int):
+    try:
+        event_id = int(event_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    payload = request.get_json(silent=True) or {}
+
+    user_id = payload.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
+
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "user_id must be an integer"}), 400
+
+    try:
+        db_session = get_db_sessionmaker()
+
+        with db_session() as session:
+            event = session.scalar(
+                select(EventTable).where(EventTable.id == event_id))
+
+            if not event:
+                return jsonify({"error": "Event not found"}), 404
+
+            if event.status != EventStatus.PAIRING_PUBLISHED:
+                return jsonify({"error": "Matches for this event are not yet published"}), 400
+
+            # Check valid registration
+            registration = session.scalar(
+                select(EventRegistrationsTable).where(
+                    EventRegistrationsTable.event_id == event_id
+                ).where(
+                    EventRegistrationsTable.user_id == user_id
+                )
+            )
+
+            if not registration:
+                return jsonify({"error": "You are not registered for this event"}), 403
+
+            if not registration.valid_registration:
+                return jsonify({"error": "You do not have a valid registration for this event"}), 403
+
+            # 4. Ensure matches exist
+            if not event.matches or len(event.matches) == 0:
+                return jsonify({"error": "No matches were found"}), 404
+
+            student_group = None
+            for group in event.matches:
+                if user_id in group:
+                    student_group = group
+                    break
+
+            if not student_group:
+                return jsonify({"error": "You were not matched for this event"}), 404
+
+            users = (session.query(UserTable, EventRegistrationsTable).join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserTable.id)
+                     .filter(
+                EventRegistrationsTable.event_id == event_id,
+                UserTable.id.in_(student_group)
+            )
+                .all()
+            )
+
+            group = []
+            for user, registration in users:
+                group.append(
+                    User(
+                        id=user.id,
+                        name=f"{user.first_name} {user.last_name}",
+                        email=user.email,
+                        role=registration.role
+                    )
+                )
+
+            paired_group = PairedGroup(students=group)
+            response = PairingResponse(event_id=event_id, pairing_results=PairingResult(
+                groups=paired_group, llm_reasoning=None))
+
+            return jsonify(response.model_dump(mode="json")), 200
+
+    except Exception as e:
+        logger.error(
+            f"Error retrieving student match for event {event_id}: {e}")
         return jsonify({"error": "Internal server error"}), 500
