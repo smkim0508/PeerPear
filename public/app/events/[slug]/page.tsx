@@ -20,7 +20,14 @@ import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { fetchEventById, checkUserRegistration, registerUserForEvent, unregisterUserFromEvent, getUserEventResponses, getEventParticipants } from "@/lib/events";
+import {
+  fetchEventById,
+  checkUserRegistration,
+  registerUserForEvent,
+  unregisterUserFromEvent,
+  getUserEventResponses,
+  getEventParticipants,
+} from "@/lib/events";
 
 type Event = {
   id: number;
@@ -73,27 +80,30 @@ export default function EventPage({ params }: EventPageProps) {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [userAnswers, setUserAnswers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Event editing states
   const [isEditingEvent, setIsEditingEvent] = useState(false);
-  const [editEventData, setEditEventData] = useState({ title: '', description: '' });
+  const [editEventData, setEditEventData] = useState({
+    title: "",
+    description: "",
+  });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
 
   const eventId = parseInt(slug);
 
   // Determine user type - STRICTLY from localStorage only
   const getUserType = (): "student" | "organization" => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const storedUserType = localStorage.getItem("userType") as
         | "student"
         | "organization"
         | null;
       return storedUserType || "student";
     }
-    
+
     return "student"; // Default to student
   };
-  
+
   const userType = getUserType();
   const isOrganizationUser = userType === "organization";
 
@@ -127,23 +137,24 @@ export default function EventPage({ params }: EventPageProps) {
 
   const checkRegistration = async () => {
     if (!user?.username) return;
-    
+
     try {
       const isRegistered = await checkUserRegistration(user.username, eventId);
       setIsRegistered(isRegistered);
-      
+
       if (isRegistered) {
         const responses = await getUserEventResponses(user.username, eventId);
         setUserResponses(responses);
-        
+
         // Check questionnaire completion status
         if (user?.id) {
-          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+          const API_BASE_URL =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
           const statusResponse = await fetch(
             `${API_BASE_URL}/event_registration/status/${eventId}/${user.id}`,
             { credentials: "include" }
           );
-          
+
           if (statusResponse.ok) {
             const statusData = await statusResponse.json();
             setQuestionnaireCompleted(statusData.valid_registration || false);
@@ -178,14 +189,21 @@ export default function EventPage({ params }: EventPageProps) {
 
     setIsRegistering(true);
     try {
-      const success = await registerUserForEvent(user.username, eventId);
-      
-      if (!success) {
-        throw new Error("Failed to register");
+      const result = await registerUserForEvent(user.id!, eventId);
+
+      if (!result.success) {
+        // Detect incomplete profile
+        if (result.error?.includes("profile")) {
+          setError(result.error);
+          return;
+        }
+
+        setError(result.error || "Failed to register for event");
+        return;
       }
 
       setIsRegistered(true);
-      
+
       // Set questionnaire completion status
       if (event.questions && event.questions.length > 0) {
         setQuestionnaireCompleted(false); // New registration needs questionnaire
@@ -207,7 +225,7 @@ export default function EventPage({ params }: EventPageProps) {
     setIsRegistering(true);
     try {
       const success = await unregisterUserFromEvent(user.username, eventId);
-      
+
       if (!success) {
         throw new Error("Failed to unregister");
       }
@@ -231,19 +249,28 @@ export default function EventPage({ params }: EventPageProps) {
 
     try {
       // Get user's responses for this event
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const response = await fetch(`${API_BASE_URL}/questionnaire/${eventId}/${selectedUser.user_id}`, {
-        credentials: 'include',
-      });
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${API_BASE_URL}/questionnaire/${eventId}/${selectedUser.user_id}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
         // Transform the data to match expected format
-        const formattedAnswers = data.answers?.map((answer: any) => ({
-          answer: answer.answer,
-          question_id: answer.question_id,
-          questions: { question: data.questions?.find((q: any) => q.id === answer.question_id)?.question || "" }
-        })) || [];
+        const formattedAnswers =
+          data.answers?.map((answer: any) => ({
+            answer: answer.answer,
+            question_id: answer.question_id,
+            questions: {
+              question:
+                data.questions?.find((q: any) => q.id === answer.question_id)
+                  ?.question || "",
+            },
+          })) || [];
         setUserAnswers(formattedAnswers);
       } else {
         console.error("Error fetching user answers:", response.statusText);
@@ -256,8 +283,8 @@ export default function EventPage({ params }: EventPageProps) {
   const handleEditEvent = () => {
     if (event) {
       setEditEventData({
-        title: event.title || '',
-        description: event.description || ''
+        title: event.title || "",
+        description: event.description || "",
       });
       setIsEditingEvent(true);
     }
@@ -265,26 +292,34 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleSaveEvent = async () => {
     if (!event) return;
-    
+
     setIsSavingEvent(true);
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const response = await fetch(`${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(editEventData)
-      });
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(editEventData),
+        }
+      );
 
       if (response.ok) {
         // Update local event state
-        setEvent(prev => prev ? {
-          ...prev,
-          title: editEventData.title,
-          description: editEventData.description
-        } : null);
+        setEvent((prev) =>
+          prev
+            ? {
+                ...prev,
+                title: editEventData.title,
+                description: editEventData.description,
+              }
+            : null
+        );
         setIsEditingEvent(false);
       } else {
         const errorData = await response.json();
@@ -300,7 +335,7 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleCancelEdit = () => {
     setIsEditingEvent(false);
-    setEditEventData({ title: '', description: '' });
+    setEditEventData({ title: "", description: "" });
   };
 
   if (isLoading) {
@@ -320,7 +355,7 @@ export default function EventPage({ params }: EventPageProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center py-8">
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Event Not Found</h2>
+            <h2 className="text-xl font-semibold mb-2">Event Error</h2>
             <p className="text-gray-600 mb-4">
               {error || "The event you are looking for does not exist."}
             </p>
@@ -353,19 +388,23 @@ export default function EventPage({ params }: EventPageProps) {
                     {event.organizations.org_name}
                   </span>
                 </div>
-                
+
                 {isEditingEvent ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-4">
-                      <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+                      <h2 className="text-2xl font-bold text-white">
+                        Edit Event Details
+                      </h2>
                       <div className="flex gap-2">
                         <button
                           onClick={handleSaveEvent}
-                          disabled={isSavingEvent || !editEventData.title.trim()}
+                          disabled={
+                            isSavingEvent || !editEventData.title.trim()
+                          }
                           className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
                           <Save className="h-4 w-4" />
-                          {isSavingEvent ? 'Saving...' : 'Save Changes'}
+                          {isSavingEvent ? "Saving..." : "Save Changes"}
                         </button>
                         <button
                           onClick={handleCancelEdit}
@@ -379,28 +418,46 @@ export default function EventPage({ params }: EventPageProps) {
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-white text-sm font-medium mb-2">Event Title *</label>
+                        <label className="block text-white text-sm font-medium mb-2">
+                          Event Title *
+                        </label>
                         <input
                           type="text"
                           value={editEventData.title}
-                          onChange={(e) => setEditEventData(prev => ({ ...prev, title: e.target.value }))}
+                          onChange={(e) =>
+                            setEditEventData((prev) => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
+                          }
                           className="w-full text-3xl lg:text-4xl font-bold leading-tight text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-green-400 transition-colors"
                           placeholder="Enter event title"
                           maxLength={100}
                         />
-                        <p className="text-sm text-gray-200 mt-1">{editEventData.title.length}/100 characters</p>
+                        <p className="text-sm text-gray-200 mt-1">
+                          {editEventData.title.length}/100 characters
+                        </p>
                       </div>
                       <div>
-                        <label className="block text-white text-sm font-medium mb-2">Event Description</label>
+                        <label className="block text-white text-sm font-medium mb-2">
+                          Event Description
+                        </label>
                         <textarea
                           value={editEventData.description}
-                          onChange={(e) => setEditEventData(prev => ({ ...prev, description: e.target.value }))}
+                          onChange={(e) =>
+                            setEditEventData((prev) => ({
+                              ...prev,
+                              description: e.target.value,
+                            }))
+                          }
                           className="w-full text-lg text-gray-100 leading-relaxed bg-transparent border-2 border-white rounded-lg p-4 focus:outline-none focus:border-green-400 resize-none transition-colors"
                           placeholder="Describe your event, its goals, and what participants can expect..."
                           rows={4}
                           maxLength={500}
                         />
-                        <p className="text-sm text-gray-200 mt-1">{editEventData.description.length}/500 characters</p>
+                        <p className="text-sm text-gray-200 mt-1">
+                          {editEventData.description.length}/500 characters
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -525,27 +582,39 @@ export default function EventPage({ params }: EventPageProps) {
                                 {questionnaireCompleted ? (
                                   <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
                                     <CheckCircle className="h-5 w-5" />
-                                    <span className="font-medium">Completed</span>
+                                    <span className="font-medium">
+                                      Completed
+                                    </span>
                                   </div>
                                 ) : (
                                   <div className="space-y-3">
                                     <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
                                       <XCircle className="h-5 w-5" />
-                                      <span className="font-medium">Incomplete</span>
+                                      <span className="font-medium">
+                                        Incomplete
+                                      </span>
                                     </div>
                                     <PearButton
                                       text="Complete Questionnaire"
-                                      onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                      onClick={() =>
+                                        router.push(
+                                          `/events/${eventId}/questionnaire`
+                                        )
+                                      }
                                       className="w-full"
                                     />
                                   </div>
                                 )}
                               </div>
-                              
+
                               {questionnaireCompleted && (
                                 <PearButton
                                   text="View/Edit Questionnaire"
-                                  onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                  onClick={() =>
+                                    router.push(
+                                      `/events/${eventId}/questionnaire`
+                                    )
+                                  }
                                   dark
                                   className="w-full"
                                 />
@@ -560,7 +629,9 @@ export default function EventPage({ params }: EventPageProps) {
                             onClick={handleUnregister}
                             dark
                             className={`w-full ${
-                              isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                              isRegistering
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                             }`}
                           />
                         </div>
@@ -597,16 +668,18 @@ export default function EventPage({ params }: EventPageProps) {
                         <p className="text-gray-800 text-lg font-medium mb-4">
                           Manage your event and view participant responses
                         </p>
-                        
+
                         <div className="grid gap-3">
                           {hasQuestions && (
                             <PearButton
                               text="View Response Analytics"
-                              onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questionnaire`)
+                              }
                               className="w-full"
                             />
                           )}
-                          
+
                           <PearButton
                             text="Edit Event Details"
                             onClick={handleEditEvent}

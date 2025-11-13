@@ -51,6 +51,19 @@ def create_new_registration(event_id: int, user_id: int):
             .limit(1)
         ) is not None
 
+        user = session.scalar(
+            select(UserTable).where(UserTable.id == user_id)
+        )
+
+        if not user:
+            return {"error": "User not found", "status": 404}
+
+        user_fields = ["first_name", "last_name", "phone_number"]
+
+        for field in user_fields:
+            if not getattr(user, field, None):
+                return {"error": "You must first finish your profile", "status": 400}
+
         # Get user profile to determine role
         user_profile = session.scalar(
             select(UserProfileTable).where(UserProfileTable.user_id == user_id)
@@ -58,6 +71,15 @@ def create_new_registration(event_id: int, user_id: int):
 
         if not user_profile:
             return {"error": "User profile not found", "status": 404}
+
+        required_fields = [
+            "class_year",
+            "major",
+            "hobbies",
+        ]
+        for field in required_fields:
+            if not getattr(user_profile, field, None):
+                return {"error": "You must first finish your profile", "status": 400}
 
         if user_profile.class_year in [ClassYear.FRESHMAN, ClassYear.SOPHOMORE]:
             role = EventRole.LITTLE_SIBLING
@@ -95,7 +117,8 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
         .join(EventRegistrationsTable, EventRegistrationsTable.user_id == UserProfileTable.user_id)
         .join(UserTable, UserTable.id == UserProfileTable.user_id)
         .where(EventRegistrationsTable.event_id == event_id)
-        .where(EventRegistrationsTable.valid_registration == True) # verifies if registration is complete
+        # verifies if registration is complete
+        .where(EventRegistrationsTable.valid_registration == True)
     )
 
     user_profiles: list[UserProfile] = []

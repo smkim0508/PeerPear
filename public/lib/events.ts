@@ -76,28 +76,33 @@ export async function checkUserRegistration(username: string, eventId: number): 
 /**
  * Register a user for an event
  */
-export async function registerUserForEvent(username: string, eventId: number): Promise<boolean> {
+export async function registerUserForEvent(userId: number, eventId: number): Promise<{ success: boolean; error?: string }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/events/${eventId}/register`, {
+    const response = await fetch(`${API_BASE_URL}/event_registration/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
-      body: JSON.stringify({ username }),
+      body: JSON.stringify({
+        user_id: userId,
+        event_id: eventId,
+      }), 
     });
 
     if (!response.ok) {
-      console.error('Error registering user:', response.statusText);
-      return false;
+      const error = await response.json().catch(() => ({}));
+      console.error("Error registering user:", error.error || response.statusText);
+      return {success: false, error: error.error || "Failed to Register"}
     }
 
-    return true;
+    return {success:true};
   } catch (err) {
-    console.error('Error in registerUserForEvent:', err);
-    return false;
+    console.error("Error in registerUserForEvent:", err);
+    return {success: false, error: "Network Error"};
   }
 }
+
 
 /**
  * Unregister a user from an event
