@@ -179,13 +179,9 @@ def get_student_match(event_id: int):
     except (ValueError, TypeError):
         return jsonify({"error": "event_id must be an integer"}), 400
 
-    payload = request.get_json(silent=True) or {}
-
-    user_id = payload.get("user_id")
-
+    user_id = request.args.get("user_id", type=int)
     if not user_id:
         return jsonify({"error": "user_id is required"}), 400
-
     try:
         user_id = int(user_id)
     except (ValueError, TypeError):
@@ -253,7 +249,7 @@ def get_student_match(event_id: int):
 
             paired_group = PairedGroup(students=group)
             response = PairingResponse(event_id=event_id, pairing_results=PairingResult(
-                groups=paired_group, llm_reasoning=None))
+                groups=[paired_group], llm_reasoning=None))
 
             return jsonify(response.model_dump(mode="json")), 200
 
