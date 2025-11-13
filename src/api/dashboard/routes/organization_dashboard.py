@@ -17,29 +17,31 @@ from common.types.event_enums import EventStatus, EventRole
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
 
+
 @org_dashboard_bp.get("/")
 def foo():
     return "placeholder"
+
 
 @org_dashboard_bp.get("/event-browse")
 @require_auth
 def browse_events():
     # Get user_id from session
     user_id = session.get("user_id")
-    
+
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
-    
+
     # Look up organization_id from orgadmins table
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
         )
-        
+
         if org_admin is None:
             return jsonify({"error": "User is not an organization admin"}), 403
-        
+
         organization_id = org_admin.organization_id
 
     # use helper to retrieve all events for the organization
@@ -48,11 +50,13 @@ def browse_events():
     except Exception as e:
         logger.error(f"Error retrieving events: {e}")
         return jsonify(generic_error_response), 500
-    
+
     pairing_event_response = EventBrowseResponse(events=published_events)
     return jsonify(pairing_event_response.model_dump(mode="json")), 200
 
 # NOTE: NOT DONE - should also use CRUD operations with DTO / ORM conversion
+
+
 @org_dashboard_bp.patch("/event")
 @require_auth
 def update_event():
@@ -63,24 +67,26 @@ def update_event():
 
     # Get user_id from session and look up organization
     user_id = session.get("user_id")
-    
+
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
-    
+
     # Look up organization_id from orgadmins table
     db_session = get_db_sessionmaker()
-    with db_session() as db_session_instance:
-        org_admin = db_session_instance.scalar(
+    with db_session() as session_instance:
+        org_admin = session_instance.scalar(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
         )
-        
+
         if org_admin is None:
             return jsonify({"error": "User is not an organization admin"}), 403
-        
+
         organization_id = org_admin.organization_id
 
     # Check if the event exists and belongs to the organization
-    event = g.db.query(EventTable).filter(EventTable.id == event_id).first()
+    event = session_instance.scalar(
+        select(EventTable).where(EventTable.id == event_id)
+    )
 
     if event is None:
         return jsonify({"error": "Event not found"}), 404
@@ -88,8 +94,16 @@ def update_event():
     elif event.organization_id != organization_id:
         return jsonify({"error": "Event does not belong to the organization"}), 404
 
-    # TODO: actually update the events
+    payload = request.get_json(silent=True) or {}
+    allowed_fields = ["title", "description", "status", "end_date"]
+    for key, value in payload.items():
+        if key in allowed_fields and hasattr(event, key):
+            setattr(event, key, value)
+
+    session_instance.commit()
+    session_instance.refresh(event)
     return jsonify({"message": "Event updated successfully"}), 200
+
 
 @org_dashboard_bp.post("/create-event")
 @require_auth
@@ -112,20 +126,20 @@ def create_event():
 
     # Get user_id from session and look up organization
     user_id = session.get("user_id")
-    
+
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
-    
+
     # Look up organization_id from orgadmins table
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
         )
-        
+
         if org_admin is None:
             return jsonify({"error": "User is not an organization admin"}), 403
-        
+
         organization_id = org_admin.organization_id
 
     title = data.get("title", "Untitled Event")
@@ -160,7 +174,7 @@ def create_event():
 
     # create the new event in db
     try:
-        updated_event = create_new_event(new_event) # This already commits
+        updated_event = create_new_event(new_event)  # This already commits
         logger.info(f"Event created: {updated_event}")
     except SQLAlchemyError as e:
         logger.error(f"Database error: {e}")
