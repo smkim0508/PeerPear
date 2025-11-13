@@ -4,18 +4,7 @@ from enum import Enum
 from common.types.user import User
 from common.types.organization import OrganizationProfile
 from typing import Optional
-
-# enums to represent event status
-class EventStatus(Enum):
-    NOT_STARTED = "NOT_STARTED"
-    STARTED = "STARTED"
-    TERMINATED = "TERMINATED"
-    PAIRING_PUBLISHED = "PAIRING_PUBLISHED"
-
-# enums to represent event roles, currently big and little siblings
-class EventRole(Enum):
-    BIG_SIBLING = "BIG_SIBLING"
-    LITTLE_SIBLING = "LITTLE_SIBLING"
+from common.types.event_enums import EventStatus, EventRole
 
 class PairedGroup(BaseModel):
     """

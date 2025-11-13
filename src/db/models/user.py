@@ -19,5 +19,4 @@ class UserTable(MainDB_Base):
     email: Mapped[str] = mapped_column(String, nullable=False)
     phone_number: Mapped[str] = mapped_column(String, nullable=True)
 
-    # org_admins = relationship("OrgAdminTable", back_populates="user")
 

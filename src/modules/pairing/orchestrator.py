@@ -7,12 +7,13 @@ from common.types.user import User, UserProfile, UserProfileFull
 from modules.pairing.system_prompts.pairing_prompts import BaselinePairingPrompts
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from common.logging import logger
+from db.crud.pairing_crud import store_new_pairing
 
 # NOTE: below is just the baseline logic for the pairing process, using end-to-end LLM connection.
 # Also, an orchestrator is technically not necessary at this stage, where we do not support continuous, stateful requests.
 # A simple endpoint could suffice, but this structure is present for future scaling.
 class PairingOrchestrator(PairingRepository):
-    def pair_students_in_groups(self, students: list[UserProfile], group_size: int) -> PairingResult:
+    def pair_students_in_groups(self, students: list[UserProfile], group_size: int, event_id: int) -> PairingResult:
         # to map paired ids back to students later
         # NOTE: the output map is a lightweight User model excluding the profile summary.
         student_map = {student.id: User(id=student.id, name=student.name, email=student.email, role=student.role) for student in students}
@@ -34,7 +35,7 @@ class PairingOrchestrator(PairingRepository):
 
         logger.info(f"Pairing results: {pairing_llm_output.groups}, reasoning: {pairing_llm_output.reasoning}")
 
-        return PairingResult(
+        pairing_result= PairingResult(
             groups=[
                 PairedGroup(
                     students=[
@@ -46,3 +47,8 @@ class PairingOrchestrator(PairingRepository):
             ],
             llm_reasoning=pairing_llm_output.reasoning
         )
+
+        # put the newly created pairing in DB for future retrieval
+        store_new_pairing(pairing_result, event_id)
+        
+        return pairing_result

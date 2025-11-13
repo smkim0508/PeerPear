@@ -15,5 +15,3 @@ class OrgAdminTable(MainDB_Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id"), nullable=False)
  
-    # user = relationship("UserTable", back_populates="org_admins")
-    # organization = relationship("OrganizationTable", back_populates="org_admins")
