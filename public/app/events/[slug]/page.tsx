@@ -12,6 +12,9 @@ import {
   Building2,
   CheckCircle,
   XCircle,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
@@ -70,6 +73,11 @@ export default function EventPage({ params }: EventPageProps) {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [userAnswers, setUserAnswers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Event editing states
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
+  const [editEventData, setEditEventData] = useState({ title: '', description: '' });
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
 
   const eventId = parseInt(slug);
 
@@ -245,6 +253,56 @@ export default function EventPage({ params }: EventPageProps) {
     }
   };
 
+  const handleEditEvent = () => {
+    if (event) {
+      setEditEventData({
+        title: event.title || '',
+        description: event.description || ''
+      });
+      setIsEditingEvent(true);
+    }
+  };
+
+  const handleSaveEvent = async () => {
+    if (!event) return;
+    
+    setIsSavingEvent(true);
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(`${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(editEventData)
+      });
+
+      if (response.ok) {
+        // Update local event state
+        setEvent(prev => prev ? {
+          ...prev,
+          title: editEventData.title,
+          description: editEventData.description
+        } : null);
+        setIsEditingEvent(false);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to update event");
+      }
+    } catch (err) {
+      console.error("Error updating event:", err);
+      setError("Failed to update event");
+    } finally {
+      setIsSavingEvent(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingEvent(false);
+    setEditEventData({ title: '', description: '' });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -295,13 +353,70 @@ export default function EventPage({ params }: EventPageProps) {
                     {event.organizations.org_name}
                   </span>
                 </div>
-                <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight text-white">
-                  {event.title}
-                </h1>
-                {event.description && (
-                  <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">
-                    {event.description}
-                  </p>
+                
+                {isEditingEvent ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveEvent}
+                          disabled={isSavingEvent || !editEventData.title.trim()}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Save className="h-4 w-4" />
+                          {isSavingEvent ? 'Saving...' : 'Save Changes'}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          disabled={isSavingEvent}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-all"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Event Title *</label>
+                        <input
+                          type="text"
+                          value={editEventData.title}
+                          onChange={(e) => setEditEventData(prev => ({ ...prev, title: e.target.value }))}
+                          className="w-full text-3xl lg:text-4xl font-bold leading-tight text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-green-400 transition-colors"
+                          placeholder="Enter event title"
+                          maxLength={100}
+                        />
+                        <p className="text-sm text-gray-200 mt-1">{editEventData.title.length}/100 characters</p>
+                      </div>
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Event Description</label>
+                        <textarea
+                          value={editEventData.description}
+                          onChange={(e) => setEditEventData(prev => ({ ...prev, description: e.target.value }))}
+                          className="w-full text-lg text-gray-100 leading-relaxed bg-transparent border-2 border-white rounded-lg p-4 focus:outline-none focus:border-green-400 resize-none transition-colors"
+                          placeholder="Describe your event, its goals, and what participants can expect..."
+                          rows={4}
+                          maxLength={500}
+                        />
+                        <p className="text-sm text-gray-200 mt-1">{editEventData.description.length}/500 characters</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-4 mb-6">
+                      <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-white">
+                        {event.title}
+                      </h1>
+                    </div>
+                    {event.description && (
+                      <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">
+                        {event.description}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -483,18 +598,21 @@ export default function EventPage({ params }: EventPageProps) {
                           Manage your event and view participant responses
                         </p>
                         
-                        {hasQuestions && (
+                        <div className="grid gap-3">
+                          {hasQuestions && (
+                            <PearButton
+                              text="View Response Analytics"
+                              onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                              className="w-full"
+                            />
+                          )}
+                          
                           <PearButton
-                            text="View All Responses"
-                            onClick={() => router.push(`/events/${eventId}/questionnaire`)}
-                            className="w-full mb-3"
+                            text="Edit Event Details"
+                            onClick={handleEditEvent}
+                            dark
+                            className="w-full"
                           />
-                        )}
-                        
-                        <div className="bg-blue-50 rounded-lg p-4">
-                          <p className="text-blue-800 font-medium">
-                            Registered Participants: {participants.length}
-                          </p>
                         </div>
                       </div>
                     </div>

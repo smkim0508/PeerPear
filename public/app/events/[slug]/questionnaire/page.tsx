@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import PearButton from "@/components/PearButton";
 import PearQuestion from "@/components/PearQuestion";
+import ResponseVisualization from "@/components/ResponseVisualization";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { use, useEffect, useState } from "react";
@@ -88,11 +89,29 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       if (participantsRes.ok) {
         const participantsData = await participantsRes.json();
         setParticipants(participantsData);
+        
+        // Fetch all responses for all participants
+        const responsePromises = participantsData.map(async (participant: any) => {
+          try {
+            const responseRes = await fetch(`${apiUrl}/questionnaire/${event_id}/${participant.user_id}`, {
+              credentials: 'include',
+            });
+            
+            if (responseRes.ok) {
+              const responseData = await responseRes.json();
+              return responseData.answers || [];
+            }
+            return [];
+          } catch (err) {
+            console.error(`Error fetching responses for user ${participant.user_id}:`, err);
+            return [];
+          }
+        });
+        
+        const allResponsesArrays = await Promise.all(responsePromises);
+        const flattenedResponses = allResponsesArrays.flat();
+        setAllResponses(flattenedResponses);
       }
-
-      // For now, we'll use the existing individual response fetching
-      // In a real implementation, you'd want a dedicated endpoint for all responses
-      setAllResponses([]); // Placeholder - would need backend endpoint
     } catch (err) {
       console.error("Error fetching participants and responses:", err);
     }
@@ -342,30 +361,15 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                   </div>
                 ) : (
                   <div className="space-y-8">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                        Participant Responses Overview
-                      </h2>
-                      <p className="text-gray-600 mb-6">
-                        {participants.length} participant{participants.length !== 1 ? 's' : ''} registered
-                      </p>
-                      <p className="text-gray-600 mb-6">
-                        Click on individual participants in the event page to view their detailed responses.
-                      </p>
-                    </div>
-                    
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                       {questions.map((question, qIndex) => (
-                        <div key={question.id} className="bg-gray-50 rounded-xl p-6">
-                          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                            {qIndex + 1}. {question.question}
-                          </h3>
-                          <div className="text-center py-8">
-                            <p className="text-gray-500">
-                              Individual responses can be viewed by clicking on participants in the main event page.
-                            </p>
-                          </div>
-                        </div>
+                        <ResponseVisualization
+                          key={question.id}
+                          question={question}
+                          participants={participants}
+                          allResponses={allResponses}
+                          questionIndex={qIndex}
+                        />
                       ))}
                     </div>
                     
