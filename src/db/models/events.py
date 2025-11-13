@@ -12,6 +12,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from db.models.organizations import OrganizationTable
 from enum import Enum
 from common.types.event_enums import EventStatus, EventRole
+from sqlalchemy.ext.mutable import MutableList
 
 # main event table, representing each event
 
@@ -55,13 +56,12 @@ class EventTable(MainDB_Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
     # NOTE: matches in DB is a 2D array of integer user ids. At each query, the user info is retrieved from DB.
-    llm_matches: Mapped[list[list[int]]] = mapped_column(ARRAY(Integer, dimensions=2), nullable=True) # the original LLM pairing
-    matches: Mapped[list[list[int]]] = mapped_column(ARRAY(Integer, dimensions=2), nullable=True) # user-edited pairing
+    llm_matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # the original LLM pairing
+    matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # user-edited pairing
     organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
 
 # table representing each unique user + event pair, which is defined as a registration
 # NOTE: allows for easily querying users attending events.
-
 
 class EventRegistrationsTable(MainDB_Base):
     __tablename__ = "event_registrations"

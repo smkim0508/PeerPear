@@ -209,27 +209,32 @@ def create_event_registration_data(session):
         EventRegistrationsTable(
             user_id=1,
             event_id=2,
-            role=EventRole.BIG_SIBLING
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
         ),
         EventRegistrationsTable(
             user_id=2,
             event_id=2,
-            role=EventRole.LITTLE_SIBLING
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True
         ),
         EventRegistrationsTable(
             user_id=3,
             event_id=2,
-            role=EventRole.BIG_SIBLING
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
         ),
         EventRegistrationsTable(
             user_id=4,
             event_id=2,
-            role=EventRole.LITTLE_SIBLING
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True
         ),
         EventRegistrationsTable(
             user_id=5,
             event_id=2,
-            role=EventRole.BIG_SIBLING
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
         )
     ]
     for registration in registrations:
