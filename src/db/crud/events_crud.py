@@ -72,6 +72,45 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
 
     return published_events
 
+def get_all_active_events_unfiltered() -> list[PublishedEvent]:
+    """
+    Returns all events that are STARTED and not yet past their end_date,
+    including events the user may already be registered for.
+    """
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+        # Main query: only events that are active and not past end_date
+        today = date.today()  # compare date only, not time
+        rows = (
+            session.query(EventTable, OrganizationTable)
+            .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
+            .filter(EventTable.status == EventStatus.STARTED)
+            .filter(
+                or_(
+                    EventTable.end_date == None,
+                    func.date(EventTable.end_date) >= today # NOTE: compares date only, so any event ending today will be valid.
+                )
+            )
+            .all()
+        )
+
+        published_events: list[PublishedEvent] = []
+        for event, org in rows:
+            published_events.append(
+                PublishedEvent(
+                    id=event.id,
+                    title=event.title or "Untitled Event",
+                    description=event.description or "",
+                    organization_name=org.org_name or "Unknown Organization",
+                    image_url=event.image_url or f"{request.host_url}student_dashboard/static/peerpear_logo.png",
+                    status=event.status,
+                    end_date=event.end_date,
+                )
+            )
+
+    return published_events
+
 def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     db_session = get_db_sessionmaker()
 

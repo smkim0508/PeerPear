@@ -8,7 +8,6 @@ import { Building2, Edit3, Save, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, refreshAuth } = useAuth();
-  const organizationId = user?.organizationId ?? 1;
 
   const [orgName, setOrgName] = useState("");
   const [editName, setEditName] = useState("");
@@ -16,53 +15,59 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!organizationId) {
-      return;
-    }
-
     const fetchProfile = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
         const res = await fetch(
-          `${apiUrl}/organization_profile/profile/${organizationId}`,
+          `${apiUrl}/organization_profile/profile`,
           {
             credentials: "include",
           }
         );
-        const data = await res.json();
-
-        if (res.ok) {
-          setOrgName(data.organization_name);
-          setOrgDescription(data.description);
-          setEditName(data.organization_name);
-          console.log(orgName);
-          console.log(orgDescription);
-        } else {
-          setMessage(data.error || "Failed to load organization profile");
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            setError("Please log in to view organization profile.");
+          } else if (res.status === 403) {
+            setError("You do not have permission to access organization profile.");
+          } else {
+            setError("Failed to load organization profile.");
+          }
+          return;
         }
+        
+        const data = await res.json();
+        setOrgName(data.organization_name);
+        setOrgDescription(data.description);
+        setEditName(data.organization_name);
+        console.log(orgName);
+        console.log(orgDescription);
       } catch (error) {
-        setMessage("Network error while loading organization profile");
+        setError("Network error while loading organization profile");
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchProfile();
-  }, [organizationId]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!organizationId) {
-      return;
-    }
     
     setIsLoading(true);
+    setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
       const res = await fetch(
-        `${apiUrl}/organization_profile/profile/${organizationId}`,
+        `${apiUrl}/organization_profile/profile`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

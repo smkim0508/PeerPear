@@ -12,6 +12,9 @@ import {
   Building2,
   CheckCircle,
   XCircle,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
@@ -60,6 +63,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [userResponses, setUserResponses] = useState<UserResponse[]>([]);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [questionnaireCompleted, setQuestionnaireCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -69,15 +73,37 @@ export default function EventPage({ params }: EventPageProps) {
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [userAnswers, setUserAnswers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Event editing states
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
+  const [editEventData, setEditEventData] = useState({ title: '', description: '' });
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
 
   const eventId = parseInt(slug);
 
+  // Determine user type - STRICTLY from localStorage only
+  const getUserType = (): "student" | "organization" => {
+    if (typeof window !== 'undefined') {
+      const storedUserType = localStorage.getItem("userType") as
+        | "student"
+        | "organization"
+        | null;
+      return storedUserType || "student";
+    }
+    
+    return "student"; // Default to student
+  };
+  
+  const userType = getUserType();
+  const isOrganizationUser = userType === "organization";
+
   useEffect(() => {
     fetchEvent();
-    if (user?.username) {
+    // Only check registration for students
+    if (user?.username && !isOrganizationUser) {
       checkRegistration();
     }
-  }, [eventId, user]);
+  }, [eventId, user, isOrganizationUser]);
 
   const fetchEvent = async () => {
     try {
@@ -109,16 +135,27 @@ export default function EventPage({ params }: EventPageProps) {
       if (isRegistered) {
         const responses = await getUserEventResponses(user.username, eventId);
         setUserResponses(responses);
+        
+        // Check questionnaire completion status
+        if (user?.id) {
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+          const statusResponse = await fetch(
+            `${API_BASE_URL}/event_registration/status/${eventId}/${user.id}`,
+            { credentials: "include" }
+          );
+          
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            setQuestionnaireCompleted(statusData.valid_registration || false);
+          }
+        }
+      } else {
+        setQuestionnaireCompleted(false);
       }
     } catch (err) {
       console.error("Error checking registration:", err);
     }
   };
-
-  // Fetch participants only for organizations
-  const isOrganizationUser =
-    user?.userType === "organization" ||
-    user?.user_info?.user_type === "organization";
 
   useEffect(() => {
     if (!eventId || !isOrganizationUser) return;
@@ -148,9 +185,13 @@ export default function EventPage({ params }: EventPageProps) {
       }
 
       setIsRegistered(true);
-
+      
+      // Set questionnaire completion status
       if (event.questions && event.questions.length > 0) {
+        setQuestionnaireCompleted(false); // New registration needs questionnaire
         router.push(`/events/${eventId}/questionnaire`);
+      } else {
+        setQuestionnaireCompleted(true); // No questionnaire needed
       }
     } catch (err) {
       console.error("Registration error:", err);
@@ -173,6 +214,7 @@ export default function EventPage({ params }: EventPageProps) {
 
       setIsRegistered(false);
       setUserResponses([]);
+      setQuestionnaireCompleted(false);
     } catch (err) {
       console.error("Unregistration error:", err);
       setError("Failed to unregister");
@@ -184,6 +226,8 @@ export default function EventPage({ params }: EventPageProps) {
   const handleUserClick = async (selectedUser: any) => {
     setSelectedUser(selectedUser);
     setIsModalOpen(true);
+
+    setUserAnswers([]); // Clear previous answers
 
     try {
       // Get user's responses for this event
@@ -207,6 +251,56 @@ export default function EventPage({ params }: EventPageProps) {
     } catch (error) {
       console.error("Error fetching user answers:", error);
     }
+  };
+
+  const handleEditEvent = () => {
+    if (event) {
+      setEditEventData({
+        title: event.title || '',
+        description: event.description || ''
+      });
+      setIsEditingEvent(true);
+    }
+  };
+
+  const handleSaveEvent = async () => {
+    if (!event) return;
+    
+    setIsSavingEvent(true);
+    try {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(`${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(editEventData)
+      });
+
+      if (response.ok) {
+        // Update local event state
+        setEvent(prev => prev ? {
+          ...prev,
+          title: editEventData.title,
+          description: editEventData.description
+        } : null);
+        setIsEditingEvent(false);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to update event");
+      }
+    } catch (err) {
+      console.error("Error updating event:", err);
+      setError("Failed to update event");
+    } finally {
+      setIsSavingEvent(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingEvent(false);
+    setEditEventData({ title: '', description: '' });
   };
 
   if (isLoading) {
@@ -259,13 +353,70 @@ export default function EventPage({ params }: EventPageProps) {
                     {event.organizations.org_name}
                   </span>
                 </div>
-                <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight text-white">
-                  {event.title}
-                </h1>
-                {event.description && (
-                  <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">
-                    {event.description}
-                  </p>
+                
+                {isEditingEvent ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveEvent}
+                          disabled={isSavingEvent || !editEventData.title.trim()}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Save className="h-4 w-4" />
+                          {isSavingEvent ? 'Saving...' : 'Save Changes'}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          disabled={isSavingEvent}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-all"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Event Title *</label>
+                        <input
+                          type="text"
+                          value={editEventData.title}
+                          onChange={(e) => setEditEventData(prev => ({ ...prev, title: e.target.value }))}
+                          className="w-full text-3xl lg:text-4xl font-bold leading-tight text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-green-400 transition-colors"
+                          placeholder="Enter event title"
+                          maxLength={100}
+                        />
+                        <p className="text-sm text-gray-200 mt-1">{editEventData.title.length}/100 characters</p>
+                      </div>
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Event Description</label>
+                        <textarea
+                          value={editEventData.description}
+                          onChange={(e) => setEditEventData(prev => ({ ...prev, description: e.target.value }))}
+                          className="w-full text-lg text-gray-100 leading-relaxed bg-transparent border-2 border-white rounded-lg p-4 focus:outline-none focus:border-green-400 resize-none transition-colors"
+                          placeholder="Describe your event, its goals, and what participants can expect..."
+                          rows={4}
+                          maxLength={500}
+                        />
+                        <p className="text-sm text-gray-200 mt-1">{editEventData.description.length}/500 characters</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-4 mb-6">
+                      <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-white">
+                        {event.title}
+                      </h1>
+                    </div>
+                    {event.description && (
+                      <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">
+                        {event.description}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -331,11 +482,6 @@ export default function EventPage({ params }: EventPageProps) {
                             className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
                             onClick={() => handleUserClick(u)}
                           >
-                            <img
-                              src={u.avatar_url || "/default-avatar.png"}
-                              alt={u.username}
-                              className="w-16 h-16 rounded-full mx-auto mb-3"
-                            />
                             <h3 className="text-center font-semibold text-lg text-nav-dark">
                               {u.full_name || u.username}
                             </h3>
@@ -350,51 +496,129 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
-              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-nav-dark font-bold">
-                    Registration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-8">
-                  <div className="text-center">
-                    {isRegistered ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
-                          <CheckCircle className="h-6 w-6" />
-                          <span className="font-bold text-lg">
-                            You're registered!
-                          </span>
-                        </div>
+              {/* Registration section - only for students */}
+              {!isOrganizationUser && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Registration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      {isRegistered ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
+                            <CheckCircle className="h-6 w-6" />
+                            <span className="font-bold text-lg">
+                              You're registered!
+                            </span>
+                          </div>
 
-                        <PearButton
-                          text={
-                            isRegistering ? "Unregistering..." : "Unregister"
-                          }
-                          onClick={handleUnregister}
-                          dark
-                          className={`w-full ${
-                            isRegistering ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <p className="text-gray-800 text-lg font-medium">
-                          Ready to join this event?
+                          {/* Questionnaire Status */}
+                          {event?.questions && event.questions.length > 0 && (
+                            <div className="space-y-3">
+                              <div className="border-t border-gray-200 pt-4">
+                                <h3 className="font-semibold text-lg text-nav-dark mb-3">
+                                  Questionnaire
+                                </h3>
+                                {questionnaireCompleted ? (
+                                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
+                                    <CheckCircle className="h-5 w-5" />
+                                    <span className="font-medium">Completed</span>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-3">
+                                    <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
+                                      <XCircle className="h-5 w-5" />
+                                      <span className="font-medium">Incomplete</span>
+                                    </div>
+                                    <PearButton
+                                      text="Complete Questionnaire"
+                                      onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {questionnaireCompleted && (
+                                <PearButton
+                                  text="View/Edit Questionnaire"
+                                  onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                  dark
+                                  className="w-full"
+                                />
+                              )}
+                            </div>
+                          )}
+
+                          <PearButton
+                            text={
+                              isRegistering ? "Unregistering..." : "Unregister"
+                            }
+                            onClick={handleUnregister}
+                            dark
+                            className={`w-full ${
+                              isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <p className="text-gray-800 text-lg font-medium">
+                            Ready to join this event?
+                          </p>
+                          <PearButton
+                            text={
+                              isRegistering ? "Registering..." : "Register Now"
+                            }
+                            onClick={handleRegister}
+                            className="w-full"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Event Management section - only for organizations */}
+              {isOrganizationUser && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Event Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-gray-800 text-lg font-medium mb-4">
+                          Manage your event and view participant responses
                         </p>
-                        <PearButton
-                          text={
-                            isRegistering ? "Registering..." : "Register Now"
-                          }
-                          onClick={handleRegister}
-                          className="w-full"
-                        />
+                        
+                        <div className="grid gap-3">
+                          {hasQuestions && (
+                            <PearButton
+                              text="View Response Analytics"
+                              onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                              className="w-full"
+                            />
+                          )}
+                          
+                          <PearButton
+                            text="Edit Event Details"
+                            onClick={handleEditEvent}
+                            dark
+                            className="w-full"
+                          />
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
@@ -404,20 +628,15 @@ export default function EventPage({ params }: EventPageProps) {
 
       {/* === User Modal (only for organization) === */}
       {isOrganizationUser && isModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[#00000078] flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
             <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer"
               onClick={() => setIsModalOpen(false)}
             >
               ✕
             </button>
             <div className="text-center mb-6">
-              <img
-                src={selectedUser.avatar_url || "/default-avatar.png"}
-                alt={selectedUser.username}
-                className="w-20 h-20 rounded-full mx-auto mb-3"
-              />
               <h2 className="text-2xl font-bold text-nav-dark">
                 {selectedUser.full_name || selectedUser.username}
               </h2>

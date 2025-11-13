@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import PearButton from "@/components/PearButton";
 import PearQuestion from "@/components/PearQuestion";
+import ResponseVisualization from "@/components/ResponseVisualization";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { use, useEffect, useState } from "react";
@@ -51,6 +52,26 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const user_id = user?.id;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
+  // Organization-specific state
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [allResponses, setAllResponses] = useState<any[]>([]);
+
+  // Determine user type - STRICTLY from localStorage only
+  const getUserType = (): "student" | "organization" => {
+    if (typeof window !== 'undefined') {
+      const storedUserType = localStorage.getItem("userType") as
+        | "student"
+        | "organization"
+        | null;
+      return storedUserType || "student";
+    }
+    
+    return "student"; // Default to student
+  };
+  
+  const userType = getUserType();
+  const isOrganizationUser = userType === "organization";
+
   const handleAnswerChange = (questionId: number, newValue: string) => {
     setAnswers((prev) => ({
       ...prev,
@@ -58,41 +79,70 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     }));
   };
 
-  const get_questions = async () => {
-    if (!user_id) {
-      setError("User not authenticated");
-      setLoading(false);
-      return;
-    }
-
+  const fetchParticipantsAndResponses = async () => {
     try {
-      const res = await fetch(
-        `${apiUrl}/questionnaire/${event_id}/${user_id}`,
-        {
-          credentials: "include", // Include cookies for authentication
-        }
-      );
+      // Fetch participants for this event (use existing endpoint)
+      const participantsRes = await fetch(`${apiUrl}/events/${event_id}/participants`, {
+        credentials: "include",
+      });
+      
+      if (participantsRes.ok) {
+        const participantsData = await participantsRes.json();
+        setParticipants(participantsData);
+        
+        // Fetch all responses for all participants
+        const responsePromises = participantsData.map(async (participant: any) => {
+          try {
+            const responseRes = await fetch(`${apiUrl}/questionnaire/${event_id}/${participant.user_id}`, {
+              credentials: 'include',
+            });
+            
+            if (responseRes.ok) {
+              const responseData = await responseRes.json();
+              return responseData.answers || [];
+            }
+            return [];
+          } catch (err) {
+            console.error(`Error fetching responses for user ${participant.user_id}:`, err);
+            return [];
+          }
+        });
+        
+        const allResponsesArrays = await Promise.all(responsePromises);
+        const flattenedResponses = allResponsesArrays.flat();
+        setAllResponses(flattenedResponses);
+      }
+    } catch (err) {
+      console.error("Error fetching participants and responses:", err);
+    }
+  };
+
+  const get_questions = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/questionnaire/${event_id}/${user_id}`, {
+        credentials: "include",
+      });
 
       const data = await res.json();
-
       if (res.ok) {
-        setQuestions(data.questions);
-        // normalized answers are set, since the API returns them as an array
-        // NEED VERIFICATION AFTER IMPLEMENTING FRONTEND
-        const normalizedAnswers: Record<number, string> = (
-          data.answers || []
-        ).reduce(
-          (
-            acc: Record<number, string>,
-            item: { question_id: number; answer: string }
-          ) => {
-            acc[item.question_id] = item.answer;
-            return acc;
-          },
-          {}
-        );
-        setAnswers(normalizedAnswers);
-        // setAnswers(data.answers);
+        setQuestions(data.questions || []);
+        
+        // For students, load their existing answers
+        if (!isOrganizationUser) {
+          const normalizedAnswers: Record<number, string> = (
+            data.answers || []
+          ).reduce(
+            (
+              acc: Record<number, string>,
+              item: { question_id: number; answer: string }
+            ) => {
+              acc[item.question_id] = item.answer;
+              return acc;
+            },
+            {}
+          );
+          setAnswers(normalizedAnswers);
+        }
       } else {
         console.error("Error from server:", data.error);
         setError(data.error || "Failed to load questions");
@@ -112,6 +162,14 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         return;
       }
 
+      // For organization users, skip registration check and load questions directly
+      if (isOrganizationUser) {
+        await get_questions();
+        await fetchParticipantsAndResponses();
+        return;
+      }
+
+      // For student users, check registration status
       try {
         const res = await fetch(
           `${apiUrl}/event_registration/status/${event_id}/${user_id}`,
@@ -144,7 +202,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       setError("Invalid event ID");
       setLoading(false);
     }
-  }, [event_id, user_id, apiUrl, router, user]);
+  }, [event_id, user_id, apiUrl, router, user, isOrganizationUser]);
 
   useEffect(() => {
     console.log("Current questions", questions);
@@ -163,37 +221,35 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     if (!termsAccepted) {
       setAlert({
         type: "error",
-        message: "You must accept the terms and conditions before submitting.",
+        message: "You must accept the terms and conditions to proceed.",
       });
       return;
     }
 
-    const invalidAnswers = validateAnswers(questions, answers);
-
-    if (invalidAnswers.length > 0) {
+    // Validate answers
+    const invalidQuestions = validateAnswers(questions, answers);
+    if (invalidQuestions.length > 0) {
       setAlert({
         type: "error",
-        message:
-          "Please ensure all questions are answered correctly before submitting.",
+        message: `Please answer all required questions. Missing responses for question(s): ${invalidQuestions.join(", ")}`,
       });
       return;
     }
 
     try {
-      const responses = Object.entries(answers).map(
-        ([question_id, answer]) => ({
-          question_id: Number(question_id),
-          answer: answer,
-        })
-      );
-
       const res = await fetch(`${apiUrl}/questionnaire/submit`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({
-          event_id: event_id,
-          user_id: user_id,
-          responses: responses,
+          event_id,
+          user_id,
+          answers: Object.entries(answers).map(([question_id, answer]) => ({
+            question_id: parseInt(question_id),
+            answer,
+          })),
         }),
       });
 
@@ -216,7 +272,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         });
       }
     } catch (err) {
-      console.error("Submit error:", error);
+      console.error("Submit error:", err);
       setAlert({
         type: "error",
         message: "Server error. Please try again later.",
@@ -262,172 +318,138 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
 
   return (
     <>
-      <Navbar userType="student" />
+      <Navbar userType={userType} />
       <div className="min-h-screen bg-[#EBECE4]">
         <div className="flex flex-col items-center p-6 pt-12">
           <div className="text-center mb-8 max-w-2xl">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              Questionnaire Form
+              {isOrganizationUser ? "Event Responses" : "Questionnaire Form"}
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed mb-3">
-              Help us find the perfect peer match for you by answering a few
-              questions about your preferences and goals.
+              {isOrganizationUser
+                ? "View all participant responses for this event."
+                : "Help us find the perfect peer match for you by answering a few questions about your preferences and goals."}
             </p>
             {alert && <PearAlert type={alert.type} message={alert.message} />}
           </div>
-          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-gray-100">
-            <div className="p-8 md:p-12">
-              <div className="space-y-8">
+          
+          {isOrganizationUser ? (
+            // Organization view - Show all responses
+            <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100">
+              <div className="p-8 md:p-12">
                 {loading ? (
-                  <h3>Loading questions...</h3>
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading responses...</p>
+                  </div>
                 ) : error ? (
-                  <h3 className="text-red-500">{error}</h3>
-                ) : (
-                  questions.map((q, index) => (
-                    <PearQuestion
-                      key={q.id}
-                      questionId={q.id}
-                      question={q.question}
-                      number={index + 1}
-                      type={q.options?.length ? "radio" : "textarea"}
-                      options={q.options || []}
-                      value={answers[q.id] || ""}
-                      onChange={handleAnswerChange}
+                  <div className="text-center">
+                    <h3 className="text-red-500 text-xl mb-4">{error}</h3>
+                    <PearButton
+                      text="Back to Event"
+                      onClick={() => router.push(`/events/${event_id}`)}
                     />
-                  ))
-                )}
-
-                {/*
-                <PearQuestion
-                  value={answers[1] || ""}
-                  questionId={1}
-                  onChange={handleAnswerChange}
-                  question="What are your learning goals for this event?"
-                  number={1}
-                />
-                <PearQuestion
-                  questionId={2}
-                  value={answers[2] || ""}
-                  onChange={handleAnswerChange}
-                  question="What skills or experiences are you hoping to gain?"
-                  number={2}
-                />
-                <PearQuestion
-                  questionId={3}
-                  value={answers[3] || ""}
-                  onChange={handleAnswerChange}
-                  question="How do you prefer to communicate with your peer?"
-                  number={3}
-                  type="radio"
-                  options={[
-                    "Email",
-                    "Slack",
-                    "In-person meetings",
-                    "Video calls",
-                    "Text messaging",
-                  ]}
-                />
-                <PearQuestion
-                  value={answers[4] || ""}
-                  questionId={4}
-                  onChange={handleAnswerChange}
-                  question="What is your availability for meetings?"
-                  number={4}
-                  type="radio"
-                  options={[
-                    "Weekday mornings",
-                    "Weekday afternoons",
-                    "Weekday evenings",
-                    "Weekends",
-                    "Flexible/anytime",
-                  ]}
-                />
-                <PearQuestion
-                  questionId={5}
-                  value={answers[5] || ""}
-                  onChange={handleAnswerChange}
-                  question="What is your experience level with the event topic?"
-                  number={5}
-                  type="radio"
-                  options={["Beginner", "Intermediate", "Advanced", "Expert"]}
-                />
-                <PearQuestion
-                  questionId={6}
-                  value={answers[6] || ""}
-                  onChange={handleAnswerChange}
-                  question="How do you prefer to learn?"
-                  number={6}
-                  type="radio"
-                  options={[
-                    "Hands-on practice",
-                    "Discussion and theory",
-                    "Visual demonstrations",
-                    "Reading materials",
-                    "Mixed approach",
-                  ]}
-                />
-                <PearQuestion
-                  questionId={7}
-                  value={answers[7] || ""}
-                  onChange={handleAnswerChange}
-                  question="What is your preferred meeting frequency?"
-                  number={7}
-                  type="radio"
-                  options={[
-                    "Daily",
-                    "Every few days",
-                    "Weekly",
-                    "Bi-weekly",
-                    "As needed",
-                  ]}
-                />
-                <PearQuestion
-                  questionId={8}
-                  value={answers[8] || ""}
-                  onChange={handleAnswerChange}
-                  question="Is there anything else you'd like your peer to know about you?"
-                  number={8}
-                />
-                */}
-                <div className="border-t border-gray-200 pt-8 mt-8">
-                  <div className="bg-gray-50 rounded-xl p-6 mb-6">
-                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                      By submitting this questionnaire, you agree to be matched
-                      with a peer based on your responses and participate in the
-                      event activities.
-                    </p>
-                    <div className="flex items-center space-x-3">
-                      <Checkbox
-                        checked={termsAccepted}
-                        onCheckedChange={(checked) =>
-                          setTermsAccepted(!!checked)
-                        }
-                        id="terms"
+                  </div>
+                ) : questions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-600 text-xl">No questionnaire has been set up for this event.</p>
+                    <PearButton
+                      text="Back to Event"
+                      onClick={() => router.push(`/events/${event_id}`)}
+                      className="mt-4"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    <div className="space-y-8">
+                      {questions.map((question, qIndex) => (
+                        <ResponseVisualization
+                          key={question.id}
+                          question={question}
+                          participants={participants}
+                          allResponses={allResponses}
+                          questionIndex={qIndex}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div className="text-center pt-8">
+                      <PearButton
+                        text="Back to Event"
+                        onClick={() => router.push(`/events/${event_id}`)}
+                        dark
                       />
-                      <Label
-                        htmlFor="terms"
-                        className="text-sm font-medium cursor-pointer"
-                      >
-                        I accept the terms and conditions
-                      </Label>
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            // Student view - Questionnaire form
+            <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-gray-100">
+              <div className="p-8 md:p-12">
+                <div className="space-y-8">
+                  {loading ? (
+                    <h3>Loading questions...</h3>
+                  ) : error ? (
+                    <h3 className="text-red-500">{error}</h3>
+                  ) : (
+                    questions.map((q, index) => (
+                      <PearQuestion
+                        key={q.id}
+                        questionId={q.id}
+                        question={q.question}
+                        number={index + 1}
+                        type={q.options?.length ? "radio" : "textarea"}
+                        options={q.options || []}
+                        value={answers[q.id] || ""}
+                        onChange={handleAnswerChange}
+                      />
+                    ))
+                  )}
 
-                  <div className="flex justify-center">
-                    <PearButton
-                      onClick={handleSubmit}
-                      text={
-                        validRegistration
-                          ? "Update Questionnaire"
-                          : "Submit Questionnaire"
-                      }
-                      className="px-8 py-3 text-lg font-semibold min-w-[200px]"
-                    />
-                  </div>
+                  {!loading && !error && questions.length > 0 && (
+                    <div className="border-t border-gray-200 pt-8 mt-8">
+                      <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                          By submitting this questionnaire, you agree to be matched
+                          with a peer based on your responses and participate in the
+                          event activities.
+                        </p>
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={termsAccepted}
+                            onCheckedChange={(checked) =>
+                              setTermsAccepted(!!checked)
+                            }
+                            id="terms"
+                          />
+                          <Label
+                            htmlFor="terms"
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            I accept the terms and conditions
+                          </Label>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <PearButton
+                          onClick={handleSubmit}
+                          text={
+                            validRegistration
+                              ? "Update Questionnaire"
+                              : "Submit Questionnaire"
+                          }
+                          className="px-8 py-3 text-lg font-semibold min-w-[200px]"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

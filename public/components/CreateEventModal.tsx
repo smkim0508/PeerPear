@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  organization_id: number;
   onSuccess: () => void;
 }
 
@@ -17,7 +16,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 export default function CreateEventModal({
   isOpen,
   onClose,
-  organization_id,
   onSuccess,
 }: CreateEventModalProps) {
   const router = useRouter();
@@ -70,7 +68,6 @@ export default function CreateEventModal({
 
     // create the dictionary object to send over
     const newEvent = {
-      organization_id: organization_id,
       title: formData.title,
       description: formData.description,
       image_url: formData.imageUrl || "",
