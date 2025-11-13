@@ -54,7 +54,8 @@ class EventTable(MainDB_Base):
 
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-    matches: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    # NOTE: matches in DB is a 2D array of integer user ids. At each query, the user info is retrieved from DB.
+    matches: Mapped[list[list[int]]] = mapped_column(ARRAY(Integer, dimensions=2), nullable=True)
     organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
 
 # table representing each unique user + event pair, which is defined as a registration
