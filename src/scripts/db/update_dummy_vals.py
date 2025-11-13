@@ -15,90 +15,8 @@ from db.models.question import QuestionTable
 from db.models.response import ResponseTable
 from db.models.orgadmin import OrgAdminTable
 
-from common.types.pairing_event import EventRole, EventStatus
+from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
-
-def create_organization_data(session):
-    organizations = [
-        OrganizationTable(
-            org_name="AASA",
-            description="Asian American Student Association"
-
-        ),
-        OrganizationTable(
-            org_name="KSAP",
-            description="Korean Student Association"
-
-        ),
-        OrganizationTable(
-            org_name="CS Club",
-            description="Computer Science Club"
-
-        ),
-        OrganizationTable(
-            org_name="Dongkon's Club",
-            description="We ride around in electric scooters"
-
-        ),
-        OrganizationTable(
-            org_name="Sungmins's Club",
-            description="We cook delicious food!"
-        )
-    ]
-
-    for org in organizations:
-        session.add(org)
-    session.commit()
-    print("Dummy organizations added.")
-
-
-def create_orgadmin_data(session):
-    # Fetch organizations to link with org admins
-    organizations = session.query(OrganizationTable).all()
-    org_admins = [
-        OrgAdminTable(
-            username="sungmink",
-            first_name="Sungmin",
-            last_name="Kim",
-            email="sungmink@example.com",
-            organization_id=2
-        ),
-        OrgAdminTable(
-            username="HenryL",
-            first_name="Henry",
-            last_name="Li",
-            email="henrylee@example.com",
-            organization_id=1
-        ),
-        OrgAdminTable(
-            username="Sk3378",
-            first_name="Sungmin",
-            last_name="Kim",
-            email="sungminkother@example.com",
-            organization_id=5
-        ),
-        OrgAdminTable(
-            username="Robert",
-            first_name="Rober",
-            last_name="Dondero",
-            email="rdondero@example.com",
-            organization_id=3
-        ),
-        OrgAdminTable(
-            username="dkkkkk",
-            first_name="Dongkon",
-            last_name="Lee",
-            email="dkkkkk@example.com",
-            organization_id=4
-        )
-
-    ]
-
-    for admin in org_admins:
-        session.add(admin)
-    session.commit()
-    print("Dummy org admins added.")
-
 
 def create_user_data(session):
     users = [
@@ -148,6 +66,71 @@ def create_user_data(session):
     session.commit()
     print("Dummy users added.")
 
+def create_organization_data(session):
+    organizations = [
+        OrganizationTable(
+            org_name="AASA",
+            description="Asian American Student Association"
+
+        ),
+        OrganizationTable(
+            org_name="KSAP",
+            description="Korean Student Association"
+
+        ),
+        OrganizationTable(
+            org_name="CS Club",
+            description="Computer Science Club"
+
+        ),
+        OrganizationTable(
+            org_name="Dongkon's Club",
+            description="We ride around in electric scooters"
+
+        ),
+        OrganizationTable(
+            org_name="Sungmins's Club",
+            description="We cook delicious food!"
+        )
+    ]
+
+    for org in organizations:
+        session.add(org)
+    session.commit()
+    print("Dummy organizations added.")
+
+
+def create_orgadmin_data(session):
+    # Fetch organizations to link with org admins
+    organizations = session.query(OrganizationTable).all()
+    org_admins = [
+        OrgAdminTable(
+            user_id=1,
+            organization_id=1
+        ),
+        OrgAdminTable(
+            user_id=2,
+            organization_id=1
+        ),
+        OrgAdminTable(
+            user_id=3,
+            organization_id=5
+        ),
+        OrgAdminTable(
+            user_id=4,
+            organization_id=3
+        ),
+        OrgAdminTable(
+            user_id=5,
+            organization_id=4
+        )
+    ]
+
+    for admin in org_admins:
+        session.add(admin)
+    session.commit()
+    print("Dummy org admins added.")
+
 def create_event_data(session):
     events = [
         EventTable( # event id 1
@@ -163,40 +146,35 @@ def create_event_data(session):
             description="*This event started* A talk on how to break into web development.",
             end_date=datetime.now() + timedelta(days=14),
             organization_id=3,
-            status=EventStatus.STARTED,
-            matches=[]
+            status=EventStatus.STARTED
         ),
         EventTable( # event id 3
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
-            status=EventStatus.TERMINATED,
-            matches=[]
+            status=EventStatus.TERMINATED
         ),
         EventTable( # event id 4
             title="PeerPear main event",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
-            status=EventStatus.PAIRING_PUBLISHED,
-            matches=[]
+            status=EventStatus.PAIRING_PUBLISHED
         ),
         EventTable( # event id 5
             title="PeerPear main event 2 - started",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=1,
-            status=EventStatus.STARTED,
-            matches=[]
+            status=EventStatus.STARTED
         ),
         EventTable( # event id 6
             title="PeerPear main event 3 - not started",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=1,
-            status=EventStatus.NOT_STARTED,
-            matches=[]
+            status=EventStatus.NOT_STARTED
         )
     ]
     for event in events:
@@ -381,10 +359,10 @@ def fill_all_tables(engine):
     time.sleep(3)
 
     # Create data in correct dependency order
-    create_organization_data(session)
-    create_orgadmin_data(session)
     create_user_data(session)
     create_user_profile_data(session)
+    create_organization_data(session)
+    create_orgadmin_data(session)
     create_event_data(session)
     create_event_registration_data(session)
     create_question_data(session)

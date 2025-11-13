@@ -11,7 +11,8 @@ from sqlalchemy import select
 from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
 from db.models.events import EventTable
-from common.types.pairing_event import EventStatus, PairingEvent, PairingResult
+from common.types.pairing_event import PairingEvent, PairingResult
+from common.types.event_enums import EventStatus, EventRole
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -154,8 +155,7 @@ def create_event():
         description=description,
         image_url=image_url,
         end_date=end_dt,
-        status=EventStatus.NOT_STARTED,
-        matches=PairingResult(groups=[]) # initially no matches
+        status=EventStatus.NOT_STARTED
     )
 
     # create the new event in db

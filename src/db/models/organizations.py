@@ -15,3 +15,5 @@ class OrganizationTable(MainDB_Base):
     org_name: Mapped[str] = mapped_column(String, nullable=False)
 
     description: Mapped[str] = mapped_column(String, nullable=False)
+
+    # org_admins = relationship("OrgAdminTable", back_populates="organization")

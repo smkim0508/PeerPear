@@ -14,7 +14,7 @@ from common.logging import logger
 from modules.pairing.orchestrator import PairingOrchestrator
 from app_types.api.response.pairing_response import PairingResponse
 from db.crud.registration_crud import get_all_registered_users_for_event
-from common.types.pairing_event import EventRole
+from common.types.event_enums import EventStatus, EventRole
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)

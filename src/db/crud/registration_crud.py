@@ -13,7 +13,7 @@ from common.types.registration import EventRegistration
 from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
 from common.types.user import UserProfile, UserProfileFull, User
 from typing import Optional
-from common.types.pairing_event import EventRole
+from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
 
 

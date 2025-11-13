@@ -5,7 +5,7 @@ from db.models.organizations import OrganizationTable
 from db.models.question import QuestionTable
 from db.models.response import ResponseTable
 from db.models.user import UserTable
-from common.types.pairing_event import EventStatus
+from common.types.event_enums import EventStatus, EventRole
 from api.dependencies import get_db_sessionmaker
 from common.logging import logger
 from common.error_response import generic_error_response

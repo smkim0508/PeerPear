@@ -2,7 +2,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
-from common.types.pairing_event import EventRole
+from common.types.event_enums import EventStatus, EventRole
 
 # internal mapping for class year, including grad, alum, prof for future uses.
 class ClassYear(Enum):

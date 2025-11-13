@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime, timezone
 from enum import Enum
 from common.types.user import User
-from common.types.pairing_event import EventRole
+from common.types.event_enums import EventStatus, EventRole
 
 # enums to represent event status
 class EventRegistration(BaseModel):
