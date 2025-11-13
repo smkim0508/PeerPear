@@ -30,10 +30,6 @@ export default function Navbar({
     if (propUserType) return propUserType;
     if (!isAuthenticated) return "guest";
 
-    if (user?.userType) {
-      return user.userType;
-    }
-
     // Check localStorage for user type preference
     const storedUserType = localStorage.getItem("userType") as
       | "student"

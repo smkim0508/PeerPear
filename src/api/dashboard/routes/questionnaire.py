@@ -43,7 +43,7 @@ def get_questionnaire(event_id, user_id):
     # format questions & answers
     return jsonify({"questions": [q.model_dump(mode="json") for q in questions], "answers": [a.model_dump(mode="json") for a in answers]}), 200
 
-@questionnaire_bp.put("/submit")
+@questionnaire_bp.post("/submit")
 def submit_questionnaire():
     payload = request.get_json(silent=True)
 
@@ -54,7 +54,7 @@ def submit_questionnaire():
     event_id = payload.get("event_id")
     user_id = payload.get("user_id")
 
-    form_responses = payload.get("responses")
+    form_responses = payload.get("answers")
 
     response_list: list[Answer] = []
     for response in form_responses:

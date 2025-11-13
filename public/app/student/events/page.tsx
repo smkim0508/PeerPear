@@ -21,9 +21,6 @@ export default function StudentDashBoard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Store user type preference for navbar
-    localStorage.setItem("userType", "student");
-
     const fetchMyEvents = async () => {
       try {
         setLoading(true);

@@ -13,7 +13,6 @@ export interface User {
   lastName?: string;
   email?: string;
   phoneNumber?: string | null;
-  userType?: "student" | "organization";
   profileComplete?: boolean;
   organizationId?: number;
   organizationProfileComplete?: boolean;
@@ -79,7 +78,6 @@ export async function getCurrentUser(): Promise<User | null> {
         lastName: data.last_name,
         email: data.email,
         phoneNumber: data.phone_number ?? null,
-        userType: data.user_type,
         profileComplete: data.profile_complete,
         organizationId: data.organization_id,
         organizationProfileComplete: data.organization_profile_complete,

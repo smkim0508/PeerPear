@@ -73,12 +73,29 @@ export default function EventPage({ params }: EventPageProps) {
 
   const eventId = parseInt(slug);
 
+  // Determine user type - STRICTLY from localStorage only
+  const getUserType = (): "student" | "organization" => {
+    if (typeof window !== 'undefined') {
+      const storedUserType = localStorage.getItem("userType") as
+        | "student"
+        | "organization"
+        | null;
+      return storedUserType || "student";
+    }
+    
+    return "student"; // Default to student
+  };
+  
+  const userType = getUserType();
+  const isOrganizationUser = userType === "organization";
+
   useEffect(() => {
     fetchEvent();
-    if (user?.username) {
+    // Only check registration for students
+    if (user?.username && !isOrganizationUser) {
       checkRegistration();
     }
-  }, [eventId, user]);
+  }, [eventId, user, isOrganizationUser]);
 
   const fetchEvent = async () => {
     try {
@@ -131,11 +148,6 @@ export default function EventPage({ params }: EventPageProps) {
       console.error("Error checking registration:", err);
     }
   };
-
-  // Fetch participants only for organizations
-  const isOrganizationUser =
-    user?.userType === "organization" ||
-    user?.user_info?.user_type === "organization";
 
   useEffect(() => {
     if (!eventId || !isOrganizationUser) return;
@@ -369,89 +381,126 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
-              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-nav-dark font-bold">
-                    Registration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    {isRegistered ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
-                          <CheckCircle className="h-6 w-6" />
-                          <span className="font-bold text-lg">
-                            You're registered!
-                          </span>
-                        </div>
+              {/* Registration section - only for students */}
+              {!isOrganizationUser && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Registration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      {isRegistered ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
+                            <CheckCircle className="h-6 w-6" />
+                            <span className="font-bold text-lg">
+                              You're registered!
+                            </span>
+                          </div>
 
-                        {/* Questionnaire Status */}
-                        {event?.questions && event.questions.length > 0 && (
-                          <div className="space-y-3">
-                            <div className="border-t border-gray-200 pt-4">
-                              <h3 className="font-semibold text-lg text-nav-dark mb-3">
-                                Questionnaire
-                              </h3>
-                              {questionnaireCompleted ? (
-                                <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
-                                  <CheckCircle className="h-5 w-5" />
-                                  <span className="font-medium">Completed</span>
-                                </div>
-                              ) : (
-                                <div className="space-y-3">
-                                  <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
-                                    <XCircle className="h-5 w-5" />
-                                    <span className="font-medium">Incomplete</span>
+                          {/* Questionnaire Status */}
+                          {event?.questions && event.questions.length > 0 && (
+                            <div className="space-y-3">
+                              <div className="border-t border-gray-200 pt-4">
+                                <h3 className="font-semibold text-lg text-nav-dark mb-3">
+                                  Questionnaire
+                                </h3>
+                                {questionnaireCompleted ? (
+                                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
+                                    <CheckCircle className="h-5 w-5" />
+                                    <span className="font-medium">Completed</span>
                                   </div>
-                                  <PearButton
-                                    text="Complete Questionnaire"
-                                    onClick={() => router.push(`/events/${eventId}/questionnaire`)}
-                                    className="w-full"
-                                  />
-                                </div>
+                                ) : (
+                                  <div className="space-y-3">
+                                    <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
+                                      <XCircle className="h-5 w-5" />
+                                      <span className="font-medium">Incomplete</span>
+                                    </div>
+                                    <PearButton
+                                      text="Complete Questionnaire"
+                                      onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {questionnaireCompleted && (
+                                <PearButton
+                                  text="View/Edit Questionnaire"
+                                  onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                  dark
+                                  className="w-full"
+                                />
                               )}
                             </div>
-                            
-                            {questionnaireCompleted && (
-                              <PearButton
-                                text="View/Edit Questionnaire"
-                                onClick={() => router.push(`/events/${eventId}/questionnaire`)}
-                                dark
-                                className="w-full"
-                              />
-                            )}
-                          </div>
-                        )}
+                          )}
 
-                        <PearButton
-                          text={
-                            isRegistering ? "Unregistering..." : "Unregister"
-                          }
-                          onClick={handleUnregister}
-                          dark
-                          className={`w-full ${
-                            isRegistering ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <p className="text-gray-800 text-lg font-medium">
-                          Ready to join this event?
+                          <PearButton
+                            text={
+                              isRegistering ? "Unregistering..." : "Unregister"
+                            }
+                            onClick={handleUnregister}
+                            dark
+                            className={`w-full ${
+                              isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <p className="text-gray-800 text-lg font-medium">
+                            Ready to join this event?
+                          </p>
+                          <PearButton
+                            text={
+                              isRegistering ? "Registering..." : "Register Now"
+                            }
+                            onClick={handleRegister}
+                            className="w-full"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Event Management section - only for organizations */}
+              {isOrganizationUser && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Event Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-gray-800 text-lg font-medium mb-4">
+                          Manage your event and view participant responses
                         </p>
-                        <PearButton
-                          text={
-                            isRegistering ? "Registering..." : "Register Now"
-                          }
-                          onClick={handleRegister}
-                          className="w-full"
-                        />
+                        
+                        {hasQuestions && (
+                          <PearButton
+                            text="View All Responses"
+                            onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                            className="w-full mb-3"
+                          />
+                        )}
+                        
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <p className="text-blue-800 font-medium">
+                            Registered Participants: {participants.length}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
