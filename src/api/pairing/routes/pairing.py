@@ -44,6 +44,7 @@ def pair_students_baseline():
 
     # initialize orhcestrator and repo
     pairing_orchestrator = PairingOrchestrator(main_db_session=db_session, llm_client=llm_client)
+    # helper creates pairing result, stores in db, and returns the result
     pairing_result: PairingResult = pairing_orchestrator.pair_students_in_groups(students=students, group_size=group_size)
 
     pairing_event_response = PairingResponse(

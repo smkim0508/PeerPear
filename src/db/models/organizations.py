@@ -16,4 +16,3 @@ class OrganizationTable(MainDB_Base):
 
     description: Mapped[str] = mapped_column(String, nullable=False)
 
-    # org_admins = relationship("OrgAdminTable", back_populates="organization")
