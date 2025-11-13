@@ -1,5 +1,6 @@
 from db.models.events import EventTable, EventStatus, EventRegistrationsTable
 from db.models.organizations import OrganizationTable
+from db.models.orgadmin import OrgAdminTable
 from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
 from api.dependencies import get_db_sessionmaker, get_llm
@@ -208,14 +209,25 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
     return None
 
 
-def validate_event_and_org(session, event_id: int, organization_id: int):
+def validate_event_and_admin(session, event_id: int, user_id: int):
 
     event = session.scalar(
         select(EventTable).where(EventTable.id == event_id)
     )
-
+    
     if not event:
         return None, {"error": "Event not found", "status": 404}
+    
+    org_admin = session.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
+
+    if org_admin is None:
+        return None, {"error": "User is not an organization admin", "status":403}
+
+    organization_id = org_admin.organization_id
+
+    
 
     if  event.organization_id != organization_id:
         return None, {"error": "Organization does not own this event", "status": 403}
@@ -224,14 +236,13 @@ def validate_event_and_org(session, event_id: int, organization_id: int):
 
 # Starts an event
 
-
-def start_event(event_id: int, organization_id: int):
+def start_event(event_id: int, user_id: int):
 
     db_session = get_db_sessionmaker()
 
-    with db_session() as session:
-        event, error = validate_event_and_org(
-            session, event_id, organization_id)
+    with db_session() as session_instance:
+        event, error = validate_event_and_admin(
+            session_instance, event_id, user_id)
 
         if error:
             return error
@@ -241,17 +252,17 @@ def start_event(event_id: int, organization_id: int):
 
         event.status = EventStatus.STARTED
 
-        session.commit()
+        session_instance.commit()
 
         return {"message": "Event started successfully", "event_id": event_id}
 
 
-def end_event(event_id: int, organization_id: int):
+def end_event(event_id: int, user_id: int):
     db_session = get_db_sessionmaker()
 
-    with db_session() as session:
-        event, error = validate_event_and_org(
-            session, event_id, organization_id)
+    with db_session() as session_instance:
+        event, error = validate_event_and_admin(
+            session_instance, event_id, user_id)
 
         if error:
             return error
@@ -266,17 +277,17 @@ def end_event(event_id: int, organization_id: int):
 
         event.status = EventStatus.TERMINATED
 
-        session.commit()
+        session_instance.commit()
 
         return {"message": "Event ended successfully", "event_id": event_id}
 
 
-def publish_event(event_id: int, organization_id: int):
+def publish_event(event_id: int, user_id: int):
     db_session = get_db_sessionmaker()
 
-    with db_session() as session:
-        event, error = validate_event_and_org(
-            session, event_id, organization_id)
+    with db_session() as session_instance:
+        event, error = validate_event_and_admin(
+            session_instance, event_id, user_id)
 
         if error:
             return error
@@ -289,6 +300,6 @@ def publish_event(event_id: int, organization_id: int):
 
         event.status = EventStatus.PAIRING_PUBLISHED
 
-        session.commit()
+        session_instance.commit()
 
         return {"message": "Event pairings published successfully", "event_id": event_id}

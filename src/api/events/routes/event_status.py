@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from sqlalchemy import select
 from db.models.events import EventTable, EventRegistrationsTable
 from db.models.organizations import OrganizationTable
@@ -15,34 +15,21 @@ from db.crud.events_crud import start_event, end_event, publish_event
 event_status_bp = Blueprint("event_status", __name__)
 
 
-@event_status_bp.patch("/start")
-def route_start_event():
-
-    payload = request.get_json(silent=True) or {}
-    logger.info(f"Received event payload: {payload}")
-
-    event_id = payload.get("event_id")
-
-    if not event_id:
-        return jsonify({"error": "event_id is required"}), 400
+@event_status_bp.patch("/start/<int:event_id>")
+def route_start_event(event_id):
 
     try:
         event_id = int(event_id)
     except:
-        return jsonify({"error":"event_id must be an integer"}), 400
+        return jsonify({"error": "event_id must be an integer"}), 400
 
-    organization_id = payload.get("organization_id")
+    user_id = session.get("user_id")
 
-    if not organization_id:
-        return jsonify({"error": "organization_id is required"}), 400
-
-    try:
-        organization_id = int(organization_id)
-    except:
-        return jsonify({"error":"organization_id must be an integer"}), 400
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
 
     try:
-        result = start_event(event_id, organization_id)
+        result = start_event(event_id, user_id)
     except Exception as e:
         logger.error(f"Error starting event: {e}")
         return jsonify(generic_error_response), 500
@@ -53,34 +40,21 @@ def route_start_event():
     return jsonify(result), 200
 
 
-@event_status_bp.patch("/end")
-def route_end_event():
-
-    payload = request.get_json(silent=True) or {}
-    logger.info(f"Received event payload: {payload}")
-
-    event_id = payload.get("event_id")
-
-    if not event_id:
-        return jsonify({"error": "event_id is required"}), 400
+@event_status_bp.patch("/end/<int:event_id>")
+def route_end_event(event_id):
 
     try:
         event_id = int(event_id)
     except:
-        return jsonify({"error":"event_id must be an integer"}), 400
+        return jsonify({"error": "event_id must be an integer"}), 400
 
-    organization_id = payload.get("organization_id")
+    user_id = session.get("user_id")
 
-    if not organization_id:
-        return jsonify({"error": "organization_id is required"}), 400
-
-    try:
-        organization_id = int(organization_id)
-    except:
-        return jsonify({"error":"organization_id must be an integer"}), 400
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
 
     try:
-        result = end_event(event_id, organization_id)
+        result = end_event(event_id, user_id)
     except Exception as e:
         logger.error(f"Error starting event: {e}")
         return jsonify(generic_error_response), 500
@@ -91,32 +65,19 @@ def route_end_event():
     return jsonify(result), 200
 
 
-@event_status_bp.patch("/publish")
-def route_publish_pairings():
-    payload = request.get_json(silent=True) or {}
-    logger.info(f"Received event payload: {payload}")
-
-    event_id = payload.get("event_id")
-
-    if not event_id:
-        return jsonify({"error": "event_id is required"}), 400
+@event_status_bp.patch("/publish/<int:event_id>")
+def route_publish_pairings(event_id):
     try:
         event_id = int(event_id)
     except:
-        return jsonify({"error":"event_id must be an integer"}), 400
+        return jsonify({"error": "event_id must be an integer"}), 400
 
-    organization_id = payload.get("organization_id")
+    user_id = session.get("user_id")
 
-    if not organization_id:
-        return jsonify({"error": "organization_id is required"}), 400
-
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
     try:
-        organization_id = int(organization_id)
-    except:
-        return jsonify({"error":"organization_id must be an integer"}), 400
-
-    try:
-        result = publish_event(event_id, organization_id)
+        result = publish_event(event_id, user_id)
     except Exception as e:
         logger.error(f"Error starting event: {e}")
         return jsonify(generic_error_response), 500
