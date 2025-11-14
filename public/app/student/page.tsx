@@ -18,9 +18,6 @@ export default function StudentDashBoard() {
   const [eventTab, setEventTab] = useState<"event" | "organization">("event");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Active / Archived tabs
-  const [statusTab, setStatusTab] = useState<"active" | "archived">("active");
-
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [registeredEvents, setRegisteredEvents] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -89,20 +86,13 @@ export default function StudentDashBoard() {
     checkStatuses();
   }, [user?.username, events]);
 
-  // Status tab filtering (Active / Archived)
-  const activeEvents = events.filter((event) => getDaysLeft(event) > 0);
-  const archivedEvents = events.filter(
-    (event) => getDaysLeft(event) <= 0 && registeredEvents.has(event.id)
-  );
-  const selectedStatusEvents = statusTab === "active" ? activeEvents : archivedEvents;
-
   // Search & org/event filter
   const filteredEvents =
     eventTab === "event"
-      ? selectedStatusEvents.filter((event) =>
+      ? events.filter((event) =>
           event.title.toLowerCase().includes(searchQuery.toLowerCase())
         )
-      : selectedStatusEvents.filter((event) =>
+      : events.filter((event) =>
           String(event.organization_name)
             .toLowerCase()
             .includes(searchQuery.toLowerCase())
@@ -122,31 +112,6 @@ export default function StudentDashBoard() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
             />
-          </div>
-
-          {/* ⭐ Active / Archived tabs */}
-          <div className="max-w-7xl mx-auto flex gap-3 mb-6">
-            <button
-              className={`px-6 py-2 rounded-full border transition-colors
-                ${statusTab === "active"
-                  ? "bg-[#D7FF9C] border-[#B2E672] text-black"
-                  : "bg-[#F5F5F5] border-gray-300 text-gray-700 hover:bg-gray-100"
-                }`}
-              onClick={() => setStatusTab("active")}
-            >
-              Active
-            </button>
-
-            <button
-              className={`px-6 py-2 rounded-full border transition-colors
-                ${statusTab === "archived"
-                  ? "bg-[#D7FF9C] border-[#B2E672] text-black"
-                  : "bg-[#F5F5F5] border-gray-300 text-gray-700 hover:bg-gray-100"
-                }`}
-              onClick={() => setStatusTab("archived")}
-            >
-              Archived
-            </button>
           </div>
 
           {/* Loading / Error / No results / List */}
