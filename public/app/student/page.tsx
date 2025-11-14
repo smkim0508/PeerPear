@@ -8,6 +8,7 @@ import EventCard from "@/components/EventCard";
 import SearchBar from "@/components/SearchBar";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
+import { checkUserRegistration } from "@/lib/events";
 
 export default function StudentDashBoard() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function StudentDashBoard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [registeredEvents, setRegisteredEvents] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -51,8 +53,58 @@ export default function StudentDashBoard() {
         setLoading(false);
       }
     };
+
+    const checkRegistrationStatus = async () => {
+      if (!user?.username || events.length === 0) return;
+      
+      try {
+        const registrationPromises = events.map(async (event) => {
+          const isRegistered = await checkUserRegistration(user.username, event.id);
+          return { eventId: event.id, isRegistered };
+        });
+        
+        const registrationResults = await Promise.all(registrationPromises);
+        const registeredEventIds = new Set(
+          registrationResults
+            .filter(result => result.isRegistered)
+            .map(result => result.eventId)
+        );
+        
+        setRegisteredEvents(registeredEventIds);
+      } catch (err) {
+        console.log("Error checking registration status", err);
+      }
+    };
+
     fetchEvents();
   }, []);
+
+  // Check registration status when user and events are available
+  useEffect(() => {
+    if (user?.username && events.length > 0 && registeredEvents.size === 0) {
+      const checkRegistrationStatus = async () => {
+        try {
+          const registrationPromises = events.map(async (event) => {
+            const isRegistered = await checkUserRegistration(user.username, event.id);
+            return { eventId: event.id, isRegistered };
+          });
+          
+          const registrationResults = await Promise.all(registrationPromises);
+          const registeredEventIds = new Set(
+            registrationResults
+              .filter(result => result.isRegistered)
+              .map(result => result.eventId)
+          );
+          
+          setRegisteredEvents(registeredEventIds);
+        } catch (err) {
+          console.log("Error checking registration status", err);
+        }
+      };
+
+      checkRegistrationStatus();
+    }
+  }, [user?.username, events]);
 
   // Rudimentary filtering logic TODO: FIX ORGANIZATION SEARCH + animate?
   const filteredEvents =
@@ -102,7 +154,11 @@ export default function StudentDashBoard() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
               {filteredEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard 
+                  key={event.id} 
+                  event={event} 
+                  isRegistered={registeredEvents.has(event.id)}
+                />
               ))}
             </div>
           )}
