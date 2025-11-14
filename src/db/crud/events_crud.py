@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
 from common.types.pairing_event import PairingEvent
 from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
+from typing import Optional
 
 # helper to retrieve all events
 # NOTE: filtering is handled in FE
@@ -155,6 +156,7 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
     stmt = (
         select(EventTable, OrganizationTable)
+        .select_from(EventTable) # explicitly states left join
         .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
         .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
         .where(EventRegistrationsTable.user_id == user_id)
@@ -327,7 +329,7 @@ def auto_terminate(event_id: int):
 
         return {"message": "Event ended successfully", "event_id": event_id}
 
-def get_registration_by_user_and_event_id(event_id: int, user_id: int) -> int:
+def get_registration_by_user_and_event_id(event_id: int, user_id: int) -> Optional[int]:
     """
     Retrieves the unique registration tied to an event id and user id.
     """
@@ -337,7 +339,6 @@ def get_registration_by_user_and_event_id(event_id: int, user_id: int) -> int:
 
         stmt = (
             select(EventRegistrationsTable.id)
-            .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
             .where(EventRegistrationsTable.user_id == user_id)
             .where(EventRegistrationsTable.event_id == event_id)
         )

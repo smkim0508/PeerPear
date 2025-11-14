@@ -26,7 +26,6 @@ class BaselinePairingPrompts:
     {{
         "groups": list[list[int]],
         "reasoning": "a step-by-step reasoning trace of your thoughts"
-
     }}
 
     **IMPORTANT**:

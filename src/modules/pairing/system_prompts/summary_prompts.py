@@ -21,10 +21,11 @@ class ResponseSummaryPrompts:
         - 'answer' (string)
 
     ## Output Contract (STRICT)
-    Return **only** a single string — a concise paragraph (≤120 words) summarizing the respondent.
-    Do NOT include any JSON keys, arrays, or metadata.
-    Output example format:
-    "Summary: <text>"
+    Return **only** the following JSON object:
+    {{
+        "llm_summary": "an extremely concise, semantically-rich summary of the respondent's core response."
+        "reasoning": "a step-by-step reasoning trace of your thoughts"
+    }}
 
     **IMPORTANT**:
     - The output must be a single paragraph, semantically dense but not verbose.
@@ -82,7 +83,10 @@ class ResponseSummaryPrompts:
     ]
 
     Output:
-    "Summary: Enjoys coding, running, and creative hobbies like music and startup reading. Seeks to learn web development and connect with like-minded peers. Prefers communicative, feedback-oriented partners and avoids disorganized or unresponsive teammates. Available weeknights after 6 PM and weekends."
+    {{
+        "llm_summary": "Aspiring web developer who enjoys coding, running, and music. Values clear, responsive teammates and avoids disorganization. Seeks collaborative peers for learning. Available weeknights after 6 PM and weekends.",
+        "reasoning": "Extracted answers about hobbies, goals, skills, preferences, and avoidances. Synthesized into a concise, pairing-relevant summary."
+    }}
 
     2)
     Input:
@@ -94,7 +98,10 @@ class ResponseSummaryPrompts:
     ]
 
     Output:
-    "Summary: Economics and computer science student interested in quantitative work such as data visualization and algorithmic trading. Experienced with financial data analysis and programming. Prefers technical projects over marketing or design tasks. Generally available evenings after 5 PM."
+    {{
+        "llm_summary": "Economics and computer science student with financial data and programming experience. Interested in quantitative and algorithmic projects, avoiding marketing or design. Available evenings after 5 PM.",
+        "reasoning": "Identified background, project interests, exclusions, and schedule. Summarized with minimal redundancy for clear pairing context."
+    }}
 
     3)
     Input:
@@ -106,7 +113,10 @@ class ResponseSummaryPrompts:
     ]
 
     Output:
-    "Summary: Aspiring founder seeking a long-term collaborator for an AI startup. Experienced in LLM-based chatbots, Python, and API development. Prefers remote meetings once or twice a week. Independent yet collaborative, enjoys fast-paced ideation and problem-solving."
+    {{
+        "llm_summary": "AI-focused founder skilled in LLM chatbots, Python, and APIs. Prefers remote weekly meetings and fast-paced collaboration while maintaining independence.",
+        "reasoning": "Parsed technical skills, collaboration style, and logistics. Compressed into a concise statement highlighting compatibility traits."
+    }}
 
     4)
     Input:
@@ -117,7 +127,10 @@ class ResponseSummaryPrompts:
     ]
 
     Output:
-    "Summary: Mechanical engineering student passionate about robotics and drone design. Prefers detail-oriented, patient partners for collaboration. Available primarily on weekends."
+    {{
+        "llm_summary": "Mechanical engineering student passionate about robotics and drones. Prefers patient, detail-oriented partners. Available weekends only.",
+        "reasoning": "Extracted academic focus, partner preference, and availability. Synthesized into a brief, high-signal summary."
+    }}
     </FEW-SHOT EXAMPLES>
     """
     

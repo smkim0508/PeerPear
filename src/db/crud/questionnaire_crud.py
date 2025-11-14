@@ -99,6 +99,7 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
         # NOTE: temporarily, this forces all questions in form to be answered.
         # Technically, some should be required and some not.
         if any([not r.answer for r in responses]):
+            logger.info("form")
             return "form"
 
         event = session.scalar(
@@ -106,9 +107,11 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
         )
 
         if not event:
+            logger.info("event")
             return "event"
 
         if event.status != EventStatus.STARTED:
+            logger.info("status")
             return "status"
 
         for r in responses:
@@ -132,10 +135,12 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
         registration = session.get(EventRegistrationsTable, registration_id)
         if registration is None:
             # NOTE: this is defensive behavior; technically shouldn't happen, but implies the DB state changed between earlier registration_id lookup & now
+            logger.info("no_registration")
             return "no_registration"
 
         registration.response_summary = response_summary # add in summary field
         session.commit()
+        logger.info("success")
         return "success"
 
 def add_question(event_id: int, question: str, options: list):
