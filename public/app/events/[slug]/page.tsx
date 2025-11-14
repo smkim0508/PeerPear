@@ -20,6 +20,8 @@ import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PairingResults from "@/components/PairingResults";
+import { PairingResultData } from "@/types/events";
 import {
   fetchEventById,
   checkUserRegistration,
@@ -28,6 +30,10 @@ import {
   getUserEventResponses,
   getEventParticipants,
   autoTerminateEvent,
+  endEvent,
+  triggerPairing,
+  getEventPairings,
+  publishPairings,
 } from "@/lib/events";
 
 type Event = {
@@ -90,6 +96,13 @@ export default function EventPage({ params }: EventPageProps) {
     description: "",
   });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
+
+  // Pairing states
+  const [pairingData, setPairingData] = useState<PairingResultData | null>(null);
+  const [isEndingEvent, setIsEndingEvent] = useState(false);
+  const [isTriggeringPairing, setIsTriggeringPairing] = useState(false);
+  const [isPublishingPairings, setIsPublishingPairings] = useState(false);
+  const [groupSize, setGroupSize] = useState(2);
 
   const eventId = parseInt(slug);
 
@@ -343,6 +356,101 @@ export default function EventPage({ params }: EventPageProps) {
     setIsEditingEvent(false);
     setEditEventData({ title: "", description: "" });
   };
+
+  // Pairing handler functions
+  const handleEndEvent = async () => {
+    if (!event) return;
+    
+    setIsEndingEvent(true);
+    try {
+      const result = await endEvent(eventId);
+      if (result.success) {
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to end event");
+      }
+    } catch (err) {
+      console.error("Error ending event:", err);
+      setError("Failed to end event");
+    } finally {
+      setIsEndingEvent(false);
+    }
+  };
+
+  const handleTriggerPairing = async () => {
+    if (!event) return;
+    
+    setIsTriggeringPairing(true);
+    try {
+      const result = await triggerPairing(eventId, groupSize);
+      if (result.success && result.data) {
+        setPairingData(result.data.pairing_results);
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to create pairings");
+      }
+    } catch (err) {
+      console.error("Error triggering pairing:", err);
+      setError("Failed to create pairings");
+    } finally {
+      setIsTriggeringPairing(false);
+    }
+  };
+
+  const handleViewPairings = async () => {
+    if (!event) return;
+    
+    try {
+      const result = await getEventPairings(eventId);
+      if (result.success && result.data) {
+        setPairingData(result.data.pairing_results);
+      } else {
+        setError(result.error || "Failed to get pairings");
+      }
+    } catch (err) {
+      console.error("Error getting pairings:", err);
+      setError("Failed to get pairings");
+    }
+  };
+
+  const handlePublishPairings = async () => {
+    if (!event) return;
+    
+    setIsPublishingPairings(true);
+    try {
+      const result = await publishPairings(eventId);
+      if (result.success) {
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to publish pairings");
+      }
+    } catch (err) {
+      console.error("Error publishing pairings:", err);
+      setError("Failed to publish pairings");
+    } finally {
+      setIsPublishingPairings(false);
+    }
+  };
+
+  // Helper function to get event status for display
+  const getEventStatus = () => {
+    if (!event) return "Unknown";
+    
+    // Check if event has ended based on date
+    const endDate = event.ends_at ? new Date(event.ends_at) : null;
+    const hasDateEnded = endDate ? new Date() > endDate : false;
+    
+    if (event.active && !hasDateEnded) return "STARTED";
+    if (hasDateEnded || (!event.active && event.matches)) return "TERMINATED";
+    if (!event.active && !event.matches) return "NOT_STARTED";
+    
+    return "Unknown";
+  };
+
+  const currentStatus = getEventStatus();
 
   if (isLoading) {
     return (
@@ -675,6 +783,7 @@ export default function EventPage({ params }: EventPageProps) {
                         </p>
 
                         <div className="grid gap-3">
+                          {/* Always available buttons */}
                           {hasQuestions && (
                             <PearButton
                               text="View Response Analytics"
@@ -691,11 +800,75 @@ export default function EventPage({ params }: EventPageProps) {
                             dark
                             className="w-full"
                           />
+
+                          {/* Event status-specific buttons */}
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text={isEndingEvent ? "Ending Event..." : "End Event"}
+                              onClick={handleEndEvent}
+                              className="w-full bg-orange-600 hover:bg-orange-700"
+                            />
+                          )}
+
+                          {currentStatus === "TERMINATED" && (
+                            <>
+                              <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Group Size
+                                </label>
+                                <select
+                                  value={groupSize}
+                                  onChange={(e) => setGroupSize(parseInt(e.target.value))}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                  <option value={2}>Pairs (2 people)</option>
+                                  <option value={3}>Groups of 3</option>
+                                  <option value={4}>Groups of 4</option>
+                                  <option value={5}>Groups of 5</option>
+                                </select>
+                              </div>
+                              
+                              <PearButton
+                                text={
+                                  isTriggeringPairing
+                                    ? "Creating Pairings..."
+                                    : "Create Pairings"
+                                }
+                                onClick={handleTriggerPairing}
+                                className="w-full bg-green-600 hover:bg-green-700"
+                              />
+
+                              {pairingData && (
+                                <PearButton
+                                  text={
+                                    isPublishingPairings
+                                      ? "Publishing..."
+                                      : "Publish Pairings to Students"
+                                  }
+                                  onClick={handlePublishPairings}
+                                  className="w-full bg-blue-600 hover:bg-blue-700"
+                                />
+                              )}
+                            </>
+                          )}
+
+                          {(currentStatus === "TERMINATED" && event.matches) && (
+                            <PearButton
+                              text="View Existing Pairings"
+                              onClick={handleViewPairings}
+                              className="w-full bg-purple-600 hover:bg-purple-700"
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Pairing Results section - only for organizations with pairing data */}
+              {isOrganizationUser && pairingData && (
+                <PairingResults pairingData={pairingData} eventId={eventId} />
               )}
             </div>
           </div>

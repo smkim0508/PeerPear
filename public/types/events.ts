@@ -1,5 +1,5 @@
 export interface PairingResult {
-  groups: number[][];
+  groups: number[][]; // for the existing matches field in events
 }
 
 export interface PairingEvent {
@@ -54,6 +54,8 @@ export interface User {
   email: string;
   phone_number: string | null;
   events: number[];
+  role?: string; // for pairing results
+  name?: string; // for pairing results
 }
 
 export interface UserProfile {
@@ -63,4 +65,19 @@ export interface UserProfile {
   class_year: number;
   major: string;
   hobbies: string[];
+}
+
+// Pairing types for API responses
+export interface PairedGroup {
+  students: User[];
+}
+
+export interface PairingResultData {
+  groups: PairedGroup[];
+  llm_reasoning?: string;
+}
+
+export interface PairingResponse {
+  event_id: number;
+  pairing_results: PairingResultData;
 }

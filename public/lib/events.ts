@@ -216,3 +216,92 @@ export async function autoTerminateEvent(eventId: number)  {
       console.error("Error auto-terminating event", err);
     }
   };
+
+/**
+ * End an event (for organization users)
+ */
+export async function endEvent(eventId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/event_status/end/${eventId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { success: false, error: errorData.error || 'Failed to end event' };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error ending event:', err);
+    return { success: false, error: 'Failed to end event' };
+  }
+}
+
+/**
+ * Trigger pairing for an event (for organization users)
+ */
+export async function triggerPairing(eventId: number, groupSize: number = 2): Promise<{ success: boolean; error?: string; data?: any }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pairing?event_id=${eventId}&group_size=${groupSize}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { success: false, error: errorData.error || 'Failed to trigger pairing' };
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error('Error triggering pairing:', err);
+    return { success: false, error: 'Failed to trigger pairing' };
+  }
+}
+
+/**
+ * Get pairing results for an event (for organization users)
+ */
+export async function getEventPairings(eventId: number): Promise<{ success: boolean; error?: string; data?: any }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pairing/event/${eventId}`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { success: false, error: errorData.error || 'Failed to get pairings' };
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error('Error getting event pairings:', err);
+    return { success: false, error: 'Failed to get pairings' };
+  }
+}
+
+/**
+ * Publish pairing results for an event (for organization users)
+ */
+export async function publishPairings(eventId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/event_status/publish/${eventId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { success: false, error: errorData.error || 'Failed to publish pairings' };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error publishing pairings:', err);
+    return { success: false, error: 'Failed to publish pairings' };
+  }
+}
