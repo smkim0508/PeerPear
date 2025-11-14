@@ -46,8 +46,9 @@ export default function Navbar({
 
   return (
     <div className="w-full bg-[#C3DD90]">
-      <div className="flex items-center justify-between w-screen h-16 px-6">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center w-screen h-16 px-6">
+        {/* Logo - Fixed width */}
+        <div className="flex items-center gap-2 w-48">
           <img
             src="/logo.svg"
             alt="Logo"
@@ -56,63 +57,67 @@ export default function Navbar({
           <span className="text-black"><Link href="/">peerpear</Link></span>
         </div>
 
-        <NavigationMenu>
-          {userType !== "guest" ? (
-            <NavigationMenuList className="flex gap-6">
-              {userType === "student" ? (
+        {/* Navigation - Centered */}
+        <div className="flex-1 flex justify-center">
+          <NavigationMenu>
+            {userType !== "guest" ? (
+              <NavigationMenuList className="flex gap-6">
+                {userType === "student" ? (
+                  <NavigationMenuItem className="bg-[#C3DD90] relative">
+                    <NavigationMenuLink
+                      asChild
+                      className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                    >
+                      <Link href="/student/events" className="relative">
+                        My Events
+                        {isActiveTab("/student/events") && (
+                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                        )}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                ) : (
+                  <></>
+                )}
                 <NavigationMenuItem className="bg-[#C3DD90] relative">
                   <NavigationMenuLink
                     asChild
-                    className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                    className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
                   >
-                    <Link href="/student/events" className="relative">
-                      My Events
-                      {isActiveTab("/student/events") && (
+                    <Link href={`/${userType}`} className="relative">
+                      Dashboard
+                      {isActiveTab(`/${userType}`) && (
                         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
                       )}
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
-              ) : (
-                <></>
-              )}
-              <NavigationMenuItem className="bg-[#C3DD90] relative">
-                <NavigationMenuLink
-                  asChild
-                  className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
-                >
-                  <Link href={`/${userType}`} className="relative">
-                    Dashboard
-                    {isActiveTab(`/${userType}`) && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
-                    )}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
 
-              <NavigationMenuItem className="relative">
-                <NavigationMenuLink
-                  asChild
-                  className={
-                    "!bg-[#C3DD90] hover:!bg-[#6f7e51]" +
-                    navigationMenuTriggerStyle()
-                  }
-                >
-                  <Link href={`/${userType}/profile`} className="relative">
-                    Profile
-                    {isActiveTab(`/${userType}/profile`) && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
-                    )}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          ) : (
-            <></>
-          )}
-        </NavigationMenu>
+                <NavigationMenuItem className="relative">
+                  <NavigationMenuLink
+                    asChild
+                    className={
+                      "!bg-[#C3DD90] hover:!bg-[#6f7e51]" +
+                      navigationMenuTriggerStyle()
+                    }
+                  >
+                    <Link href={`/${userType}/profile`} className="relative">
+                      Profile
+                      {isActiveTab(`/${userType}/profile`) && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                      )}
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            ) : (
+              <></>
+            )}
+          </NavigationMenu>
+        </div>
 
-        <div className="flex items-center gap-3">
+        {/* User info and logout - Fixed width */}
+        <div className="flex items-center gap-3 w-48 justify-end">
           {isAuthenticated && (
             <p className="text-black font-medium">
               {user?.user_info.attributes?.displayname
