@@ -233,7 +233,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
             <div>
               <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
               <p className="text-gray-600 mb-8">
-                {!edit || !view
+                {edit
                   ? "You are able to manage the questions participants will answer for this event before the event begins"
                   : "The event has begun and you are no longer able to edit the event"}
               </p>
