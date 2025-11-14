@@ -8,6 +8,10 @@ from common.types.user import UserProfileFull, User, UserProfile
 from common.types.questionnaire import Question, Answer
 from common.logging import logger
 from typing import Optional
+from modules.pairing.pairing_repository import PairingRepository
+from modules.pairing.orchestrator import PairingOrchestrator
+
+# TODO: use the pairing orchestrator and repository to create summary, and put it into db
 
 def get_questions(event_id: int) -> list[Question]:
     """Fetch all questions for a given event."""
@@ -62,7 +66,10 @@ def get_user_answers(question_ids: list[int], user_id: int) -> list[Answer]:
         return answers
 
 def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
-    """Insert or update responses for a questionnaire."""
+    """
+    Insert or update responses for a questionnaire.
+    Also summarizes all the user responses into a summary field to be used in pairing later.
+    """
     db_session = get_db_sessionmaker()
     questions = get_questions(event_id)
 
@@ -70,7 +77,8 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
         return "no_questions"
 
     with db_session() as session:
-        # NOTE: temporarily, this forces all questions in form to be answered. Technically, some should be required and some not.
+        # NOTE: temporarily, this forces all questions in form to be answered.
+        # Technically, some should be required and some not.
         if any([not r.answer for r in responses]):
             return "form"
         

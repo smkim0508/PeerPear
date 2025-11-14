@@ -74,6 +74,7 @@ def submit_questionnaire():
     
     logger.info(f"form responses: {form_responses}")
 
+    # try to put responses into database
     try:
         result = submit_responses(event_id, user_id, response_list)
     except Exception as e:

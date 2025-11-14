@@ -15,8 +15,6 @@ from common.types.event_enums import EventStatus, EventRole
 from sqlalchemy.ext.mutable import MutableList
 
 # main event table, representing each event
-
-
 class EventTable(MainDB_Base):
     """
     The SA ORM mapping for the event table.
@@ -85,3 +83,5 @@ class EventRegistrationsTable(MainDB_Base):
     valid_registration: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
+    # LLM parsed response summary for the user
+    response_summary: Mapped[str] = mapped_column(String, nullable=True)
