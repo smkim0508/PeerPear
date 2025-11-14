@@ -26,7 +26,6 @@ class BaselinePairingPrompts:
     {{
         "groups": list[list[int]],
         "reasoning": "a step-by-step reasoning trace of your thoughts"
-
     }}
 
     **IMPORTANT**:
@@ -194,11 +193,11 @@ class BaselinePairingPrompts:
             ],
         }
 
-        instruction = (
-            "Form balanced groups using the input below.\n"
-            "Maximize the satisfaction across students by pairing similar students together, follow the group_size constraint.\n"
-            "NEVER make a group with only one student, and return only the requested JSON output."
-        )
+        instruction = """
+        Form balanced groups using the input below.
+        Maximize the satisfaction across students by pairing similar students together, follow the group_size constraint.
+        NEVER make a group with only one student, and return only the requested JSON output.
+        """
 
         return instruction + json.dumps(payload, indent=2, ensure_ascii=False)
     

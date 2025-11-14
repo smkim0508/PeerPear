@@ -76,6 +76,7 @@ def submit_questionnaire():
 
     logger.info(f"form responses: {form_responses}")
 
+    # try to put responses into database + summarize it under registration table
     try:
         result = submit_responses(event_id, user_id, response_list)
     except Exception as e:
@@ -88,8 +89,10 @@ def submit_questionnaire():
         return jsonify({"error": "Please answer all questions"}), 400
     if result == "no_questions":
         return jsonify({"error": "This event has no questions"}), 404
+    if result == "no_registration":
+        return jsonify({"error": "User has not registered for this event"}), 404
     if result == "event":
         return jsonify({"error": "There is no event"}), 404
     if result == "status":
         return jsonify({"error": "This event is not active at this time"}), 404
-    return jsonify({"error": "Database error while submitting response"}), 500
+    return jsonify(generic_error_response), 500
