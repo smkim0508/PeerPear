@@ -25,6 +25,8 @@ from api.dashboard.routes.questionnaire import questionnaire_bp
 from api.dashboard.routes.event_registration import event_registration_bp
 from api.events.routes.events import events_bp
 from api.events.routes.event_status import event_status_bp
+from api.dashboard.routes.question_management import question_management_bp
+
 
 from api.profile.routes.profile import user_profile_bp
 
@@ -137,12 +139,15 @@ def create_app() -> Flask:
     app.register_blueprint(org_profile_bp, url_prefix="/organization_profile")
     app.register_blueprint(questionnaire_bp, url_prefix="/questionnaire")
     app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
+    app.register_blueprint(question_management_bp,
+                           url_prefix="/question_management")
     app.register_blueprint(event_registration_bp,
                            url_prefix="/event_registration")
     app.register_blueprint(events_bp, url_prefix="/events")
     app.register_blueprint(event_status_bp, url_prefix="/event_status")
 
     # check health for app dependencies and liveness
+
     @app.get("/health")
     def health():
         """

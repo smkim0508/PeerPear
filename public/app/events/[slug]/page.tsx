@@ -320,10 +320,10 @@ export default function EventPage({ params }: EventPageProps) {
         setEvent((prev) =>
           prev
             ? {
-                ...prev,
-                title: editEventData.title,
-                description: editEventData.description,
-              }
+              ...prev,
+              title: editEventData.title,
+              description: editEventData.description,
+            }
             : null
         );
         setIsEditingEvent(false);
@@ -634,11 +634,10 @@ export default function EventPage({ params }: EventPageProps) {
                             }
                             onClick={handleUnregister}
                             dark
-                            className={`w-full ${
-                              isRegistering
+                            className={`w-full ${isRegistering
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                           />
                         </div>
                       ) : (

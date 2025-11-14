@@ -91,3 +91,59 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
 
         session.commit()
         return "success"
+
+def add_question(event_id: int, question: str, options: list):
+    db_session = get_db_sessionmaker()
+
+    try:
+        with db_session() as session:
+            new_question = QuestionTable(
+                                    event_id=event_id,
+                                    question=question,
+                                    options=options if isinstance(
+                                        options, list) else []
+                                    )
+            session.add(new_question)
+            session.commit()
+            session.refresh(new_question)
+
+            return new_question.id
+    except SQLAlchemyError as e:
+        print(f"Database error in add_question: {e}")
+        return "db_error"
+
+
+def remove_question(question_id:int):
+    db_session = get_db_sessionmaker()
+
+    try:
+        with db_session() as session:
+            question = session.get(QuestionTable, question_id)
+
+            if not question:
+                return "not found"
+
+            session.delete(question)
+            session.commit()
+
+            return "success"
+
+    except SQLAlchemyError as e:
+        print(f"Database error in delete_question: {e}")
+        return "db_error"
+
+def get_question(question_id:int):
+    db_session = get_db_sessionmaker()
+    
+    try:
+        with db_session() as session:
+            
+            question = session.get(QuestionTable,question_id)
+            
+            return question
+    
+    except SQLAlchemyError as e:
+        print(f"Database error in get_question: {e}")
+        return {}
+        
+    
