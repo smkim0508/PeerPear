@@ -394,4 +394,9 @@ if __name__ == "__main__":
         print(f"Error connecting to database: {e}")
         exit(1)
 
-    fill_all_tables(engine)
+    # fill_all_tables(engine)
+
+    # NOTE: script to fill dummy data for singular tables
+    # Session = sessionmaker(bind=engine)
+    # session = Session()
+    # create_event_registration_data(session)

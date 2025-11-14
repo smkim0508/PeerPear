@@ -153,11 +153,12 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
     db_session = get_db_sessionmaker()
 
-    stmt = (select(EventTable, OrganizationTable)
-            .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
-            .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
-            .where(EventRegistrationsTable.user_id == user_id)
-            )
+    stmt = (
+        select(EventTable, OrganizationTable)
+        .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
+        .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
+        .where(EventRegistrationsTable.user_id == user_id)
+    )
 
     with db_session() as session:
         rows = session.execute(stmt).all()
@@ -207,7 +208,6 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
             )
 
     return None
-
 
 def validate_event_and_admin(session, event_id: int, user_id: int):
 
@@ -326,3 +326,21 @@ def auto_terminate(event_id: int):
         session_instance.commit()
 
         return {"message": "Event ended successfully", "event_id": event_id}
+
+def get_registration_by_user_and_event_id(event_id: int, user_id: int) -> int:
+    """
+    Retrieves the unique registration tied to an event id and user id.
+    """
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+
+        stmt = (
+            select(EventRegistrationsTable.id)
+            .join(EventRegistrationsTable, EventTable.id == EventRegistrationsTable.event_id)
+            .where(EventRegistrationsTable.user_id == user_id)
+            .where(EventRegistrationsTable.event_id == event_id)
+        )
+
+        registration_id = session.execute(stmt).scalar_one_or_none()
+        return registration_id

@@ -1,8 +1,9 @@
 # db/crud/questionnaire_crud.py
+from db.models.events import EventRegistrationsTable
 from db.models.question import QuestionTable
 from db.models.response import ResponseTable
 from sqlalchemy import select
-from api.dependencies import get_db_sessionmaker
+from api.dependencies import get_db_sessionmaker, get_llm
 from sqlalchemy.exc import SQLAlchemyError
 from common.types.user import UserProfileFull, User, UserProfile
 from common.types.questionnaire import Question, Answer
@@ -10,6 +11,7 @@ from common.logging import logger
 from typing import Optional
 from modules.pairing.pairing_repository import PairingRepository
 from modules.pairing.orchestrator import PairingOrchestrator
+from db.crud.events_crud import get_registration_by_user_and_event_id
 
 # TODO: use the pairing orchestrator and repository to create summary, and put it into db
 
@@ -71,10 +73,21 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
     Also summarizes all the user responses into a summary field to be used in pairing later.
     """
     db_session = get_db_sessionmaker()
-    questions = get_questions(event_id)
+    llm_client = get_llm() # needed for summarization
 
+    # fetch questions
+    questions = get_questions(event_id)
     if not questions:
         return "no_questions"
+    
+    # find the registration id tied to this event and user
+    registration_id = get_registration_by_user_and_event_id(event_id, user_id)
+    if not registration_id:
+        return "no_registration"
+    
+    # summarize user responses
+    pairing_orchestrator = PairingOrchestrator(main_db_session=db_session, llm_client=llm_client)
+    response_summary = pairing_orchestrator.summarize_questionnaire_response(responses, questions)
 
     with db_session() as session:
         # NOTE: temporarily, this forces all questions in form to be answered.
@@ -97,5 +110,12 @@ def submit_responses(event_id: int, user_id: int, responses: list[Answer]):
             else:
                 session.add(ResponseTable(question_id=qid, answer=ans, user_id=user_id))
 
+        # fetch the existing registration via SQLAlchemy
+        registration = session.get(EventRegistrationsTable, registration_id)
+        if registration is None:
+            # NOTE: this is defensive behavior; technically shouldn't happen, but implies the DB state changed between earlier registration_id lookup & now
+            return "no_registration"
+
+        registration.response_summary = response_summary # add in summary field
         session.commit()
         return "success"
