@@ -144,14 +144,14 @@ def verify_view(event_id):
     try:
         db_session = get_db_sessionmaker()
         with db_session() as session_instance:
-            event = session.scalar(
+            event = session_instance.scalar(
                 select(EventTable).where(EventTable.id == event_id)
             )
 
         if not event:
             return jsonify({"error": "Event not found"}), 404
     
-        org_admin = session.scalar(
+        org_admin = session_instance.scalar(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
         )
 
@@ -165,8 +165,8 @@ def verify_view(event_id):
         
         if event.status != EventStatus.NOT_STARTED:
             return jsonify({"canView": True,"canEdit": False }), 200
-        return jsonify({"canView": False,"canEdit": True }), 200
+        return jsonify({"canView": True,"canEdit": True }), 200
 
     except:
-        logger.error(f"Error verifying event: {e}")
+        logger.error(f"Error verifying event")
         return jsonify(generic_error_response), 500

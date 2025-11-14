@@ -51,34 +51,36 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   }, [event_id]);
 
   useEffect(() => {
-    fetchPermissions()
-  }, [event_id])
+    fetchPermissions();
+  }, [event_id]);
 
   const fetchPermissions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const res = await fetch(`${apiUrl}/questiion_management/verification/${event_id}`)
-      const data = await res.json()
+      const res = await fetch(
+        `${apiUrl}/question_management/verification/${event_id}`,
+        {
+          credentials: "include", // Include cookies for authentication
+        }
+      );
+      const data = await res.json();
       if (res.ok) {
-        setEdit(data.canEdit)
-        setView(data.canView)
+        setEdit(data.canEdit);
+        setView(data.canView);
+      } else {
+        console.error("error verifying user", data.error);
+        setView(false);
+        setEdit(false);
       }
-      else {
-        console.error('error verifying user', data.error)
-        setView(false)
-        setEdit(false)
-      }
-
+    } catch (err) {
+      console.error("error verifying user", err);
+      setView(false);
+      setEdit(false);
     }
-    catch (err) {
-      console.error('error verifying user', err)
-      setView(false)
-      setEdit(false)
-    }
-  }
+  };
 
   const getUserType = (): "student" | "organization" => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const storedUserType = localStorage.getItem("userType") as
         | "student"
         | "organization"
@@ -121,16 +123,19 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
       let res;
       if (data.id) {
         //Endpoint is: /update-question/<question_id>
-        res = await fetch(`${apiUrl}/question_management/update-question/${data.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: data.question,
-            options: data.type === "multiple_choice" ? data.options : [],
-          }),
-        });
+        res = await fetch(
+          `${apiUrl}/question_management/update-question/${data.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              question: data.question,
+              options: data.type === "multiple_choice" ? data.options : [],
+            }),
+          }
+        );
       } else {
         //Endpoint is:  POST /create-question
         res = await fetch(`${apiUrl}/question_management/create-question`, {
@@ -150,7 +155,9 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
 
       if (res.ok) {
         setSuccessMessage(
-          data.id ? "Question updated successfully!" : "Question added successfully!"
+          data.id
+            ? "Question updated successfully!"
+            : "Question added successfully!"
         );
         setShowAddForm(false);
         fetchQuestions();
@@ -226,10 +233,12 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
             <div>
               <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
               <p className="text-gray-600 mb-8">
-                {(!edit || !view) ? "You are able to manage the questions participants will answer for this event before the event begins" : "The event has begun and you are no longer able to edit the event"}
+                {!edit || !view
+                  ? "You are able to manage the questions participants will answer for this event before the event begins"
+                  : "The event has begun and you are no longer able to edit the event"}
               </p>
             </div>
-            {edit &&
+            {edit && (
               <div>
                 <PearButton
                   text={showAddForm ? "Cancel" : "Add a Question"}
@@ -237,12 +246,13 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
                   onClick={() => setShowAddForm(!showAddForm)}
                 />
               </div>
-            }
-
+            )}
           </div>
 
           {error && <PearAlert type="error" message={error} />}
-          {successMessage && <PearAlert type="success" message={successMessage} />}
+          {successMessage && (
+            <PearAlert type="success" message={successMessage} />
+          )}
 
           {showAddForm && (
             <PearForm
@@ -270,9 +280,13 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
                   key={q.id}
                   questionId={q.id}
                   questionText={q.question}
-                  questionType={q.options && q.options.length > 0 ? "multiple_choice" : "text"}
+                  questionType={
+                    q.options && q.options.length > 0
+                      ? "multiple_choice"
+                      : "text"
+                  }
                   existingOptions={q.options || []}
-                  canEdit={!view || !edit}
+                  canEdit={edit}
                   onSave={handleSaveQuestion}
                   onDelete={handleDeleteQuestion}
                   isEditing={true}
