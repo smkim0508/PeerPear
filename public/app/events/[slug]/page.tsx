@@ -828,7 +828,7 @@ export default function EventPage({ params }: EventPageProps) {
                 )}
 
               {/* Registration section - only for students */}
-              {!isOrganizationUser && (
+              {!isOrganizationUser && event?.status === "STARTED" && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
