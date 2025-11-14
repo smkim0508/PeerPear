@@ -12,14 +12,37 @@ import PearButton from "@/components/PearButton";
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { isAuthenticated, user, isLoading, verifyAndRedirectToOrganization } = useAuth();
   const router = useRouter();
 
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
 
-  // Handle post-login redirects - removed auto-redirect to let users stay on home page after logout
-  useEffect(() => {}, [isAuthenticated, isLoading, router]);
+  // Handle post-login redirects and check for auth errors
+  useEffect(() => {
+    // Check for auth error message from localStorage
+    const errorMessage = localStorage.getItem("authError");
+    if (errorMessage) {
+      setAuthError(errorMessage);
+      localStorage.removeItem("authError"); // Clear it after reading
+    }
+
+    // If user is authenticated, handle redirects based on userType
+    if (isAuthenticated && !isLoading) {
+      const storedUserType = localStorage.getItem("userType") as
+        | "student"
+        | "organization"
+        | null;
+      
+      if (storedUserType === "organization") {
+        // Verify organization access before redirecting
+        verifyAndRedirectToOrganization();
+      } else if (storedUserType === "student") {
+        router.push("/student");
+      }
+    }
+  }, [isAuthenticated, isLoading, router, verifyAndRedirectToOrganization]);
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -33,18 +56,24 @@ export default function Home() {
     );
   }
 
-  // Redirect authenticated users based on what they logged in as
-  const storedUserType = localStorage.getItem("userType") as
-    | "student"
-    | "organization"
-    | null;
-  if (isAuthenticated) {
-    redirect(`/${storedUserType}`);
-  }
-
   return (
     <div className="font-sans min-h-screen flex flex-col">
       <Navbar onLoginClick={openLoginModal} userType="guest" />
+
+      {/* Error message display */}
+      {authError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 relative">
+          <strong className="font-bold">Access Denied: </strong>
+          <span className="block sm:inline">{authError}</span>
+          <button
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer"
+            onClick={() => setAuthError(null)}
+          >
+            <span className="sr-only">Dismiss</span>
+            ×
+          </button>
+        </div>
+      )}
 
       <main className="flex-1">
         <Hero onTryNowClick={openLoginModal} />
