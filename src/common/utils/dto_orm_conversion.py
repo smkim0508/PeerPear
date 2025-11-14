@@ -1,0 +1,15 @@
+# universal helper to easily convert DTO and ORM objects
+from pydantic import BaseModel
+from typing import TypeVar, Generic, Optional
+
+def orm_to_dto(orm_obj, dto_class):
+    # if not isinstance(orm_obj, dict):
+    #     orm_obj = {c.name: getattr(orm_obj, c.name) for c in orm_obj.__table__.columns}
+    return dto_class.model_validate(orm_obj, from_attributes=True)
+
+def dto_to_orm(dto_obj, orm_cls):
+    return orm_cls(**dto_obj.model_dump(
+        exclude_unset=True, exclude={
+            "organization", # NOTE: exclude any "relationship" fields from conversion
+        }
+    ))

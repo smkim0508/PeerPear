@@ -2,22 +2,62 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { supabase, Database } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PearButton from "@/components/PearButton";
-import { Calendar, Clock, Users, Building2, CheckCircle, XCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  Building2,
+  CheckCircle,
+  XCircle,
+  Edit,
+  Save,
+  X,
+} from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import {
+  fetchEventById,
+  checkUserRegistration,
+  registerUserForEvent,
+  unregisterUserFromEvent,
+  getUserEventResponses,
+  getEventParticipants,
+  autoTerminateEvent,
+} from "@/lib/events";
 
-type Event = Database['public']['Tables']['events']['Row'] & {
-  organizations: Database['public']['Tables']['organizations']['Row'];
-  questions: Database['public']['Tables']['questions']['Row'][];
+type Event = {
+  id: number;
+  organization_id: number;
+  created_at: string;
+  ends_at: string | null;
+  active: boolean;
+  title: string | null;
+  description: string | null;
+  matches: any | null;
+  organizations: {
+    id: number;
+    org_name: string;
+    description: string;
+  };
+  questions: {
+    id: number;
+    question: string;
+    options: any | null;
+    event_id: number;
+  }[];
 };
 
-type UserResponse = Database['public']['Tables']['responses']['Row'];
+type UserResponse = {
+  id: number;
+  question_id: number;
+  answer: any | null;
+  user_id: number;
+};
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -31,95 +71,155 @@ export default function EventPage({ params }: EventPageProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [userResponses, setUserResponses] = useState<UserResponse[]>([]);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [questionnaireCompleted, setQuestionnaireCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [checkedAutoTerminate, setCheckedAutoTerminate] = useState(false);
+
+  // Organization-only section states
+  const [participants, setParticipants] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [userAnswers, setUserAnswers] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Event editing states
+  const [isEditingEvent, setIsEditingEvent] = useState(false);
+  const [editEventData, setEditEventData] = useState({
+    title: "",
+    description: "",
+  });
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
 
   const eventId = parseInt(slug);
 
+  // Determine user type - STRICTLY from localStorage only
+  const getUserType = (): "student" | "organization" => {
+    if (typeof window !== "undefined") {
+      const storedUserType = localStorage.getItem("userType") as
+        | "student"
+        | "organization"
+        | null;
+      return storedUserType || "student";
+    }
+
+    return "student"; // Default to student
+  };
+
+  const userType = getUserType();
+  const isOrganizationUser = userType === "organization";
+
   useEffect(() => {
     fetchEvent();
-  }, [eventId, user]);
+    // Only check registration for students
+    if (user?.username && !isOrganizationUser) {
+      checkRegistration();
+    }
+  }, [eventId, user, isOrganizationUser]);
 
   const fetchEvent = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // Fetch event with organization details
-      const { data: eventData, error: eventError } = await supabase
-        .from('events')
-        .select(`
-          *,
-          organizations (
-            id,
-            org_name,
-            description
-          ),
-          questions (
-            id,
-            question,
-            options,
-            event_id
-          )
-        `)
-        .eq('id', eventId)
-        .single();
-
-      console.log("eventData", eventData);
-
-      if (eventError) {
-        console.error('Error fetching event:', eventError);
-        setError('Event not found');
-        return;
+      if (!checkedAutoTerminate) {
+        setCheckedAutoTerminate(true);
+        await autoTerminateEvent(eventId);
       }
 
-      setEvent(eventData as Event);
+      const eventData = await fetchEventById(eventId);
+      if (!eventData) {
+        setError("Event not found");
+        return;
+      }
+      setEvent(eventData);
     } catch (err) {
-      console.error('Error:', err);
-      setError('Failed to load event');
+      console.error("Error:", err);
+      setError("Failed to load event");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const checkRegistration = async () => {
+    if (!user?.username) return;
+
+    try {
+      const isRegistered = await checkUserRegistration(user.username, eventId);
+      setIsRegistered(isRegistered);
+
+      if (isRegistered) {
+        const responses = await getUserEventResponses(user.username, eventId);
+        setUserResponses(responses);
+
+        // Check questionnaire completion status
+        if (user?.id) {
+          const API_BASE_URL =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+          const statusResponse = await fetch(
+            `${API_BASE_URL}/event_registration/status/${eventId}/${user.id}`,
+            { credentials: "include" }
+          );
+
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            setQuestionnaireCompleted(statusData.valid_registration || false);
+          }
+        }
+      } else {
+        setQuestionnaireCompleted(false);
+      }
+    } catch (err) {
+      console.error("Error checking registration:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!eventId || !isOrganizationUser) return;
+
+    const fetchParticipants = async () => {
+      try {
+        const data = await getEventParticipants(eventId);
+        setParticipants(data);
+        console.log("Participants data:", data);
+      } catch (error) {
+        console.error("Error fetching participants:", error);
+      }
+    };
+
+    fetchParticipants();
+  }, [eventId, isOrganizationUser]);
 
   const handleRegister = async () => {
     if (!user || !event) return;
 
     setIsRegistering(true);
     try {
-      // Get user ID first
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id, events')
-        .eq('username', user.username)
-        .single();
+      const result = await registerUserForEvent(user.id!, eventId);
 
-      if (userError) {
-        throw new Error('User not found');
-      }
+      if (!result.success) {
+        // Detect incomplete profile
+        if (result.error?.includes("profile")) {
+          setError(result.error);
+          return;
+        }
 
-      // Add event to user's events array
-      const updatedEvents = [...(userData.events || []), eventId];
-
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ events: updatedEvents })
-        .eq('id', userData.id);
-
-      if (updateError) {
-        throw new Error('Failed to register for event');
+        setError(result.error || "Failed to register for event");
+        return;
       }
 
       setIsRegistered(true);
 
-      // Redirect to questionnaire if there are questions
+      // Set questionnaire completion status
       if (event.questions && event.questions.length > 0) {
+        setQuestionnaireCompleted(false); // New registration needs questionnaire
         router.push(`/events/${eventId}/questionnaire`);
+      } else {
+        setQuestionnaireCompleted(true); // No questionnaire needed
       }
     } catch (err) {
-      console.error('Registration error:', err);
-      setError('Failed to register for event');
+      console.error("Registration error:", err);
+      setError("Failed to register for event");
     } finally {
       setIsRegistering(false);
     }
@@ -130,37 +230,118 @@ export default function EventPage({ params }: EventPageProps) {
 
     setIsRegistering(true);
     try {
-      // Get user ID first
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('id, events')
-        .eq('username', user.username)
-        .single();
+      const success = await unregisterUserFromEvent(user.username, eventId);
 
-      if (userError) {
-        throw new Error('User not found');
-      }
-
-      // Remove event from user's events array
-      const updatedEvents = (userData.events || []).filter((id: number) => id !== eventId);
-
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ events: updatedEvents })
-        .eq('id', userData.id);
-
-      if (updateError) {
-        throw new Error('Failed to unregister from event');
+      if (!success) {
+        throw new Error("Failed to unregister");
       }
 
       setIsRegistered(false);
       setUserResponses([]);
+      setQuestionnaireCompleted(false);
     } catch (err) {
-      console.error('Unregistration error:', err);
-      setError('Failed to unregister from event');
+      console.error("Unregistration error:", err);
+      setError("Failed to unregister");
     } finally {
       setIsRegistering(false);
     }
+  };
+
+  const handleUserClick = async (selectedUser: any) => {
+    setSelectedUser(selectedUser);
+    setIsModalOpen(true);
+
+    setUserAnswers([]); // Clear previous answers
+
+    try {
+      // Get user's responses for this event
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${API_BASE_URL}/questionnaire/${eventId}/${selectedUser.user_id}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Transform the data to match expected format
+        const formattedAnswers =
+          data.answers?.map((answer: any) => ({
+            answer: answer.answer,
+            question_id: answer.question_id,
+            questions: {
+              question:
+                data.questions?.find((q: any) => q.id === answer.question_id)
+                  ?.question || "",
+            },
+          })) || [];
+        setUserAnswers(formattedAnswers);
+      } else {
+        console.error("Error fetching user answers:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching user answers:", error);
+    }
+  };
+
+  const handleEditEvent = () => {
+    if (event) {
+      setEditEventData({
+        title: event.title || "",
+        description: event.description || "",
+      });
+      setIsEditingEvent(true);
+    }
+  };
+
+  const handleSaveEvent = async () => {
+    if (!event) return;
+
+    setIsSavingEvent(true);
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(editEventData),
+        }
+      );
+
+      if (response.ok) {
+        // Update local event state
+        setEvent((prev) =>
+          prev
+            ? {
+              ...prev,
+              title: editEventData.title,
+              description: editEventData.description,
+            }
+            : null
+        );
+        setIsEditingEvent(false);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to update event");
+      }
+    } catch (err) {
+      console.error("Error updating event:", err);
+      setError("Failed to update event");
+    } finally {
+      setIsSavingEvent(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingEvent(false);
+    setEditEventData({ title: "", description: "" });
   };
 
   if (isLoading) {
@@ -180,26 +361,28 @@ export default function EventPage({ params }: EventPageProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center py-8">
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Event Not Found</h2>
-            <p className="text-gray-600 mb-4">{error || 'The event you are looking for does not exist.'}</p>
-            <PearButton text="Back to Events" onClick={() => router.push('/student')} />
+            <h2 className="text-xl font-semibold mb-2">Event Error</h2>
+            <p className="text-gray-600 mb-4">
+              {error || "The event you are looking for does not exist."}
+            </p>
+            <PearButton
+              text="Back to Events"
+              onClick={() => router.push("/student")}
+            />
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const isEventActive = event.active;
-  const hasEnded = event.end_date ? new Date(event.end_date) < new Date() : false;
   const hasQuestions = event.questions && event.questions.length > 0;
-  const hasCompletedQuestionnaire = hasQuestions && userResponses.length > 0;
 
   return (
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-linear-to-br from-light-beige via-white to-light-beige">
         <Navbar />
 
-        {/* Hero Section */}
+        {/* === HERO SECTION === */}
         <div className="relative bg-linear-to-r from-nav-dark to-gray-700 text-white overflow-hidden">
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
@@ -207,87 +390,126 @@ export default function EventPage({ params }: EventPageProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-6">
                   <Building2 className="h-7 w-7 text-green" />
-                  <span className="text-green font-bold text-xl">{event.organizations.org_name}</span>
-                </div>
-                <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight text-white">{event.title}</h1>
-                {event.description && (
-                  <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">{event.description}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {isEventActive ? (
-                  <span className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-green text-nav-dark text-base font-bold shadow-lg">
-                    <CheckCircle className="h-5 w-5" />
-                    Active
+                  <span className="text-green font-bold text-xl">
+                    {event.organizations.org_name}
                   </span>
+                </div>
+
+                {isEditingEvent ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="text-2xl font-bold text-white">
+                        Edit Event Details
+                      </h2>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveEvent}
+                          disabled={
+                            isSavingEvent || !editEventData.title.trim()
+                          }
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                          <Save className="h-4 w-4" />
+                          {isSavingEvent ? "Saving..." : "Save Changes"}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          disabled={isSavingEvent}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-all"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">
+                          Event Title *
+                        </label>
+                        <input
+                          type="text"
+                          value={editEventData.title}
+                          onChange={(e) =>
+                            setEditEventData((prev) => ({
+                              ...prev,
+                              title: e.target.value,
+                            }))
+                          }
+                          className="w-full text-3xl lg:text-4xl font-bold leading-tight text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-green-400 transition-colors"
+                          placeholder="Enter event title"
+                          maxLength={100}
+                        />
+                        <p className="text-sm text-gray-200 mt-1">
+                          {editEventData.title.length}/100 characters
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">
+                          Event Description
+                        </label>
+                        <textarea
+                          value={editEventData.description}
+                          onChange={(e) =>
+                            setEditEventData((prev) => ({
+                              ...prev,
+                              description: e.target.value,
+                            }))
+                          }
+                          className="w-full text-lg text-gray-100 leading-relaxed bg-transparent border-2 border-white rounded-lg p-4 focus:outline-none focus:border-green-400 resize-none transition-colors"
+                          placeholder="Describe your event, its goals, and what participants can expect..."
+                          rows={4}
+                          maxLength={500}
+                        />
+                        <p className="text-sm text-gray-200 mt-1">
+                          {editEventData.description.length}/500 characters
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <span className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gray-500 text-white text-base font-medium shadow-lg">
-                    <XCircle className="h-5 w-5" />
-                    Inactive
-                  </span>
+                  <div>
+                    <div className="flex items-center gap-4 mb-6">
+                      <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-white">
+                        {event.title}
+                      </h1>
+                    </div>
+                    {event.description && (
+                      <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">
+                        {event.description}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
-
-            {/* Key Event Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
-              {event.start_date && (
-                <div className="flex items-center gap-4 bg-white bg-opacity-95 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-                  <Calendar className="h-10 w-10 text-nav-dark shrink-0" />
-                  <div>
-                    <p className="text-nav-dark font-bold text-sm uppercase tracking-wide mb-1">Created</p>
-                    <p className="text-gray-700 text-lg font-semibold">{format(parseISO(event.start_date), 'PPP')}</p>
-                  </div>
-                </div>
-              )}
-
-              {event.end_date && (
-                <div className="flex items-center gap-4 bg-white bg-opacity-95 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-                  <Clock className="h-10 w-10 text-nav-dark shrink-0" />
-                  <div>
-                    <p className="text-nav-dark font-bold text-sm uppercase tracking-wide mb-1">Ends</p>
-                    <p className="text-gray-700 text-lg font-semibold">{format(parseISO(event.end_date), 'PPP p')}</p>
-                  </div>
-                </div>
-              )}
-
-              {hasQuestions && (
-                <div className="flex items-center gap-4 bg-white bg-opacity-95 backdrop-blur-sm rounded-xl p-6 shadow-lg">
-                  <Users className="h-10 w-10 text-nav-dark shrink-0" />
-                  <div>
-                    <p className="text-nav-dark font-bold text-sm uppercase tracking-wide mb-1">Questions</p>
-                    <p className="text-gray-700 text-lg font-semibold">{event.questions.length} Question{event.questions.length !== 1 ? 's' : ''}</p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
+        {/* === MAIN CONTENT === */}
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid lg:grid-cols-3 gap-8">
-
-            {/* Main Content Column */}
+            {/* === LEFT COLUMN === */}
             <div className="lg:col-span-2 space-y-8">
-
-              {/* Organization Info */}
+              {/* About the Organization */}
               <Card className="shadow-lg border-0 bg-white rounded-xl">
-                <CardHeader className="pb-6">
+                <CardHeader>
                   <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
                     <Building2 className="h-7 w-7" />
                     About the Organization
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-800 text-xl leading-relaxed">{event.organizations.description}</p>
+                  <p className="text-gray-800 text-xl leading-relaxed">
+                    {event.organizations.description}
+                  </p>
                 </CardContent>
               </Card>
 
               {/* Questions Preview */}
               {hasQuestions && (
                 <Card className="shadow-lg border-0 bg-white rounded-xl">
-                  <CardHeader className="pb-6">
+                  <CardHeader>
                     <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
                       <Users className="h-7 w-7" />
                       Event Questions
@@ -295,48 +517,111 @@ export default function EventPage({ params }: EventPageProps) {
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-800 text-xl mb-6 leading-relaxed">
-                      This event includes {event.questions.length} question{event.questions.length !== 1 ? 's' : ''} to help with pairing participants effectively.
+                      This event includes {event.questions.length} question
+                      {event.questions.length !== 1 ? "s" : ""} to help match
+                      participants effectively.
                     </p>
-                    <div className="bg-light-beige rounded-xl p-6">
-                      <p className="text-base text-gray-700 leading-relaxed">
-                        After registration, you'll be able to complete the questionnaire to provide information for better matching with other participants.
-                      </p>
-                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* === Participants Section (only for organization) === */}
+              {isOrganizationUser && (
+                <Card className="shadow-lg border-0 bg-white rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                      <Users className="h-7 w-7" />
+                      Participants
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {participants.length === 0 ? (
+                      <p className="text-gray-600">No participants yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {participants.map((u) => (
+                          <div
+                            key={u.id}
+                            className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
+                            onClick={() => handleUserClick(u)}
+                          >
+                            <h3 className="text-center font-semibold text-lg text-nav-dark">
+                              {u.full_name || u.username}
+                            </h3>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
             </div>
 
-            {/* Sidebar */}
+            {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
-
-              {/* Registration Card */}
-              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                <CardHeader className="rounded-t-xl">
-                  <CardTitle className="text-2xl text-nav-dark font-bold">Registration</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-8">
-                  <div className="space-y-6">
+              {/* Registration section - only for students */}
+              {!isOrganizationUser && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Registration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="text-center">
                       {isRegistered ? (
                         <div className="space-y-4">
                           <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
                             <CheckCircle className="h-6 w-6" />
-                            <span className="font-bold text-lg">You're registered!</span>
+                            <span className="font-bold text-lg">
+                              You're registered!
+                            </span>
                           </div>
 
-                          {hasQuestions && (
-                            <div className="bg-light-beige rounded-xl p-4">
-                              <p className="text-base text-gray-800 mb-3">
-                                Questionnaire: {hasCompletedQuestionnaire ?
-                                  <span className="text-green-600 font-bold">Completed ✓</span> :
-                                  <span className="text-orange-600 font-bold">Pending</span>
-                                }
-                              </p>
-                              {!hasCompletedQuestionnaire && (
+                          {/* Questionnaire Status */}
+                          {event?.questions && event.questions.length > 0 && (
+                            <div className="space-y-3">
+                              <div className="border-t border-gray-200 pt-4">
+                                <h3 className="font-semibold text-lg text-nav-dark mb-3">
+                                  Questionnaire
+                                </h3>
+                                {questionnaireCompleted ? (
+                                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
+                                    <CheckCircle className="h-5 w-5" />
+                                    <span className="font-medium">
+                                      Completed
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-3">
+                                    <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
+                                      <XCircle className="h-5 w-5" />
+                                      <span className="font-medium">
+                                        Incomplete
+                                      </span>
+                                    </div>
+                                    <PearButton
+                                      text="Complete Questionnaire"
+                                      onClick={() =>
+                                        router.push(
+                                          `/events/${eventId}/questionnaire`
+                                        )
+                                      }
+                                      className="w-full"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
+                              {questionnaireCompleted && (
                                 <PearButton
-                                  text="Complete Questionnaire"
-                                  onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                  text="View/Edit Questionnaire"
+                                  onClick={() =>
+                                    router.push(
+                                      `/events/${eventId}/questionnaire`
+                                    )
+                                  }
+                                  dark
                                   className="w-full"
                                 />
                               )}
@@ -344,73 +629,117 @@ export default function EventPage({ params }: EventPageProps) {
                           )}
 
                           <PearButton
-                            text={isRegistering ? "Unregistering..." : "Unregister"}
+                            text={
+                              isRegistering ? "Unregistering..." : "Unregister"
+                            }
                             onClick={handleUnregister}
                             dark
-                            className={`w-full ${isRegistering ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className={`w-full ${isRegistering
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                              }`}
                           />
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          <p className="text-gray-800 text-lg font-medium">Ready to join this event?</p>
+                          <p className="text-gray-800 text-lg font-medium">
+                            Ready to join this event?
+                          </p>
                           <PearButton
-                            text={isRegistering ? "Registering..." : "Register Now"}
+                            text={
+                              isRegistering ? "Registering..." : "Register Now"
+                            }
                             onClick={handleRegister}
-                            className={`w-full ${(!isEventActive || hasEnded || isRegistering) ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className="w-full"
                           />
-                          {(!isEventActive || hasEnded) && (
-                            <p className="text-base text-red-600 mt-3 font-medium">
-                              {hasEnded ? "This event has ended" : "This event is not currently active"}
-                            </p>
-                          )}
                         </div>
                       )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
 
-              {/* Event Status Card */}
-              <Card className="shadow-lg border-0 bg-white rounded-xl">
-                <CardHeader className="pb-6">
-                  <CardTitle className="text-2xl text-nav-dark font-bold">Event Status</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-700 text-base font-medium">Status</span>
-                    <span className={`font-bold text-base ${isEventActive ? 'text-green-600' : 'text-gray-500'}`}>
-                      {isEventActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
+              {/* Event Management section - only for organizations */}
+              {isOrganizationUser && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Event Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-gray-800 text-lg font-medium mb-4">
+                          Manage your event and view participant responses
+                        </p>
 
-                  {event.start_date && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-700 text-base font-medium">Created</span>
-                      <span className="font-bold text-base text-gray-800">{format(parseISO(event.start_date), 'MMM d, yyyy')}</span>
+                        <div className="grid gap-3">
+                          {hasQuestions && (
+                            <PearButton
+                              text="View Response Analytics"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questionnaire`)
+                              }
+                              className="w-full"
+                            />
+                          )}
+
+                          <PearButton
+                            text="Edit Event Details"
+                            onClick={handleEditEvent}
+                            dark
+                            className="w-full"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  )}
-
-                  {event.end_date && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-700 text-base font-medium">Ends</span>
-                      <span className="font-bold text-base text-gray-800">{format(parseISO(event.end_date), 'MMM d, yyyy')}</span>
-                    </div>
-                  )}
-
-                  {hasQuestions && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-700 text-base font-medium">Questions</span>
-                      <span className="font-bold text-base text-gray-800">{event.questions.length}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
 
         <Footer />
       </div>
+
+      {/* === User Modal (only for organization) === */}
+      {isOrganizationUser && isModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-[#00000078] flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer"
+              onClick={() => setIsModalOpen(false)}
+            >
+              ✕
+            </button>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-nav-dark">
+                {selectedUser.full_name || selectedUser.username}
+              </h2>
+            </div>
+
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              Questionnaire Answers
+            </h3>
+            {userAnswers.length === 0 ? (
+              <p className="text-gray-600 text-center">No answers submitted.</p>
+            ) : (
+              <div className="space-y-4 max-h-80 overflow-y-auto">
+                {userAnswers.map((ans, idx) => (
+                  <div key={idx} className="bg-light-beige rounded-lg p-4">
+                    <p className="font-medium text-nav-dark">
+                      {ans.questions.question}
+                    </p>
+                    <p className="text-gray-700 mt-1">{ans.answer}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }

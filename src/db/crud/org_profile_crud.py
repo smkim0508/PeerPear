@@ -1,28 +1,35 @@
-from db.models.organizations import Organization
+from db.models.organizations import OrganizationTable
 from sqlalchemy import select
 from api.dependencies import get_db_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional
 from common.types.db_status import DBStatus
+from common.types.organization import OrganizationProfile
 
-def get_organization_profile(organization_id: int) -> Optional[Organization]:
+def get_organization_profile(organization_id: int) -> Optional[OrganizationProfile]:
     db_session = get_db_sessionmaker()
 
-    stmt = select(Organization).where(Organization.id == organization_id)
+    stmt = select(OrganizationTable).where(OrganizationTable.id == organization_id)
     
     with db_session() as session: 
-        result = db_session.execute(stmt).scalar_one_or_none() 
+        result = session.execute(stmt).scalar_one_or_none() 
 
-    return result
+        if result is None:
+            return None
+    
+        org_profile = OrganizationProfile(
+            id=result.id,
+            org_name=result.org_name,
+            description=result.description
+        )
 
-def update_organization_profile(data: dict) -> Optional[str]:
-    organization_id = data.get("organization_id")
-    if not organization_id:
-        return "error: missing organization_id"
+        return org_profile
+
+def update_organization_profile(new_profile: OrganizationProfile) -> Optional[str]:
 
     db_session = get_db_sessionmaker()
 
-    org_stmt = select(Organization).where(Organization.id == organization_id)
+    org_stmt = select(OrganizationTable).where(OrganizationTable.id == new_profile.id)
 
     # handle organization profile within one SA session
     with db_session() as session: 
@@ -30,10 +37,11 @@ def update_organization_profile(data: dict) -> Optional[str]:
 
         if not org_profile:
             return None # NOTE: signals organization not found.
-    
-        new_name = data.get("org_name")
-        new_description = data.get("description")
 
+        new_name = new_profile.org_name
+        new_description = new_profile.description
+
+        # only updates fields that were passed in, via SQLAlchemy ORM
         if new_name:
             org_profile.org_name = new_name
         if new_description:
@@ -44,4 +52,4 @@ def update_organization_profile(data: dict) -> Optional[str]:
             return DBStatus.SUCCESS.value
         except SQLAlchemyError as e:
             session.rollback()
-            return f"error: {str(e)}"
+            return str(e) # returns error message, to be handled in parent caller

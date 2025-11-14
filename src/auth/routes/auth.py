@@ -4,7 +4,10 @@ import re
 import json
 from functools import wraps
 from flask import Blueprint, request, session, redirect, jsonify, abort
+from sqlalchemy import select
 from db.crud.user_crud import get_or_create_user
+from db.models.orgadmin import OrgAdminTable
+from api.dependencies import get_db_sessionmaker
 
 #-----------------------------------------------------------------------
 
@@ -286,7 +289,18 @@ def get_current_user():
         response_data["last_name"] = db_user.last_name
         response_data["email"] = db_user.email
         response_data["phone_number"] = db_user.phone_number
-        response_data["events"] = db_user.events
+        
+        # Check if user is an organization admin and get organization_id
+        db_session = get_db_sessionmaker()
+        with db_session() as session:
+            org_admin = session.scalar(
+                select(OrgAdminTable).where(OrgAdminTable.user_id == db_user.id)
+            )
+            if org_admin:
+                response_data["user_type"] = "organization"
+                response_data["organization_id"] = org_admin.organization_id
+            else:
+                response_data["user_type"] = "student"
     
     return jsonify(response_data)
 

@@ -1,8 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone, timedelta
-from common.types.events import EventStatus
-
+from common.types.event_enums import EventStatus, EventRole
 
 class PublishedEvent(BaseModel):
     """

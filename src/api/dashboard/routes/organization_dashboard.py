@@ -1,15 +1,18 @@
 # main landing page for organizations after logging in
-from flask import Blueprint, request, send_from_directory, jsonify, g
-import os
-from api import validate_model
-from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
+from flask import Blueprint, request, jsonify, session, g
+from app_types.api.response.event_browse_response import EventBrowseResponse
 from db.crud.events_crud import get_organization_events, create_new_event
-from datetime import datetime, timedelta, timezone
+from common.logging import logger
+from common.error_response import generic_error_response
+from auth.routes.auth import require_auth
+from db.models.orgadmin import OrgAdminTable
+from api.dependencies import get_db_sessionmaker
 from sqlalchemy import select
+from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
-from db.models.organizations import Organization
-from common.types.events import EventStatus, EventRole
+from db.models.events import EventTable
+from common.types.pairing_event import PairingEvent, PairingResult
+from common.types.event_enums import EventStatus, EventRole
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -21,37 +24,69 @@ def foo():
 
 
 @org_dashboard_bp.get("/event-browse")
+@require_auth
 def browse_events():
+    # Get user_id from session
+    user_id = session.get("user_id")
 
-    organization_id = request.args.get("organization_id")
-    print(organization_id)
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
 
-    if organization_id is None:
-        return jsonify({"error": "organization_id is required"}), 400
+    # Look up organization_id from orgadmins table
+    db_session = get_db_sessionmaker()
+    with db_session() as db_session_instance:
+        org_admin = db_session_instance.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
 
-    try:
-        organization_id = int(organization_id)
-    except ValueError:
-        return jsonify({"error": "organization_id must be an integer"}), 400
+        if org_admin is None:
+            return jsonify({"error": "User is not an organization admin"}), 403
+
+        organization_id = org_admin.organization_id
 
     # use helper to retrieve all events for the organization
-    published_events = get_organization_events(int(organization_id))
+    try:
+        published_events = get_organization_events(organization_id)
+    except Exception as e:
+        logger.error(f"Error retrieving events: {e}")
+        return jsonify(generic_error_response), 500
+
     pairing_event_response = EventBrowseResponse(events=published_events)
+    return jsonify(pairing_event_response.model_dump(mode="json")), 200
 
-    return jsonify(pairing_event_response.model_dump()), 200
+# NOTE: NOT DONE - should also use CRUD operations with DTO / ORM conversion
 
 
-# NOT DONE
 @org_dashboard_bp.patch("/event")
+@require_auth
 def update_event():
-    organization_id = request.args.get("organization_id")
     event_id = request.args.get("event_id")
 
-    if organization_id is None or event_id is None:
-        return jsonify({"error": "organization_id and event_id are required"}), 400
+    if event_id is None:
+        return jsonify({"error": "event_id is required"}), 400
+
+    # Get user_id from session and look up organization
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    # Look up organization_id from orgadmins table
+    db_session = get_db_sessionmaker()
+    with db_session() as session_instance:
+        org_admin = session_instance.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
+
+        if org_admin is None:
+            return jsonify({"error": "User is not an organization admin"}), 403
+
+        organization_id = org_admin.organization_id
 
     # Check if the event exists and belongs to the organization
-    event = g.db.query(Event).filter(Event.id == event_id).first()
+    event = session_instance.scalar(
+        select(EventTable).where(EventTable.id == event_id)
+    )
 
     if event is None:
         return jsonify({"error": "Event not found"}), 404
@@ -59,21 +94,29 @@ def update_event():
     elif event.organization_id != organization_id:
         return jsonify({"error": "Event does not belong to the organization"}), 404
 
-    # TODO: actually update the events
+    payload = request.get_json(silent=True) or {}
+    allowed_fields = ["title", "description", "status", "end_date"]
+    for key, value in payload.items():
+        if key in allowed_fields and hasattr(event, key):
+            setattr(event, key, value)
+
+    session_instance.commit()
+    session_instance.refresh(event)
     return jsonify({"message": "Event updated successfully"}), 200
 
 
-# NOTE: by convention, use "-" to split words in routes
 @org_dashboard_bp.post("/create-event")
+@require_auth
 def create_event():
     """
     Create a new event for an organization.
     Expects JSON payload with:
-    - organization_id
     - title
     - description
     - image_url (optional)
     - end_date
+
+    The organization_id is determined from the authenticated user's session.
 
     defaults:
     - status = NOT_STARTED
@@ -81,15 +124,23 @@ def create_event():
 
     data = request.get_json(silent=True) or {}
 
-    organization_id = data.get("organization_id")
+    # Get user_id from session and look up organization
+    user_id = session.get("user_id")
 
-    if not organization_id:
-        return jsonify({"error": "organization_id is required"}), 400
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
 
-    try:
-        organization_id = int(organization_id)
-    except ValueError:
-        return jsonify({"error": "organization_id must be an integer"}), 400
+    # Look up organization_id from orgadmins table
+    db_session = get_db_sessionmaker()
+    with db_session() as db_session_instance:
+        org_admin = db_session_instance.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
+
+        if org_admin is None:
+            return jsonify({"error": "User is not an organization admin"}), 403
+
+        organization_id = org_admin.organization_id
 
     title = data.get("title", "Untitled Event")
     description = data.get("description", "")
@@ -101,33 +152,35 @@ def create_event():
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)
     today_date = today.date()
-    matches = []
     end_date = data.get("end_date")
 
     # NOTE: try to parse the requested end date into standard datetime
     try:
-        end_dt = datetime.fromisoformat(end_date)
+        end_dt = datetime.fromisoformat(str(end_date))
     except Exception:
         return jsonify({"error": "Invalid date format"}), 400
 
     if end_dt.date() < today_date:
         return jsonify({"error": "End date cannot be in the past"}), 400
 
-    new_event = Event(
+    new_event = PairingEvent(
         organization_id=organization_id,
         title=title,
         description=description,
         image_url=image_url,
         end_date=end_dt,
-        matches=matches,
-        status=EventStatus.NOT_STARTED,
+        status=EventStatus.NOT_STARTED
     )
 
     # create the new event in db
     try:
-        create_new_event(new_event)  # This already commits
+        updated_event = create_new_event(new_event)  # This already commits
+        logger.info(f"Event created: {updated_event}")
     except SQLAlchemyError as e:
-        print(str(e))
-        return jsonify({"error": "Database error"}), 500
+        logger.error(f"Database error: {e}")
+        return jsonify(generic_error_response), 500
+    except Exception as e:
+        logger.error(f"Unknown error: {e}")
+        return jsonify(generic_error_response), 500
 
-    return jsonify({"message": "Event created successfully", "event_id": new_event.id}), 200
+    return jsonify({"message": "Event created successfully", "event_id": updated_event.id}), 200

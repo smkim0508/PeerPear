@@ -1,39 +1,36 @@
 # main landing page for students after logging in
-from flask import Blueprint, request, send_from_directory, jsonify, g
-from common.types.events import PairingEvent, PairingResult
-from datetime import datetime, timezone, timedelta
-from api import validate_model
-from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
-from db.models.organizations import Organization
-from sqlalchemy import inspect
-from api.dependencies import get_db_sessionmaker, get_llm
-from db.crud.events_crud import get_all_active_events
+from flask import Blueprint, send_from_directory, jsonify, session
+from app_types.api.response.event_browse_response import EventBrowseResponse
+from db.crud.events_crud import get_all_active_events_unfiltered
+from common.logging import logger
+from common.error_response import generic_error_response
+from auth.routes.auth import require_auth
 
 # use blueprint to group routes
 student_dashboard_bp = Blueprint("student_dashboard", __name__)
 
-# TODO: change this to be the actual landing page
-
-
+# TODO: this endpoint needs to be changed?
 @student_dashboard_bp.get("/")
 def foo():
     return "something"
 
-
+# NOTE: temporary endpoint for serving static image
 @student_dashboard_bp.get("/static/<path:filename>")
 def static_files(filename):
     print(f"filename: {filename}")
     return send_from_directory("assets/images", filename)
 
-
 @student_dashboard_bp.get("/event-browse")
+@require_auth
 def browse_events():
-    user_id = request.args.get("user_id", type=int)
-    if not user_id:
-        return jsonify({"error": "Missing user_id"}), 400
-
-    published_events = get_all_active_events(user_id)
+    # No need for user_id since we're showing all active events
+    # Authentication is still required to access the dashboard
+    
+    try:
+        published_events = get_all_active_events_unfiltered()
+    except Exception as e:
+        logger.error(f"Error retrieving events: {e}")
+        return jsonify(generic_error_response), 500
 
     response = EventBrowseResponse(events=published_events)
-    return jsonify(response.model_dump()), 200
+    return jsonify(response.model_dump(mode="json")), 200

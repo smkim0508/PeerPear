@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from urllib.parse import urlsplit
 import os
-from flask import Flask, g, jsonify, send_from_directory, current_app
+from flask import Flask, g, jsonify, send_from_directory, current_app, request, redirect
 from flask_cors import CORS
 from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
 
 from common.logging import logger
 
@@ -21,6 +22,9 @@ from api.dashboard.routes.student_dashboard import student_dashboard_bp
 from api.dashboard.routes.organization_dashboard import org_dashboard_bp
 from api.dashboard.routes.organization_profile import org_profile_bp
 from api.dashboard.routes.questionnaire import questionnaire_bp
+from api.dashboard.routes.event_registration import event_registration_bp
+from api.events.routes.events import events_bp
+from api.events.routes.event_status import event_status_bp
 from api.dashboard.routes.question_management import question_management_bp
 
 
@@ -41,10 +45,10 @@ def create_app() -> Flask:
     # Configure CORS to allow requests from Next.js frontend
     CORS(
         app,
-        origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://peerpear.vercel.app"],
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
     )
 
     # Configure session for CAS authentication
@@ -89,13 +93,30 @@ def create_app() -> Flask:
         db_url=app.config["MAIN_DB_URL"])
     app.extensions["db"] = {"engine": engine, "SessionLocal": SessionLocal}
 
+    # store llm client in app.extensions to link them with flask instance
+    llm_client = AsyncGenAITypedClient(api_key=app.config["GOOGLE_API_KEY"])
+    app.extensions["llm_client"] = llm_client
+
     # TODO: need to dispose of all app lifetime dependencies
 
     # open a single session with each request
     @app.before_request
     def _open_session():
+        # print(f"request url: {request.url_root}")
+        # # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
+        # is_running_locally = "//localhost:" in request.url_root or "//127.0.0.1:" in request.url_root
+        # is_using_https = request.is_secure
+        # if (not is_running_locally) and (not is_using_https):
+        #     url = request.url.replace("http://", "https://", 1)
+        #     print(f'redirecting to {url}')
+        #     return redirect(url, code=301)
+
+        # print(f"hello")
+
+        # once verified, open session for db and llm client
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
+        g.llm_client = current_app.extensions["llm_client"]
 
     # close session after each response
     @app.after_request
@@ -120,11 +141,20 @@ def create_app() -> Flask:
     app.register_blueprint(user_profile_bp, url_prefix="/user-profile")
     app.register_blueprint(question_management_bp,
                            url_prefix="/question_management")
+    app.register_blueprint(event_registration_bp,
+                           url_prefix="/event_registration")
+    app.register_blueprint(events_bp, url_prefix="/events")
+    app.register_blueprint(event_status_bp, url_prefix="/event_status")
 
     # check health for app dependencies and liveness
 
     @app.get("/health")
     def health():
+        """
+        NOTE: This endpoint mostly checks db connection, and that LLM API Key is present.
+        LLM connection is not checked here due to rate limit quotas.
+        To verify LLM connection, please use the test_llm script under tests/
+        """
         db_status = False
         try:
             # just check if connection is possible

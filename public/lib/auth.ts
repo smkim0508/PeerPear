@@ -2,11 +2,20 @@
  * Authentication utilities for communicating with Flask backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 export interface User {
+  id?: number;
   username: string;
   user_info: any;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string | null;
+  profileComplete?: boolean;
+  organizationId?: number;
+  organizationProfileComplete?: boolean;
 }
 
 export interface AuthStatus {
@@ -18,6 +27,15 @@ export interface AuthResponse {
   authenticated: boolean;
   username: string;
   user_info: any;
+  user_id?: number;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone_number?: string | null;
+  user_type?: "student" | "organization";
+  profile_complete?: boolean;
+  organization_id?: number;
+  organization_profile_complete?: boolean;
 }
 
 /**
@@ -25,9 +43,9 @@ export interface AuthResponse {
  */
 export async function checkAuthStatus(): Promise<AuthStatus> {
   try {
-    console.log('Checking auth status from', API_BASE_URL);
+    console.log("Checking auth status from", API_BASE_URL);
     const response = await fetch(`${API_BASE_URL}/auth/status`, {
-      credentials: 'include', // Include cookies for session
+      credentials: "include", // Include cookies for session
     });
     
     if (response.ok) {
@@ -47,14 +65,22 @@ export async function checkAuthStatus(): Promise<AuthStatus> {
 export async function getCurrentUser(): Promise<User | null> {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/user`, {
-      credentials: 'include',
+      credentials: "include",
     });
     
     if (response.ok) {
       const data: AuthResponse = await response.json();
       return {
+        id: data.user_id,
         username: data.username,
         user_info: data.user_info,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        email: data.email,
+        phoneNumber: data.phone_number ?? null,
+        profileComplete: data.profile_complete,
+        organizationId: data.organization_id,
+        organizationProfileComplete: data.organization_profile_complete,
       };
     }
     
@@ -75,7 +101,9 @@ export function loginWithCAS(redirectUrl?: string): void {
   
   // Redirect to Flask backend which will handle CAS authentication
   // and then redirect back to the specified URL
-  const loginUrl = `${API_BASE_URL}/auth/login?redirect_url=${encodeURIComponent(targetRedirectUrl)}`;
+  const loginUrl = `${API_BASE_URL}/auth/login?redirect_url=${encodeURIComponent(
+    targetRedirectUrl
+  )}`;
   window.location.href = loginUrl;
 }
 
@@ -85,8 +113,8 @@ export function loginWithCAS(redirectUrl?: string): void {
 export async function logout(): Promise<void> {
   try {
     await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: 'GET',
-      credentials: 'include',
+      method: "GET",
+      credentials: "include",
     });
     
     // Reload the page to clear any cached state

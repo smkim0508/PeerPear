@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, ReactNode } from "react";
+import { useEffect, ReactNode, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { loginWithCAS } from "@/lib/auth";
+import { usePathname, useRouter } from "next/navigation";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -22,7 +23,15 @@ export default function ProtectedRoute({
   ),
   redirectToLogin = true,
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [profileChecked, setProfileChecked] = useState(false);
+  const storedUserType =
+    typeof window !== "undefined"
+      ? (localStorage.getItem("userType") as "student" | "organization" | null)
+      : null;
+  const inferredUserType = storedUserType;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated && redirectToLogin) {
@@ -31,6 +40,34 @@ export default function ProtectedRoute({
     }
   }, [isAuthenticated, isLoading, redirectToLogin]);
 
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setProfileChecked(true);
+      return;
+    }
+
+    const isProfileRoute = pathname?.startsWith(`/${inferredUserType}/profile`);
+
+    if (isProfileRoute) {
+      setProfileChecked(true);
+      return;
+    }
+
+    setProfileChecked(true);
+  }, [
+    inferredUserType,
+    isAuthenticated,
+    isLoading,
+    pathname,
+    router,
+    user?.organizationProfileComplete,
+    user?.profileComplete,
+  ]);
+
   // Show loading state while checking authentication
   if (isLoading) {
     return (
@@ -38,6 +75,17 @@ export default function ProtectedRoute({
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-2 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && !profileChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#C3DD90]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Preparing your workspace...</p>
         </div>
       </div>
     );

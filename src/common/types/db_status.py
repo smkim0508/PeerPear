@@ -4,3 +4,4 @@ from enum import Enum
 class DBStatus(Enum):
     SUCCESS = "success"
     FAILURE = "failure"
+    NOT_FOUND = "not_found"

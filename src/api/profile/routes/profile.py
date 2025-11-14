@@ -3,13 +3,14 @@ from flask import Blueprint, request, send_from_directory, jsonify, g
 import os
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from db.models.events import Event
+from db.models.events import EventTable
 from db.crud.profile_crud import update_user_profile, get_user_profile
 from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
-from db.models.organizations import Organization
-from common.types.user import UserProfile
+from db.models.organizations import OrganizationTable
+from common.types.user import UserProfile, UserProfileFull, User
+from common.logging import logger
 
 # use blueprint to group routes
 user_profile_bp = Blueprint("user_profile", __name__)
@@ -24,14 +25,17 @@ def get_profile():
     profile = get_user_profile(int(user_id))
 
     if not profile:
-        return jsonify({"profile": {}}), 200
+        return jsonify({"profile": {}}), 200 # returns an empty profile
 
-    return jsonify({"profile": profile}), 200
+    return jsonify({"profile": profile.model_dump(mode="json")}), 200 # NOTE: mode set to json to allow enums to be converted
 
 @user_profile_bp.post("/update-profile")
 def update_profile():
 
-    profile_payload = request.get_json() # NOTE: retrieves the whole profile as json obj
+    profile_payload = request.get_json(silent=True) # NOTE: retrieves the whole profile as json obj
+
+    if not profile_payload:
+        return jsonify({"error": "invalid form responses"}), 400
 
     user_id = profile_payload.get("user_id")
     first_name = profile_payload.get("first_name")
@@ -43,7 +47,7 @@ def update_profile():
     major = profile_payload.get("major")
     hobbies = profile_payload.get("hobbies")
 
-    user_profile = UserProfile(
+    user_profile = UserProfileFull(
         id=user_id,
         first_name=first_name,
         last_name=last_name,
@@ -55,12 +59,11 @@ def update_profile():
         hobbies=hobbies
     )
 
-    # TODO: actually update the profile
-
-    print(f"user id: {user_id}, first_name: {first_name}, last_name: {last_name}, email: {email}, phone_number: {phone_number}, gender: {gender}, class_year: {class_year}, major: {major}, hobbies: {hobbies}")
-
-    # if any of the fields are none, do not touch it in db
-
-    updated_profile = update_user_profile(user_profile=user_profile)
+    try:
+        updated_profile = update_user_profile(user_profile=user_profile)
+        logger.info(f"updated profile: {updated_profile}") # NOTE: nothing is being done with updated profile right now
+    except Exception as e:
+        logger.error(f"Error updating user profile: {e}")
+        return jsonify({"error": "invalid form responses"}), 400
 
     return jsonify({"message": "Profile updated successfully"}), 200

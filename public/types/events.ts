@@ -14,7 +14,7 @@ export interface PairingEvent {
   matches: PairingResult;
 }
 
-// Database types for Supabase integration
+// Database types for API integration
 export interface DatabaseEvent {
   id: number;
   organization_id: number;

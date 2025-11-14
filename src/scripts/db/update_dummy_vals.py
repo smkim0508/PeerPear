@@ -7,98 +7,16 @@ import time
 import os
 
 from db import session
-from db.models.events import Event, EventRegistrations
-from db.models.organizations import Organization
+from db.models.events import EventTable, EventRegistrationsTable
+from db.models.organizations import OrganizationTable
 from db.models.user import UserTable
 from db.models.user_profile import UserProfileTable
-from db.models.question import Question
-from db.models.response import Response
-from db.models.orgadmin import OrgAdmin
+from db.models.question import QuestionTable
+from db.models.response import ResponseTable
+from db.models.orgadmin import OrgAdminTable
 
-from common.types.events import EventRole, EventStatus
+from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
-
-def create_organization_data(session):
-    organizations = [
-        Organization(
-            org_name="AASA",
-            description="Asian American Student Association"
-
-        ),
-        Organization(
-            org_name="KSAP",
-            description="Korean Student Association"
-
-        ),
-        Organization(
-            org_name="CS Club",
-            description="Computer Science Club"
-
-        ),
-        Organization(
-            org_name="Dongkon's Club",
-            description="We ride around in electric scooters"
-
-        ),
-        Organization(
-            org_name="Sungmins's Club",
-            description="We cook delicious food!"
-        )
-    ]
-
-    for org in organizations:
-        session.add(org)
-    session.commit()
-    print("Dummy organizations added.")
-
-
-def create_orgadmin_data(session):
-    # Fetch organizations to link with org admins
-    organizations = session.query(Organization).all()
-    org_admins = [
-        OrgAdmin(
-            username="sungmink",
-            first_name="Sungmin",
-            last_name="Kim",
-            email="sungmink@example.com",
-            organization_id=2
-        ),
-        OrgAdmin(
-            username="HenryL",
-            first_name="Henry",
-            last_name="Li",
-            email="henrylee@example.com",
-            organization_id=1
-        ),
-        OrgAdmin(
-            username="Sk3378",
-            first_name="Sungmin",
-            last_name="Kim",
-            email="sungminkother@example.com",
-            organization_id=5
-        ),
-        OrgAdmin(
-            username="Robert",
-            first_name="Rober",
-            last_name="Dondero",
-            email="rdondero@example.com",
-            organization_id=3
-        ),
-        OrgAdmin(
-            username="dkkkkk",
-            first_name="Dongkon",
-            last_name="Lee",
-            email="dkkkkk@example.com",
-            organization_id=4
-        )
-
-    ]
-
-    for admin in org_admins:
-        session.add(admin)
-    session.commit()
-    print("Dummy org admins added.")
-
 
 def create_user_data(session):
     users = [
@@ -148,9 +66,74 @@ def create_user_data(session):
     session.commit()
     print("Dummy users added.")
 
+def create_organization_data(session):
+    organizations = [
+        OrganizationTable(
+            org_name="AASA",
+            description="Asian American Student Association"
+
+        ),
+        OrganizationTable(
+            org_name="KSAP",
+            description="Korean Student Association"
+
+        ),
+        OrganizationTable(
+            org_name="CS Club",
+            description="Computer Science Club"
+
+        ),
+        OrganizationTable(
+            org_name="Dongkon's Club",
+            description="We ride around in electric scooters"
+
+        ),
+        OrganizationTable(
+            org_name="Sungmins's Club",
+            description="We cook delicious food!"
+        )
+    ]
+
+    for org in organizations:
+        session.add(org)
+    session.commit()
+    print("Dummy organizations added.")
+
+
+def create_orgadmin_data(session):
+    # Fetch organizations to link with org admins
+    organizations = session.query(OrganizationTable).all()
+    org_admins = [
+        OrgAdminTable(
+            user_id=1,
+            organization_id=1
+        ),
+        OrgAdminTable(
+            user_id=2,
+            organization_id=1
+        ),
+        OrgAdminTable(
+            user_id=3,
+            organization_id=5
+        ),
+        OrgAdminTable(
+            user_id=4,
+            organization_id=3
+        ),
+        OrgAdminTable(
+            user_id=5,
+            organization_id=4
+        )
+    ]
+
+    for admin in org_admins:
+        session.add(admin)
+    session.commit()
+    print("Dummy org admins added.")
+
 def create_event_data(session):
     events = [
-        Event( # event id 1
+        EventTable( # event id 1
             title="Welcome Event",
             description="An event to welcome new members.",
             end_date=datetime.now() + timedelta(days=7),
@@ -158,45 +141,40 @@ def create_event_data(session):
             status=EventStatus.NOT_STARTED,
             matches=[(1, 3), (2, 4)]
         ),
-        Event( # event id 2
+        EventTable( # event id 2
             title="Tech Talk",
             description="*This event started* A talk on how to break into web development.",
             end_date=datetime.now() + timedelta(days=14),
             organization_id=3,
-            status=EventStatus.STARTED,
-            matches=[]
+            status=EventStatus.STARTED
         ),
-        Event( # event id 3
+        EventTable( # event id 3
             title="Cultural Festival",
             description="Celebrating Korean culture with tons of food.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
-            status=EventStatus.TERMINATED,
-            matches=[]
+            status=EventStatus.TERMINATED
         ),
-        Event( # event id 4
+        EventTable( # event id 4
             title="PeerPear main event",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=2,
-            status=EventStatus.PAIRING_PUBLISHED,
-            matches=[]
+            status=EventStatus.PAIRING_PUBLISHED
         ),
-        Event( # event id 5
+        EventTable( # event id 5
             title="PeerPear main event 2 - started",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=1,
-            status=EventStatus.STARTED,
-            matches=[]
+            status=EventStatus.STARTED
         ),
-        Event( # event id 6
+        EventTable( # event id 6
             title="PeerPear main event 3 - not started",
             description="This event has been published.",
             end_date=datetime.now() + timedelta(days=21),
             organization_id=1,
-            status=EventStatus.NOT_STARTED,
-            matches=[]
+            status=EventStatus.NOT_STARTED
         )
     ]
     for event in events:
@@ -206,26 +184,58 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     registrations = [
-        EventRegistrations(
+        # event 1 with 4 registrations
+        EventRegistrationsTable(
             user_id=1,
             event_id=1,
             role=EventRole.BIG_SIBLING
         ),
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=2,
             event_id=1,
             role=EventRole.LITTLE_SIBLING
         ),
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=3,
             event_id=1,
             role=EventRole.BIG_SIBLING
         ),
-        EventRegistrations(
+        EventRegistrationsTable(
             user_id=4,
             event_id=1,
             role=EventRole.LITTLE_SIBLING
         ),
+        # event 2 with 5 registrations
+        EventRegistrationsTable(
+            user_id=1,
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
+        ),
+        EventRegistrationsTable(
+            user_id=2,
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True
+        ),
+        EventRegistrationsTable(
+            user_id=3,
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
+        ),
+        EventRegistrationsTable(
+            user_id=4,
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True
+        ),
+        EventRegistrationsTable(
+            user_id=5,
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
+        )
     ]
     for registration in registrations:
         session.add(registration)
@@ -285,17 +295,17 @@ def create_user_profile_data(session):
 
 def create_question_data(session):
     questions = [
-        Question(
+        QuestionTable(
             question="What is your favorite programming language?",
             options=["Python","Javascript","C++","Java"],
             event_id=2
         ),
-        Question(
+        QuestionTable(
             question="How many years of coding experience do you have?",
             options=["1","2","3","4","5+"],
             event_id=2
         ),
-        Question(
+        QuestionTable(
             question="What is your favorite Asian food?:",
             event_id=1
         )
@@ -307,27 +317,27 @@ def create_question_data(session):
 
 def create_response_data(session):
     responses = [
-        Response(
+        ResponseTable(
             user_id=2,
             question_id=1,
             answer="Python"
         ),
-        Response(
+        ResponseTable(
             user_id=4,
             question_id=1,
             answer="Javascript"
         ),
-        Response(
+        ResponseTable(
             user_id=2,
             question_id=2,
             answer="2"
         ),
-        Response(
+        ResponseTable(
             user_id=4,
             question_id=2,
             answer="Java"
         ),
-        Response(
+        ResponseTable(
             user_id=1,
             question_id=3,
             answer="Noodles"
@@ -354,10 +364,10 @@ def fill_all_tables(engine):
     time.sleep(3)
 
     # Create data in correct dependency order
-    create_organization_data(session)
-    create_orgadmin_data(session)
     create_user_data(session)
     create_user_profile_data(session)
+    create_organization_data(session)
+    create_orgadmin_data(session)
     create_event_data(session)
     create_event_registration_data(session)
     create_question_data(session)
