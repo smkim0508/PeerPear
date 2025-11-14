@@ -218,6 +218,28 @@ export async function autoTerminateEvent(eventId: number)  {
   };
 
 /**
+ * Start an event (for organization users)
+ */
+export async function startEvent(eventId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/event_status/start/${eventId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { success: false, error: errorData.error || 'Failed to start event' };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('Error starting event:', err);
+    return { success: false, error: 'Failed to start event' };
+  }
+}
+
+/**
  * End an event (for organization users)
  */
 export async function endEvent(eventId: number): Promise<{ success: boolean; error?: string }> {
@@ -303,5 +325,27 @@ export async function publishPairings(eventId: number): Promise<{ success: boole
   } catch (err) {
     console.error('Error publishing pairings:', err);
     return { success: false, error: 'Failed to publish pairings' };
+  }
+}
+
+/**
+ * Get student's match for an event (for students)
+ */
+export async function getStudentMatch(eventId: number, userId: number): Promise<{ success: boolean; error?: string; data?: any }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pairing/event/${eventId}/my-match?user_id=${userId}`, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return { success: false, error: errorData.error || 'Failed to get your match' };
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error('Error getting student match:', err);
+    return { success: false, error: 'Failed to get your match' };
   }
 }

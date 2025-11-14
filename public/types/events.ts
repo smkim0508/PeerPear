@@ -21,6 +21,7 @@ export interface DatabaseEvent {
   created_at: string;
   ends_at: string | null;
   active: boolean;
+  status: string;
   title: string | null;
   description: string | null;
   matches: any | null;

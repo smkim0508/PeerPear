@@ -47,6 +47,7 @@ def get_event_details(event_id: int):
                 "created_at": event.end_date.isoformat() if event.end_date else None,  # Map to frontend expected field
                 "ends_at": event.end_date.isoformat() if event.end_date else None,
                 "active": event.status.value == "STARTED" if hasattr(event.status, 'value') else str(event.status) == "STARTED",
+                "status": event.status.value if hasattr(event.status, 'value') else str(event.status),
                 "title": event.title,
                 "description": event.description,
                 "matches": event.matches,
@@ -105,6 +106,7 @@ def get_active_events():
                     "created_at": event.end_date.isoformat() if event.end_date else None,
                     "ends_at": event.end_date.isoformat() if event.end_date else None,
                     "active": event.status.value == "STARTED" if hasattr(event.status, 'value') else str(event.status) == "STARTED",
+                    "status": event.status.value if hasattr(event.status, 'value') else str(event.status),
                     "title": event.title,
                     "description": event.description,
                     "matches": event.matches,

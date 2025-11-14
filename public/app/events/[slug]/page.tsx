@@ -15,6 +15,8 @@ import {
   Edit,
   Save,
   X,
+  Trophy,
+  Award,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
@@ -30,10 +32,12 @@ import {
   getUserEventResponses,
   getEventParticipants,
   autoTerminateEvent,
+  startEvent,
   endEvent,
   triggerPairing,
   getEventPairings,
   publishPairings,
+  getStudentMatch,
 } from "@/lib/events";
 
 type Event = {
@@ -42,6 +46,7 @@ type Event = {
   created_at: string;
   ends_at: string | null;
   active: boolean;
+  status: string;
   title: string | null;
   description: string | null;
   matches: any | null;
@@ -96,13 +101,22 @@ export default function EventPage({ params }: EventPageProps) {
     description: "",
   });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [isStartingEvent, setIsStartingEvent] = useState(false);
 
   // Pairing states
-  const [pairingData, setPairingData] = useState<PairingResultData | null>(null);
+  const [pairingData, setPairingData] = useState<PairingResultData | null>(
+    null
+  );
   const [isEndingEvent, setIsEndingEvent] = useState(false);
   const [isTriggeringPairing, setIsTriggeringPairing] = useState(false);
   const [isPublishingPairings, setIsPublishingPairings] = useState(false);
   const [groupSize, setGroupSize] = useState(2);
+
+  // Student match states
+  const [studentMatch, setStudentMatch] = useState<PairingResultData | null>(
+    null
+  );
+  const [isLoadingMatch, setIsLoadingMatch] = useState(false);
 
   const eventId = parseInt(slug);
 
@@ -124,11 +138,27 @@ export default function EventPage({ params }: EventPageProps) {
 
   useEffect(() => {
     fetchEvent();
+  }, [eventId]);
+
+  useEffect(() => {
     // Only check registration for students
     if (user?.username && !isOrganizationUser) {
       checkRegistration();
     }
-  }, [eventId, user, isOrganizationUser]);
+  }, [user, isOrganizationUser]);
+
+  useEffect(() => {
+    // Check for student matches if event has published pairings
+    if (
+      event &&
+      event.status === "PAIRING_PUBLISHED" &&
+      user?.id &&
+      !isOrganizationUser &&
+      isRegistered
+    ) {
+      fetchStudentMatch();
+    }
+  }, [event?.status, user?.id, isOrganizationUser, isRegistered]);
 
   const fetchEvent = async () => {
     try {
@@ -333,10 +363,10 @@ export default function EventPage({ params }: EventPageProps) {
         setEvent((prev) =>
           prev
             ? {
-              ...prev,
-              title: editEventData.title,
-              description: editEventData.description,
-            }
+                ...prev,
+                title: editEventData.title,
+                description: editEventData.description,
+              }
             : null
         );
         setIsEditingEvent(false);
@@ -357,10 +387,31 @@ export default function EventPage({ params }: EventPageProps) {
     setEditEventData({ title: "", description: "" });
   };
 
+  // Start event handler
+  const handleStartEvent = async () => {
+    if (!event) return;
+
+    setIsStartingEvent(true);
+    try {
+      const result = await startEvent(eventId);
+      if (result.success) {
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to start event");
+      }
+    } catch (err) {
+      console.error("Error starting event:", err);
+      setError("Failed to start event");
+    } finally {
+      setIsStartingEvent(false);
+    }
+  };
+
   // Pairing handler functions
   const handleEndEvent = async () => {
     if (!event) return;
-    
+
     setIsEndingEvent(true);
     try {
       const result = await endEvent(eventId);
@@ -380,7 +431,7 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleTriggerPairing = async () => {
     if (!event) return;
-    
+
     setIsTriggeringPairing(true);
     try {
       const result = await triggerPairing(eventId, groupSize);
@@ -401,7 +452,7 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleViewPairings = async () => {
     if (!event) return;
-    
+
     try {
       const result = await getEventPairings(eventId);
       if (result.success && result.data) {
@@ -417,7 +468,7 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handlePublishPairings = async () => {
     if (!event) return;
-    
+
     setIsPublishingPairings(true);
     try {
       const result = await publishPairings(eventId);
@@ -438,19 +489,33 @@ export default function EventPage({ params }: EventPageProps) {
   // Helper function to get event status for display
   const getEventStatus = () => {
     if (!event) return "Unknown";
-    
-    // Check if event has ended based on date
-    const endDate = event.ends_at ? new Date(event.ends_at) : null;
-    const hasDateEnded = endDate ? new Date() > endDate : false;
-    
-    if (event.active && !hasDateEnded) return "STARTED";
-    if (hasDateEnded || (!event.active && event.matches)) return "TERMINATED";
-    if (!event.active && !event.matches) return "NOT_STARTED";
-    
-    return "Unknown";
+
+    // Return the status directly from the database
+    return event.status;
   };
 
   const currentStatus = getEventStatus();
+
+  // Fetch student match if pairings are published
+  const fetchStudentMatch = async () => {
+    if (!event || !user?.id || isOrganizationUser) return;
+
+    setIsLoadingMatch(true);
+    try {
+      const result = await getStudentMatch(eventId, user.id);
+      if (result.success && result.data) {
+        setStudentMatch(result.data.pairing_results);
+      } else {
+        console.log("No match found or error:", result.error);
+        setStudentMatch(null);
+      }
+    } catch (err) {
+      console.error("Error getting student match:", err);
+      setStudentMatch(null);
+    } finally {
+      setIsLoadingMatch(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -667,6 +732,101 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
+              {/* Student Match Results - only for students with published pairings */}
+              {!isOrganizationUser &&
+                event?.status === "PAIRING_PUBLISHED" &&
+                isRegistered && (
+                  <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+                        <Users className="w-6 h-6" />
+                        Your Match
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {isLoadingMatch ? (
+                        <div className="text-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Loading your match...</p>
+                        </div>
+                      ) : studentMatch &&
+                        studentMatch.groups &&
+                        studentMatch.groups.length > 0 ? (
+                        <div className="space-y-4">
+                          <div className="text-center mb-4">
+                            <p className="text-gray-800 text-lg font-medium">
+                              🎉 You've been matched! Here are your teammates:
+                            </p>
+                          </div>
+
+                          {studentMatch.groups.map((group, groupIndex) => (
+                            <div
+                              key={groupIndex}
+                              className="bg-green-50 border border-green-200 rounded-lg p-4"
+                            >
+                              <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                                <Users className="w-4 h-4" />
+                                Your Group ({group.students.length} members)
+                              </h3>
+
+                              <div className="space-y-3">
+                                {group.students.map((student, studentIndex) => (
+                                  <div
+                                    key={studentIndex}
+                                    className={`flex items-center justify-between p-3 rounded-md border ${
+                                      student.id === user?.id
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-white border-gray-200"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-2">
+                                        {student.role === "BIG_SIBLING" ? (
+                                          <Trophy className="w-4 h-4 text-yellow-600" />
+                                        ) : (
+                                          <Award className="w-4 h-4 text-blue-600" />
+                                        )}
+                                        <div>
+                                          <p className="font-medium text-gray-900">
+                                            {student.name}{" "}
+                                            {student.id === user?.id && "(You)"}
+                                          </p>
+                                          <p className="text-sm text-gray-600">
+                                            {student.email}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <span
+                                      className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                        student.role === "BIG_SIBLING"
+                                          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                          : "bg-blue-100 text-blue-800 border-blue-200"
+                                      }`}
+                                    >
+                                      {student.role === "BIG_SIBLING"
+                                        ? "Big Sibling"
+                                        : "Little Sibling"}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-gray-600">
+                            No match found for this event.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
               {/* Registration section - only for students */}
               {!isOrganizationUser && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
@@ -742,10 +902,11 @@ export default function EventPage({ params }: EventPageProps) {
                             }
                             onClick={handleUnregister}
                             dark
-                            className={`w-full ${isRegistering
+                            className={`w-full ${
+                              isRegistering
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                              }`}
+                            }`}
                           />
                         </div>
                       ) : (
@@ -784,7 +945,7 @@ export default function EventPage({ params }: EventPageProps) {
 
                         <div className="grid gap-3">
                           {/* Always available buttons */}
-                          {hasQuestions && (
+                          {hasQuestions && currentStatus === "STARTED" && (
                             <PearButton
                               text="View Response Analytics"
                               onClick={() =>
@@ -801,63 +962,174 @@ export default function EventPage({ params }: EventPageProps) {
                             className="w-full"
                           />
 
-                          {/* Event status-specific buttons */}
-                          {currentStatus === "STARTED" && (
+                          {/* Questionnaire management based on event status */}
+                          {currentStatus === "NOT_STARTED" && (
                             <PearButton
-                              text={isEndingEvent ? "Ending Event..." : "End Event"}
-                              onClick={handleEndEvent}
-                              className="w-full bg-orange-600 hover:bg-orange-700"
+                              text="Edit Questionnaire"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questions`)
+                              }
+                              className="w-full bg-blue-600 hover:bg-blue-700"
                             />
                           )}
 
-                          {currentStatus === "TERMINATED" && (
-                            <>
-                              <div className="space-y-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  Group Size
-                                </label>
-                                <select
-                                  value={groupSize}
-                                  onChange={(e) => setGroupSize(parseInt(e.target.value))}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                  <option value={2}>Pairs (2 people)</option>
-                                  <option value={3}>Groups of 3</option>
-                                  <option value={4}>Groups of 4</option>
-                                  <option value={5}>Groups of 5</option>
-                                </select>
-                              </div>
-                              
-                              <PearButton
-                                text={
-                                  isTriggeringPairing
-                                    ? "Creating Pairings..."
-                                    : "Create Pairings"
-                                }
-                                onClick={handleTriggerPairing}
-                                className="w-full bg-green-600 hover:bg-green-700"
-                              />
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text="View Questionnaire"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questions`)
+                              }
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            />
+                          )}
 
-                              {pairingData && (
+                          {/* Event status-specific buttons */}
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text={
+                                isStartingEvent
+                                  ? "Starting Event..."
+                                  : "Start Event"
+                              }
+                              onClick={
+                                isStartingEvent ? () => {} : handleStartEvent
+                              }
+                              className={`w-full bg-green-600 hover:bg-green-700 ${
+                                isStartingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          )}
+
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text={
+                                isEndingEvent ? "Ending Event..." : "End Event"
+                              }
+                              onClick={
+                                isEndingEvent ? () => {} : handleEndEvent
+                              }
+                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
+                                isEndingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          )}
+
+                          {currentStatus === "TERMINATED" &&
+                            (!event.matches ||
+                              (Array.isArray(event.matches) &&
+                                event.matches.length === 0)) && (
+                              <>
+                                <div className="space-y-2">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Group Size
+                                  </label>
+                                  <select
+                                    value={groupSize}
+                                    onChange={(e) =>
+                                      setGroupSize(parseInt(e.target.value))
+                                    }
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    <option value={2}>Pairs (2 people)</option>
+                                    <option value={3}>Groups of 3</option>
+                                    <option value={4}>Groups of 4</option>
+                                    <option value={5}>Groups of 5</option>
+                                  </select>
+                                </div>
+
+                                <PearButton
+                                  text={
+                                    isTriggeringPairing
+                                      ? "Creating Pairings..."
+                                      : "Create Pairings"
+                                  }
+                                  onClick={
+                                    isTriggeringPairing
+                                      ? () => {}
+                                      : handleTriggerPairing
+                                  }
+                                  className={`w-full bg-green-600 hover:bg-green-700 ${
+                                    isTriggeringPairing
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+
+                                {pairingData && (
+                                  <PearButton
+                                    text={
+                                      isPublishingPairings
+                                        ? "Publishing..."
+                                        : "Publish Pairings to Students"
+                                    }
+                                    onClick={
+                                      isPublishingPairings
+                                        ? () => {}
+                                        : handlePublishPairings
+                                    }
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                      isPublishingPairings
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  />
+                                )}
+                              </>
+                            )}
+
+                          {currentStatus === "TERMINATED" &&
+                            event.matches &&
+                            Array.isArray(event.matches) &&
+                            event.matches.length > 0 && (
+                              <>
+                                <PearButton
+                                  text="View Existing Pairings"
+                                  onClick={handleViewPairings}
+                                  className="w-full bg-purple-600 hover:bg-purple-700"
+                                />
+                                
+                                {/* Show publish button if pairings haven't been published yet */}
                                 <PearButton
                                   text={
                                     isPublishingPairings
                                       ? "Publishing..."
                                       : "Publish Pairings to Students"
                                   }
-                                  onClick={handlePublishPairings}
-                                  className="w-full bg-blue-600 hover:bg-blue-700"
+                                  onClick={
+                                    isPublishingPairings
+                                      ? () => {}
+                                      : handlePublishPairings
+                                  }
+                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                    isPublishingPairings
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 />
-                              )}
-                            </>
-                          )}
+                              </>
+                            )}
 
-                          {(currentStatus === "TERMINATED" && event.matches) && (
-                            <PearButton
-                              text="View Existing Pairings"
-                              onClick={handleViewPairings}
-                              className="w-full bg-purple-600 hover:bg-purple-700"
-                            />
+                          {currentStatus === "PAIRING_PUBLISHED" && (
+                            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                              <h3 className="font-semibold text-green-800 mb-1">
+                                Pairings Published!
+                              </h3>
+                              <p className="text-green-700 text-sm">
+                                Students can now view their matches
+                              </p>
+                              <div className="mt-3">
+                                <PearButton
+                                  text="View Published Pairings"
+                                  onClick={handleViewPairings}
+                                  className="w-full bg-green-600 hover:bg-green-700"
+                                />
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>
