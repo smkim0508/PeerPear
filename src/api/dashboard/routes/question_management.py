@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from api.dependencies import get_db_sessionmaker
-from db.models.question import Question
-from db.models.events import Event
+from db.models.question import QuestionTable
+from db.models.events import EventTable
 from db.crud.events_crud import get_event_by_id
 from db.crud.questionnaire_crud import get_questions, add_question, remove_question, get_question
 
@@ -108,7 +108,7 @@ def update_question(question_id):
 
         with db_session() as session:
 
-            modify = session.get(Question, question_id)
+            modify = session.get(QuestionTable, question_id)
 
             if not modify:
                 return jsonify({"error": "Question not found"}), 404
