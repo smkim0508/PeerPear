@@ -1,10 +1,16 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from sqlalchemy.exc import SQLAlchemyError
 from api.dependencies import get_db_sessionmaker
 from db.models.question import QuestionTable
 from db.models.events import EventTable
 from db.crud.events_crud import get_event_by_id
 from db.crud.questionnaire_crud import get_questions, add_question, remove_question, get_question
+from common.error_response import generic_error_response
+from common.types.event_enums import EventRole, EventStatus
+from sqlalchemy import inspect, select, or_
+from db.models.orgadmin import OrgAdminTable
+from common.logging import logger
+
 
 
 question_management_bp = Blueprint("question_management", __name__)
@@ -122,3 +128,45 @@ def update_question(question_id):
     except SQLAlchemyError as e:
         print("Database Error", e)
         return jsonify({"error": "Database error"}), 500
+
+
+@question_management_bp.get("verification/<int:event_id>")
+def verify_view(event_id):
+    try:
+        event_id = int(event_id)
+    except:
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    try:
+        db_session = get_db_sessionmaker()
+        with db_session() as session_instance:
+            event = session.scalar(
+                select(EventTable).where(EventTable.id == event_id)
+            )
+
+        if not event:
+            return jsonify({"error": "Event not found"}), 404
+    
+        org_admin = session.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
+
+        if org_admin is None:
+            return jsonify({"canView": False,"canEdit": False }), 200
+
+        organization_id = org_admin.organization_id
+
+        if event.organization_id != organization_id:
+            return jsonify({"canView": False,"canEdit": False }), 200
+        
+        if event.status != EventStatus.NOT_STARTED:
+            return jsonify({"canView": True,"canEdit": False }), 200
+        return jsonify({"canView": False,"canEdit": True }), 200
+
+    except:
+        logger.error(f"Error verifying event: {e}")
+        return jsonify(generic_error_response), 500
