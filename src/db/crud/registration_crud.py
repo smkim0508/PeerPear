@@ -134,7 +134,7 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
                     name="".join([user.first_name, " ", user.last_name]),
                     email=user.email,
                     role=reg.role,
-                    profile_summary=profile.profile_summary or ""
+                    profile_summary=profile.profile_summary or f"hobbies: {''.join(profile.hobbies)}" # TODO: make this pull hobbies instead for now and join str; technically this should format the user profile into something meaningful.
                 )
             )
 
