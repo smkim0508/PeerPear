@@ -97,7 +97,8 @@ def add_question(event_id: int, question: str, options: list):
 
     try:
         with db_session() as session:
-            new_question = Question(event_id=event_id,
+            new_question = QuestionTable(
+                                    event_id=event_id,
                                     question=question,
                                     options=options if isinstance(
                                         options, list) else []
@@ -117,7 +118,7 @@ def remove_question(question_id:int):
 
     try:
         with db_session() as session:
-            question = session.get(Question, question_id)
+            question = session.get(QuestionTable, question_id)
 
             if not question:
                 return "not found"
@@ -137,7 +138,7 @@ def get_question(question_id:int):
     try:
         with db_session() as session:
             
-            question = session.get(Question,question_id)
+            question = session.get(QuestionTable,question_id)
             
             return question
     

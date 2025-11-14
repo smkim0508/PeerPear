@@ -1,11 +1,18 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
 import { PearAlert } from "@/components/PearAlert";
 import PearButton from "@/components/PearButton";
 import PearForm from "@/components/PearForm";
+import { Card, CardContent } from "@/components/ui/card";
+import { XCircle } from "lucide-react";
+
+interface QuestionnairePageProps {
+  params: Promise<{ slug: string }>;
+}
 
 interface EventInfo {
   id: number;
@@ -24,11 +31,15 @@ interface Question {
   options?: string[];
 }
 
-export default function EventQuestionsPage() {
-  const event_id = 2;
+export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
+  const { slug } = use(params);
+  const { user } = useAuth();
+  const event_id = parseInt(slug);
   const router = useRouter();
 
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [edit, setEdit] = useState(false);
+  const [view, setView] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +49,48 @@ export default function EventQuestionsPage() {
   useEffect(() => {
     fetchQuestions();
   }, [event_id]);
+
+  useEffect(() => {
+    fetchPermissions()
+  }, [event_id])
+
+  const fetchPermissions = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const res = await fetch(`${apiUrl}/questiion_management/verification/${event_id}`)
+      const data = await res.json()
+      if (res.ok) {
+        setEdit(data.canEdit)
+        setView(data.canView)
+      }
+      else {
+        console.error('error verifying user', data.error)
+        setView(false)
+        setEdit(false)
+      }
+
+    }
+    catch (err) {
+      console.error('error verifying user', err)
+      setView(false)
+      setEdit(false)
+    }
+  }
+
+  const getUserType = (): "student" | "organization" => {
+    if (typeof window !== 'undefined') {
+      const storedUserType = localStorage.getItem("userType") as
+        | "student"
+        | "organization"
+        | null;
+      return storedUserType || "student";
+    }
+
+    return "student"; // Default to student
+  };
+
+  const userType = getUserType();
+  const isOrganizationUser = userType === "organization";
 
   const fetchQuestions = async () => {
     try {
@@ -144,6 +197,26 @@ export default function EventQuestionsPage() {
     }
   };
 
+  if (!view || userType == "student") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center py-8">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Event Access Error</h2>
+            <p className="text-gray-600 mb-4">
+              You are not able to view this Event
+            </p>
+            <PearButton
+              text="Back to Events"
+              onClick={() => router.push("/organization")}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <>
       <Navbar userType="organization" />
@@ -153,16 +226,19 @@ export default function EventQuestionsPage() {
             <div>
               <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
               <p className="text-gray-600 mb-8">
-                Manage the questions participants will answer for this event.
+                {(!edit || !view) ? "You are able to manage the questions participants will answer for this event before the event begins" : "The event has begun and you are no longer able to edit the event"}
               </p>
             </div>
-            <div>
-              <PearButton
-                text={showAddForm ? "Cancel" : "Add a Question"}
-                className=""
-                onClick={() => setShowAddForm(!showAddForm)}
-              />
-            </div>
+            {edit &&
+              <div>
+                <PearButton
+                  text={showAddForm ? "Cancel" : "Add a Question"}
+                  className=""
+                  onClick={() => setShowAddForm(!showAddForm)}
+                />
+              </div>
+            }
+
           </div>
 
           {error && <PearAlert type="error" message={error} />}
@@ -196,6 +272,7 @@ export default function EventQuestionsPage() {
                   questionText={q.question}
                   questionType={q.options && q.options.length > 0 ? "multiple_choice" : "text"}
                   existingOptions={q.options || []}
+                  canEdit={!view || !edit}
                   onSave={handleSaveQuestion}
                   onDelete={handleDeleteQuestion}
                   isEditing={true}

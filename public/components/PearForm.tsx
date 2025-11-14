@@ -9,6 +9,7 @@ interface PearFormProps {
     questionText?: string;
     questionType?: "text" | "multiple_choice";
     existingOptions?: string[];
+    canEdit?: boolean
     onSave: (data: {
         id?: number;
         question: string;
@@ -24,6 +25,7 @@ export default function PearForm({
     questionText = "",
     questionType = "text",
     existingOptions = [],
+    canEdit,
     onSave,
     onDelete,
     isEditing = false,
@@ -121,7 +123,7 @@ export default function PearForm({
                             </ul>
                         )}
                     </div>
-                    <div className="flex gap-2">
+                    {canEdit && <div className="flex gap-2">
                         <button
                             onClick={() => setShowForm(true)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -138,7 +140,7 @@ export default function PearForm({
                                 <Trash2 size={18} />
                             </button>
                         )}
-                    </div>
+                    </div>}
                 </div>
             </div>
         );
