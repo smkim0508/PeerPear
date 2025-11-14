@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
   children: ReactNode;
   fallback?: ReactNode;
   redirectToLogin?: boolean;
+  requiredRole?: "student" | "organization";
 }
 
 export default function ProtectedRoute({
@@ -22,6 +23,7 @@ export default function ProtectedRoute({
     </div>
   ),
   redirectToLogin = true,
+  requiredRole,
 }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
@@ -39,6 +41,18 @@ export default function ProtectedRoute({
       loginWithCAS(window.location.href);
     }
   }, [isAuthenticated, isLoading, redirectToLogin]);
+
+  // Check role-based access
+  useEffect(() => {
+    if (isAuthenticated && requiredRole && storedUserType) {
+      if (storedUserType !== requiredRole) {
+        // User is logged in but accessing wrong role route
+        // Redirect to their correct dashboard
+        router.push(`/${storedUserType}`);
+        return;
+      }
+    }
+  }, [isAuthenticated, requiredRole, storedUserType, router]);
 
   useEffect(() => {
     if (isLoading) {
@@ -96,8 +110,20 @@ export default function ProtectedRoute({
     return <>{fallback}</>;
   }
 
-  // Show children if authenticated
+  // Show children if authenticated and has correct role (or no role required)
   if (isAuthenticated) {
+    // If a specific role is required, check if user has the correct role
+    if (requiredRole && storedUserType && storedUserType !== requiredRole) {
+      // Show loading while redirect is happening
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-[#C3DD90]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Redirecting to your dashboard...</p>
+          </div>
+        </div>
+      );
+    }
     return <>{children}</>;
   }
 

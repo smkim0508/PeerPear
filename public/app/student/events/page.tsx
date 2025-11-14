@@ -114,7 +114,7 @@ export default function StudentDashBoard() {
   });
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRole="student">
       <div className="font-sans flex flex-col min-h-screen">
         <Navbar userType="student" />
 

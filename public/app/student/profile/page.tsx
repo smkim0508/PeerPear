@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { Squiggle } from "@/components/ui/Squiggle";
 import { User, Mail, Phone, BookOpen, GraduationCap, Heart } from "lucide-react";
@@ -185,8 +186,9 @@ export default function ProfilePage() {
   const isFieldError = (field: string) => errors.includes(field);
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-light-beige">
-      <Navbar userType="student" />
+    <ProtectedRoute requiredRole="student">
+      <div className="flex flex-col min-h-screen font-sans bg-light-beige">
+        <Navbar userType="student" />
 
       <div className="bg-linear-to-br from-light-beige to-dark-beige relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-8 py-16 text-center">
@@ -411,5 +413,6 @@ export default function ProfilePage() {
 
       <Footer />
     </div>
+    </ProtectedRoute>
   );
 }
