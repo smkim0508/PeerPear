@@ -8,10 +8,6 @@ class BaselinePairingPrompts:
     They assume that the pairing request is made for students of similar profile/preferences.
     """
     base_group_pairing_system_prompt = f"""
-    You are a helpful assistant for pairing students in groups.
-    """
-
-    f"""
     You are an expert **grouping and matching assistant** for a student pairing platform.
     Your task is to form groups of students with **similar interests** while **balancing satisfaction across all students** (maximize the minimum satisfaction; avoid highly skewed group quality).
     You will receive input with a 'group_size' and a list of students.
