@@ -116,10 +116,10 @@ export default function Navbar({
           </NavigationMenu>
         </div>
 
-        {/* User info and logout - Fixed width */}
-        <div className="flex items-center gap-3 w-48 justify-end">
+        {/* User info and logout - Flexible width, no wrapping */}
+        <div className="flex items-center gap-3 justify-end whitespace-nowrap">
           {isAuthenticated && (
-            <p className="text-black font-medium">
+            <p className="text-black font-medium whitespace-nowrap">
               {user?.user_info.attributes?.displayname
                 ? `${user.user_info.attributes.displayname.toString().toLowerCase()} (${userType})`
                 : ""}
@@ -128,7 +128,7 @@ export default function Navbar({
           {userType === "guest" ? (
             <button
               onClick={onLoginClick}
-              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
               log in
               <CircleUserRound size={20} />
@@ -136,7 +136,7 @@ export default function Navbar({
           ) : (
             <button
               onClick={logout}
-              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
               log out
             </button>
