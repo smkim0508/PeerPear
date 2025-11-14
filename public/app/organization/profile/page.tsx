@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { Squiggle } from "@/components/ui/Squiggle";
 import { Building2, Edit3, Save, AlertCircle, CheckCircle } from "lucide-react";
@@ -91,8 +92,9 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen font-sans bg-light-beige">
-      <Navbar userType="organization" />
+    <ProtectedRoute requiredRole="organization">
+      <div className="flex flex-col min-h-screen font-sans bg-light-beige">
+        <Navbar userType="organization" />
       <main className="flex-1 p-8 max-w-5xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
@@ -269,5 +271,6 @@ export default function ProfilePage() {
       </main>
       <Footer />
     </div>
+    </ProtectedRoute>
   );
 }

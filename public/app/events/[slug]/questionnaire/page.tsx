@@ -17,17 +17,17 @@ interface QuestionnairePageProps {
 function validateAnswers(questions: any[], answers: Record<number, string>) {
   const invalidAnswers = [];
 
-  for (const q of questions) {
+  for (const [index, q] of questions.entries())  {
     const question_id = q.id;
     const value = answers[question_id];
 
     if (!value || value.trim() === "") {
-      invalidAnswers.push(question_id);
+      invalidAnswers.push(index+1);
       continue;
     }
 
     if (q.options && q.options.length > 0 && !q.options.includes(value)) {
-      invalidAnswers.push(question_id);
+      invalidAnswers.push(index+1);
     }
   }
 

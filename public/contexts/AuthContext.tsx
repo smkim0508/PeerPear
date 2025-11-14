@@ -13,6 +13,7 @@ import {
   checkAuthStatus,
   getCurrentUser,
   handleCASRedirect,
+  verifyOrganizationAccess,
 } from "@/lib/auth";
 
 interface AuthContextType {
@@ -21,6 +22,7 @@ interface AuthContextType {
   isLoading: boolean;
   refreshAuth: () => Promise<void>;
   logout: () => Promise<void>;
+  verifyAndRedirectToOrganization: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -82,6 +84,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const verifyAndRedirectToOrganization = async () => {
+    try {
+      const verification = await verifyOrganizationAccess();
+      
+      if (verification.authorized) {
+        // User is authorized, redirect to organization dashboard
+        window.location.href = "/organization";
+      } else {
+        // User is not authorized, log them out and show error
+        await logout();
+        
+        // Store error message in localStorage to show on home page
+        localStorage.setItem("authError", verification.error || "You are not authorized to access organization features.");
+        
+        // Redirect will happen through logout()
+      }
+    } catch (error) {
+      console.error("Error verifying organization access:", error);
+      await logout();
+      localStorage.setItem("authError", "Unable to verify organization access. Please try again.");
+    }
+  };
+
   useEffect(() => {
     // Handle CAS redirects when component mounts
     handleCASRedirect();
@@ -96,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     refreshAuth,
     logout,
+    verifyAndRedirectToOrganization,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

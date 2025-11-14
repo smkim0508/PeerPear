@@ -4,6 +4,7 @@ import os
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.pool import NullPool
 
 # A dedicated Base for all models that map to tables in the Main database.
 class MainDB_Base(DeclarativeBase):
@@ -11,11 +12,11 @@ class MainDB_Base(DeclarativeBase):
 
 def create_engine_and_sessionmaker(db_url: str):
 
+    # NOTE: for Supabase, we should disable SQLAlchemy's internal pool with NullPool
     engine = create_engine(
         db_url,
         pool_pre_ping=True,
-        pool_size=10,
-        max_overflow=20,
+        poolclass=NullPool,
         echo=False,
     )
 

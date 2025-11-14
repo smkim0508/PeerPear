@@ -9,11 +9,16 @@ import {
 import Image from "next/image";
 import type { PairingEvent } from "@/types/events";
 import { formatDistanceToNow, isPast, format } from "date-fns";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, CheckCircle } from "lucide-react";
 import PearButton from "./PearButton";
 import { useRouter } from "next/navigation";
 
-export default function EventCard({ event }: { event: PairingEvent }) {
+interface EventCardProps {
+  event: PairingEvent;
+  isRegistered?: boolean;
+}
+
+export default function EventCard({ event, isRegistered = false }: EventCardProps) {
   const router = useRouter();
 
   const endDate = event.end_date ? new Date(event.end_date) : null;
@@ -83,6 +88,15 @@ export default function EventCard({ event }: { event: PairingEvent }) {
             {timeUntilEvent}
           </div>
         </div>
+
+        {isRegistered && (
+          <div className="absolute top-3 right-3 bg-[#C3DD90] backdrop-blur-sm px-3 py-1 rounded-full shadow-lg">
+            <div className="flex items-center gap-1 text-xs font-medium text-black">
+              <CheckCircle className="w-3 h-3" />
+              Registered
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col grow p-5">

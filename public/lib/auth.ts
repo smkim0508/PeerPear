@@ -146,3 +146,26 @@ export function handleCASRedirect(): void {
     window.history.replaceState({}, '', newUrl.toString());
   }
 }
+
+/**
+ * Verify if the current user can access organization features
+ */
+export async function verifyOrganizationAccess(): Promise<{authorized: boolean, error?: string, organization_id?: number}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-organization-access`, {
+      credentials: "include",
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    } else if (response.status === 403) {
+      const errorData = await response.json();
+      return { authorized: false, error: errorData.error };
+    } else {
+      return { authorized: false, error: "Unable to verify organization access" };
+    }
+  } catch (error) {
+    console.error('Error verifying organization access:', error);
+    return { authorized: false, error: "Unable to verify organization access" };
+  }
+}

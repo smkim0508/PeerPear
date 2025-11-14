@@ -118,7 +118,7 @@ export default function OrganizationDashBoard() {
   });
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requiredRole="organization">
       <div className="font-sans flex flex-col min-h-screen">
         <Navbar userType="organization" />
         <main className="m-4 p-6 flex-1 min-h-screen">

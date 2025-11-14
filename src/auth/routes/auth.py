@@ -311,3 +311,31 @@ def auth_status():
         "authenticated": is_authenticated(),
         "username": get_username() if is_authenticated() else None
     })
+
+@auth_bp.route("/verify-organization-access")
+def verify_organization_access():
+    """Verify if the current user can access organization features"""
+    if not is_authenticated():
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    user_id = get_user_id()
+    if not user_id:
+        return jsonify({"error": "User ID not found in session"}), 401
+    
+    # Check if user is an organization admin
+    db_session = get_db_sessionmaker()
+    with db_session() as session:
+        org_admin = session.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
+        
+        if org_admin:
+            return jsonify({
+                "authorized": True,
+                "organization_id": org_admin.organization_id
+            })
+        else:
+            return jsonify({
+                "authorized": False,
+                "error": "You are not authorized to access organization features. Only organization administrators can access this area."
+            }), 403
