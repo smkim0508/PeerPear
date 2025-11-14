@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import PearSwitch from "./PearSwitch";
 
 type SearchBarProps = {
-  activeTab: "event" | "organization";
-  setActiveTab: (tab: "event" | "organization") => void;
+  activeTab: "event" | "organization";   // ← restored
+  setActiveTab: (tab: "event" | "organization") => void;  // ← restored
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 };
@@ -20,39 +19,22 @@ export default function SearchBar({
     <div className="w-full px-4">
       <div className="w-full max-w-full mx-auto">
         <div className="flex items-center gap-4 w-full">
-          {/* Search input (left, fills remaining space) */}
+
+          {/* Search input */}
           <div className="flex-1 min-w-56">
-            <label htmlFor="search" className="sr-only">
-              Search
-            </label>
-            <div className="relative">
-              <input
-                id="search"
-                type="text"
-                placeholder={`Search ${activeTab === "event" ? "events" : "organizations"
-                  }...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
-              />
-              <svg
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
+            <input
+              id="search"
+              type="text"
+              placeholder={`Search ${
+                activeTab === "event" ? "events" : "organizations"
+              }...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
+            />
           </div>
 
-          {/* Filter buttons (right, fixed width) */}
+          {/* Event/Organization switch (restored) */}
           <PearSwitch
             options={["event", "organization"]}
             activeOption={activeTab}
