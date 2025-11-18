@@ -232,6 +232,51 @@ def validate_event_and_admin(session, event_id: int, user_id: int):
 
     return event, None
 
+
+def validate_event_and_user(session, event_id: int, user_id: int):
+    event = session.scalar(
+        select(EventTable).where(EventTable.id == event_id)
+    )
+
+    if not event:
+        return None, {"error": "Event not found", "status": 404}
+
+    user = session.scalar(select(UserTable).where(UserTable.id == user_id))
+
+    if user is None:
+        return None, {"error": "User not found", "status": 404}
+
+    if event.status == EventStatus.NOT_STARTED:
+        return None, {"error": "Event has not started.", "status": 403}
+
+    if event.status == EventStatus.STARTED:
+        return event, None
+
+    registration = session.scalar(select(EventRegistrationsTable).where(
+        EventRegistrationsTable.event_id == event_id).where(EventRegistrationsTable.user_id == user_id))
+
+    if not registration:
+        return None, {"error": "You do not have view access to this event.", "status": 403}
+    
+    return event, None
+
+def verify_access(event_id:int,user_id:int, user_type:str):
+    
+    db_session = get_db_sessionmaker()
+    
+    with db_session() as session_instance:
+        if user_type == "organization":
+            event, error =  validate_event_and_admin(session_instance,event_id,user_id)
+            
+        else:
+            event, error = validate_event_and_user(session_instance,event_id,user_id)
+        
+        if error:
+            return error
+        
+        return {"message": "Access to this event is verified", "status": 200}
+            
+
 # Starts an event
 
 
@@ -302,6 +347,7 @@ def publish_event(event_id: int, user_id: int):
 
         return {"message": "Event pairings published successfully", "event_id": event_id}
 
+
 def auto_terminate(event_id: int):
     db_session = get_db_sessionmaker()
 
@@ -311,7 +357,7 @@ def auto_terminate(event_id: int):
         )
 
         if not event:
-            return   {"error": "Event not found", "status": 404}
+            return {"error": "Event not found", "status": 404}
 
         today = date.today()
 
