@@ -59,7 +59,7 @@ def create_app() -> Flask:
     # Set to True in production with HTTPS
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = None
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
     # sets up core services/db/clients during app start up
     # TODO: add core configuration for env here
