@@ -25,12 +25,12 @@ export default function CreateEventModal({
     title: "",
     description: "",
     endDate: "",
-    imageUrl: "",
+    imageFile: null as File | null,
   });
   const [showAlert, setShowAlert] = useState(false);
   const [dateAlert, setDateAlert] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,13 +66,16 @@ export default function CreateEventModal({
     setSubmitError(null);
     setSubmitting(true);
 
-    // create the dictionary object to send over
-    const newEvent = {
-      title: formData.title,
-      description: formData.description,
-      image_url: formData.imageUrl || "",
-      end_date: new Date(formData.endDate).toISOString(),
-    };
+    // create the form data to send over
+
+    const form = new FormData();
+    form.append("title", formData.title);
+    form.append("description", formData.description);
+    form.append("end_date", new Date(formData.endDate).toISOString());
+
+    if (formData.imageFile) {
+      form.append("image", formData.imageFile);
+    }
 
     try {
       const res = await fetch(
@@ -80,8 +83,7 @@ export default function CreateEventModal({
         {
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newEvent)
+          body: form,
         }
       );
 
@@ -94,7 +96,7 @@ export default function CreateEventModal({
         title: "",
         description: "",
         endDate: "",
-        imageUrl: "",
+        imageFile: null,
       });
 
       const data = await res.json();
@@ -236,15 +238,15 @@ export default function CreateEventModal({
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          Image URL
+          Optional Event Image
         </label>
         <input
-          value={formData.imageUrl}
-          onChange={(e) =>
-            setFormData({ ...formData, imageUrl: e.target.value })
-          }
-          type="text"
-          placeholder="Paste an image link (optional)"
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            setFormData({ ...formData, imageFile: file });
+          }}
+          type="file"
+          accept="image/*"
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
         />
 

@@ -76,9 +76,10 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
       <div className="relative h-48 overflow-hidden">
         <Image
           className="object-cover group-hover:scale-105 transition-transform duration-300"
-          src="/event_image.png"
+          src={event.image_url || "/event_image.png"}
           alt={event.title}
           fill
+          unoptimized
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
 

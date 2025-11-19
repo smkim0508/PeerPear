@@ -68,7 +68,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=event.image_url or f"{request.host_url}student_dashboard/static/peerpear_logo.png",
+                    image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date,
                 )
@@ -109,7 +109,7 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=event.image_url or f"{request.host_url}student_dashboard/static/peerpear_logo.png",
+                    image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date,
                 )
@@ -140,7 +140,7 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url
-                    or f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
+                    or f"{request.host_url}static/peerpear_logo.png",
                     end_date=event.end_date or datetime.now(timezone.utc),
                     status=event.status
                 )
@@ -171,7 +171,7 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=f"{request.host_url}student_dashboard/static/peerpear_logo.png",
+                    image_url=f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date,
                 )
@@ -201,7 +201,7 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
                 title=event.title or "Untitled Event",
                 description=event.description or "",
                 organization_name=org_name,
-                image_url=event.image_url or f"{request.host_url}student_dashboard/static/peerpear_logo.png",
+                image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                 end_date=event.end_date or datetime.now(timezone.utc),
                 status=event.status
             )
@@ -257,25 +257,28 @@ def validate_event_and_user(session, event_id: int, user_id: int):
 
     if not registration:
         return None, {"error": "You do not have view access to this event.", "status": 403}
-    
+
     return event, None
 
-def verify_access(event_id:int,user_id:int, user_type:str):
-    
+
+def verify_access(event_id: int, user_id: int, user_type: str):
+
     db_session = get_db_sessionmaker()
-    
+
     with db_session() as session_instance:
         if user_type == "organization":
-            event, error =  validate_event_and_admin(session_instance,event_id,user_id)
-            
+            event, error = validate_event_and_admin(
+                session_instance, event_id, user_id)
+
         else:
-            event, error = validate_event_and_user(session_instance,event_id,user_id)
-        
+            event, error = validate_event_and_user(
+                session_instance, event_id, user_id)
+
         if error:
             return error
-        
+
         return {"message": "Access to this event is verified", "status": 200}
-            
+
 
 # Starts an event
 
