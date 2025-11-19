@@ -45,7 +45,7 @@ def create_app() -> Flask:
     # Configure CORS to allow requests from Next.js frontend
     CORS(
         app,
-        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://peerpear.vercel.app"],
+        origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://peerpear.vercel.app", "http://peerpear.vercel.app"],
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
@@ -59,7 +59,7 @@ def create_app() -> Flask:
     # Set to True in production with HTTPS
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests
+    app.config['SESSION_COOKIE_SAMESITE'] = None
 
     # sets up core services/db/clients during app start up
     # TODO: add core configuration for env here
@@ -102,14 +102,14 @@ def create_app() -> Flask:
     # open a single session with each request
     @app.before_request
     def _open_session():
-        # print(f"request url: {request.url_root}")
-        # # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
-        # is_running_locally = "//localhost:" in request.url_root or "//127.0.0.1:" in request.url_root
-        # is_using_https = request.is_secure
-        # if (not is_running_locally) and (not is_using_https):
-        #     url = request.url.replace("http://", "https://", 1)
-        #     print(f'redirecting to {url}')
-        #     return redirect(url, code=301)
+        print(f"request url: {request.url_root}")
+        # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
+        is_running_locally = "//localhost:" in request.url_root or "//127.0.0.1:" in request.url_root
+        is_using_https = request.is_secure
+        if (not is_running_locally) and (not is_using_https):
+            url = request.url.replace("http://", "https://", 1)
+            print(f'redirecting to {url}')
+            return redirect(url, code=301)
 
         # print(f"hello")
 
