@@ -57,7 +57,7 @@ def create_app() -> Flask:
         "SECRET_KEY", "blah-blah-change-for-prod-cos333")
     app.config['SESSION_TYPE'] = 'filesystem'
     # Set to True in production with HTTPS
-    app.config['SESSION_COOKIE_SECURE'] = False
+    app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Allow cross-site requests
 
