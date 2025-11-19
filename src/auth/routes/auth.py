@@ -203,8 +203,25 @@ def require_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not is_authenticated():
-            # Force authentication
-            authenticate()
+            # Check if this is an API request (JSON expected)
+            if request.path.startswith('/student_dashboard/') or \
+               request.path.startswith('/organization_dashboard/') or \
+               request.path.startswith('/my_events_dashboard/') or \
+               request.path.startswith('/organization_profile/') or \
+               request.path.startswith('/questionnaire/') or \
+               request.path.startswith('/user-profile/') or \
+               request.path.startswith('/question_management/') or \
+               request.path.startswith('/event_registration/') or \
+               request.path.startswith('/events/') or \
+               request.path.startswith('/pairing/') or \
+               request.path.startswith('/sorting/') or \
+               'application/json' in request.headers.get('Accept', '') or \
+               request.headers.get('Content-Type', '').startswith('application/json'):
+                # Return JSON error for API endpoints
+                return jsonify({"error": "Authentication required", "authenticated": False}), 401
+            else:
+                # Force authentication for non-API routes
+                authenticate()
         return f(*args, **kwargs)
     return decorated_function
 

@@ -63,7 +63,10 @@ export default function OrganizationDashBoard() {
       
       if (!res.ok) {
         if (res.status === 401) {
-          setError("Please log in to view events.");
+          // User is not authenticated, redirect to login
+          const currentUrl = window.location.href;
+          window.location.href = `${apiUrl}/auth/login?redirect_url=${encodeURIComponent(currentUrl)}`;
+          return;
         } else if (res.status === 403) {
           setError("You do not have permission to access organization events.");
         } else {

@@ -148,6 +148,20 @@ export function handleCASRedirect(): void {
 }
 
 /**
+ * Handle API response that requires authentication
+ * If status is 401, redirects to CAS login
+ */
+export function handleApiAuthError(response: Response): boolean {
+  if (response.status === 401) {
+    const currentUrl = window.location.href;
+    const loginUrl = `${API_BASE_URL}/auth/login?redirect_url=${encodeURIComponent(currentUrl)}`;
+    window.location.href = loginUrl;
+    return true; // Handled the error
+  }
+  return false; // Not an auth error
+}
+
+/**
  * Verify if the current user can access organization features
  */
 export async function verifyOrganizationAccess(): Promise<{authorized: boolean, error?: string, organization_id?: number}> {

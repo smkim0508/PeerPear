@@ -45,7 +45,13 @@ export default function StudentDashBoard() {
         });
 
         if (!res.ok) {
-          setError(res.status === 401 ? "Please log in to view events." : "Failed to load events.");
+          if (res.status === 401) {
+            // User is not authenticated, redirect to login
+            const currentUrl = window.location.href;
+            window.location.href = `${apiUrl}/auth/login?redirect_url=${encodeURIComponent(currentUrl)}`;
+            return;
+          }
+          setError("Failed to load events. Please try again.");
           return;
         }
 
