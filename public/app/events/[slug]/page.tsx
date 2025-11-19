@@ -141,6 +141,36 @@ export default function EventPage({ params }: EventPageProps) {
   }, [eventId]);
 
   useEffect(() => {
+    if (!eventId || !userType) {
+      return;
+    }
+
+    const checkAccess = async () => {
+      try {
+        const API_BASE_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const res = await fetch(
+          `${API_BASE_URL}/events/verify/${eventId}/${userType}`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          setError(data.error || "You do not have access to view this event")
+        }
+      }
+      catch (err) {
+        console.error("Error verifying access:", err);
+      setError("You do not have access to view this event");
+      }
+
+    };
+
+    checkAccess();
+  }, [eventId, userType]);
+
+  useEffect(() => {
     // Only check registration for students
     if (user?.username && !isOrganizationUser) {
       checkRegistration();
@@ -1091,7 +1121,7 @@ export default function EventPage({ params }: EventPageProps) {
                                   onClick={handleViewPairings}
                                   className="w-full bg-purple-600 hover:bg-purple-700"
                                 />
-                                
+
                                 {/* Show publish button if pairings haven't been published yet */}
                                 <PearButton
                                   text={
