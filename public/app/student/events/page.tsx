@@ -36,10 +36,7 @@ export default function StudentDashBoard() {
         
         if (!res.ok) {
           if (res.status === 401) {
-            // User is not authenticated, redirect to login
-            const currentUrl = window.location.href;
-            window.location.href = `${apiUrl}/auth/login?redirect_url=${encodeURIComponent(currentUrl)}`;
-            return;
+            setError("Please log in to view your registered events.");
           } else {
             setError("Failed to load events. Please try again.");
           }
@@ -74,10 +71,7 @@ export default function StudentDashBoard() {
       
       if (!res.ok) {
         if (res.status === 401) {
-          // User is not authenticated, redirect to login
-          const currentUrl = window.location.href;
-          window.location.href = `${apiUrl}/auth/login?redirect_url=${encodeURIComponent(currentUrl)}`;
-          return;
+          setError("Please log in to view your registered events.");
         } else {
           setError("Failed to load events. Please try again.");
         }
