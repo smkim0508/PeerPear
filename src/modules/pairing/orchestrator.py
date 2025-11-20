@@ -4,19 +4,27 @@ from common.types.pairing_event import PairingResult, PairedGroup
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.pairing_repository import PairingRepository
 from common.types.user import User, UserProfile, UserPairingInformation
-from modules.pairing.system_prompts.pairing_prompts import BaselinePairingPrompts
+from modules.pairing.system_prompts.pairing_prompts import BaselinePairingPrompts, QuestionniarePairingPrompts, CustomPairingPrompts
 from modules.pairing.system_prompts.summary_prompts import ResponseSummaryPrompts
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.llm_output_types.summary_outputs import ResponseSummaryLLMOutput
 from common.logging import logger
 from db.crud.pairing_crud import store_new_pairing
 from common.types.questionnaire import Answer, Question, QuestionAnswerPair
+from app_types.api.response.event_browse_response import PublishedEvent
+from typing import Optional
 
 # NOTE: below is just the baseline logic for the pairing process, using end-to-end LLM connection.
 # Also, an orchestrator is technically not necessary at this stage, where we do not support continuous, stateful requests.
 # A simple endpoint could suffice, but this structure is present for future scaling.
 class PairingOrchestrator(PairingRepository):
-    def pair_students_in_groups(self, students: list[UserPairingInformation], group_size: int, event_id: int) -> PairingResult:
+    def pair_students_in_groups(
+        self,
+        students: list[UserPairingInformation],
+        event_description: str,
+        group_size: int,
+        event_id: int
+    ) -> PairingResult:
         """
         Main process for pairing students into groups.
         """
@@ -28,14 +36,19 @@ class PairingOrchestrator(PairingRepository):
         if group_size <= 1:
             logger.warning(f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
             return PairingResult(groups=[])
+        
+        # TODO: make the prompt take in event descrption
+        # then, make a new endpoint for pairing with questionnaire responses
+        # NOTE: for now, we can make questionnaire responses as the default, unless questionnaire doesn't exist then we do baseline pairing
 
         # call LLM to get pairing result
         pairing_llm_output: PairingLLMOutput = self.llm_client.create_sync(
             response_model=PairingLLMOutput,
-            system_prompt=BaselinePairingPrompts.base_group_pairing_system_prompt,
-            user_prompt=BaselinePairingPrompts.get_base_group_pairing_user_prompt(
+            system_prompt=QuestionniarePairingPrompts.questionniare_group_pairing_system_prompt,
+            user_prompt=QuestionniarePairingPrompts.get_questionnaire_group_pairing_user_prompt(
                 group_size=group_size,
-                students=students
+                students=students,
+                event_description=event_description
             ),
         )
 

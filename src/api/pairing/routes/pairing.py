@@ -17,6 +17,7 @@ from app_types.api.response.pairing_response import PairingResponse
 from db.crud.registration_crud import get_all_registered_users_for_event
 from common.types.event_enums import EventStatus, EventRole
 from db.crud.pairing_crud import store_new_pairing, get_pairings_for_event
+from db.crud.events_crud import get_event_by_id
 from common.error_response import generic_error_response
 
 # use blueprint to group routes
@@ -42,13 +43,18 @@ def pair_students_baseline():
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
     try:
         students: list[UserPairingInformation] | None = get_all_registered_users_for_event(event_id=event_id)
+        published_event: PublishedEvent | None = get_event_by_id(event_id=event_id)
     except Exception as e:
-        logger.error(f"Error getting registered users: {e}")
+        logger.error(f"Error fetching registered users and event details: {e}")
         return jsonify(generic_error_response), 500
 
     if not students:
-        # return empty response
+        # return empty pairing response
         return jsonify({"event_id": event_id, "pairing_results": {}}), 200
+    
+    if not published_event:
+        # return event not found error
+        return jsonify({"error": "Event not found"}), 404
 
     # initialize orhcestrator and repo
     pairing_orchestrator = PairingOrchestrator(
@@ -58,6 +64,7 @@ def pair_students_baseline():
         pairing_result: PairingResult = pairing_orchestrator.pair_students_in_groups(
             students=students,
             group_size=group_size,
+            event_description=published_event.description,
             event_id=event_id
         )
     except Exception as e:
@@ -111,6 +118,7 @@ def pair_students_test():
     pairing_result: PairingResult = pairing_orchestrator.pair_students_in_groups(
         students=students,
         group_size=group_size,
+        event_description="This is a casual social event.", # generic sample description
         event_id=event_id
     )
 
