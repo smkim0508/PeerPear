@@ -50,7 +50,9 @@ export async function checkAuthStatus(): Promise<AuthStatus> {
     
     if (response.ok) {
       console.log("Auth status response received");
-      return await response.json();
+      const data: AuthStatus = await response.json();
+      console.log("Auth status data:", data);
+      return data;
     }
     
     console.log("Auth status response not ok");
