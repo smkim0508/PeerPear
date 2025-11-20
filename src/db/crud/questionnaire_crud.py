@@ -6,7 +6,7 @@ from db.models.events import EventTable
 from sqlalchemy import select
 from api.dependencies import get_db_sessionmaker, get_llm
 from sqlalchemy.exc import SQLAlchemyError
-from common.types.user import UserProfileFull, User, UserProfile
+from common.types.user import UserPairingInformation, User, UserProfile
 from common.types.questionnaire import Question, Answer
 from common.types.event_enums import EventStatus
 from common.logging import logger

@@ -14,7 +14,7 @@ class ClassYear(Enum):
     ALUMNI = "Alumni"
     PROFESSOR = "Professor"
 
-class UserProfileFull(BaseModel):
+class UserProfile(BaseModel):
     """
     Full user profile with all relevant information, mapped 1-to-1 with the form responses (except for summary).
     TODO: add more fields as we build the form.
@@ -31,10 +31,11 @@ class UserProfileFull(BaseModel):
     hobbies: list[str] # NOTE: technically could be NULLable but right now we define it as non-nullable
     profile_summary: Optional[str] = None
 
-class UserProfile(BaseModel):
+class UserPairingInformation(BaseModel):
     """
     User profile carrying basic information and semantically-parsed profile summary.
     NOTE: this is the actual user profile that will be given to LLM as context.
+    TODO: rename all instances, make userprofilefull into user profile
     """
     id: int
     name: str

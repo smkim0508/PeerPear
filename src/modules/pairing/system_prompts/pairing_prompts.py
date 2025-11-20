@@ -1,6 +1,6 @@
 # central place for pairing prompts
 import json
-from common.types.user import User, UserProfile, UserProfileFull
+from common.types.user import User, UserProfile, UserPairingInformation
 
 class BaselinePairingPrompts:
     """
@@ -15,7 +15,7 @@ class BaselinePairingPrompts:
     Each student has:
     - 'student_id' (int, unique),
     - 'name' (string),
-    - 'profile_summary' with semantic information (fav food, major, sports, hobbies, career interests, etc.)
+    - 'profile_summary' with semantic information about the student (fav food, major, sports, hobbies, career interests, general summary, etc.)
 
     ## Output Contract (STRICT)
     Return **only** the following JSON object:
@@ -49,6 +49,7 @@ class BaselinePairingPrompts:
         - Music/Media (e.g., "hip-hop," "K-pop," "anime")
         - Clubs/Communities/Volunteering (Non-sensitive ones only. Do not consider any involvement that deal with sensitive topcis like sexual orientation, race, religion, etc.)
     - Treat synonyms as equivalent when clearly aligned ("machine learning" ≈ "ML," "soccer" ≈ "football (soccer)").
+    **IMPORTANT**: Note that not all profiles will have all topics listed above. Do not treat missing fields as a signal to match, only look at positive matching signals to pair students together.
 
     2. Similarity Scoring (Pairwise)
     - Prefer explicit overlaps in facets and key phrases.
@@ -175,7 +176,7 @@ class BaselinePairingPrompts:
     @staticmethod
     def get_base_group_pairing_user_prompt(
         group_size: int,
-        students: list[UserProfile]
+        students: list[UserPairingInformation]
     ) -> str:
         payload = {
             "group_size": group_size,
@@ -379,7 +380,7 @@ class QuestionniarePairingPrompts:
     @staticmethod
     def get_base_group_pairing_user_prompt(
         group_size: int,
-        students: list[UserProfile]
+        students: list[UserPairingInformation]
     ) -> str:
         payload = {
             "group_size": group_size,

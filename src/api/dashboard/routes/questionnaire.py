@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.crud.questionnaire_crud import get_questions, get_user_answers, submit_responses
-from common.types.user import UserProfileFull, User, UserProfile
+from common.types.user import UserProfile, User, UserPairingInformation
 from common.types.questionnaire import Question, Answer
 from pydantic import ValidationError
 from common.logging import logger
