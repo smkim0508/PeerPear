@@ -42,15 +42,29 @@ class PairingOrchestrator(PairingRepository):
         # NOTE: for now, we can make questionnaire responses as the default, unless questionnaire doesn't exist then we do baseline pairing
 
         # call LLM to get pairing result
-        pairing_llm_output: PairingLLMOutput = self.llm_client.create_sync(
-            response_model=PairingLLMOutput,
-            system_prompt=QuestionniarePairingPrompts.questionniare_group_pairing_system_prompt,
-            user_prompt=QuestionniarePairingPrompts.get_questionnaire_group_pairing_user_prompt(
-                group_size=group_size,
-                students=students,
-                event_description=event_description
-            ),
-        )
+        pairing_llm_output: PairingLLMOutput
+        
+        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing
+        if all(student.questionniare_response_summary is None for student in students):
+            pairing_llm_output = self.llm_client.create_sync(
+                response_model=PairingLLMOutput,
+                system_prompt=BaselinePairingPrompts.base_group_pairing_system_prompt,
+                user_prompt=BaselinePairingPrompts.get_base_group_pairing_user_prompt(
+                    group_size=group_size,
+                    students=students,
+                    event_description=event_description
+                ),
+            )
+        else:
+            pairing_llm_output = self.llm_client.create_sync(
+                response_model=PairingLLMOutput,
+                system_prompt=QuestionniarePairingPrompts.questionniare_group_pairing_system_prompt,
+                user_prompt=QuestionniarePairingPrompts.get_questionnaire_group_pairing_user_prompt(
+                    group_size=group_size,
+                    students=students,
+                    event_description=event_description
+                ),
+            )
 
         logger.info(f"Pairing results: {pairing_llm_output.groups}, reasoning: {pairing_llm_output.reasoning}")
 
