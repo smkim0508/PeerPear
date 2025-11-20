@@ -37,13 +37,9 @@ class PairingOrchestrator(PairingRepository):
             logger.warning(f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
             return PairingResult(groups=[])
         
-        # TODO: make the prompt take in event descrption
-        # then, make a new endpoint for pairing with questionnaire responses
-        # NOTE: for now, we can make questionnaire responses as the default, unless questionnaire doesn't exist then we do baseline pairing
-
         # call LLM to get pairing result
         pairing_llm_output: PairingLLMOutput
-        
+
         # look at the user information; if everyone is missing questionnaire response, then use baseline pairing
         if all(student.questionniare_response_summary is None for student in students):
             pairing_llm_output = self.llm_client.create_sync(
