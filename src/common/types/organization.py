@@ -10,3 +10,7 @@ class OrganizationProfile(BaseModel):
     id: int
     org_name: str
     description: Optional[str] = None
+
+class OrgAdminResponse(BaseModel):
+    organizations: list[OrganizationProfile]
+    
