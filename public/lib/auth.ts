@@ -49,9 +49,11 @@ export async function checkAuthStatus(): Promise<AuthStatus> {
     });
     
     if (response.ok) {
+      console.log("Auth status response received");
       return await response.json();
     }
     
+    console.log("Auth status response not ok");
     return { authenticated: false, username: null };
   } catch (error) {
     console.error('Error checking auth status:', error);
