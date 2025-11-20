@@ -2,7 +2,7 @@
 from typing import Optional
 from flask import Blueprint, request, send_from_directory, jsonify, g
 from common.types.pairing_event import PairingEvent, PairingResult, PairedGroup
-from common.types.user import User, UserProfile, UserProfileFull
+from common.types.user import User, UserProfile, UserPairingInformation
 from datetime import datetime, timezone, timedelta
 from api import validate_model
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
@@ -41,7 +41,7 @@ def pair_students_baseline():
 
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
     try:
-        students: list[UserProfile] | None = get_all_registered_users_for_event(event_id=event_id)
+        students: list[UserPairingInformation] | None = get_all_registered_users_for_event(event_id=event_id)
     except Exception as e:
         logger.error(f"Error getting registered users: {e}")
         return jsonify(generic_error_response), 500
@@ -92,17 +92,17 @@ def pair_students_test():
 
     # dummy values below, the **intention** is that LLM should correctly pair up: (John + Bob); (Jane + Charlie); (Alice + Emily
     students = []
-    students.append(UserProfile(id=1, name="John Doe", email="johndoe@me.com", role=EventRole.BIG_SIBLING,
+    students.append(UserPairingInformation(id=1, name="John Doe", email="johndoe@me.com", role=EventRole.BIG_SIBLING,
                     profile_summary="I like software engineering, building web apps. I love Python."))
-    students.append(UserProfile(id=2, name="Jane Doe", email="janedoe@me.com",
+    students.append(UserPairingInformation(id=2, name="Jane Doe", email="janedoe@me.com",
                     role=EventRole.BIG_SIBLING, profile_summary="Jane Doe is an athelete in the Rugby team."))
-    students.append(UserProfile(id=3, name="Bob Smith", email="bobsmith@me.com", role=EventRole.LITTLE_SIBLING,
+    students.append(UserPairingInformation(id=3, name="Bob Smith", email="bobsmith@me.com", role=EventRole.LITTLE_SIBLING,
                     profile_summary="Bob likes to build machine learning models and apps."))
-    students.append(UserProfile(id=4, name="Alice Johnson", email="alicejohnson@me.com", role=EventRole.LITTLE_SIBLING,
+    students.append(UserPairingInformation(id=4, name="Alice Johnson", email="alicejohnson@me.com", role=EventRole.LITTLE_SIBLING,
                     profile_summary="Alice Johnson loves to film vlogs eating food in Manhattan Chinatown."))
-    students.append(UserProfile(id=5, name="Charlie Brown", email="charliebrown@me.com", role=EventRole.LITTLE_SIBLING,
+    students.append(UserPairingInformation(id=5, name="Charlie Brown", email="charliebrown@me.com", role=EventRole.LITTLE_SIBLING,
                     profile_summary="Charlie Brown plays basketball everyday. He also loves soccer."))
-    students.append(UserProfile(id=6, name="Emily Davis", email="emilydavis@me.com", role=EventRole.BIG_SIBLING,
+    students.append(UserPairingInformation(id=6, name="Emily Davis", email="emilydavis@me.com", role=EventRole.BIG_SIBLING,
                     profile_summary="Emily Davis is a chef and loves to cook for her friends."))
 
     # initialize orhcestrator and repo

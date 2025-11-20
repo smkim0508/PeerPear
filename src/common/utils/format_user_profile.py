@@ -1,7 +1,7 @@
 # universal helper to easily format user profile to the DTO object
 from pydantic import BaseModel
 from typing import TypeVar, Generic, Optional
-from common.types.user import UserProfile, UserProfileFull, User
+from common.types.user import UserProfile, UserPairingInformation, User
 
 def format_user_profile_summary(
     major: str,

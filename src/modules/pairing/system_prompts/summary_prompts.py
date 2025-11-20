@@ -1,6 +1,6 @@
 # central place for pairing prompts
 import json
-from common.types.user import User, UserProfile, UserProfileFull
+from common.types.user import User, UserProfile, UserPairingInformation
 from common.types.questionnaire import Question, Answer, QuestionAnswerPair
 
 class ResponseSummaryPrompts:

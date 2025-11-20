@@ -3,7 +3,7 @@ from typing import List
 from common.types.pairing_event import PairingResult, PairedGroup
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.pairing_repository import PairingRepository
-from common.types.user import User, UserProfile, UserProfileFull
+from common.types.user import User, UserProfile, UserPairingInformation
 from modules.pairing.system_prompts.pairing_prompts import BaselinePairingPrompts
 from modules.pairing.system_prompts.summary_prompts import ResponseSummaryPrompts
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
@@ -16,7 +16,7 @@ from common.types.questionnaire import Answer, Question, QuestionAnswerPair
 # Also, an orchestrator is technically not necessary at this stage, where we do not support continuous, stateful requests.
 # A simple endpoint could suffice, but this structure is present for future scaling.
 class PairingOrchestrator(PairingRepository):
-    def pair_students_in_groups(self, students: list[UserProfile], group_size: int, event_id: int) -> PairingResult:
+    def pair_students_in_groups(self, students: list[UserPairingInformation], group_size: int, event_id: int) -> PairingResult:
         """
         Main process for pairing students into groups.
         """

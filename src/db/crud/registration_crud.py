@@ -140,7 +140,8 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserPairi
                     name="".join([user.first_name, " ", user.last_name]),
                     email=user.email,
                     role=reg.role,
-                    profile_summary=profile_summary # contains info about hobbies, major, and general summary
+                    profile_summary=profile_summary, # contains info about hobbies, major, and general summary
+                    questionniare_response_summary=reg.response_summary or None # a semantic summary of the user's responses
                 )
             )
 
