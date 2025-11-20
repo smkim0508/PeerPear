@@ -59,7 +59,7 @@ export default function StudentDashBoard() {
       }
     };
 
-    fetchEvents();
+    // fetchEvents();
   }, []);
 
   // Check registration state
