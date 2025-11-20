@@ -15,6 +15,7 @@ from common.types.user import UserProfile, UserProfileFull, User
 from typing import Optional
 from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
+from common.utils.format_user_profile import format_user_profile_summary
 
 
 def create_new_registration(event_id: int, user_id: int):
@@ -125,8 +126,13 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
 
     with db_session() as session:
         registrations = session.execute(stmt).all()
-
         for reg, profile, user in registrations:
+            # use helper to format profile summary for LLM
+            profile_summary = format_user_profile_summary(
+                major=profile.major or "no current major",
+                hobbies=profile.hobbies, # not nullable
+                general_profile_summary=profile.profile_summary or None # this is the pre-computed, general summary, if exists
+            )
             user_profiles.append(
                 UserProfile(
                     id=user.id,
@@ -134,7 +140,7 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
                     name="".join([user.first_name, " ", user.last_name]),
                     email=user.email,
                     role=reg.role,
-                    profile_summary=profile.profile_summary or ""
+                    profile_summary=profile_summary # contains info about hobbies, major, and general summary
                 )
             )
 
