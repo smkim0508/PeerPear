@@ -16,16 +16,22 @@ import os
 # helper to delete all tables
 def delete_all_tables(engine):
     print(list(MainDB_Base.metadata.tables.keys()))
-    print(f"WARNING: THIS WILL DELETE ALL TABLES IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
+    print(f"WARNING: THIS WILL DELETE **ALL** TABLES IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
     time.sleep(5)
     MainDB_Base.metadata.drop_all(engine)
 
 # helper to delete a single table
 def delete_table(table_name, engine):
-    print(f"WARNING: THIS WILL DELETE TABLE {table_name} IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
+    print(f"WARNING: THIS WILL DELETE TABLE *{table_name}* IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
     time.sleep(5)
-    table = getattr(MainDB_Base, table_name)
-    table.__table__.drop(engine)
+    
+    try:
+        table = MainDB_Base.metadata.tables[table_name]
+    except KeyError:
+        raise ValueError(f"Table '{table_name}' not found in metadata")
+
+    table.drop(engine)
+    print(f"Dropped table {table_name}")
 
 if __name__ == "__main__":
     # one-off script to create tables
@@ -49,5 +55,5 @@ if __name__ == "__main__":
         exit(1)
 
     # NOTE: change below to determine which table(s) to delete
-    delete_all_tables(engine)
-    # delete_table("user", engine)
+    # delete_all_tables(engine)
+    delete_table("event_registrations", engine)

@@ -11,10 +11,11 @@ from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
 from common.types.registration import EventRegistration
 from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
-from common.types.user import UserProfile, UserProfileFull, User
+from common.types.user import UserProfile, UserPairingInformation, User
 from typing import Optional
 from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
+from common.utils.format_user_profile import format_user_profile_summary
 
 
 def create_new_registration(event_id: int, user_id: int):
@@ -103,7 +104,7 @@ def create_new_registration(event_id: int, user_id: int):
         return reg_dto.model_dump(mode="json")
 
 
-def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfile]]:
+def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserPairingInformation]]:
     """
     Retrieves all *users* that are registered for a given event id.
     NOTE: not to be confused with retrieving actual registration details.
@@ -121,20 +122,26 @@ def get_all_registered_users_for_event(event_id: int) -> Optional[list[UserProfi
         .where(EventRegistrationsTable.valid_registration == True)
     )
 
-    user_profiles: list[UserProfile] = []
+    user_profiles: list[UserPairingInformation] = []
 
     with db_session() as session:
         registrations = session.execute(stmt).all()
-
         for reg, profile, user in registrations:
+            # use helper to format profile summary for LLM
+            profile_summary = format_user_profile_summary(
+                major=profile.major or "no current major",
+                hobbies=profile.hobbies, # not nullable
+                general_profile_summary=profile.profile_summary or None # this is the pre-computed, general summary, if exists
+            )
             user_profiles.append(
-                UserProfile(
+                UserPairingInformation(
                     id=user.id,
                     # joins first and last name
                     name="".join([user.first_name, " ", user.last_name]),
                     email=user.email,
                     role=reg.role,
-                    profile_summary=profile.profile_summary or f"hobbies: {''.join(profile.hobbies)}" # TODO: make this pull hobbies instead for now and join str; technically this should format the user profile into something meaningful.
+                    profile_summary=profile_summary, # contains info about hobbies, major, and general summary
+                    questionniare_response_summary=reg.response_summary or None # a semantic summary of the user's responses
                 )
             )
 
