@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PearButton from "@/components/PearButton";
+import { HelpCircle } from "lucide-react";
+
 import {
   Calendar,
   Clock,
@@ -714,7 +716,7 @@ export default function EventPage({ params }: EventPageProps) {
                 <Card className="shadow-lg border-0 bg-white rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                      <Users className="h-7 w-7" />
+                      <HelpCircle className="h-7 w-7" />
                       Event Questions
                     </CardTitle>
                   </CardHeader>

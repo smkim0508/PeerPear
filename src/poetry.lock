@@ -598,6 +598,26 @@ flask = ">=0.9"
 Werkzeug = ">=0.7"
 
 [[package]]
+name = "flask-jwt-extended"
+version = "4.7.1"
+description = "Extended JWT integration with Flask"
+optional = false
+python-versions = "<4,>=3.9"
+groups = ["main"]
+files = [
+    {file = "Flask_JWT_Extended-4.7.1-py2.py3-none-any.whl", hash = "sha256:52f35bf0985354d7fb7b876e2eb0e0b141aaff865a22ff6cc33d9a18aa987978"},
+    {file = "flask_jwt_extended-4.7.1.tar.gz", hash = "sha256:8085d6757505b6f3291a2638c84d207e8f0ad0de662d1f46aa2f77e658a0c976"},
+]
+
+[package.dependencies]
+Flask = ">=2.0,<4.0"
+PyJWT = ">=2.0,<3.0"
+Werkzeug = ">=0.14"
+
+[package.extras]
+asymmetric-crypto = ["cryptography (>=3.3.1)"]
+
+[[package]]
 name = "flask-sqlalchemy"
 version = "3.1.1"
 description = "Add SQLAlchemy support to your Flask application."
@@ -2450,4 +2470,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "2df1a680381df7bf4316133feba7002149d047dba43b892541667608f25a501b"
+content-hash = "ebc4acab8db566bea46cf71d983f11028474d15b74d78e0e702e5d12b4524105"
