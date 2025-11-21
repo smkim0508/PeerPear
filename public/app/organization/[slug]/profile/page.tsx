@@ -43,19 +43,26 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
       if (response.ok) {
         setIsAuthorized(true);
       } else if (response.status === 401) {
-        setMessage("Please log in to access this organization profile.");
+        setMessage("Please log in to access this organization profile. Redirecting...");
         setIsAuthorized(false);
+        setTimeout(() => router.push("/organization"), 2000);
       } else if (response.status === 403) {
-        setMessage("You do not have admin access to this organization.");
+        setMessage("You do not have admin access to this organization. Redirecting...");
         setIsAuthorized(false);
+        setTimeout(() => router.push("/organization"), 2000);
       } else {
-        setMessage("Failed to validate organization access.");
+        setMessage("Failed to validate organization access. Redirecting...");
         setIsAuthorized(false);
+        setTimeout(() => router.push("/organization"), 2000);
       }
     } catch (err) {
       console.error("Error validating admin access:", err);
-      setMessage("Failed to validate organization access. Please check your connection.");
+      setMessage(
+        "Failed to validate organization access. Please check your connection. Redirecting..."
+      );
       setIsAuthorized(false);
+              setTimeout(() => router.push("/organization"), 2000);
+
     }
   };
 
@@ -71,9 +78,12 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
           const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-          const res = await fetch(`${apiUrl}/organization_profile/profile?organization_id=${organizationId}`, {
-            credentials: "include",
-          });
+          const res = await fetch(
+            `${apiUrl}/organization_profile/profile?organization_id=${organizationId}`,
+            {
+              credentials: "include",
+            }
+          );
 
           if (!res.ok) return;
 
@@ -82,7 +92,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
           setEditName(data.organization_name || "");
           setOrgDescription(data.description || "");
         } catch (error) {
-          console.error("Network error while loading organization profile:", error);
+          console.error(
+            "Network error while loading organization profile:",
+            error
+          );
         } finally {
           setIsLoading(false);
         }
@@ -109,15 +122,18 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-      const res = await fetch(`${apiUrl}/organization_profile/profile?organization_id=${organizationId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          org_name: editName,
-          description: orgDescription,
-        }),
-      });
+      const res = await fetch(
+        `${apiUrl}/organization_profile/profile?organization_id=${organizationId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            org_name: editName,
+            description: orgDescription,
+          }),
+        }
+      );
 
       const data = await res.json();
       if (res.ok) {
@@ -161,7 +177,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
               </Alert>
               <PearButton
                 text="Back to Organizations"
-                onClick={() => router.push('/organization')}
+                onClick={() => router.push("/organization")}
               />
             </div>
           </main>
@@ -171,7 +187,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
             <div className="text-center mb-12">
               <h1 className="text-[56px] font-extrabold text-[#0a0a0a] relative inline-block tracking-tight">
                 Organization Profile
-                <Squiggle width={530} className="left-1/2 -translate-x-1/2 -bottom-2" />
+                <Squiggle
+                  width={530}
+                  className="left-1/2 -translate-x-1/2 -bottom-2"
+                />
               </h1>
               <p className="mt-6 text-lg text-[#1a1a1a] max-w-2xl mx-auto">
                 Manage your organization's profile information and settings
@@ -189,7 +208,9 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                     <h2 className="text-3xl font-bold text-[#0a0a0a]">
                       {orgName || "Your Organization"}
                     </h2>
-                    <p className="text-[#1a1a1a] font-medium">Organization Details</p>
+                    <p className="text-[#1a1a1a] font-medium">
+                      Organization Details
+                    </p>
                   </div>
                 </div>
 
@@ -209,16 +230,18 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
-                        Organization Name <span className="text-red-600">*</span>
+                        Organization Name{" "}
+                        <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${errors.org_name
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-white focus:ring-white"
-                          }`}
+                        className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${
+                          errors.org_name
+                            ? "border-red-500 focus:ring-red-500"
+                            : "border-white focus:ring-white"
+                        }`}
                         placeholder="Enter organization name"
                       />
                     </div>
@@ -243,10 +266,11 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                       value={orgDescription}
                       onChange={(e) => setOrgDescription(e.target.value)}
                       rows={4}
-                      className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none ${errors.description
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-white focus:ring-white"
-                        }`}
+                      className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none ${
+                        errors.description
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-white focus:ring-white"
+                      }`}
                       placeholder="Tell us about your organization..."
                     />
                   </div>
@@ -277,10 +301,11 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
                   {message && (
                     <div
-                      className={`p-4 rounded-lg text-center font-semibold ${message.includes("success")
-                        ? "bg-green text-nav-dark"
-                        : "bg-red-100 text-red-800"
-                        }`}
+                      className={`p-4 rounded-lg text-center font-semibold ${
+                        message.includes("success")
+                          ? "bg-green text-nav-dark"
+                          : "bg-red-100 text-red-800"
+                      }`}
                     >
                       {message}
                     </div>
@@ -304,7 +329,9 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                       </h3>
                       <span className="inline-flex items-center gap-2 bg-white/60 px-4 py-2 rounded-lg">
                         <CheckCircle className="w-4 h-4 text-green-600" />
-                        <span className="text-[#1a1a1a] font-medium">Active</span>
+                        <span className="text-[#1a1a1a] font-medium">
+                          Active
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -329,7 +356,8 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   Need Help?
                 </h3>
                 <p className="text-[#1a1a1a] mb-4">
-                  Having trouble with your profile? Check out our help resources.
+                  Having trouble with your profile? Check out our help
+                  resources.
                 </p>
                 <button className="bg-green cursor-pointer hover:bg-[#c4de90] text-[#0a0a0a] px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
                   Contact Support

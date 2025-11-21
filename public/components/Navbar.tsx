@@ -78,7 +78,7 @@ export default function Navbar({
             setCurrentOrganization({
               id: org.id,
               name: org.org_name,
-              image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center"
+              image: "/logo.svg"
             });
           } else {
             setCurrentOrganization(null);

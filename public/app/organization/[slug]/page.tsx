@@ -45,19 +45,27 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
       if (response.ok) {
         setIsAuthorized(true);
       } else if (response.status === 401) {
-        setError("Please log in to access this organization dashboard.");
+        setError("Please log in to access this organization dashboard. Redirecting...");
         setIsAuthorized(false);
+        setTimeout(() => router.push("/organization"), 2000);
+
       } else if (response.status === 403) {
-        setError("You do not have admin access to this organization.");
+        setError("You do not have admin access to this organization.Redirecting...");
         setIsAuthorized(false);
+        setTimeout(() => router.push("/organization"), 2000);
+
       } else {
-        setError("Failed to validate organization access.");
+        setError("Failed to validate organization access.Redirecting...");
         setIsAuthorized(false);
+        setTimeout(() => router.push("/organization"), 2000);
+
       }
     } catch (err) {
       console.error("Error validating admin access:", err);
-      setError("Failed to validate organization access. Please check your connection.");
+      setError("Failed to validate organization access. Please check your connection. Redirecting...");
       setIsAuthorized(false);
+      setTimeout(() => router.push("/organization"), 2000);
+
     }
   };
 

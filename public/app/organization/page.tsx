@@ -51,7 +51,8 @@ export default function OrganizationPage({ params }: OrganizationProps) {
       const data = await response.json();
 
       // The API returns: { organizations: [{ id, org_name, description? }] }
-      const defaultImage = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=100&h=100&fit=crop&crop=center";
+      
+      const defaultImage = "/logo.svg";
 
       const mappedOrgs: Organization[] = (data.organizations || []).map((org: any) => ({
         id: org.id,
