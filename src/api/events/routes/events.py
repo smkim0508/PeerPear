@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from sqlalchemy import select
 from db.models.events import EventTable, EventRegistrationsTable
 from db.models.organizations import OrganizationTable
@@ -10,7 +10,10 @@ from api.dependencies import get_db_sessionmaker
 from common.logging import logger
 from common.error_response import generic_error_response
 
+from db.crud.events_crud import verify_access
+
 events_bp = Blueprint("events", __name__)
+
 
 @events_bp.get("/<int:event_id>")
 def get_event_details(event_id: int):
@@ -20,7 +23,7 @@ def get_event_details(event_id: int):
     """
     try:
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get event with organization
             event_query = (
@@ -28,25 +31,28 @@ def get_event_details(event_id: int):
                 .join(OrganizationTable, EventTable.organization_id == OrganizationTable.id)
                 .where(EventTable.id == event_id)
             )
-            
+
             event_result = session.execute(event_query).one_or_none()
             if not event_result:
                 return jsonify({"error": "Event not found"}), 404
-            
+
             event, organization = event_result
-            
+
             # Get questions for the event
-            questions_query = select(QuestionTable).where(QuestionTable.event_id == event_id)
+            questions_query = select(QuestionTable).where(
+                QuestionTable.event_id == event_id)
             questions_result = session.execute(questions_query).all()
             questions = [q[0] for q in questions_result]
-            
+
             # Format response
             event_data = {
                 "id": event.id,
                 "organization_id": event.organization_id,
-                "created_at": event.end_date.isoformat() if event.end_date else None,  # Map to frontend expected field
+                # Map to frontend expected field
+                "created_at": event.end_date.isoformat() if event.end_date else None,
                 "ends_at": event.end_date.isoformat() if event.end_date else None,
                 "active": event.status.value == "STARTED" if hasattr(event.status, 'value') else str(event.status) == "STARTED",
+                "status": event.status.value if hasattr(event.status, 'value') else str(event.status),
                 "title": event.title,
                 "description": event.description,
                 "matches": event.matches,
@@ -64,9 +70,9 @@ def get_event_details(event_id: int):
                     } for q in questions
                 ]
             }
-            
+
             return jsonify(event_data), 200
-            
+
     except Exception as e:
         logger.error(f"Error getting event details: {e}")
         return jsonify(generic_error_response), 500
@@ -80,7 +86,7 @@ def get_active_events():
     """
     try:
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get active events with organizations
             query = (
@@ -89,22 +95,24 @@ def get_active_events():
                 .where(EventTable.status == EventStatus.STARTED)
                 .order_by(EventTable.end_date.desc())
             )
-            
+
             results = session.execute(query).all()
-            
+
             events = []
             for event, organization in results:
                 # Get questions for each event
-                questions_query = select(QuestionTable).where(QuestionTable.event_id == event.id)
+                questions_query = select(QuestionTable).where(
+                    QuestionTable.event_id == event.id)
                 questions_result = session.execute(questions_query).all()
                 questions = [q[0] for q in questions_result]
-                
+
                 event_data = {
                     "id": event.id,
                     "organization_id": event.organization_id,
                     "created_at": event.end_date.isoformat() if event.end_date else None,
                     "ends_at": event.end_date.isoformat() if event.end_date else None,
                     "active": event.status.value == "STARTED" if hasattr(event.status, 'value') else str(event.status) == "STARTED",
+                    "status": event.status.value if hasattr(event.status, 'value') else str(event.status),
                     "title": event.title,
                     "description": event.description,
                     "matches": event.matches,
@@ -123,9 +131,9 @@ def get_active_events():
                     ]
                 }
                 events.append(event_data)
-            
+
             return jsonify(events), 200
-            
+
     except Exception as e:
         logger.error(f"Error getting active events: {e}")
         return jsonify(generic_error_response), 500
@@ -139,29 +147,31 @@ def check_user_registration(event_id: int, username: str):
     """
     try:
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get user by username
-            user_query = select(UserTable).where(UserTable.username == username)
+            user_query = select(UserTable).where(
+                UserTable.username == username)
             user_result = session.execute(user_query).one_or_none()
-            
+
             if not user_result:
                 return jsonify({"registered": False}), 200
-            
+
             user = user_result[0]
-            
+
             # Check registration
             registration_query = (
                 select(EventRegistrationsTable)
                 .where(EventRegistrationsTable.event_id == event_id)
                 .where(EventRegistrationsTable.user_id == user.id)
             )
-            
-            registration_result = session.execute(registration_query).one_or_none()
+
+            registration_result = session.execute(
+                registration_query).one_or_none()
             is_registered = registration_result is not None
-            
+
             return jsonify({"registered": is_registered}), 200
-            
+
     except Exception as e:
         logger.error(f"Error checking user registration: {e}")
         return jsonify(generic_error_response), 500
@@ -176,44 +186,45 @@ def register_user_for_event(event_id: int):
     try:
         payload = request.get_json(silent=True) or {}
         username = payload.get("username")
-        
+
         if not username:
             return jsonify({"error": "username is required"}), 400
-        
+
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get user by username
-            user_query = select(UserTable).where(UserTable.username == username)
+            user_query = select(UserTable).where(
+                UserTable.username == username)
             user_result = session.execute(user_query).one_or_none()
-            
+
             if not user_result:
                 return jsonify({"error": "User not found"}), 404
-            
+
             user = user_result[0]
-            
+
             # Check if already registered
             existing_registration = (
                 select(EventRegistrationsTable)
                 .where(EventRegistrationsTable.event_id == event_id)
                 .where(EventRegistrationsTable.user_id == user.id)
             )
-            
+
             if session.execute(existing_registration).one_or_none():
                 return jsonify({"error": "User already registered for this event"}), 400
-            
+
             # Create registration
             registration = EventRegistrationsTable(
                 event_id=event_id,
                 user_id=user.id,
                 valid_registration=False
             )
-            
+
             session.add(registration)
             session.commit()
-            
+
             return jsonify({"message": "Registration successful"}), 201
-            
+
     except Exception as e:
         logger.error(f"Error registering user for event: {e}")
         return jsonify(generic_error_response), 500
@@ -228,54 +239,58 @@ def unregister_user_from_event(event_id: int):
     try:
         payload = request.get_json(silent=True) or {}
         username = payload.get("username")
-        
+
         if not username:
             return jsonify({"error": "username is required"}), 400
-        
+
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get user by username
-            user_query = select(UserTable).where(UserTable.username == username)
+            user_query = select(UserTable).where(
+                UserTable.username == username)
             user_result = session.execute(user_query).one_or_none()
-            
+
             if not user_result:
                 return jsonify({"error": "User not found"}), 404
-            
+
             user = user_result[0]
-            
+
             # Remove registration
             registration_query = (
                 select(EventRegistrationsTable)
                 .where(EventRegistrationsTable.event_id == event_id)
                 .where(EventRegistrationsTable.user_id == user.id)
             )
-            
-            registration_result = session.execute(registration_query).one_or_none()
+
+            registration_result = session.execute(
+                registration_query).one_or_none()
             if not registration_result:
                 return jsonify({"error": "User not registered for this event"}), 400
-            
+
             registration = registration_result[0]
             session.delete(registration)
-            
+
             # Also remove any responses the user made for this event
-            questions_query = select(QuestionTable.id).where(QuestionTable.event_id == event_id)
-            question_ids = [q[0] for q in session.execute(questions_query).all()]
-            
+            questions_query = select(QuestionTable.id).where(
+                QuestionTable.event_id == event_id)
+            question_ids = [q[0]
+                            for q in session.execute(questions_query).all()]
+
             if question_ids:
                 responses_query = (
                     select(ResponseTable)
                     .where(ResponseTable.user_id == user.id)
                     .where(ResponseTable.question_id.in_(question_ids))
                 )
-                
+
                 for response_row in session.execute(responses_query).all():
                     session.delete(response_row[0])
-            
+
             session.commit()
-            
+
             return jsonify({"message": "Unregistration successful"}), 200
-            
+
     except Exception as e:
         logger.error(f"Error unregistering user from event: {e}")
         return jsonify(generic_error_response), 500
@@ -289,31 +304,34 @@ def get_user_event_responses(event_id: int, username: str):
     """
     try:
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get user by username
-            user_query = select(UserTable).where(UserTable.username == username)
+            user_query = select(UserTable).where(
+                UserTable.username == username)
             user_result = session.execute(user_query).one_or_none()
-            
+
             if not user_result:
                 return jsonify([]), 200
-            
+
             user = user_result[0]
-            
+
             # Get questions for this event
-            questions_query = select(QuestionTable.id).where(QuestionTable.event_id == event_id)
-            question_ids = [q[0] for q in session.execute(questions_query).all()]
-            
+            questions_query = select(QuestionTable.id).where(
+                QuestionTable.event_id == event_id)
+            question_ids = [q[0]
+                            for q in session.execute(questions_query).all()]
+
             if not question_ids:
                 return jsonify([]), 200
-            
+
             # Get user's responses
             responses_query = (
                 select(ResponseTable)
                 .where(ResponseTable.user_id == user.id)
                 .where(ResponseTable.question_id.in_(question_ids))
             )
-            
+
             responses = []
             for response_row in session.execute(responses_query).all():
                 response = response_row[0]
@@ -323,9 +341,9 @@ def get_user_event_responses(event_id: int, username: str):
                     "answer": response.answer,
                     "user_id": response.user_id
                 })
-            
+
             return jsonify(responses), 200
-            
+
     except Exception as e:
         logger.error(f"Error getting user event responses: {e}")
         return jsonify(generic_error_response), 500
@@ -341,25 +359,26 @@ def submit_event_responses(event_id: int):
         payload = request.get_json(silent=True) or {}
         username = payload.get("username")
         responses_data = payload.get("responses", [])
-        
+
         if not username:
             return jsonify({"error": "username is required"}), 400
-        
+
         if not responses_data:
             return jsonify({"error": "responses are required"}), 400
-        
+
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get user by username
-            user_query = select(UserTable).where(UserTable.username == username)
+            user_query = select(UserTable).where(
+                UserTable.username == username)
             user_result = session.execute(user_query).one_or_none()
-            
+
             if not user_result:
                 return jsonify({"error": "User not found"}), 404
-            
+
             user = user_result[0]
-            
+
             # Insert responses
             for response_data in responses_data:
                 response = ResponseTable(
@@ -368,11 +387,11 @@ def submit_event_responses(event_id: int):
                     answer=response_data["answer"]
                 )
                 session.add(response)
-            
+
             session.commit()
-            
+
             return jsonify({"message": "Responses submitted successfully"}), 201
-            
+
     except Exception as e:
         logger.error(f"Error submitting event responses: {e}")
         return jsonify(generic_error_response), 500
@@ -386,7 +405,7 @@ def get_event_participants(event_id: int):
     """
     try:
         db_session = get_db_sessionmaker()
-        
+
         with db_session() as session:
             # Get participants with user details
             query = (
@@ -394,9 +413,9 @@ def get_event_participants(event_id: int):
                 .join(UserTable, EventRegistrationsTable.user_id == UserTable.id)
                 .where(EventRegistrationsTable.event_id == event_id)
             )
-            
+
             results = session.execute(query).all()
-            
+
             participants = []
             for registration, user in results:
                 participant = {
@@ -408,9 +427,36 @@ def get_event_participants(event_id: int):
                     "full_name": f"{user.first_name} {user.last_name}"
                 }
                 participants.append(participant)
-            
+
             return jsonify(participants), 200
-            
+
     except Exception as e:
         logger.error(f"Error getting event participants: {e}")
         return jsonify(generic_error_response), 500
+
+@events_bp.get("/verify/<int:event_id>/<string:user_type>")
+def verify_event_access(event_id, user_type):
+    try:
+        event_id = int(event_id)
+    except:
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
+    
+    if user_type not in ["student", "organization"]:
+        return jsonify({"error": "User type must be specified"}), 400
+        
+
+    try:
+        result = verify_access(event_id, user_id,user_type)
+    except Exception as e:
+        logger.error(f"Error starting event: {e}")
+        return jsonify(generic_error_response), 500
+
+    if result.get("error"):
+        return jsonify(result), result.get("status", 400)
+
+    return jsonify(result), 200

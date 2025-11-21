@@ -15,11 +15,16 @@ import {
   Edit,
   Save,
   X,
+  Trophy,
+  Award,
+  Timer,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PairingResults from "@/components/PairingResults";
+import { PairingResultData } from "@/types/events";
 import {
   fetchEventById,
   checkUserRegistration,
@@ -28,7 +33,33 @@ import {
   getUserEventResponses,
   getEventParticipants,
   autoTerminateEvent,
+  startEvent,
+  endEvent,
+  triggerPairing,
+  getEventPairings,
+  publishPairings,
+  getStudentMatch,
 } from "@/lib/events";
+
+function calculateTimeLeft(endTime: string | null) {
+  if (!endTime) return null;
+
+  const eventEnd = new Date(endTime).getTime();
+  const now = Date.now();
+  const diff = eventEnd - now;
+
+  if (diff <= 0) {
+    return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  return {
+    expired: false,
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / 1000 / 60) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+}
 
 type Event = {
   id: number;
@@ -36,6 +67,7 @@ type Event = {
   created_at: string;
   ends_at: string | null;
   active: boolean;
+  status: string;
   title: string | null;
   description: string | null;
   matches: any | null;
@@ -90,8 +122,39 @@ export default function EventPage({ params }: EventPageProps) {
     description: "",
   });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [isStartingEvent, setIsStartingEvent] = useState(false);
+
+  // Pairing states
+  const [pairingData, setPairingData] = useState<PairingResultData | null>(
+    null
+  );
+  const [isEndingEvent, setIsEndingEvent] = useState(false);
+  const [isTriggeringPairing, setIsTriggeringPairing] = useState(false);
+  const [isPublishingPairings, setIsPublishingPairings] = useState(false);
+  const [groupSize, setGroupSize] = useState(2);
+
+  // Student match states
+  const [studentMatch, setStudentMatch] = useState<PairingResultData | null>(
+    null
+  );
+  const [isLoadingMatch, setIsLoadingMatch] = useState(false);
 
   const eventId = parseInt(slug);
+
+  const [timeLeft, setTimeLeft] = useState<any>(null);
+
+  useEffect(() => {
+    if (!event?.ends_at) return;
+
+    const updateTime = () => {
+      setTimeLeft(calculateTimeLeft(event.ends_at!));
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, [event?.ends_at]);
 
   // Determine user type - STRICTLY from localStorage only
   const getUserType = (): "student" | "organization" => {
@@ -111,11 +174,57 @@ export default function EventPage({ params }: EventPageProps) {
 
   useEffect(() => {
     fetchEvent();
+  }, [eventId]);
+
+  useEffect(() => {
+    if (!eventId || !userType) {
+      return;
+    }
+
+    const checkAccess = async () => {
+      try {
+        const API_BASE_URL =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const res = await fetch(
+          `${API_BASE_URL}/events/verify/${eventId}/${userType}`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json()
+
+        if (!res.ok) {
+          setError(data.error || "You do not have access to view this event")
+        }
+      }
+      catch (err) {
+        console.error("Error verifying access:", err);
+      setError("You do not have access to view this event");
+      }
+
+    };
+
+    checkAccess();
+  }, [eventId, userType]);
+
+  useEffect(() => {
     // Only check registration for students
     if (user?.username && !isOrganizationUser) {
       checkRegistration();
     }
-  }, [eventId, user, isOrganizationUser]);
+  }, [user, isOrganizationUser]);
+
+  useEffect(() => {
+    // Check for student matches if event has published pairings
+    if (
+      event &&
+      event.status === "PAIRING_PUBLISHED" &&
+      user?.id &&
+      !isOrganizationUser &&
+      isRegistered
+    ) {
+      fetchStudentMatch();
+    }
+  }, [event?.status, user?.id, isOrganizationUser, isRegistered]);
 
   const fetchEvent = async () => {
     try {
@@ -139,6 +248,58 @@ export default function EventPage({ params }: EventPageProps) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const CountdownCard = () => {
+    if (!event?.ends_at || !timeLeft) return null;
+
+    const expired = timeLeft.expired;
+
+    const color =
+      expired
+        ? "text-red-700 bg-red-100 border-red-300"
+        : timeLeft.days < 2
+        ? "text-orange-700 bg-orange-100 border-orange-300"
+        : "text-green-700 bg-green-100 border-green-300";
+
+    return (
+      <Card className="shadow-xl border-0 bg-white rounded-xl">
+        <CardHeader>
+          <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+            <Timer className="w-6 h-6" />
+            Registration Ends
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {expired ? (
+            <div className="text-center p-4 bg-red-50 border border-red-300 rounded-xl">
+              <p className="text-red-700 text-xl font-semibold">
+                Registration Closed
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                className={`text-center p-4 rounded-xl border ${color} transition-all`}
+              >
+                <p className="font-bold text-lg mb-2">Time Remaining</p>
+                <p className="text-2xl font-mono">
+                  {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m{" "}
+                  {timeLeft.seconds}s
+                </p>
+              </div>
+
+              <div className="mt-4 text-center text-gray-700">
+                <p className="font-medium">Deadline:</p>
+                <p className="text-lg font-semibold">
+                  {format(parseISO(event.ends_at), "MMMM d, yyyy — h:mm a")}
+                </p>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   const checkRegistration = async () => {
@@ -320,10 +481,10 @@ export default function EventPage({ params }: EventPageProps) {
         setEvent((prev) =>
           prev
             ? {
-              ...prev,
-              title: editEventData.title,
-              description: editEventData.description,
-            }
+                ...prev,
+                title: editEventData.title,
+                description: editEventData.description,
+              }
             : null
         );
         setIsEditingEvent(false);
@@ -342,6 +503,136 @@ export default function EventPage({ params }: EventPageProps) {
   const handleCancelEdit = () => {
     setIsEditingEvent(false);
     setEditEventData({ title: "", description: "" });
+  };
+
+  // Start event handler
+  const handleStartEvent = async () => {
+    if (!event) return;
+
+    setIsStartingEvent(true);
+    try {
+      const result = await startEvent(eventId);
+      if (result.success) {
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to start event");
+      }
+    } catch (err) {
+      console.error("Error starting event:", err);
+      setError("Failed to start event");
+    } finally {
+      setIsStartingEvent(false);
+    }
+  };
+
+  // Pairing handler functions
+  const handleEndEvent = async () => {
+    if (!event) return;
+
+    setIsEndingEvent(true);
+    try {
+      const result = await endEvent(eventId);
+      if (result.success) {
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to end event");
+      }
+    } catch (err) {
+      console.error("Error ending event:", err);
+      setError("Failed to end event");
+    } finally {
+      setIsEndingEvent(false);
+    }
+  };
+
+  const handleTriggerPairing = async () => {
+    if (!event) return;
+
+    setIsTriggeringPairing(true);
+    try {
+      const result = await triggerPairing(eventId, groupSize);
+      if (result.success && result.data) {
+        setPairingData(result.data.pairing_results);
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to create pairings");
+      }
+    } catch (err) {
+      console.error("Error triggering pairing:", err);
+      setError("Failed to create pairings");
+    } finally {
+      setIsTriggeringPairing(false);
+    }
+  };
+
+  const handleViewPairings = async () => {
+    if (!event) return;
+
+    try {
+      const result = await getEventPairings(eventId);
+      if (result.success && result.data) {
+        setPairingData(result.data.pairing_results);
+      } else {
+        setError(result.error || "Failed to get pairings");
+      }
+    } catch (err) {
+      console.error("Error getting pairings:", err);
+      setError("Failed to get pairings");
+    }
+  };
+
+  const handlePublishPairings = async () => {
+    if (!event) return;
+
+    setIsPublishingPairings(true);
+    try {
+      const result = await publishPairings(eventId);
+      if (result.success) {
+        // Refresh event to update status
+        await fetchEvent();
+      } else {
+        setError(result.error || "Failed to publish pairings");
+      }
+    } catch (err) {
+      console.error("Error publishing pairings:", err);
+      setError("Failed to publish pairings");
+    } finally {
+      setIsPublishingPairings(false);
+    }
+  };
+
+  // Helper function to get event status for display
+  const getEventStatus = () => {
+    if (!event) return "Unknown";
+
+    // Return the status directly from the database
+    return event.status;
+  };
+
+  const currentStatus = getEventStatus();
+
+  // Fetch student match if pairings are published
+  const fetchStudentMatch = async () => {
+    if (!event || !user?.id || isOrganizationUser) return;
+
+    setIsLoadingMatch(true);
+    try {
+      const result = await getStudentMatch(eventId, user.id);
+      if (result.success && result.data) {
+        setStudentMatch(result.data.pairing_results);
+      } else {
+        console.log("No match found or error:", result.error);
+        setStudentMatch(null);
+      }
+    } catch (err) {
+      console.error("Error getting student match:", err);
+      setStudentMatch(null);
+    } finally {
+      setIsLoadingMatch(false);
+    }
   };
 
   if (isLoading) {
@@ -559,8 +850,104 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
+              
+              {/* Student Match Results - only for students with published pairings */}
+              {!isOrganizationUser &&
+                event?.status === "PAIRING_PUBLISHED" &&
+                isRegistered && (
+                  <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+                        <Users className="w-6 h-6" />
+                        Your Match
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {isLoadingMatch ? (
+                        <div className="text-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Loading your match...</p>
+                        </div>
+                      ) : studentMatch &&
+                        studentMatch.groups &&
+                        studentMatch.groups.length > 0 ? (
+                        <div className="space-y-4">
+                          <div className="text-center mb-4">
+                            <p className="text-gray-800 text-lg font-medium">
+                              🎉 You've been matched! Here are your teammates:
+                            </p>
+                          </div>
+
+                          {studentMatch.groups.map((group, groupIndex) => (
+                            <div
+                              key={groupIndex}
+                              className="bg-green-50 border border-green-200 rounded-lg p-4"
+                            >
+                              <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                                <Users className="w-4 h-4" />
+                                Your Group ({group.students.length} members)
+                              </h3>
+
+                              <div className="space-y-3">
+                                {group.students.map((student, studentIndex) => (
+                                  <div
+                                    key={studentIndex}
+                                    className={`flex items-center justify-between p-3 rounded-md border ${
+                                      student.id === user?.id
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-white border-gray-200"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-2">
+                                        {student.role === "BIG_SIBLING" ? (
+                                          <Trophy className="w-4 h-4 text-yellow-600" />
+                                        ) : (
+                                          <Award className="w-4 h-4 text-blue-600" />
+                                        )}
+                                        <div>
+                                          <p className="font-medium text-gray-900">
+                                            {student.name}{" "}
+                                            {student.id === user?.id && "(You)"}
+                                          </p>
+                                          <p className="text-sm text-gray-600">
+                                            {student.email}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <span
+                                      className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                        student.role === "BIG_SIBLING"
+                                          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                          : "bg-blue-100 text-blue-800 border-blue-200"
+                                      }`}
+                                    >
+                                      {student.role === "BIG_SIBLING"
+                                        ? "Big Sibling"
+                                        : "Little Sibling"}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-gray-600">
+                            No match found for this event.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
               {/* Registration section - only for students */}
-              {!isOrganizationUser && (
+              {!isOrganizationUser && event?.status === "STARTED" && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
@@ -634,10 +1021,11 @@ export default function EventPage({ params }: EventPageProps) {
                             }
                             onClick={handleUnregister}
                             dark
-                            className={`w-full ${isRegistering
+                            className={`w-full ${
+                              isRegistering
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                              }`}
+                            }`}
                           />
                         </div>
                       ) : (
@@ -675,7 +1063,8 @@ export default function EventPage({ params }: EventPageProps) {
                         </p>
 
                         <div className="grid gap-3">
-                          {hasQuestions && (
+                          {/* Always available buttons */}
+                          {hasQuestions && currentStatus === "STARTED" && (
                             <PearButton
                               text="View Response Analytics"
                               onClick={() =>
@@ -691,11 +1080,186 @@ export default function EventPage({ params }: EventPageProps) {
                             dark
                             className="w-full"
                           />
+
+                          {/* Questionnaire management based on event status */}
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text="Edit Questionnaire"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questions`)
+                              }
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            />
+                          )}
+
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text="View Questionnaire"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questions`)
+                              }
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            />
+                          )}
+
+                          {/* Event status-specific buttons */}
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text={
+                                isStartingEvent
+                                  ? "Starting Event..."
+                                  : "Start Event"
+                              }
+                              onClick={
+                                isStartingEvent ? () => {} : handleStartEvent
+                              }
+                              className={`w-full bg-green-600 hover:bg-green-700 ${
+                                isStartingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          )}
+
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text={
+                                isEndingEvent ? "Ending Event..." : "End Event"
+                              }
+                              onClick={
+                                isEndingEvent ? () => {} : handleEndEvent
+                              }
+                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
+                                isEndingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          )}
+
+                          {currentStatus === "TERMINATED" &&
+                            (!event.matches ||
+                              (Array.isArray(event.matches) &&
+                                event.matches.length === 0)) && (
+                              <>
+                                <div className="space-y-2">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Group Size
+                                  </label>
+                                  <select
+                                    value={groupSize}
+                                    onChange={(e) =>
+                                      setGroupSize(parseInt(e.target.value))
+                                    }
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    <option value={2}>Pairs (2 people)</option>
+                                    <option value={3}>Groups of 3</option>
+                                    <option value={4}>Groups of 4</option>
+                                    <option value={5}>Groups of 5</option>
+                                  </select>
+                                </div>
+
+                                <PearButton
+                                  text={
+                                    isTriggeringPairing
+                                      ? "Creating Pairings..."
+                                      : "Create Pairings"
+                                  }
+                                  onClick={
+                                    isTriggeringPairing
+                                      ? () => {}
+                                      : handleTriggerPairing
+                                  }
+                                  className={`w-full bg-green-600 hover:bg-green-700 ${
+                                    isTriggeringPairing
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+
+                                {pairingData && (
+                                  <PearButton
+                                    text={
+                                      isPublishingPairings
+                                        ? "Publishing..."
+                                        : "Publish Pairings to Students"
+                                    }
+                                    onClick={
+                                      isPublishingPairings
+                                        ? () => {}
+                                        : handlePublishPairings
+                                    }
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                      isPublishingPairings
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  />
+                                )}
+                              </>
+                            )}
+
+                          {currentStatus === "TERMINATED" &&
+                            event.matches &&
+                            Array.isArray(event.matches) &&
+                            event.matches.length > 0 && (
+                              <>
+                                <PearButton
+                                  text="View Existing Pairings"
+                                  onClick={handleViewPairings}
+                                  className="w-full bg-purple-600 hover:bg-purple-700"
+                                />
+
+                                {/* Show publish button if pairings haven't been published yet */}
+                                <PearButton
+                                  text={
+                                    isPublishingPairings
+                                      ? "Publishing..."
+                                      : "Publish Pairings to Students"
+                                  }
+                                  onClick={
+                                    isPublishingPairings
+                                      ? () => {}
+                                      : handlePublishPairings
+                                  }
+                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                    isPublishingPairings
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+                              </>
+                            )}
+
+                          {currentStatus === "PAIRING_PUBLISHED" && (
+                            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                              <h3 className="font-semibold text-green-800 mb-1">
+                                Pairings Published!
+                              </h3>
+                              <p className="text-green-700 text-sm">
+                                Students can now view their matches
+                              </p>
+                              <div className="mt-3">
+                                <PearButton
+                                  text="View Published Pairings"
+                                  onClick={handleViewPairings}
+                                  className="w-full bg-green-600 hover:bg-green-700"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Pairing Results section - only for organizations with pairing data */}
+              {isOrganizationUser && pairingData && (
+                <PairingResults pairingData={pairingData} eventId={eventId} />
               )}
             </div>
           </div>

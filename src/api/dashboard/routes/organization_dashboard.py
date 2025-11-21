@@ -13,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.events import EventTable
 from common.types.pairing_event import PairingEvent, PairingResult
 from common.types.event_enums import EventStatus, EventRole
+from db.supabase_client import upload_event_image
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -26,23 +27,30 @@ def foo():
 @org_dashboard_bp.get("/event-browse")
 @require_auth
 def browse_events():
+    # Get organization_id from query parameter
+    organization_id = request.args.get("organization_id")
+    
+    if organization_id is None:
+        return jsonify({"error": "organization_id is required"}), 400
+
     # Get user_id from session
     user_id = session.get("user_id")
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
 
-    # Look up organization_id from orgadmins table
+    # Verify user has admin access to this specific organization
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
-            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+            select(OrgAdminTable).where(
+                (OrgAdminTable.user_id == user_id) & 
+                (OrgAdminTable.organization_id == organization_id)
+            )
         )
 
         if org_admin is None:
-            return jsonify({"error": "User is not an organization admin"}), 403
-
-        organization_id = org_admin.organization_id
+            return jsonify({"error": "User is not admin for this organization"}), 403
 
     # use helper to retrieve all events for the organization
     try:
@@ -122,7 +130,7 @@ def create_event():
     - status = NOT_STARTED
     """
 
-    data = request.get_json(silent=True) or {}
+    data = request.form
 
     # Get user_id from session and look up organization
     user_id = session.get("user_id")
@@ -144,10 +152,19 @@ def create_event():
 
     title = data.get("title", "Untitled Event")
     description = data.get("description", "")
-    image_url = data.get(
-        "image_url",
-        f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
-    )
+
+    uploaded_file = request.files.get("image")
+    image_url = None
+
+    if uploaded_file:
+        file_bytes = uploaded_file.read()
+        content_type = uploaded_file.content_type
+        filename = uploaded_file.filename
+
+        image_url = upload_event_image(file_bytes, filename, content_type)
+    else:
+        image_url = f"{request.host_url}static/peerpear_logo.png"
+
 
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)

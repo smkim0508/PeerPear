@@ -40,6 +40,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [edit, setEdit] = useState(false);
   const [view, setView] = useState(false);
+  const [permissionsLoading, setPermissionsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +77,8 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
       console.error("error verifying user", err);
       setView(false);
       setEdit(false);
+    } finally {
+      setPermissionsLoading(false);
     }
   };
 
@@ -204,6 +207,14 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
     }
   };
 
+  if (permissionsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-gray-600">Checking permissions...</p>
+      </div>
+    );
+  }
+
   if (!view || userType == "student") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -233,7 +244,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
             <div>
               <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
               <p className="text-gray-600 mb-8">
-                {!edit || !view
+                {edit
                   ? "You are able to manage the questions participants will answer for this event before the event begins"
                   : "The event has begun and you are no longer able to edit the event"}
               </p>
