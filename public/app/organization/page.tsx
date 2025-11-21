@@ -1,5 +1,7 @@
 'use client';
 
+import { ArrowLeft } from "lucide-react";
+
 interface OrganizationProps {
   params: { slug: string };
 }
@@ -31,6 +33,9 @@ export default function OrganizationPage({ params }: OrganizationProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#E8F4D6] to-[#D7E8C2] flex items-center justify-center p-6">
+      <div className="flex flex-row fixed top-0 left-0 m-6">
+        <ArrowLeft /> <p className="hover:font-bold">Logout</p>
+      </div>
       <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
         <div className="bg-[#ABC469] p-6">
           <h1 className="text-2xl font-bold text-black text-center">Select an Organization</h1>
@@ -58,17 +63,6 @@ export default function OrganizationPage({ params }: OrganizationProps) {
                 <p className="text-sm text-gray-600 mt-1">
                   {org.description}
                 </p>
-              </div>
-
-              <div className="ml-4 opacity-0 transition-opacity">
-                <svg
-                  className="w-5 h-5 text-pear-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
               </div>
             </div>
           ))}
