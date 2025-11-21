@@ -13,6 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.events import EventTable
 from common.types.pairing_event import PairingEvent, PairingResult
 from common.types.event_enums import EventStatus, EventRole
+from db.supabase_client import upload_event_image
 
 # use blueprint to group routes
 org_dashboard_bp = Blueprint("organization_dashboard", __name__)
@@ -129,7 +130,7 @@ def create_event():
     - status = NOT_STARTED
     """
 
-    data = request.get_json(silent=True) or {}
+    data = request.form
 
     # Get user_id from session and look up organization
     user_id = session.get("user_id")
@@ -151,10 +152,19 @@ def create_event():
 
     title = data.get("title", "Untitled Event")
     description = data.get("description", "")
-    image_url = data.get(
-        "image_url",
-        f"{request.host_url}organization-dashboard/static/peerpear_logo.png",
-    )
+
+    uploaded_file = request.files.get("image")
+    image_url = None
+
+    if uploaded_file:
+        file_bytes = uploaded_file.read()
+        content_type = uploaded_file.content_type
+        filename = uploaded_file.filename
+
+        image_url = upload_event_image(file_bytes, filename, content_type)
+    else:
+        image_url = f"{request.host_url}static/peerpear_logo.png"
+
 
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)
