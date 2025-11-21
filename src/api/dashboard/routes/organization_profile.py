@@ -17,26 +17,33 @@ org_profile_bp = Blueprint("organization_profile", __name__)
 @org_profile_bp.get("/profile")
 @require_auth
 def get_organization():
+    # Get organization_id from query parameter
+    organization_id = request.args.get("organization_id")
+    
+    if organization_id is None:
+        return jsonify({"error": "organization_id is required"}), 400
+
     # Get user_id from session and look up organization
     user_id = session.get("user_id")
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
 
-    # Look up organization_id from orgadmins table
+    # Verify user has admin access to this specific organization
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
-            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+            select(OrgAdminTable).where(
+                (OrgAdminTable.user_id == user_id) & 
+                (OrgAdminTable.organization_id == organization_id)
+            )
         )
 
         if org_admin is None:
-            return jsonify({"error": "User is not an organization admin"}), 403
-
-        organization_id = org_admin.organization_id
+            return jsonify({"error": "User is not admin for this organization"}), 403
 
     profile: OrganizationProfile | None = get_organization_profile(
-        organization_id)
+        int(organization_id))
 
     if not profile:
         return jsonify({"error": "organization not found"}), 404
@@ -50,23 +57,30 @@ def get_organization():
 @org_profile_bp.put("/profile")
 @require_auth
 def update_organization():
+    # Get organization_id from query parameter
+    organization_id = request.args.get("organization_id")
+    
+    if organization_id is None:
+        return jsonify({"error": "organization_id is required"}), 400
+
     # Get user_id from session and look up organization
     user_id = session.get("user_id")
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
 
-    # Look up organization_id from orgadmins table
+    # Verify user has admin access to this specific organization
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
-            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+            select(OrgAdminTable).where(
+                (OrgAdminTable.user_id == user_id) & 
+                (OrgAdminTable.organization_id == organization_id)
+            )
         )
 
         if org_admin is None:
-            return jsonify({"error": "User is not an organization admin"}), 403
-
-        organization_id = org_admin.organization_id
+            return jsonify({"error": "User is not admin for this organization"}), 403
 
     org_profile_payload = request.get_json(silent=True)
 
@@ -78,7 +92,7 @@ def update_organization():
 
     # create DTO from payload
     org_profile = OrganizationProfile(
-        id=organization_id,
+        id=int(organization_id),
         org_name=org_name,
         description=description
     )

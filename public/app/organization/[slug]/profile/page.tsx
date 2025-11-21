@@ -71,7 +71,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
           const apiUrl =
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-          const res = await fetch(`${apiUrl}/organization_profile/profile`, {
+          const res = await fetch(`${apiUrl}/organization_profile/profile?organization_id=${organizationId}`, {
             credentials: "include",
           });
 
@@ -109,7 +109,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-      const res = await fetch(`${apiUrl}/organization_profile/profile`, {
+      const res = await fetch(`${apiUrl}/organization_profile/profile?organization_id=${organizationId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -216,8 +216,8 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${errors.org_name
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-white focus:ring-white"
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-white focus:ring-white"
                           }`}
                         placeholder="Enter organization name"
                       />
@@ -244,8 +244,8 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                       onChange={(e) => setOrgDescription(e.target.value)}
                       rows={4}
                       className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none ${errors.description
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-white focus:ring-white"
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-white focus:ring-white"
                         }`}
                       placeholder="Tell us about your organization..."
                     />
@@ -278,8 +278,8 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   {message && (
                     <div
                       className={`p-4 rounded-lg text-center font-semibold ${message.includes("success")
-                          ? "bg-green text-nav-dark"
-                          : "bg-red-100 text-red-800"
+                        ? "bg-green text-nav-dark"
+                        : "bg-red-100 text-red-800"
                         }`}
                     >
                       {message}

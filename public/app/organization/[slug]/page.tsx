@@ -92,7 +92,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
       setError(null);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const res = await fetch(
-        `${apiUrl}/organization_dashboard/event-browse`,
+        `${apiUrl}/organization_dashboard/event-browse?organization_id=${organizationId}`,
         {
           credentials: "include", // Include cookies for authentication
         }

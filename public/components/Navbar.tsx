@@ -8,14 +8,22 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
-import { CircleUserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CircleUserRound, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 interface NavbarProps {
   onLoginClick?: () => void;
   onLogoutClick?: () => void;
   userType?: "student" | "organization" | "guest";
+}
+
+interface OrganizationInfo {
+  id: number;
+  name: string;
+  image?: string;
 }
 
 export default function Navbar({
@@ -24,6 +32,9 @@ export default function Navbar({
 }: NavbarProps) {
   const { isAuthenticated, logout, user } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+  const [currentOrganization, setCurrentOrganization] = useState<OrganizationInfo | null>(null);
+  const [loadingOrgInfo, setLoadingOrgInfo] = useState(false);
 
   // Determine user type from auth context or localStorage or prop
   const getUserType = (): "student" | "organization" | "guest" => {
@@ -40,7 +51,78 @@ export default function Navbar({
 
   const userType = getUserType();
 
+  // Check if we're on an organization slug page
+  const getOrganizationId = (): number | null => {
+    const match = pathname.match(/^\/organization\/(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+  };
+
+  const organizationId = getOrganizationId();
+  const isOnOrganizationPage = organizationId !== null;
+
+  // Fetch organization info when on organization slug pages
+  useEffect(() => {
+    const fetchOrganizationInfo = async (orgId: number) => {
+      try {
+        setLoadingOrgInfo(true);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const response = await fetch(`${apiUrl}/organization/myorganizations`, {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const org = data.organizations?.find((o: any) => o.id === orgId);
+
+          if (org) {
+            setCurrentOrganization({
+              id: org.id,
+              name: org.org_name,
+              image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center"
+            });
+          } else {
+            setCurrentOrganization(null);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching organization info:", error);
+        setCurrentOrganization(null);
+      } finally {
+        setLoadingOrgInfo(false);
+      }
+    };
+
+    if (organizationId && isAuthenticated && userType === "organization") {
+      fetchOrganizationInfo(organizationId);
+    } else {
+      setCurrentOrganization(null);
+    }
+  }, [organizationId, isAuthenticated, userType]);
+
+  // Get the correct dashboard URL based on context
+  const getDashboardUrl = (): string => {
+    if (userType === "organization" && organizationId) {
+      return `/organization/${organizationId}`;
+    }
+    return `/${userType}`;
+  };
+
+  // Get the correct profile URL based on context
+  const getProfileUrl = (): string => {
+    if (userType === "organization" && organizationId) {
+      return `/organization/${organizationId}/profile`;
+    }
+    return `/${userType}/profile`;
+  };
+
   const isActiveTab = (path: string): boolean => {
+    // Special handling for Dashboard - check if we're on the dashboard page for the current context
+    if (path === "dashboard") {
+      if (userType === "organization" && organizationId) {
+        return pathname === `/organization/${organizationId}`;
+      }
+      return pathname === `/${userType}`;
+    }
     return pathname === path;
   };
 
@@ -82,28 +164,25 @@ export default function Navbar({
                 <NavigationMenuItem className="bg-[#C3DD90] relative">
                   <NavigationMenuLink
                     asChild
-                    className={"!bg-[#C3DD90] " + navigationMenuTriggerStyle()}
+                    className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
                   >
-                    <Link href={`/${userType}`} className="relative">
+                    <Link href={getDashboardUrl()} className="relative">
                       Dashboard
-                      {isActiveTab(`/${userType}`) && (
+                      {isActiveTab("dashboard") && (
                         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
                       )}
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                <NavigationMenuItem className="relative">
+                <NavigationMenuItem className="bg-[#C3DD90] relative">
                   <NavigationMenuLink
                     asChild
-                    className={
-                      "!bg-[#C3DD90] hover:!bg-[#6f7e51]" +
-                      navigationMenuTriggerStyle()
-                    }
+                    className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
                   >
-                    <Link href={`/${userType}/profile`} className="relative">
+                    <Link href={getProfileUrl()} className="relative">
                       Profile
-                      {isActiveTab(`/${userType}/profile`) && (
+                      {isActiveTab(getProfileUrl()) && (
                         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
                       )}
                     </Link>
@@ -119,11 +198,36 @@ export default function Navbar({
         {/* User info and logout - Flexible width, no wrapping */}
         <div className="flex items-center gap-3 justify-end whitespace-nowrap">
           {isAuthenticated && (
-            <p className="text-black font-medium whitespace-nowrap">
-              {user?.user_info.attributes?.displayname
-                ? `${user.user_info.attributes.displayname.toString().toLowerCase()} (${userType})`
-                : ""}
-            </p>
+            <>
+              {isOnOrganizationPage && currentOrganization && userType === "organization" ? (
+                /* Organization info when on organization slug pages */
+                <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
+                  <img
+                    src={currentOrganization.image}
+                    alt={`${currentOrganization.name} logo`}
+                    className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
+                    }}
+                  />
+                  <span>{currentOrganization.name}</span>
+                </div>
+              ) : loadingOrgInfo && isOnOrganizationPage ? (
+                /* Loading state when fetching organization info */
+                <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+                  <span className="text-gray-500">Loading...</span>
+                </div>
+              ) : (
+                /* Default user info */
+                <p className="text-black font-medium whitespace-nowrap">
+                  {user?.user_info.attributes?.displayname
+                    ? `${user.user_info.attributes.displayname.toString().toLowerCase()} (${userType})`
+                    : ""}
+                </p>
+              )}
+            </>
           )}
           {userType === "guest" ? (
             <button
@@ -132,6 +236,13 @@ export default function Navbar({
             >
               log in
               <CircleUserRound size={20} />
+            </button>
+          ) : isOnOrganizationPage && userType === "organization" ? (
+            <button
+              onClick={() => router.push('/organization')}
+              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap hover:font-bold"
+            >
+              back to organizations
             </button>
           ) : (
             <button
