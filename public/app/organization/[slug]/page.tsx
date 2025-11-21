@@ -9,13 +9,19 @@ import EventCard from "@/components/EventCard";
 import CreateEventModal from "@/components/CreateEventModal";
 import { useRouter } from "next/navigation";
 import { PairingEvent } from "@/types/events";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import PearButton from "@/components/PearButton";
 import PearSwitch from "@/components/PearSwitch";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { parseISO, isPast } from "date-fns";
 
-export default function OrganizationDashBoard() {
+interface OrganizationDashboardProps {
+  params: Promise<{ slug: string }>;
+}
+
+export default function OrganizationDashBoard({ params }: OrganizationDashboardProps) {
+  const { slug } = use(params);
+  const organizationId = parseInt(slug);
   const router = useRouter();
   const { user } = useAuth();
   const [events, setEvents] = useState<PairingEvent[]>([]);
@@ -23,6 +29,37 @@ export default function OrganizationDashBoard() {
   const [activeTab, setActiveTab] = useState<string>("All Events");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+  // Validate organization admin access
+  const validateAdminAccess = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${apiUrl}/organization/validate-admin/${organizationId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        setIsAuthorized(true);
+      } else if (response.status === 401) {
+        setError("Please log in to access this organization dashboard.");
+        setIsAuthorized(false);
+      } else if (response.status === 403) {
+        setError("You do not have admin access to this organization.");
+        setIsAuthorized(false);
+      } else {
+        setError("Failed to validate organization access.");
+        setIsAuthorized(false);
+      }
+    } catch (err) {
+      console.error("Error validating admin access:", err);
+      setError("Failed to validate organization access. Please check your connection.");
+      setIsAuthorized(false);
+    }
+  };
 
   const tabOptions = [
     "All Events",
@@ -60,7 +97,7 @@ export default function OrganizationDashBoard() {
           credentials: "include", // Include cookies for authentication
         }
       );
-      
+
       if (!res.ok) {
         if (res.status === 401) {
           setError("Please log in to view events.");
@@ -71,7 +108,7 @@ export default function OrganizationDashBoard() {
         }
         return;
       }
-      
+
       const data = await res.json();
       setEvents(data.events);
       console.log(data.events);
@@ -84,8 +121,14 @@ export default function OrganizationDashBoard() {
   };
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    validateAdminAccess();
+  }, [organizationId]);
+
+  useEffect(() => {
+    if (isAuthorized === true) {
+      fetchEvents();
+    }
+  }, [isAuthorized]);
 
   const handleEventSuccess = async () => {
     await fetchEvents();
@@ -121,36 +164,60 @@ export default function OrganizationDashBoard() {
     <ProtectedRoute requiredRole="organization">
       <div className="font-sans flex flex-col min-h-screen">
         <Navbar userType="organization" />
-        <main className="m-4 p-6 flex-1 min-h-screen">
-          <div className="max-w-7xl mx-auto mb-6">
-            <div className="flex justify-center my-8">
+
+        {/* Authorization Check */}
+        {isAuthorized === null ? (
+          <main className="flex-1 min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pear-2 mx-auto mb-4"></div>
+              <p className="text-gray-600">Validating organization access...</p>
+            </div>
+          </main>
+        ) : isAuthorized === false ? (
+          <main className="flex-1 min-h-screen flex items-center justify-center">
+            <div className="text-center max-w-md mx-auto">
+              <Alert className="mb-4">
+                <AlertTitle>Access Denied</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
               <PearButton
-                text="Create New Event"
-                className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
-                onClick={() => setIsModalOpen(true)}
+                text="Back to Organizations"
+                onClick={() => router.push('/organization')}
               />
             </div>
-          </div>
+          </main>
+        ) : (
+          <main className="m-4 p-6 flex-1 min-h-screen">
+            <div className="max-w-7xl mx-auto mb-6">
+              <div className="flex justify-center my-8">
+                <PearButton
+                  text="Create New Event"
+                  className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
+                  onClick={() => setIsModalOpen(true)}
+                />
+              </div>
+            </div>
 
-          <div className="flex justify-center mb-8">
-            <PearSwitch
-              options={tabOptions}
-              activeOption={activeTab}
-              onOptionChange={setActiveTab}
+            <div className="flex justify-center mb-8">
+              <PearSwitch
+                options={tabOptions}
+                activeOption={activeTab}
+                onOptionChange={setActiveTab}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+              {filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+            <CreateEventModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSuccess={handleEventSuccess}
             />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-          <CreateEventModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={handleEventSuccess}
-          />
-        </main>
+          </main>
+        )}
         <Footer />
       </div>
     </ProtectedRoute>

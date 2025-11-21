@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface OrganizationProps {
   params: { slug: string };
@@ -30,12 +31,16 @@ const organizations = [
 export default function OrganizationPage({ params }: OrganizationProps) {
   const { slug } = params;
   const organizationId = parseInt(slug);
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#E8F4D6] to-[#D7E8C2] flex items-center justify-center p-6">
-      <div className="flex flex-row fixed top-0 left-0 m-6">
-        <ArrowLeft /> <p className="hover:font-bold">Logout</p>
-      </div>
+      <button
+        onClick={logout}
+        className="flex flex-row fixed top-0 left-0 m-6 hover:font-bold cursor-pointer items-center gap-2"
+      >
+        <ArrowLeft className="w-4 h-4" /> Logout
+      </button>
       <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
         <div className="bg-[#ABC469] p-6">
           <h1 className="text-2xl font-bold text-black text-center">Select an Organization</h1>
