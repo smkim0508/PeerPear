@@ -26,7 +26,7 @@ from api.dashboard.routes.event_registration import event_registration_bp
 from api.events.routes.events import events_bp
 from api.events.routes.event_status import event_status_bp
 from api.dashboard.routes.question_management import question_management_bp
-
+from api.organization.organization import organization_bp
 
 from api.profile.routes.profile import user_profile_bp
 
@@ -145,6 +145,7 @@ def create_app() -> Flask:
                            url_prefix="/event_registration")
     app.register_blueprint(events_bp, url_prefix="/events")
     app.register_blueprint(event_status_bp, url_prefix="/event_status")
+    app.register_blueprint(organization_bp,url_prefix = "/organization")
 
     # check health for app dependencies and liveness
 

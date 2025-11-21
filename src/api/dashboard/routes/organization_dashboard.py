@@ -26,23 +26,30 @@ def foo():
 @org_dashboard_bp.get("/event-browse")
 @require_auth
 def browse_events():
+    # Get organization_id from query parameter
+    organization_id = request.args.get("organization_id")
+    
+    if organization_id is None:
+        return jsonify({"error": "organization_id is required"}), 400
+
     # Get user_id from session
     user_id = session.get("user_id")
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
 
-    # Look up organization_id from orgadmins table
+    # Verify user has admin access to this specific organization
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
-            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+            select(OrgAdminTable).where(
+                (OrgAdminTable.user_id == user_id) & 
+                (OrgAdminTable.organization_id == organization_id)
+            )
         )
 
         if org_admin is None:
-            return jsonify({"error": "User is not an organization admin"}), 403
-
-        organization_id = org_admin.organization_id
+            return jsonify({"error": "User is not admin for this organization"}), 403
 
     # use helper to retrieve all events for the organization
     try:
