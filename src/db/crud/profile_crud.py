@@ -8,10 +8,10 @@ from api.dependencies import get_db_sessionmaker, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
 from flask import request
 from datetime import datetime, timedelta
-from common.types.user import UserProfile, UserProfileFull, User, ClassYear
+from common.types.user import UserProfile, UserPairingInformation, User, ClassYear
 
 # returns a row from the UserProfileTable given a user id
-def get_user_profile(user_id: int) -> Optional[UserProfileFull]:
+def get_user_profile(user_id: int) -> Optional[UserProfile]:
     db_session = get_db_sessionmaker()
 
     stmt = (
@@ -38,7 +38,7 @@ def get_user_profile(user_id: int) -> Optional[UserProfileFull]:
     if not result:
         return None
 
-    user_profile = UserProfileFull(
+    user_profile = UserProfile(
         id=result.id,
         first_name=result.first_name,
         last_name=result.last_name,
@@ -81,7 +81,7 @@ def create_user_profile(
     
     return new_profile
 
-def update_user_profile(user_profile: UserProfileFull):
+def update_user_profile(user_profile: UserProfile):
     db_session = get_db_sessionmaker()
 
     # only update fields that the caller actually sent

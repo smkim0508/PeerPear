@@ -14,7 +14,7 @@ class ClassYear(Enum):
     ALUMNI = "Alumni"
     PROFESSOR = "Professor"
 
-class UserProfileFull(BaseModel):
+class UserProfile(BaseModel):
     """
     Full user profile with all relevant information, mapped 1-to-1 with the form responses (except for summary).
     TODO: add more fields as we build the form.
@@ -28,10 +28,10 @@ class UserProfileFull(BaseModel):
     gender: Optional[str] = None
     class_year: ClassYear | None = None
     major: Optional[str] = None
-    hobbies: list[str] # NOTE: technically could be NULLable but right now we define it as non-nullable
+    hobbies: list[str] # NOTE: technically could be nullable but right now we define it as non-nullable
     profile_summary: Optional[str] = None
 
-class UserProfile(BaseModel):
+class UserPairingInformation(BaseModel):
     """
     User profile carrying basic information and semantically-parsed profile summary.
     NOTE: this is the actual user profile that will be given to LLM as context.
@@ -40,12 +40,13 @@ class UserProfile(BaseModel):
     name: str
     email: str
     role: Optional[EventRole] = None
-    profile_summary: str
+    profile_summary: str # main information used for pairing
+    questionniare_response_summary: Optional[str] = None # supplementary information, if available
 
 class User(BaseModel):
     """
     Lightweight representation of a single user, which holds just their id, name, email.
-    NOTE: this is technically a shallow copy of the UserProfile class without summary.
+    NOTE: this is technically a shallow copy of the UserPairingInformation class without summary.
     """
     id: int
     name: str

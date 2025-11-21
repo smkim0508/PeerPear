@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from db.models.organizations import OrganizationTable
-from common.types.user import UserProfile, UserProfileFull, User
+from common.types.user import UserProfile, UserPairingInformation, User
 from common.logging import logger
 
 # use blueprint to group routes
@@ -47,7 +47,7 @@ def update_profile():
     major = profile_payload.get("major")
     hobbies = profile_payload.get("hobbies")
 
-    user_profile = UserProfileFull(
+    user_profile = UserProfile(
         id=user_id,
         first_name=first_name,
         last_name=last_name,

@@ -17,3 +17,11 @@ class Answer(BaseModel):
     """
     question_id: int
     answer: str
+
+class QuestionAnswerPair(BaseModel):
+    """
+    Represents a single question/answer pair that simply has the question string and answer string.
+    Used for LLM parsing and summarization.
+    """
+    question: str
+    answer: str
