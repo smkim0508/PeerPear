@@ -5,12 +5,10 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
-import PearSwitch from "@/components/PearSwitch";
+import PearButton from "@/components/PearButton";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
-import { isPast } from "date-fns";
-import PearButton from "@/components/PearButton";
-import { parseISO } from "date-fns";
+import { isPast, parseISO } from "date-fns";
 
 export default function StudentDashBoard() {
   const router = useRouter();
@@ -29,23 +27,20 @@ export default function StudentDashBoard() {
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
         const res = await fetch(
           `${apiUrl}/my_events_dashboard/my-event-browse`,
-          {
-            credentials: "include", // Include cookies for authentication
-          }
+          { credentials: "include" }
         );
-        
+
         if (!res.ok) {
-          if (res.status === 401) {
-            setError("Please log in to view your registered events.");
-          } else {
-            setError("Failed to load events. Please try again.");
-          }
+          setError(
+            res.status === 401
+              ? "Please log in to view your registered events."
+              : "Failed to load events. Please try again."
+          );
           return;
         }
-        
+
         const data = await res.json();
         setEvents(data.events || []);
-        console.log(data.events);
       } catch (err) {
         console.log("Error fetching events", err);
         setError("Failed to load events. Please check your connection.");
@@ -57,57 +52,43 @@ export default function StudentDashBoard() {
   }, []);
 
   const handleRetry = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const res = await fetch(
         `${apiUrl}/my_events_dashboard/my-event-browse`,
-        {
-          credentials: "include",
-        }
+        { credentials: "include" }
       );
-      
       if (!res.ok) {
-        if (res.status === 401) {
-          setError("Please log in to view your registered events.");
-        } else {
-          setError("Failed to load events. Please try again.");
-        }
+        setError(
+          res.status === 401
+            ? "Please log in to view your registered events."
+            : "Failed to load events. Please try again."
+        );
         return;
       }
-      
       const data = await res.json();
       setEvents(data.events || []);
     } catch (err) {
-      console.log("Error fetching events", err);
+      console.log(err);
       setError("Failed to load events. Please check your connection.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter events based on selected option
-
   const filteredEvents = events.filter((event) => {
     const endDate = event.end_date ? parseISO(event.end_date) : null;
     const isEnded = endDate ? isPast(endDate) : false;
-
     switch (filterOption) {
       case "Active":
-        // Show STARTED events that are still ongoing
         return event.status === "STARTED" && !isEnded;
-
       case "Ended":
-        // Either manually terminated or auto-ended (past end_date)
         return event.status === "TERMINATED" || isEnded;
-
       case "Results Available":
-        // Explicitly published events
         return event.status === "PAIRING_PUBLISHED";
-
-      case "All Events":
       default:
         return true;
     }
@@ -115,21 +96,62 @@ export default function StudentDashBoard() {
 
   return (
     <ProtectedRoute requiredRole="student">
-      <div className="font-sans flex flex-col min-h-screen">
+      <div className="font-sans flex flex-col min-h-screen bg-gray-50">
         <Navbar userType="student" />
 
-        <main className=" m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
+        <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
           <div className="flex flex-col items-center max-w-7xl mx-auto mb-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">
+            <h1 className="text-3xl font-bold mb-4 text-gray-800">
               My Registered Events
             </h1>
-            <PearSwitch
-              options={["All Events", "Active", "Ended", "Results Available"]}
-              activeOption={filterOption}
-              onOptionChange={setFilterOption}
-            />
+
+            {/* Native dropdown */}
+            <div className="w-full max-w-xs">
+              <label
+                htmlFor="eventFilter"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Filter Events
+              </label>
+              <div className="relative">
+                <select
+                  id="eventFilter"
+                  value={filterOption}
+                  onChange={(e) => setFilterOption(e.target.value)}
+                  className="
+                    block w-full appearance-none bg-white border border-gray-300
+                    rounded-xl py-2 pl-4 pr-10 text-gray-700 shadow-sm
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                    sm:text-sm transition-all duration-200 hover:border-gray-400
+                  "
+                >
+                  {["All Events", "Active", "Ended", "Results Available"].map(
+                    (option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    )
+                  )}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg
+                    className="h-4 w-4 text-gray-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
-          
+
+          {/* Event Cards */}
           {loading ? (
             <div className="flex justify-center items-center min-h-[200px]">
               <div className="text-center">
@@ -141,26 +163,26 @@ export default function StudentDashBoard() {
             <div className="flex justify-center items-center min-h-[200px]">
               <div className="text-center">
                 <p className="text-red-600 text-lg mb-4">{error}</p>
-                <PearButton
-                  text="Retry"
-                  onClick={handleRetry}
-                />
+                <PearButton text="Retry" onClick={handleRetry} />
               </div>
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="flex justify-center items-center min-h-[200px]">
               <div className="text-center">
-                <p className="text-gray-600 text-lg">No events found for the selected filter.</p>
+                <p className="text-gray-600 text-lg">
+                  No events found for the selected filter.
+                </p>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
               {filteredEvents.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
           )}
         </main>
+
         <Footer />
       </div>
     </ProtectedRoute>
