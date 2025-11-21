@@ -55,7 +55,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
         setTimeout(() => router.push("/organization"), 2000);
 
       } else {
-        setError("Failed to validate organization access.Redirecting...");
+        setError("Failed to validate organization access. Redirecting...");
         setIsAuthorized(false);
         setTimeout(() => router.push("/organization"), 2000);
 
