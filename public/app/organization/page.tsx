@@ -1,6 +1,8 @@
+'use client';
 
-"use client";
-
+interface OrganizationProps {
+  params: { slug: string };
+}
 // Sample organization data
 const organizations = [
   {
@@ -23,7 +25,9 @@ const organizations = [
   }
 ];
 
-export default function OrganizationPage() {
+export default function OrganizationPage({ params }: OrganizationProps) {
+  const { slug } = params;
+  const organizationId = parseInt(slug);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#E8F4D6] to-[#D7E8C2] flex items-center justify-center p-6">
