@@ -1,158 +1,75 @@
+
 "use client";
 
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
-import EventCard from "@/components/EventCard";
-import CreateEventModal from "@/components/CreateEventModal";
-import { useRouter } from "next/navigation";
-import { PairingEvent } from "@/types/events";
-import { useEffect, useState } from "react";
-import PearButton from "@/components/PearButton";
-import PearSwitch from "@/components/PearSwitch";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { parseISO, isPast } from "date-fns";
+// Sample organization data
+const organizations = [
+  {
+    id: 1,
+    name: "AASA",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=100&h=100&fit=crop&crop=center",
+    description: "Leading technology and innovation community"
+  },
+  {
+    id: 2,
+    name: "POP-UP Club",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=100&h=100&fit=crop&crop=center",
+    description: "Environmental conservation and sustainability"
+  },
+  {
+    id: 3,
+    name: "Charter Club",
+    image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=100&h=100&fit=crop&crop=center",
+    description: "Fostering creativity and artistic expression"
+  }
+];
 
-export default function OrganizationDashBoard() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const [events, setEvents] = useState<PairingEvent[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("All Events");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const tabOptions = [
-    "All Events",
-    "Not Started",
-    "Active",
-    "Unpublished",
-    "Published Matches",
-  ];
-
-  const getFilterValue = (tabName: string) => {
-    switch (tabName) {
-      case "All Events":
-        return "all";
-      case "Not Started":
-        return "notStarted";
-      case "Active":
-        return "active";
-      case "Unpublished":
-        return "terminated";
-      case "Published Matches":
-        return "published";
-      default:
-        return "all";
-    }
-  };
-
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const res = await fetch(
-        `${apiUrl}/organization_dashboard/event-browse`,
-        {
-          credentials: "include", // Include cookies for authentication
-        }
-      );
-      
-      if (!res.ok) {
-        if (res.status === 401) {
-          setError("Please log in to view events.");
-        } else if (res.status === 403) {
-          setError("You do not have permission to access organization events.");
-        } else {
-          setError("Failed to load events. Please try again.");
-        }
-        return;
-      }
-      
-      const data = await res.json();
-      setEvents(data.events);
-      console.log(data.events);
-    } catch (err) {
-      console.log("Error fetching events", err);
-      setError("Failed to load events. Please check your connection.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const handleEventSuccess = async () => {
-    await fetchEvents();
-  };
-
-  const today = new Date();
-
-  const filteredEvents = events.filter((event) => {
-    const filterValue = getFilterValue(activeTab);
-    const status = event.status?.toUpperCase?.() || "";
-    const endDate = event.end_date ? parseISO(event.end_date) : null;
-    const isEnded = endDate ? isPast(endDate) : false;
-
-    switch (filterValue) {
-      case "notStarted":
-        return status === "NOT_STARTED";
-
-      case "active":
-        return status === "STARTED" && !isEnded;
-
-      case "terminated":
-        return status === "TERMINATED" || (status === "STARTED" && isEnded);
-
-      case "published":
-        return status === "PAIRING_PUBLISHED";
-
-      default:
-        return true;
-    }
-  });
+export default function OrganizationPage() {
 
   return (
-    <ProtectedRoute requiredRole="organization">
-      <div className="font-sans flex flex-col min-h-screen">
-        <Navbar userType="organization" />
-        <main className="m-4 p-6 flex-1 min-h-screen">
-          <div className="max-w-7xl mx-auto mb-6">
-            <div className="flex justify-center my-8">
-              <PearButton
-                text="Create New Event"
-                className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
-                onClick={() => setIsModalOpen(true)}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#E8F4D6] to-[#D7E8C2] flex items-center justify-center p-6">
+      <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-[#ABC469] p-6">
+          <h1 className="text-2xl font-bold text-black text-center">Select an Organization</h1>
+          <p className="text-black text-center mt-2">Choose an organization to view their dashboard</p>
+        </div>
+
+        <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#CBCCC5]">
+          {organizations.map((org) => (
+            <div
+              key={org.id}
+              className="flex items-center p-4 rounded-xl border bg-[#E5E6DD] hover:bg-[#ABC469]"
+            >
+              <div className="relative w-16 h-16 rounded-full overflow-hidden">
+                <img
+                  src={org.image}
+                  alt={`${org.name} logo`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="ml-4 flex-grow">
+                <h3 className="font-semibold text-black transition-colors">
+                  {org.name}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {org.description}
+                </p>
+              </div>
+
+              <div className="ml-4 opacity-0 transition-opacity">
+                <svg
+                  className="w-5 h-5 text-pear-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
             </div>
-          </div>
-
-          <div className="flex justify-center mb-8">
-            <PearSwitch
-              options={tabOptions}
-              activeOption={activeTab}
-              onOptionChange={setActiveTab}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-          <CreateEventModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={handleEventSuccess}
-          />
-        </main>
-        <Footer />
+          ))}
+        </div>
       </div>
-    </ProtectedRoute>
-  );
+    </div>
+  )
 }
