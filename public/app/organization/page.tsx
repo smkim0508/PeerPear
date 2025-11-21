@@ -33,7 +33,7 @@ export default function OrganizationPage() {
           <p className="text-black text-center mt-2">Choose an organization to view their dashboard</p>
         </div>
 
-        <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#CBCCC5]">
+        <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#d7d8d1]">
           {organizations.map((org) => (
             <div
               key={org.id}
