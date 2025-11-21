@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PearButton from "@/components/PearButton";
-import { HelpCircle } from "lucide-react";
-
 import {
   Calendar,
   Clock,
@@ -19,6 +17,7 @@ import {
   X,
   Trophy,
   Award,
+  Timer,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
@@ -41,6 +40,26 @@ import {
   publishPairings,
   getStudentMatch,
 } from "@/lib/events";
+
+function calculateTimeLeft(endTime: string | null) {
+  if (!endTime) return null;
+
+  const eventEnd = new Date(endTime).getTime();
+  const now = Date.now();
+  const diff = eventEnd - now;
+
+  if (diff <= 0) {
+    return { expired: true, days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+
+  return {
+    expired: false,
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+    minutes: Math.floor((diff / 1000 / 60) % 60),
+    seconds: Math.floor((diff / 1000) % 60),
+  };
+}
 
 type Event = {
   id: number;
@@ -121,6 +140,21 @@ export default function EventPage({ params }: EventPageProps) {
   const [isLoadingMatch, setIsLoadingMatch] = useState(false);
 
   const eventId = parseInt(slug);
+
+  const [timeLeft, setTimeLeft] = useState<any>(null);
+
+  useEffect(() => {
+    if (!event?.ends_at) return;
+
+    const updateTime = () => {
+      setTimeLeft(calculateTimeLeft(event.ends_at!));
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, [event?.ends_at]);
 
   // Determine user type - STRICTLY from localStorage only
   const getUserType = (): "student" | "organization" => {
@@ -214,6 +248,58 @@ export default function EventPage({ params }: EventPageProps) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const CountdownCard = () => {
+    if (!event?.ends_at || !timeLeft) return null;
+
+    const expired = timeLeft.expired;
+
+    const color =
+      expired
+        ? "text-red-700 bg-red-100 border-red-300"
+        : timeLeft.days < 2
+        ? "text-orange-700 bg-orange-100 border-orange-300"
+        : "text-green-700 bg-green-100 border-green-300";
+
+    return (
+      <Card className="shadow-xl border-0 bg-white rounded-xl">
+        <CardHeader>
+          <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+            <Timer className="w-6 h-6" />
+            Registration Ends
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {expired ? (
+            <div className="text-center p-4 bg-red-50 border border-red-300 rounded-xl">
+              <p className="text-red-700 text-xl font-semibold">
+                Registration Closed
+              </p>
+            </div>
+          ) : (
+            <>
+              <div
+                className={`text-center p-4 rounded-xl border ${color} transition-all`}
+              >
+                <p className="font-bold text-lg mb-2">Time Remaining</p>
+                <p className="text-2xl font-mono">
+                  {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m{" "}
+                  {timeLeft.seconds}s
+                </p>
+              </div>
+
+              <div className="mt-4 text-center text-gray-700">
+                <p className="font-medium">Deadline:</p>
+                <p className="text-lg font-semibold">
+                  {format(parseISO(event.ends_at), "MMMM d, yyyy — h:mm a")}
+                </p>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
   };
 
   const checkRegistration = async () => {
@@ -716,7 +802,7 @@ export default function EventPage({ params }: EventPageProps) {
                 <Card className="shadow-lg border-0 bg-white rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                      <HelpCircle className="h-7 w-7" />
+                      <Users className="h-7 w-7" />
                       Event Questions
                     </CardTitle>
                   </CardHeader>
@@ -764,6 +850,7 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
+              
               {/* Student Match Results - only for students with published pairings */}
               {!isOrganizationUser &&
                 event?.status === "PAIRING_PUBLISHED" &&
