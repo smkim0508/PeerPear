@@ -26,7 +26,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       localStorage.setItem("userType", activeTab);
 
       // Redirect to CAS login with the appropriate dashboard URL
-      const dashboardUrl = `${window.location.origin}/${activeTab}`;
+      const dashboardUrl =
+        activeTab === "student"
+          ? `${window.location.origin}/student/events`
+          : `${window.location.origin}/${activeTab}`;
       loginWithCAS(dashboardUrl);
     } catch (error) {
       console.log("Login error: ", error);
