@@ -1,5 +1,6 @@
 from db.models.organizations import OrganizationTable
 from db.models.orgadmin import OrgAdminTable
+from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
 from api.dependencies import get_db_sessionmaker
 from flask import request, jsonify

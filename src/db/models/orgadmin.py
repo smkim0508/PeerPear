@@ -14,4 +14,10 @@ class OrgAdminTable(MainDB_Base):
     
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id"), nullable=False)
+    
+    is_owner: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",  
+    )
  

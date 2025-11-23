@@ -23,7 +23,8 @@ from db.crud.org_admin_crud import (
     create_org_admin_request,
     admin_requests_for_org,
     accept_request,
-    reject_request
+    reject_request,
+    verify_org_owner_access
 )
 
 
@@ -128,7 +129,7 @@ def get_admin_requests(organization_id):
         return jsonify({"error": "Not authenticated"}), 401
 
     try:
-        auth = verify_org_access(int(user_id), organization_id)
+        auth = verify_org_owner_access(int(user_id), organization_id)
         if auth.get("error"):
             return jsonify(auth), auth.get("status", 403)
         requests = admin_requests_for_org(organization_id)
@@ -167,7 +168,7 @@ def approve_request_route():
             if not req:
                 return jsonify({"error": "Request not found"}), 404
             organization_id = req.organization_id
-        auth = verify_org_access(int(user_id), organization_id)
+        auth = verify_org_owner_access(int(user_id), organization_id)
         if auth.get("error"):
             return jsonify(auth), auth.get("status", 403)
 
@@ -204,7 +205,7 @@ def deny_request_route():
             if not req:
                 return jsonify({"error": "Request not found"}), 404
             organization_id = req.organization_id
-        auth = verify_org_access(int(user_id), organization_id)
+        auth = verify_org_owner_access(int(user_id), organization_id)
         if auth.get("error"):
             return jsonify(auth), auth.get("status", 403)
 

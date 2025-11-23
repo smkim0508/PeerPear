@@ -5,6 +5,26 @@ from db.models.orgadmin import OrgAdminTable
 from db.models.orgadmin_requests import OrgAdminRequestTable
 from common.types.organization import OrganizationProfile
 
+# helper function to verify owner access
+
+
+def verify_org_owner_access(user_id: int, organization_id: int):
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session_instance:
+        owner = session_instance.scalar(
+            select(OrgAdminTable).where(
+                OrgAdminTable.user_id == user_id,
+                OrgAdminTable.organization_id == organization_id,
+                OrgAdminTable.is_owner == True,
+            )
+        )
+
+        if owner is None:
+            return {"error": "Org owner not found", "status": 403}
+
+        return {"message": "Owner access verified", "status": 200}
+
 
 def get_request_table(user_id: int) -> list[OrganizationProfile]:
     db_session = get_db_sessionmaker()
@@ -116,7 +136,8 @@ def accept_request(request_id: int):
 
         new_admin = OrgAdminTable(
             user_id=request.user_id,
-            organization_id=request.organization_id
+            organization_id=request.organization_id,
+            is_owner=False,
         )
         session_instance.add(new_admin)
 
