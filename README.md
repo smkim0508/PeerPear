@@ -1,5 +1,6 @@
 # PeerPear
 #### Centralized, LLM-powered Group Pairing Platform for Student Organizations.
+Try PeerPear yourself at: https://peerpear.vercel.app/
 
 ## How to Run the Backend (Locally):
 The dependencies in this project are managed through poetry.
