@@ -27,9 +27,8 @@ def get_request_table(user_id: int) -> list[OrganizationProfile]:
             session_instance.query(
                 OrganizationTable
             ).filter(
-                not (OrganizationTable.id.in_(admin_already),
-                     not (OrganizationTable.id.in_(request_already))
-                     )
+                not_(OrganizationTable.id.in_(admin_already)),
+                not_(OrganizationTable.id.in_(request_already))
             )
             .all()
         )
@@ -101,7 +100,7 @@ def accept_request(request_id: int):
         request = session_instance.get(OrgAdminRequestTable, request_id)
 
         if not request:
-            return {"error": "No request exists", "status": "404"}
+            return {"error": "No request exists", "status": 404}
 
         existing_admin = session_instance.scalar(
             select(OrgAdminTable).where(
@@ -113,7 +112,7 @@ def accept_request(request_id: int):
         )
 
         if existing_admin:
-            return {"error": "User is already an admin of the organization", "status": "404"}
+            return {"error": "User is already an admin of the organization", "status": 404}
 
         new_admin = OrgAdminTable(
             user_id=request.user_id,
@@ -136,7 +135,7 @@ def reject_request(request_id: int):
         request = session_instance.get(OrgAdminRequestTable, request_id)
 
         if not request:
-            return {"error": "No request exists", "status": "404"}
+            return {"error": "No request exists", "status": 404}
 
         session_instance.delete(request)
         session_instance.commit()
