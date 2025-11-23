@@ -13,7 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.events import EventTable
 from common.types.pairing_event import PairingEvent, PairingResult
 from common.types.event_enums import EventStatus, EventRole
-from common.types.organization import OrganizationProfile, OrgAdminResponse
+from common.types.organization import OrganizationProfile, OrgAdminResponse, AdminListResponse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models.orgadmin_requests import OrgAdminRequestTable
 from db.crud.organization_crud import get_user_organizations, verify_org_access
@@ -24,7 +24,10 @@ from db.crud.org_admin_crud import (
     admin_requests_for_org,
     accept_request,
     reject_request,
-    verify_org_owner_access
+    verify_org_owner_access,
+    get_admins_for_org,
+    promote_admin_to_owner,
+    remove_admin_from_org
 )
 
 
@@ -35,6 +38,7 @@ organization_bp = Blueprint("organization", __name__)
 @require_auth
 @organization_bp.get("/myorganizations")
 def get_all_admins_orgs():
+    """Gets this users current organizations that they are admins for"""
     user_id = session.get("user_id")
 
     if user_id is None:
@@ -53,6 +57,7 @@ def get_all_admins_orgs():
 
 @organization_bp.get("/validate-admin/<int:organization_id>")
 def validate_org_admin(organization_id):
+    """Ensures that this user can view this organization"""
     user_id = session.get("user_id")
 
     if user_id is None:
@@ -74,6 +79,7 @@ def validate_org_admin(organization_id):
 @require_auth
 @organization_bp.get("/available-organizations")
 def available_organizations():
+    """Gets the organizations that the user is able to request to join"""
     user_id = session.get("user_id")
 
     if user_id is None:
@@ -92,6 +98,7 @@ def available_organizations():
 @require_auth
 @organization_bp.post("/admin-request")
 def create_request():
+    """Creates a request to join an organization"""
     user_id = session.get("user_id")
 
     if user_id is None:
@@ -124,6 +131,7 @@ def create_request():
 @require_auth
 @organization_bp.get("/admin-requests/<int:organization_id>")
 def get_admin_requests(organization_id):
+    """Fetches all the requests to join a current organization"""
     user_id = session.get("user_id")
     if user_id is None:
         return jsonify({"error": "Not authenticated"}), 401
@@ -150,6 +158,7 @@ def get_admin_requests(organization_id):
 @require_auth
 @organization_bp.post("/admin-requests/approve")
 def approve_request_route():
+    """Approves a request to become an org admin"""
     user_id = session.get("user_id")
     if user_id is None:
         return jsonify({"error": "Not authenticated"}), 401
@@ -187,6 +196,7 @@ def approve_request_route():
 @require_auth
 @organization_bp.post("/admin-requests/deny")
 def deny_request_route():
+    """Denies a request to be an orgadmin"""
     user_id = session.get("user_id")
     if user_id is None:
         return jsonify({"error": "Not authenticated"}), 401
@@ -223,6 +233,7 @@ def deny_request_route():
 @require_auth
 @organization_bp.post("/admin-requests/bulk-create")
 def create_requests_bulk():
+    """Bulk creates request (multiselect to join orgadmin)"""
     user_id = session.get("user_id")
     if user_id is None:
         return jsonify({"error": "Not authenticated"}), 401
@@ -258,4 +269,121 @@ def create_requests_bulk():
 
     except Exception as e:
         logger.error(f"Error creating bulk admin requests: {e}")
+        return jsonify(generic_error_response), 500
+
+
+@require_auth
+@organization_bp.get("/org-admins/<int:organization_id>")
+def get_org_admins(organization_id):
+    """Retrieves all the admins of an organization"""
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    try:
+        auth = verify_org_owner_access(int(user_id), organization_id)
+        if auth.get("error"):
+            return jsonify(auth), auth.get("status", 403)
+
+        admins = get_admins_for_org(organization_id)
+
+        response = AdminListResponse(admins=admins)
+        return jsonify(response.model_dump(mode="json")), 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving org admins: {e}")
+        return jsonify(generic_error_response), 500
+
+
+@require_auth
+@organization_bp.post("/org-admins/promote")
+def promote_admin_route():
+    """Promotes an admin to an owner"""
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    data = request.get_json() or {}
+    target_user_id = data.get("user_id")
+    organization_id = data.get("organization_id")
+
+    if not target_user_id or not organization_id:
+        return jsonify({"error": "user_id and organization_id are required"}), 400
+
+    try:
+
+        auth = verify_org_owner_access(int(user_id), int(organization_id))
+        if auth.get("error"):
+            return jsonify(auth), auth.get("status", 403)
+
+        result = promote_admin_to_owner(
+            int(target_user_id), int(organization_id))
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), result.get("status", 400)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Error promoting org admin: {e}")
+        return jsonify(generic_error_response), 500
+
+
+@require_auth
+@organization_bp.post("/org-admins/remove")
+def remove_admin_route():
+    """Removes an admin from an organization"""
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    data = request.get_json() or {}
+    target_user_id = data.get("user_id")
+    organization_id = data.get("organization_id")
+
+    if not target_user_id or not organization_id:
+        return jsonify({"error": "user_id and organization_id are required"}), 400
+
+    try:
+
+        auth = verify_org_owner_access(int(user_id), int(organization_id))
+        if auth.get("error"):
+            return jsonify(auth), auth.get("status", 403)
+
+        result = remove_admin_from_org(
+            int(target_user_id), int(organization_id))
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), result.get("status", 400)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Error removing org admin: {e}")
+        return jsonify(generic_error_response), 500
+
+
+@require_auth
+@organization_bp.post("/org-admins/leave")
+def leave_org_route():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    data = request.get_json() or {}
+    organization_id = data.get("organization_id")
+
+    if not organization_id:
+        return jsonify({"error": "organization_id is required"}), 400
+
+    try:
+        result = leave_organization(int(user_id), int(organization_id))
+
+        if "error" in result:
+            return jsonify({"error": result["error"]}), result.get("status", 400)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Error leaving organization: {e}")
         return jsonify(generic_error_response), 500
