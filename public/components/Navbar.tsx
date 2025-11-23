@@ -60,7 +60,6 @@ export default function Navbar({
   const organizationId = getOrganizationId();
   const isOnOrganizationPage = organizationId !== null;
 
-  // Fetch organization info when on organization slug pages
   useEffect(() => {
     const fetchOrganizationInfo = async (orgId: number) => {
       try {
@@ -107,7 +106,6 @@ export default function Navbar({
     return `/${userType}`;
   };
 
-  // Get the correct profile URL based on context
   const getProfileUrl = (): string => {
     if (userType === "organization" && organizationId) {
       return `/organization/${organizationId}/profile`;
@@ -116,7 +114,6 @@ export default function Navbar({
   };
 
   const isActiveTab = (path: string): boolean => {
-    // Special handling for Dashboard - check if we're on the dashboard page for the current context
     if (path === "dashboard") {
       if (userType === "organization" && organizationId) {
         return pathname === `/organization/${organizationId}`;
@@ -136,7 +133,7 @@ export default function Navbar({
             alt="Logo"
             className="h-10 w-10 border-2 border-[#393D3F] rounded-lg p-1 bg-[#393D3F] transition-transform hover:rotate-12"
           />
-          <span className="text-black"><Link href="/">peerpear</Link></span>
+          <span className="text-black"><Link href="/">PeerPear</Link></span>
         </div>
 
         {/* Navigation - Centered */}
@@ -234,7 +231,7 @@ export default function Navbar({
               onClick={onLoginClick}
               className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              log in
+              Log In
               <CircleUserRound size={20} />
             </button>
           ) : isOnOrganizationPage && userType === "organization" ? (
@@ -242,14 +239,14 @@ export default function Navbar({
               onClick={() => router.push('/organization')}
               className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap hover:font-bold"
             >
-              back to organizations
+              Back to Organizations
             </button>
           ) : (
             <button
               onClick={logout}
               className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              log out
+              Log Out
             </button>
           )}
         </div>
