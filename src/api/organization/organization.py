@@ -14,9 +14,9 @@ from db.models.events import EventTable
 from common.types.pairing_event import PairingEvent, PairingResult
 from common.types.event_enums import EventStatus, EventRole
 from common.types.organization import OrganizationProfile, OrgAdminResponse, AdminListResponse
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from db.models.orgadmin_requests import OrgAdminRequestTable
 from db.crud.organization_crud import get_user_organizations, verify_org_access
+from db.crud.org_admin_crud import leave_organization
 
 from db.crud.org_admin_crud import (
     get_request_table,
