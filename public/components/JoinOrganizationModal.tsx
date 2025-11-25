@@ -32,19 +32,14 @@ export default function JoinOrganizationModal({
 
   //show
   const [error, setError] = useState<string | null>(null);
-  const [success,setSuccess] = useState<string | null>(null);
-
-  const mockOrganizations: Organization[] = [
-    { id: 1, title: "CS Club", description: "Computer Science Club" },
-    { id: 2, title: "Princeton Debate Panel", description: "Debate Society" },
-    { id: 3, title: "Dance Company", description: "Student Dance Group" },
-  ];
+  const [success, setSuccess] = useState<string | null>(null);
 
   // call on open and on succesful request
   const fetchOrganizations = async () => {
     try {
       setLoading(true);
       setError(null);
+      setSuccess(null);
       const response = await fetch(
         `${apiUrl}/organization/available-organizations`,
         {
@@ -59,8 +54,6 @@ export default function JoinOrganizationModal({
       const data = await response.json();
 
       // The API returns: { organizations: [{ id, org_name, description? }] }
-
-     
 
       const mappedOrgs: Organization[] = (data.organizations || []).map(
         (org: any) => ({
@@ -80,12 +73,51 @@ export default function JoinOrganizationModal({
   };
 
   useEffect(() => {
+    fetchOrganizations();
+  }, [isOpen]);
+
+  useEffect(() => {
     setFiltered(
-      mockOrganizations.filter((org) =>
+      organizations.filter((org) =>
         org.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [searchQuery,isOpen]);
+  }, [searchQuery, organizations]);
+
+  const handleRequest = async (organization_id: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      const payload = { organization_id: organization_id };
+
+      const response = await fetch(`${apiUrl}/organization/admin-request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Failed to send request to organization");
+      }
+
+      fetchOrganizations();
+      setSuccess("Request sent!");
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching organizations:", err);
+      setError(
+        "Failed to send request to this organization. Please check your connection."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -126,6 +158,18 @@ export default function JoinOrganizationModal({
         <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a]">
           Request to join an organization
         </h2>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm text-left">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="w-full bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-sm">
+            {success}
+          </div>
+        )}
         {/* Search bar */}
         <input
           type="text"
@@ -135,9 +179,14 @@ export default function JoinOrganizationModal({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         <div className="max-h-64 overflow-y-auto space-y-3">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-6 text-gray-600">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ABC469] mb-3"></div>
+              Loading...
+            </div>
+          ) : filtered.length === 0 ? (
             <p className="text-sm text-gray-600 text-center">
-              No matching organizations found.
+              There are no organizations that you can request to join.
             </p>
           ) : (
             filtered.map((org) => (
@@ -153,15 +202,7 @@ export default function JoinOrganizationModal({
                 <button
                   className="bg-[#ABC469] hover:bg-[#9BB359] transition-colors text-black px-3 py-1 rounded-lg text-sm font-medium"
                   onClick={() => {
-                    console.log(`Would call: await fetch(${apiUrl}/organization/admin-request, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          }, credentials: "include",
-        })`) ;
-                    console.log("Payload:", {
-                      organization_id: org.id,
-                    });
+                    handleRequest(org.id);
                   }}
                 >
                   Request
