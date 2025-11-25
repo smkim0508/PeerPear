@@ -384,3 +384,21 @@ def leave_org_route():
     except Exception as e:
         logger.error(f"Error leaving organization: {e}")
         return jsonify(generic_error_response), 500
+
+@organization_bp.get("/validate-owner/<int:organization_id>")
+@require_auth
+def validate_org_owner(organization_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    try:
+        result = verify_org_owner_access(int(user_id), organization_id)
+        if result.get("error"):
+            return jsonify(result), result.get("status", 403)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Error verifying owner access: {e}")
+        return jsonify(generic_error_response), 500
