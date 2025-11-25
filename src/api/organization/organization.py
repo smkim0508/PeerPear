@@ -16,8 +16,6 @@ from common.types.event_enums import EventStatus, EventRole
 from common.types.organization import OrganizationProfile, OrgAdminResponse, AdminListResponse
 from db.models.orgadmin_requests import OrgAdminRequestTable
 from db.crud.organization_crud import get_user_organizations, verify_org_access
-from db.crud.org_admin_crud import leave_organization
-
 from db.crud.org_admin_crud import (
     get_request_table,
     create_org_admin_request,
@@ -27,13 +25,12 @@ from db.crud.org_admin_crud import (
     verify_org_owner_access,
     get_admins_for_org,
     promote_admin_to_owner,
-    remove_admin_from_org
+    remove_admin_from_org,
+    leave_organization
 )
-
 
 # use blueprint to group routes
 organization_bp = Blueprint("organization", __name__)
-
 
 @require_auth
 @organization_bp.get("/myorganizations")
