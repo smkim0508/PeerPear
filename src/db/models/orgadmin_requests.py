@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
-
 class OrgAdminRequestTable(MainDB_Base):
     __tablename__ = "org_admin_requests"
 
@@ -17,7 +16,6 @@ class OrgAdminRequestTable(MainDB_Base):
         ForeignKey("organizations.id"), nullable=False)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), nullable=False)
-
 
     __table_args__ = (
         UniqueConstraint("user_id", "organization_id", name="uq_user_org_request"),

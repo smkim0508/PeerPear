@@ -13,6 +13,7 @@ from db.models.user_profile import UserProfileTable
 from db.models.question import QuestionTable
 from db.models.response import ResponseTable
 from db.models.orgadmin import OrgAdminTable
+from db.models.orgadmin_requests import OrgAdminRequestTable
 
 from scripts.db.create_tables import create_all_tables
 from scripts.db.update_dummy_vals import fill_all_tables

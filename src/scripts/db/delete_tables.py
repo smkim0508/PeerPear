@@ -9,6 +9,7 @@ from db.models.user_profile import UserProfileTable
 from db.models.question import QuestionTable
 from db.models.response import ResponseTable
 from db.models.orgadmin import OrgAdminTable
+from db.models.orgadmin_requests import OrgAdminRequestTable
 
 from dotenv import load_dotenv
 import os
