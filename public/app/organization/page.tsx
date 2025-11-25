@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
+import PearButton from "@/components/PearButton";
+import JoinOrganizationModal from "@/components/JoinOrganizationModal";
 
 interface Organization {
   id: number;
@@ -25,6 +27,7 @@ export default function OrganizationPage({ params }: OrganizationProps) {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch user's organizations
   const fetchOrganizations = async () => {
@@ -51,15 +54,17 @@ export default function OrganizationPage({ params }: OrganizationProps) {
       const data = await response.json();
 
       // The API returns: { organizations: [{ id, org_name, description? }] }
-      
+
       const defaultImage = "/logo.svg";
 
-      const mappedOrgs: Organization[] = (data.organizations || []).map((org: any) => ({
-        id: org.id,
-        name: org.org_name,
-        image: defaultImage,
-        description: org.description || "No description available"
-      }));
+      const mappedOrgs: Organization[] = (data.organizations || []).map(
+        (org: any) => ({
+          id: org.id,
+          name: org.org_name,
+          image: defaultImage,
+          description: org.description || "No description available",
+        })
+      );
 
       setOrganizations(mappedOrgs);
     } catch (err) {
@@ -82,68 +87,105 @@ export default function OrganizationPage({ params }: OrganizationProps) {
       >
         <ArrowLeft className="w-4 h-4" /> Logout
       </button>
-      <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
-        <div className="bg-[#ABC469] p-6">
-          <h1 className="text-2xl font-bold text-black text-center">Select an Organization</h1>
-          <p className="text-black text-center mt-2">Choose an organization to view their dashboard</p>
+      <div className="flex flex-col w-full items-center">
+        <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-[#ABC469] p-6">
+            <h1 className="text-2xl font-bold text-black text-center">
+              Select an Organization
+            </h1>
+            <p className="text-black text-center mt-2">
+              Choose an organization to view their dashboard
+            </p>
+          </div>
+
+          <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#d7d8d1]">
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ABC469] mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading your organizations...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
+                <button
+                  onClick={fetchOrganizations}
+                  className="px-4 py-2 bg-[#ABC469] text-black rounded hover:bg-[#9BB359] transition-colors"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : organizations.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-4">
+                  You are not an admin of any organizations.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Contact your organization administrator to get access.
+                </p>
+              </div>
+            ) : (
+              organizations.map((org) => (
+                <div
+                  key={org.id}
+                  className="flex items-center p-4 rounded-xl border bg-[#E5E6DD] hover:bg-[#ABC469] cursor-pointer transition-colors"
+                  onClick={() =>
+                    (window.location.href = `/organization/${org.id}`)
+                  }
+                >
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden">
+                    <img
+                      src={org.image}
+                      alt={`${org.name} logo`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback image if the provided image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.src =
+                          "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=100&h=100&fit=crop&crop=center";
+                      }}
+                    />
+                  </div>
+
+                  <div className="ml-4 flex-grow">
+                    <h3 className="font-semibold text-black transition-colors">
+                      {org.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {org.description}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
-        <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#d7d8d1]">
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ABC469] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your organizations...</p>
-            </div>
-          ) : error ? (
-            <div className="text-center py-8">
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-              <button
-                onClick={fetchOrganizations}
-                className="px-4 py-2 bg-[#ABC469] text-black rounded hover:bg-[#9BB359] transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : organizations.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">You are not an admin of any organizations.</p>
-              <p className="text-sm text-gray-500">Contact your organization administrator to get access.</p>
-            </div>
-          ) : (
-            organizations.map((org) => (
-              <div
-                key={org.id}
-                className="flex items-center p-4 rounded-xl border bg-[#E5E6DD] hover:bg-[#ABC469] cursor-pointer transition-colors"
-                onClick={() => window.location.href = `/organization/${org.id}`}
-              >
-                <div className="relative w-16 h-16 rounded-full overflow-hidden">
-                  <img
-                    src={org.image}
-                    alt={`${org.name} logo`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback image if the provided image fails to load
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=100&h=100&fit=crop&crop=center";
-                    }}
-                  />
-                </div>
+        {/* OR Divider Section */}
+        <div className="flex items-center my-6">
+          <div className="flex-1 h-px bg-gray-400" />
+          <span className="px-4 text-gray-600 font-medium">OR</span>
+          <div className="flex-1 h-px bg-gray-400" />
+        </div>
 
-                <div className="ml-4 flex-grow">
-                  <h3 className="font-semibold text-black transition-colors">
-                    {org.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {org.description}
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
+        {/* Join Organization Button */}
+        <div className="flex justify-center mb-4">
+          <button
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+            className=" inline-flex items-center justify-center text-[#1a1a1a] font-bold rounded-lg px-5 py-3 cursor-pointer
+        transition-all duration-300 hover:scale-100 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1 bg-[#ABC469]"
+          >
+            Join an Organization
+          </button>
         </div>
       </div>
+      <JoinOrganizationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
-  )
+  );
 }
