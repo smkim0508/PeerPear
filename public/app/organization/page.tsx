@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import PearButton from "@/components/PearButton";
 import JoinOrganizationModal from "@/components/JoinOrganizationModal";
+import ConfirmActionModal from "@/components/ConfirmActionModal";
 
 interface Organization {
   id: number;
@@ -21,20 +22,25 @@ interface OrganizationProps {
 }
 
 export default function OrganizationPage({ params }: OrganizationProps) {
-  const { slug } = params;
-  const organizationId = parseInt(slug);
   const { logout } = useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [confirmSuccess, setConfirmSuccess] = useState<string | null>(null);
+  const [currentOrgToLeave, setCurrentOrgToLeave] =
+    useState<Organization | null>(null);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
   // Fetch user's organizations
   const fetchOrganizations = async () => {
     try {
       setLoading(true);
       setError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
       const response = await fetch(`${apiUrl}/organization/myorganizations`, {
         credentials: "include",
@@ -75,6 +81,33 @@ export default function OrganizationPage({ params }: OrganizationProps) {
     }
   };
 
+  // Function for leaving an organization
+  const handleLeave = async (organization_id: number) => {
+    try {
+      const res = await fetch(`${apiUrl}/organization/org-admins/leave`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ organization_id: organization_id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setConfirmError(data.error || "Error with leaving this organization");
+        return;
+      }
+
+      setConfirmSuccess(data.message || "Successfully left the organization.");
+      await fetchOrganizations();
+      setTimeout(() => setConfirmOpen(false), 1200);
+    } catch (err) {
+      setConfirmError(
+        "Error with leaving this organization. Please check your connection"
+      );
+    }
+  };
+
   useEffect(() => {
     fetchOrganizations();
   }, []);
@@ -88,6 +121,18 @@ export default function OrganizationPage({ params }: OrganizationProps) {
         <ArrowLeft className="w-4 h-4" /> Logout
       </button>
       <div className="flex flex-col w-full items-center">
+        {confirmSuccess && (
+          <div className="mb-4 w-full max-w-2xl bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            {confirmSuccess}
+          </div>
+        )}
+
+        {confirmError && (
+          <div className="mb-4 w-full max-w-2xl bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {confirmError}
+          </div>
+        )}
+
         <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-[#ABC469] p-6">
             <h1 className="text-2xl font-bold text-black text-center">
@@ -156,6 +201,16 @@ export default function OrganizationPage({ params }: OrganizationProps) {
                       {org.description}
                     </p>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentOrgToLeave(org);
+                      setConfirmOpen(true);
+                    }}
+                    className="ml-4 px-3 py-1 text-sm bg-red-300 hover:bg-red-400 text-black rounded-md"
+                  >
+                    Leave
+                  </button>
                 </div>
               ))
             )}
@@ -186,6 +241,17 @@ export default function OrganizationPage({ params }: OrganizationProps) {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      {currentOrgToLeave && (
+        <ConfirmActionModal
+          isOpen={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          message={`Are you sure you want to leave ${currentOrgToLeave?.name}?`}
+          onConfirm={() => {
+            handleLeave(currentOrgToLeave.id);
+          }}
+        />
+      )}
     </div>
   );
 }
