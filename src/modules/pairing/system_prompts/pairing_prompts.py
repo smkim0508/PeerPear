@@ -555,11 +555,3 @@ class QuestionniarePairingPrompts:
         """
 
         return instruction + json.dumps(payload, indent=2, ensure_ascii=False)
-
-
-class CustomPairingPrompts:
-    """
-    Customizable pairing prompts with aux. request and questionnaire response support.
-    To be implemented, as a stretch goal.
-    """
-    
