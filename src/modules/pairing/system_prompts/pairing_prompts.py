@@ -565,3 +565,10 @@ class QuestionniarePairingPrompts:
         """
 
         return instruction + json.dumps(payload, indent=2, ensure_ascii=False)
+
+class CustomRequestPairingPrompts:
+    """
+    Pairing prompts where the user has requested for a specific custom pairing request.
+    NOTE: these pairing prompts are available in both baseline + questionnaire versions as above. The distinction in class is to help keep system and user prompts organized and remove unnecessary custom request logic when it is not present.
+    - User prompts also need to reflect a larger student information context such as demographic or major information.
+    """
