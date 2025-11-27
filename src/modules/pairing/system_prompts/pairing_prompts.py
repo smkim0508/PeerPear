@@ -550,7 +550,7 @@ class QuestionniarePairingPrompts:
 
         instruction = """
         Form balanced groups using the input below.
-        Maximize the satisfaction across students by pairing similar students together, follow the group_size constraint.
+        Maximize the satisfaction across students by pairing similar students together, according to questionnaire response summary, event description, and profile summary. Follow the group_size constraint.
         NEVER make a group with only one student, and return only the requested JSON output.
         """
 
@@ -561,6 +561,8 @@ class CustomRequestPairingPrompts:
     Pairing prompts where the user has requested for a specific custom pairing request.
     NOTE: these pairing prompts are available in both baseline + questionnaire versions as above. The distinction in class is to help keep system and user prompts organized and remove unnecessary custom request logic when it is not present.
     - User prompts also need to reflect a larger student information context such as demographic or major information.
+
+    TODO: need to write user prompts for each
     """
     custom_base_group_pairing_system_prompt = f"""
     You are an expert **grouping and matching assistant** for a student pairing platform.
@@ -760,6 +762,37 @@ class CustomRequestPairingPrompts:
     }}
     </FEW-SHOT EXAMPLES>
     """
+
+    @staticmethod
+    def get_custom_base_group_pairing_user_prompt(
+        group_size: int,
+        event_description: str,
+        students: list[UserPairingInformation],
+        custom_request: str
+    ) -> str:
+        payload = {
+            "custom_request": custom_request,
+            "group_size": group_size,
+            "event_description": event_description,
+            "students": [
+                {
+                    "student_id": s.id,
+                    "name": s.name,
+                    "profile_summary": s.profile_summary,
+                }
+                for s in students
+            ],
+        }
+
+        instruction = """
+        Form balanced groups using the input below.
+        Maximize the satisfaction across students by pairing similar students together, follow the group_size constraint.
+        - Be sure to satisfy the custom request given.
+        NEVER make a group with only one student, and return only the requested JSON output.
+        """
+
+        return instruction + json.dumps(payload, indent=2, ensure_ascii=False)
+    
     custom_questionniare_group_pairing_system_prompt = f"""
     You are an expert **grouping and matching assistant** for a student pairing platform.
     Your task is to form groups of students with **similar interests**, especially based on:
@@ -1042,3 +1075,34 @@ class CustomRequestPairingPrompts:
     }}
     </FEW-SHOT EXAMPLES>
     """
+
+    @staticmethod
+    def get_custom_questionnaire_group_pairing_user_prompt(
+        group_size: int,
+        event_description: str,
+        students: list[UserPairingInformation],
+        custom_request: str
+    ) -> str:
+        payload = {
+            "custom_request": custom_request,
+            "group_size": group_size,
+            "event_description": event_description,
+            "students": [
+                {
+                    "student_id": s.id,
+                    "name": s.name,
+                    "profile_summary": s.profile_summary,
+                    "questionnaire_response_summary": s.questionniare_response_summary
+                }
+                for s in students
+            ],
+        }
+
+        instruction = """
+        Form balanced groups using the input below.
+        Maximize the satisfaction across students by pairing similar students together according to *custom_request*, questionnaire response summary, event description, and profile summary, follow the group_size constraint.
+        - The custom request should take highest priority, followed by questionnaire responses.
+        NEVER make a group with only one student, and return only the requested JSON output.
+        """
+
+        return instruction + json.dumps(payload, indent=2, ensure_ascii=False)
