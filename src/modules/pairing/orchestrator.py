@@ -4,7 +4,10 @@ from common.types.pairing_event import PairingResult, PairedGroup
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.pairing_repository import PairingRepository
 from common.types.user import User, UserProfile, UserPairingInformation
-from modules.pairing.system_prompts.pairing_prompts import BaselinePairingPrompts, QuestionniarePairingPrompts, CustomPairingPrompts
+from modules.pairing.system_prompts.baseline_pairing_prompts import BaselinePairingPrompts
+from modules.pairing.system_prompts.questionnaire_pairing_prompts import QuestionniarePairingPrompts
+from modules.pairing.system_prompts.custom_pairing_prompts import CustomRequestPairingPrompts
+from modules.pairing.system_prompts.big_little_pairing_prompts import BigLittlePairingPrompts
 from modules.pairing.system_prompts.summary_prompts import ResponseSummaryPrompts
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.llm_output_types.summary_outputs import ResponseSummaryLLMOutput
