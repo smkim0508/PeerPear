@@ -26,6 +26,11 @@ pairing_bp = Blueprint("pairing", __name__)
 @pairing_bp.get("/")
 def pair_students_baseline():
 
+    # TODO: write handling for pairing requests where big/little is required. 
+    # this could be a field under events, or for now we can check if user info has big/little...
+    # also when custom request is given, handle that
+    # NOTE: these need FE integration and possibly DB migration
+
     # load in global dependencies
     db_session = get_db_sessionmaker()
     llm_client = get_llm()

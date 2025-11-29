@@ -43,7 +43,7 @@ class PairingOrchestrator(PairingRepository):
         # call LLM to get pairing result
         pairing_llm_output: PairingLLMOutput
 
-        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing
+        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing; otherwise use questionnaire
         if all(student.questionniare_response_summary is None for student in students):
             pairing_llm_output = self.llm_client.create_sync(
                 response_model=PairingLLMOutput,
