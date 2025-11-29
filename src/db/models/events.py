@@ -58,6 +58,11 @@ class EventTable(MainDB_Base):
     matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # user-edited pairing
     llm_reasoning: Mapped[str] = mapped_column(String, nullable=True) # the LLM's reasoning for the pairing, for users to evaluate how well it did
     organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
+    
+    # represents whether this event is public
+    is_public: Mapped[bool] = mapped_column(Boolean, nullable=True, default=True) # default public
+    # represents if big/little roles are relevant to this event
+    check_sibling_roles: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
 
 # table representing each unique user + event pair, which is defined as a registration
 # NOTE: allows for easily querying users attending events.
