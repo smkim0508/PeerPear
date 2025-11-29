@@ -18,6 +18,6 @@ class OrgAdminTable(MainDB_Base):
     is_owner: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
-        server_default="false",  
+        default=False
     )
  
