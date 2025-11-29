@@ -18,6 +18,7 @@ class OrgAdminTable(MainDB_Base):
     is_owner: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
-        default=False
+        default=False,
+        server_default="false", # since supabase has defaults too
     )
  
