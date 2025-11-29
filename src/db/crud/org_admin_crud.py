@@ -57,7 +57,7 @@ def get_request_table(user_id: int) -> list[OrganizationProfile]:
 
         return [OrganizationProfile(
             id=org.id,
-            org_name=org.name,
+            org_name=org.org_name,
             description=org.description
 
         ) for org in organizations]
