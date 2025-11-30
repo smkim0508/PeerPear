@@ -11,7 +11,7 @@ from db.models.user import UserTable
 from db.models.organizations import OrganizationTable
 from sqlalchemy import inspect, select
 from api.dependencies import get_db_sessionmaker, get_llm
-from common.logging import logger
+from common.logging import logger, session_id_var
 from modules.pairing.orchestrator import PairingOrchestrator
 from app_types.api.response.pairing_response import PairingResponse
 from db.crud.registration_crud import get_all_registered_users_for_event
@@ -19,6 +19,7 @@ from common.types.event_enums import EventStatus, EventRole
 from db.crud.pairing_crud import store_new_pairing, get_pairings_for_event
 from db.crud.events_crud import get_event_by_id
 from common.error_response import generic_error_response
+import uuid
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)
@@ -39,6 +40,11 @@ def pair_students_baseline():
         logger.warning(
             f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
         return jsonify({"error": "Group size must be an integer greater than 1."}), 400
+
+    # starting session
+    session_id = str(uuid.uuid4())
+    session_id_var.set(f"session_id:{session_id}")
+    logger.info(f"Starting pairing session task.")
 
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
     try:
