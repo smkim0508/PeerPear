@@ -102,16 +102,14 @@ def create_app() -> Flask:
     # open a single session with each request
     @app.before_request
     def _open_session():
-        print(f"request url: {request.url_root}")
-        # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
+        # first check if request is using HTTPS, otherwise redirect to HTTPS
+        # NOTE: seems to not matter for deployment, since endpoint calls are handled by Vercel; kept to be safe
         is_running_locally = "//localhost:" in request.url_root or "//127.0.0.1:" in request.url_root
         is_using_https = request.is_secure
         if (not is_running_locally) and (not is_using_https):
             url = request.url.replace("http://", "https://", 1)
             print(f'redirecting to {url}')
             return redirect(url, code=301)
-
-        # print(f"hello")
 
         # once verified, open session for db and llm client
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
