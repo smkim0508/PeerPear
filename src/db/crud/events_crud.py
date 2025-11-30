@@ -11,6 +11,7 @@ from sqlalchemy import func
 from common.types.pairing_event import PairingEvent
 from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
 from typing import Optional
+from common.logging import logger
 
 def create_new_event(event: PairingEvent) -> PairingEvent:
     db_session = get_db_sessionmaker()
@@ -396,4 +397,9 @@ def check_if_sibling_role_considered(event_id: int) -> bool:
         )
 
         check_sibling_roles = session.execute(stmt).scalar_one_or_none()
-        return check_sibling_roles
+
+        if isinstance(check_sibling_roles, bool):
+            return check_sibling_roles
+        # if for any reason the value is not a bool, log and default to false
+        logger.warning(f"Invalid value for check_sibling_roles: {check_sibling_roles}, defaulting to False")
+        return False

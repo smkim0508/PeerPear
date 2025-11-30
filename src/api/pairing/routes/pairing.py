@@ -60,6 +60,7 @@ def pair_students_baseline():
 
     # depending on if sibling role is considered or not, call different pairing helper
     try:
+        # NOTE: the helper enforces bool return, default to False if db is corrupt
         is_sibling_role_considered = check_if_sibling_role_considered(event_id=event_id)
     except Exception as e:
         logger.error(f"Error checking if sibling role considered for event {event_id}: {e}")
