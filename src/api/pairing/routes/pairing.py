@@ -41,11 +41,6 @@ def pair_students_baseline():
             f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
         return jsonify({"error": "Group size must be an integer greater than 1."}), 400
 
-    # starting session
-    session_id = str(uuid.uuid4())
-    session_id_var.set(f"session_id:{session_id}")
-    logger.info(f"Starting pairing session task.")
-
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
     # NOTE: currently no separate prompt for partner pairing; to be worked on.
     # Also should be handled inside the pairing orchestrator.

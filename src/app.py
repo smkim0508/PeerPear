@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
-
-from common.logging import logger
+import uuid
+from common.logging import logger, session_id_var
 
 # routes
 from api.pairing.routes.pairing import pairing_bp
@@ -111,7 +111,11 @@ def create_app() -> Flask:
             print(f'redirecting to {url}')
             return redirect(url, code=301)
 
-        # once verified, open session for db and llm client
+        # once verified, set session_id and open session for db and llm client
+        session_id = str(uuid.uuid4())
+        session_id_var.set(f"session_id: {session_id}")
+        logger.info(f"Starting session for request.")
+
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
         g.llm_client = current_app.extensions["llm_client"]
@@ -146,7 +150,6 @@ def create_app() -> Flask:
     app.register_blueprint(organization_bp,url_prefix = "/organization")
 
     # check health for app dependencies and liveness
-
     @app.get("/health")
     def health():
         """
