@@ -4,12 +4,16 @@ from common.types.pairing_event import PairingResult, PairedGroup
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.pairing_repository import PairingRepository
 from common.types.user import User, UserProfile, UserPairingInformation
-from modules.pairing.system_prompts.pairing_prompts import BaselinePairingPrompts, QuestionniarePairingPrompts, CustomPairingPrompts
+from modules.pairing.system_prompts.baseline_pairing_prompts import BaselinePairingPrompts
+from modules.pairing.system_prompts.questionnaire_pairing_prompts import QuestionniarePairingPrompts
+from modules.pairing.system_prompts.custom_pairing_prompts import CustomRequestPairingPrompts
+from modules.pairing.system_prompts.big_little_pairing_prompts import BigLittlePairingPrompts
 from modules.pairing.system_prompts.summary_prompts import ResponseSummaryPrompts
 from modules.pairing.llm_output_types.pairing_outputs import PairingLLMOutput
 from modules.pairing.llm_output_types.summary_outputs import ResponseSummaryLLMOutput
 from common.logging import logger
 from db.crud.pairing_crud import store_new_pairing
+from db.crud.events_crud import check_if_sibling_role_considered
 from common.types.questionnaire import Answer, Question, QuestionAnswerPair
 from app_types.api.response.event_browse_response import PublishedEvent
 from typing import Optional
@@ -40,7 +44,7 @@ class PairingOrchestrator(PairingRepository):
         # call LLM to get pairing result
         pairing_llm_output: PairingLLMOutput
 
-        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing
+        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing; otherwise use questionnaire
         if all(student.questionniare_response_summary is None for student in students):
             pairing_llm_output = self.llm_client.create_sync(
                 response_model=PairingLLMOutput,
@@ -59,6 +63,143 @@ class PairingOrchestrator(PairingRepository):
                     group_size=group_size,
                     students=students,
                     event_description=event_description
+                ),
+            )
+
+        logger.info(f"Pairing results: {pairing_llm_output.groups}, reasoning: {pairing_llm_output.reasoning}")
+
+        pairing_result= PairingResult(
+            groups=[
+                PairedGroup(
+                    students=[
+                        student_map[student_id]
+                        for student_id in group
+                    ]
+                )
+                for group in pairing_llm_output.groups
+            ],
+            llm_reasoning=pairing_llm_output.reasoning
+        )
+
+        # put the newly created pairing in DB for future retrieval
+        store_new_pairing(pairing_result, event_id)
+        
+        return pairing_result
+    
+    def pair_groups_with_sibling_roles(
+        self,
+        students: list[UserPairingInformation],
+        event_description: str,
+        group_size: int,
+        event_id: int
+    ) -> PairingResult:
+        """
+        Pairs students into groups.
+        ** Accounts for sibling roles, using a custom prompt.
+        NOTE: ensures no group is solely comprised of the same sibling role.
+        """
+        # to map paired ids back to students later
+        # NOTE: the output map is a lightweight User model excluding the profile summary.
+        student_map = {student.id: User(id=student.id, name=student.name, email=student.email, role=student.role) for student in students}
+
+        # NOTE: this guardrail is also handled in API.
+        if group_size <= 1:
+            logger.warning(f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
+            return PairingResult(groups=[])
+        
+        # call LLM to get pairing result
+        pairing_llm_output: PairingLLMOutput
+
+        # NOTE: sole change from main process is in the pairing prompts called below
+        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing; otherwise use questionnaire
+        if all(student.questionniare_response_summary is None for student in students):
+            pairing_llm_output = self.llm_client.create_sync(
+                response_model=PairingLLMOutput,
+                system_prompt=BigLittlePairingPrompts.big_little_base_group_pairing_system_prompt,
+                user_prompt=BigLittlePairingPrompts.get_big_little_base_group_pairing_user_prompt(
+                    group_size=group_size,
+                    students=students,
+                    event_description=event_description
+                ),
+            )
+        else:
+            pairing_llm_output = self.llm_client.create_sync(
+                response_model=PairingLLMOutput,
+                system_prompt=BigLittlePairingPrompts.big_little_questionnaire_group_pairing_system_prompt,
+                user_prompt=BigLittlePairingPrompts.get_big_little_questionnaire_group_pairing_user_prompt(
+                    group_size=group_size,
+                    students=students,
+                    event_description=event_description
+                ),
+            )
+
+        logger.info(f"Pairing results: {pairing_llm_output.groups}, reasoning: {pairing_llm_output.reasoning}")
+
+        pairing_result= PairingResult(
+            groups=[
+                PairedGroup(
+                    students=[
+                        student_map[student_id]
+                        for student_id in group
+                    ]
+                )
+                for group in pairing_llm_output.groups
+            ],
+            llm_reasoning=pairing_llm_output.reasoning
+        )
+
+        # put the newly created pairing in DB for future retrieval
+        store_new_pairing(pairing_result, event_id)
+        
+        return pairing_result
+    
+    
+    def pair_groups_with_custom_request(
+        self,
+        students: list[UserPairingInformation],
+        event_description: str,
+        custom_request: str,
+        group_size: int,
+        event_id: int
+    ) -> PairingResult:
+        """
+        Pairs students into groups.
+        ** Accounts for any custom requests from user.
+        """
+        # to map paired ids back to students later
+        # NOTE: the output map is a lightweight User model excluding the profile summary.
+        student_map = {student.id: User(id=student.id, name=student.name, email=student.email, role=student.role) for student in students}
+
+        # NOTE: this guardrail is also handled in API.
+        if group_size <= 1:
+            logger.warning(f"Group size {group_size} is invalid, please revise to an integer greater than 1.")
+            return PairingResult(groups=[])
+        
+        # call LLM to get pairing result
+        pairing_llm_output: PairingLLMOutput
+
+        # NOTE: sole change from main process is in the pairing prompts called below
+        # look at the user information; if everyone is missing questionnaire response, then use baseline pairing; otherwise use questionnaire
+        if all(student.questionniare_response_summary is None for student in students):
+            pairing_llm_output = self.llm_client.create_sync(
+                response_model=PairingLLMOutput,
+                system_prompt=CustomRequestPairingPrompts.custom_base_group_pairing_system_prompt,
+                user_prompt=CustomRequestPairingPrompts.get_custom_base_group_pairing_user_prompt(
+                    group_size=group_size,
+                    students=students,
+                    event_description=event_description,
+                    custom_request=custom_request
+                ),
+            )
+        else:
+            pairing_llm_output = self.llm_client.create_sync(
+                response_model=PairingLLMOutput,
+                system_prompt=CustomRequestPairingPrompts.custom_questionniare_group_pairing_system_prompt,
+                user_prompt=CustomRequestPairingPrompts.get_custom_questionnaire_group_pairing_user_prompt(
+                    group_size=group_size,
+                    students=students,
+                    event_description=event_description,
+                    custom_request=custom_request
                 ),
             )
 
