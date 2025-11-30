@@ -17,7 +17,7 @@ from app_types.api.response.pairing_response import PairingResponse
 from db.crud.registration_crud import get_all_registered_users_for_event
 from common.types.event_enums import EventStatus, EventRole
 from db.crud.pairing_crud import store_new_pairing, get_pairings_for_event
-from db.crud.events_crud import get_event_by_id
+from db.crud.events_crud import get_event_by_id, check_if_sibling_role_considered
 from common.error_response import generic_error_response
 import uuid
 
@@ -47,6 +47,8 @@ def pair_students_baseline():
     logger.info(f"Starting pairing session task.")
 
     # TODO: depending on the group size, call the group pairing helper or the partner pairing helper
+    # NOTE: currently no separate prompt for partner pairing; to be worked on.
+    # Also should be handled inside the pairing orchestrator.
     try:
         students: list[UserPairingInformation] | None = get_all_registered_users_for_event(event_id=event_id)
         published_event: PublishedEvent | None = get_event_by_id(event_id=event_id)
@@ -62,17 +64,35 @@ def pair_students_baseline():
         # return event not found error
         return jsonify({"error": "Event not found"}), 404
 
+    # depending on if sibling role is considered or not, call different pairing helper
+    try:
+        # NOTE: the helper enforces bool return, default to False if db is corrupt
+        is_sibling_role_considered = check_if_sibling_role_considered(event_id=event_id)
+    except Exception as e:
+        logger.error(f"Error checking if sibling role considered for event {event_id}: {e}")
+        return jsonify(generic_error_response), 500
+
     # initialize orhcestrator and repo
     pairing_orchestrator = PairingOrchestrator(
         main_db_session=db_session, llm_client=llm_client)
+    
     # helper creates pairing result, stores in db, and returns the result
     try:
-        pairing_result: PairingResult = pairing_orchestrator.pair_students_in_groups(
-            students=students,
-            group_size=group_size,
-            event_description=published_event.description,
-            event_id=event_id
-        )
+        # if sibling role considered, call appropriate sibling role pairing helper
+        if is_sibling_role_considered:
+            pairing_result: PairingResult = pairing_orchestrator.pair_groups_with_sibling_roles(
+                students=students,
+                group_size=group_size,
+                event_description=published_event.description,
+                event_id=event_id
+            )
+        else:
+            pairing_result: PairingResult = pairing_orchestrator.pair_students_in_groups(
+                students=students,
+                group_size=group_size,
+                event_description=published_event.description,
+                event_id=event_id
+            )
     except Exception as e:
         logger.error(f"Error pairing students: {e}")
         return jsonify(generic_error_response), 500
