@@ -12,10 +12,6 @@ from common.types.pairing_event import PairingEvent
 from common.utils.dto_orm_conversion import dto_to_orm, orm_to_dto
 from typing import Optional
 
-# helper to retrieve all events
-# NOTE: filtering is handled in FE
-
-
 def create_new_event(event: PairingEvent) -> PairingEvent:
     db_session = get_db_sessionmaker()
     with db_session() as session:
@@ -28,7 +24,8 @@ def create_new_event(event: PairingEvent) -> PairingEvent:
         # returns the newly-mapped event DTO
         return PairingEvent.model_validate(db_event)
 
-
+# helper to retrieve all events
+# NOTE: filtering is handled in FE
 def get_all_active_events(user_id: int) -> list[PublishedEvent]:
     """
     Returns all events that are STARTED and not yet past their end_date,
@@ -77,7 +74,6 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
 
     return published_events
 
-
 def get_all_active_events_unfiltered() -> list[PublishedEvent]:
     """
     Returns all events that are STARTED and not yet past their end_date,
@@ -118,7 +114,6 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
 
     return published_events
 
-
 def get_organization_events(organization_id: int) -> list[PublishedEvent]:
     db_session = get_db_sessionmaker()
 
@@ -148,7 +143,6 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
             )
 
     return published_events
-
 
 def get_user_events(user_id: int) -> list[PublishedEvent]:
 
@@ -182,7 +176,6 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
     return published_events
 
-
 def get_event_by_id(event_id: int) -> PublishedEvent | None:
     db_session = get_db_sessionmaker()
 
@@ -208,7 +201,6 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
                 end_date=event.end_date or datetime.now(timezone.utc),
                 status=event.status
             )
-
     return None
 
 def validate_event_and_admin(session, event_id: int, user_id: int):
@@ -233,7 +225,6 @@ def validate_event_and_admin(session, event_id: int, user_id: int):
         return None, {"error": "Organization does not own this event", "status": 403}
 
     return event, None
-
 
 def validate_event_and_user(session, event_id: int, user_id: int):
     event = session.scalar(
@@ -281,10 +272,7 @@ def verify_access(event_id: int, user_id: int, user_type: str):
 
         return {"message": "Access to this event is verified", "status": 200}
 
-
 # Starts an event
-
-
 def start_event(event_id: int, user_id: int):
 
     db_session = get_db_sessionmaker()
@@ -394,3 +382,18 @@ def get_registration_by_user_and_event_id(event_id: int, user_id: int) -> Option
 
         registration_id = session.execute(stmt).scalar_one_or_none()
         return registration_id
+
+def check_if_sibling_role_considered(event_id: int) -> bool:
+    """
+    helper to retrieve a bool about whether this event requires use of sibling roles or not.
+    """
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+        stmt = (
+            select(EventTable.check_sibling_roles)
+            .where(EventTable.id == event_id)
+        )
+
+        check_sibling_roles = session.execute(stmt).scalar_one_or_none()
+        return check_sibling_roles
