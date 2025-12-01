@@ -53,43 +53,19 @@ class EventTable(MainDB_Base):
 
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-
     # NOTE: matches in DB is a 2D array of integer user ids. At each query, the user info is retrieved from DB.
-    llm_matches: Mapped[list[list[int]]] = mapped_column(
-        MutableList.as_mutable(JSONB),
-        nullable=True
-    )  # the original LLM pairing
-
-    matches: Mapped[list[list[int]]] = mapped_column(
-        MutableList.as_mutable(JSONB),
-        nullable=True
-    )  # user-edited pairing
-
-    llm_reasoning: Mapped[str] = mapped_column(
-        String,
-        nullable=True
-    )  # the LLM's reasoning for the pairing
-
+    llm_matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # the original LLM pairing
+    matches: Mapped[list[list[int]]] = mapped_column(MutableList.as_mutable(JSONB), nullable=True) # user-edited pairing
+    llm_reasoning: Mapped[str] = mapped_column(String, nullable=True) # the LLM's reasoning for the pairing, for users to evaluate how well it did
     organization: Mapped[OrganizationTable] = relationship("OrganizationTable")
+    
+    # represents whether this event is public/private
+    is_private: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false") # default public
+    # represents if big/little roles are relevant to this event
+    check_sibling_roles: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
 
-
-    # Event → Registrations
-    registrations: Mapped[list["EventRegistrationsTable"]] = relationship(
-        "EventRegistrationsTable",
-        backref="event",
-        cascade="all, delete-orphan"
-    )
-
-    # Event → Questions (if you have EventQuestionsTable)
-    questions: Mapped[list["EventQuestionsTable"]] = relationship(
-        "EventQuestionsTable",
-        backref="event",
-        cascade="all, delete-orphan"
-    )
-
-
-# table representing each unique user + event pair, which is defined as a registration
-# NOTE: allows for easily querying users attending events.
+# NOTE: table representing each unique user + event pair, which is defined as a registration
+# Allows for easily querying users attending events.
 class EventRegistrationsTable(MainDB_Base):
     __tablename__ = "event_registrations"
 
@@ -99,21 +75,17 @@ class EventRegistrationsTable(MainDB_Base):
         ForeignKey("users.id"), nullable=False)
     event_id: Mapped[int] = mapped_column(
         ForeignKey("events.id"), nullable=False)
-
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=False
     )
-
     # optional field that represents the user's role in the event, whether big / little
     role: Mapped[EventRole] = mapped_column(
         SAEnum(EventRole, name="event_role_enum"),
         nullable=True,
         default=None
     )
-
     valid_registration: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
-
     # LLM parsed response summary for the user
     response_summary: Mapped[str] = mapped_column(String, nullable=True)
