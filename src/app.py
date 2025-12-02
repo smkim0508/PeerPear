@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
-
-from common.logging import logger
+import uuid
+from common.logging import logger, session_id_var
 
 # routes
 from api.pairing.routes.pairing import pairing_bp
@@ -102,8 +102,8 @@ def create_app() -> Flask:
     # open a single session with each request
     @app.before_request
     def _open_session():
-        print(f"request url: {request.url_root}")
-        # NOTE; first check if request is using HTTPS, otherwise redirect to HTTPS
+        # first check if request is using HTTPS, otherwise redirect to HTTPS
+        # NOTE: seems to not matter for deployment, since endpoint calls are handled by Vercel; kept to be safe
         is_running_locally = "//localhost:" in request.url_root or "//127.0.0.1:" in request.url_root
         is_using_https = request.is_secure
         if (not is_running_locally) and (not is_using_https):
@@ -111,9 +111,11 @@ def create_app() -> Flask:
             print(f'redirecting to {url}')
             return redirect(url, code=301)
 
-        # print(f"hello")
+        # once verified, set session_id and open session for db and llm client
+        session_id = str(uuid.uuid4())
+        session_id_var.set(f"session_id: {session_id}")
+        logger.info(f"Starting session for request.")
 
-        # once verified, open session for db and llm client
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
         g.llm_client = current_app.extensions["llm_client"]
@@ -148,7 +150,6 @@ def create_app() -> Flask:
     app.register_blueprint(organization_bp,url_prefix = "/organization")
 
     # check health for app dependencies and liveness
-
     @app.get("/health")
     def health():
         """

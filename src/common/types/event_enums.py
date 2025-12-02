@@ -11,3 +11,4 @@ class EventStatus(Enum):
 class EventRole(Enum):
     BIG_SIBLING = "BIG_SIBLING"
     LITTLE_SIBLING = "LITTLE_SIBLING"
+    ANY_SIBLING = "ANY_SIBLING" # open to being big or little

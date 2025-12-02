@@ -82,6 +82,7 @@ type Event = {
     options: any | null;
     event_id: number;
   }[];
+  image_url?: string | null;
 };
 
 type UserResponse = {
@@ -142,6 +143,10 @@ export default function EventPage({ params }: EventPageProps) {
   const eventId = parseInt(slug);
 
   const [timeLeft, setTimeLeft] = useState<any>(null);
+
+  const [isEditingImage, setIsEditingImage] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!event?.ends_at) return;
@@ -300,6 +305,64 @@ export default function EventPage({ params }: EventPageProps) {
         </CardContent>
       </Card>
     );
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    if (!file.type.startsWith("image/")) {
+      setImageError("File must be an image.");
+      return;
+    }
+  
+    setImageError(null);
+    setPreviewImage(URL.createObjectURL(file)); // Temporary preview
+  };
+  
+  // Save the uploaded image
+  const handleImageSave = async () => {
+    if (!event) {
+      setImageError("Event not loaded yet.");
+      return;
+    }
+  
+    if (!previewImage) {
+      setImageError("Please select an image first.");
+      return;
+    }
+  
+    const input = document.getElementById("eventImageUpload") as HTMLInputElement;
+    if (!input?.files?.[0]) return;
+  
+    const formData = new FormData();
+    formData.append("image", input.files[0]);
+  
+    try {
+      const res = await fetch(
+        `/organization_dashboard/event/image?event_id=${event.id}`,
+        { method: "PATCH", body: formData }
+      );
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        setEvent((prev) => ({ ...prev!, image_url: data.image_url }));
+        setPreviewImage(null);
+        setIsEditingImage(false);
+      } else {
+        setImageError(data.error || "Failed to upload image.");
+      }
+    } catch {
+      setImageError("Upload failed.");
+    }
+  };
+  
+  // Cancel editing
+  const handleCancelEditImage = () => {
+    setPreviewImage(null);
+    setIsEditingImage(false);
+    setImageError(null);
   };
 
   const checkRegistration = async () => {
@@ -674,108 +737,171 @@ export default function EventPage({ params }: EventPageProps) {
         <Navbar />
 
         {/* === HERO SECTION === */}
-        <div className="relative bg-linear-to-r from-nav-dark to-gray-700 text-white overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-10"></div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-8 gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-6">
-                  <Building2 className="h-7 w-7 text-green" />
-                  <span className="text-green font-bold text-xl">
-                    {event.organizations.org_name}
-                  </span>
-                </div>
+        <div className="relative bg-gradient-to-r from-nav-dark to-gray-800 text-white">
 
-                {isEditingEvent ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 mb-4">
-                      <h2 className="text-2xl font-bold text-white">
-                        Edit Event Details
-                      </h2>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveEvent}
-                          disabled={
-                            isSavingEvent || !editEventData.title.trim()
-                          }
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                        >
-                          <Save className="h-4 w-4" />
-                          {isSavingEvent ? "Saving..." : "Save Changes"}
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          disabled={isSavingEvent}
-                          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 transition-all"
-                        >
-                          <X className="h-4 w-4" />
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-white text-sm font-medium mb-2">
-                          Event Title *
-                        </label>
-                        <input
-                          type="text"
-                          value={editEventData.title}
-                          onChange={(e) =>
-                            setEditEventData((prev) => ({
-                              ...prev,
-                              title: e.target.value,
-                            }))
-                          }
-                          className="w-full text-3xl lg:text-4xl font-bold leading-tight text-white bg-transparent border-b-2 border-white focus:outline-none focus:border-green-400 transition-colors"
-                          placeholder="Enter event title"
-                          maxLength={100}
-                        />
-                        <p className="text-sm text-gray-200 mt-1">
-                          {editEventData.title.length}/100 characters
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-white text-sm font-medium mb-2">
-                          Event Description
-                        </label>
-                        <textarea
-                          value={editEventData.description}
-                          onChange={(e) =>
-                            setEditEventData((prev) => ({
-                              ...prev,
-                              description: e.target.value,
-                            }))
-                          }
-                          className="w-full text-lg text-gray-100 leading-relaxed bg-transparent border-2 border-white rounded-lg p-4 focus:outline-none focus:border-green-400 resize-none transition-colors"
-                          placeholder="Describe your event, its goals, and what participants can expect..."
-                          rows={4}
-                          maxLength={500}
-                        />
-                        <p className="text-sm text-gray-200 mt-1">
-                          {editEventData.description.length}/500 characters
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
+        {/* CONTENT */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+            {/* LEFT: Event Details */}
+            <div className="space-y-6">
+
+              {/* Organization */}
+              <div className="flex items-center gap-3 mb-4">
+                <Building2 className="h-7 w-7 text-green" />
+                <span className="text-green font-bold text-xl">
+                  {event.organizations.org_name}
+                </span>
+              </div>
+
+              {/* === EDIT MODE === */}
+              {isEditingEvent ? (
+                <div className="space-y-6">
+
+                  <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+
+                  {/* Title */}
                   <div>
-                    <div className="flex items-center gap-4 mb-6">
-                      <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-white">
-                        {event.title}
-                      </h1>
-                    </div>
-                    {event.description && (
-                      <p className="text-lg lg:text-xl text-gray-100 leading-relaxed max-w-4xl">
-                        {event.description}
-                      </p>
+                    <label className="block text-white text-sm mb-2">Event Title *</label>
+                    <input
+                      type="text"
+                      value={editEventData.title}
+                      onChange={(e) =>
+                        setEditEventData({ ...editEventData, title: e.target.value })
+                      }
+                      className="w-full text-3xl font-bold bg-transparent border-b border-white focus:border-green-400 outline-none pb-1 text-white"
+                      maxLength={100}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-white text-sm mb-2">Event Description</label>
+                    <textarea
+                      value={editEventData.description}
+                      onChange={(e) =>
+                        setEditEventData({ ...editEventData, description: e.target.value })
+                      }
+                      rows={4}
+                      className="w-full bg-transparent border border-white rounded-lg p-3 text-white focus:border-green-400 outline-none resize-none"
+                      maxLength={500}
+                    />
+                  </div>
+
+                  {/* Upload Image Button */}
+                  <div className="space-y-2">
+                    {/* Hidden file input */}
+                    <input
+                      id="eventImageUpload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageSelect}
+                    />
+
+                    {/* Fancy Upload Button */}
+                    <label
+                      htmlFor="eventImageUpload"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-lg shadow hover:bg-gray-200 cursor-pointer transition-all"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-black"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0L8 8m4-4l4 4"
+                        />
+                      </svg>
+                      Upload New Image
+                    </label>
+
+                    {imageError && (
+                      <p className="text-red-400 text-sm">{imageError}</p>
+                    )}
+                  </div>
+
+                </div>
+              ) : (
+                /* === VIEW MODE === */
+                <div>
+                  <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                    {event.title}
+                  </h1>
+
+                  {event.description && (
+                    <p className="text-lg text-gray-200 max-w-2xl leading-relaxed">
+                      {event.description}
+                    </p>
+                  )}
+                </div>
+              )}
+              {/* Save/Cancel Buttons */}
+              {isEditingEvent && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveEvent}
+                    disabled={isSavingEvent}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Save Changes
+                  </button>
+
+                  <button
+                    onClick={handleCancelEdit}
+                    disabled={isSavingEvent}
+                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT: Image Container */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-md">
+
+                {/* VIEW MODE IMAGE */}
+                {!isEditingEvent && (event.image_url || previewImage) && (
+                  <img
+                    src={previewImage || event.image_url || ""}
+                    className="rounded-xl shadow-lg object-contain w-full"
+                    alt="Event"
+                  />
+                )}
+
+                {/* EDIT MODE IMAGE + UPLOAD INPUT */}
+                {isEditingEvent && (
+                  <div className="space-y-3">
+
+                    {(previewImage || event.image_url) && (
+                      <img
+                        src={previewImage || event.image_url || ""}
+                        className="rounded-xl shadow-lg object-contain w-full"
+                        alt="Event Preview"
+                      />
+                    )}
+
+                    {imageError && (
+                      <p className="text-red-400 text-sm">{imageError}</p>
                     )}
                   </div>
                 )}
+
               </div>
             </div>
+
           </div>
         </div>
+      </div>
+
 
         {/* === MAIN CONTENT === */}
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
