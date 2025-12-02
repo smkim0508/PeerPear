@@ -32,6 +32,7 @@ from db.crud.org_admin_crud import (
 # use blueprint to group routes
 organization_bp = Blueprint("organization", __name__)
 
+
 @require_auth
 @organization_bp.get("/myorganizations")
 def get_all_admins_orgs():
@@ -125,27 +126,20 @@ def create_request():
         return jsonify(generic_error_response), 500
 
 
-@require_auth
 @organization_bp.get("/admin-requests/<int:organization_id>")
+@require_auth
 def get_admin_requests(organization_id):
-    """Fetches all the requests to join a current organization"""
     user_id = session.get("user_id")
     if user_id is None:
         return jsonify({"error": "Not authenticated"}), 401
 
+    auth = verify_org_owner_access(user_id, organization_id)
+    if auth.get("error"):
+        return jsonify(auth), auth.get("status", 403)
+
     try:
-        auth = verify_org_owner_access(int(user_id), organization_id)
-        if auth.get("error"):
-            return jsonify(auth), auth.get("status", 403)
         requests = admin_requests_for_org(organization_id)
-
-        resp = [{
-            "id": r.id,
-            "user_id": r.user_id,
-            "organization_id": r.organization_id
-        } for r in requests]
-
-        return jsonify({"requests": resp}), 200
+        return jsonify({"requests": requests}), 200
 
     except Exception as e:
         logger.error(f"Error fetching org admin requests: {e}")
@@ -384,6 +378,7 @@ def leave_org_route():
     except Exception as e:
         logger.error(f"Error leaving organization: {e}")
         return jsonify(generic_error_response), 500
+
 
 @organization_bp.get("/validate-owner/<int:organization_id>")
 @require_auth

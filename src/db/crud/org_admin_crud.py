@@ -106,12 +106,33 @@ def admin_requests_for_org(organization_id: int):
     db_session = get_db_sessionmaker()
 
     with db_session() as session_instance:
+        stmt = (
+            select(
+                OrgAdminRequestTable.id,
+                OrgAdminRequestTable.user_id,
+                UserTable.first_name,
+                UserTable.last_name,
+                UserTable.email,
+            )
+            .join(UserTable, UserTable.id == OrgAdminRequestTable.user_id)
+            .where(OrgAdminRequestTable.organization_id == organization_id)
+        )
 
-        rows = session_instance.scalars(select(OrgAdminRequestTable).where(
-            OrgAdminRequestTable.organization_id == organization_id
-        )).all()
+        rows = session_instance.execute(stmt).all()
 
-        return rows
+        # Return list of objects (or dicts)
+        requests = []
+        for row in rows:
+            request_id, user_id, first_name, last_name, email = row
+            requests.append({
+                "id": request_id,
+                "user_id": user_id,
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+            })
+
+        return requests
 
 
 def accept_request(request_id: int):
@@ -264,7 +285,7 @@ def remove_admin_from_org(target_user_id: int, organization_id: int):
         session_instance.commit()
 
         return {"message": "Admin removed successfully"}
-    
+
 
 def leave_organization(user_id: int, organization_id: int):
     db_session = get_db_sessionmaker()
