@@ -9,6 +9,7 @@ import { Squiggle } from "@/components/ui/Squiggle";
 import { Building2, Edit3, Save, AlertCircle, CheckCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import PearButton from "@/components/PearButton";
+import ConfirmActionModal from "@/components/ConfirmActionModal";
 
 interface AdminPageProps {
   params: Promise<{ slug: string }>;
@@ -37,45 +38,16 @@ export default function AdminPage({ params }: AdminPageProps) {
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
-  // Validate organization admin access *** CHANGE TO OWNER ACCESS LATER***
-  const validateAdminAccess = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const response = await fetch(
-        `${apiUrl}/organization/validate-admin/${organizationId}`,
-        {
-          credentials: "include",
-        }
-      );
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmAction, setConfirmAction] = useState<
+    (() => Promise<void>) | null
+  >(null);
 
-      if (response.ok) {
-        setIsAuthorized(true);
-      } else if (response.status === 401) {
-        setMessage(
-          "Please log in to access this organization profile. Redirecting..."
-        );
-        setIsAuthorized(false);
-        setTimeout(() => router.push("/organization"), 2000);
-      } else if (response.status === 403) {
-        setMessage(
-          "You do not have admin access to this organization. Redirecting..."
-        );
-        setIsAuthorized(false);
-        setTimeout(() => router.push("/organization"), 2000);
-      } else {
-        setMessage("Failed to validate organization access. Redirecting...");
-        setIsAuthorized(false);
-        setTimeout(() => router.push("/organization"), 2000);
-      }
-    } catch (err) {
-      console.error("Error validating admin access:", err);
-      setMessage(
-        "Failed to validate organization access. Please check your connection. Redirecting..."
-      );
-      setIsAuthorized(false);
-      setTimeout(() => router.push("/organization"), 2000);
-    }
-  };
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  // Validate organization admin access *** CHANGE TO OWNER ACCESS LATER***
 
   const validateOwnerAccess = async () => {
     try {
@@ -146,53 +118,80 @@ export default function AdminPage({ params }: AdminPageProps) {
     }
   }, [isAuthorized, organizationId]);
 
-  const handlePromote = async (userId: number) => {
-    if (!confirm("Are you sure you want to promote this admin to owner?")) return;
+  const openPromoteModal = (admin: Admin) => {
+    setConfirmMessage(
+      `Promote ${admin.first_name} ${admin.last_name} to Owner?`
+    );
+    setConfirmAction(() => async () => {
+      await handlePromote(admin.id);
+    });
+    setConfirmOpen(true);
+  };
 
+  const handlePromote = async (userId: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const response = await fetch(`${apiUrl}/organization/org-admins/promote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, organization_id: organizationId }),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${apiUrl}/organization/org-admins/promote`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            user_id: userId,
+            organization_id: organizationId,
+          }),
+        }
+      );
 
-      if (response.ok) {
-        fetchAdmins();
-        alert("Admin promoted successfully");
-      } else {
-        const data = await response.json();
-        alert(data.error || "Failed to promote admin");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setActionError(data.error || "Failed to promote admin");
+        return;
       }
-    } catch (error) {
-      console.error("Error promoting admin:", error);
-      alert("An error occurred");
+
+      setActionSuccess("Admin promoted successfully!");
+      await fetchAdmins();
+    } catch (err) {
+      setActionError("Error promoting admin.");
     }
   };
 
-  const handleRemove = async (userId: number) => {
-    if (!confirm("Are you sure you want to remove this admin from the organization?")) return;
+  const openRemoveModal = (admin: Admin) => {
+    setConfirmMessage(
+      `Remove ${admin.first_name} ${admin.last_name} from this organization?`
+    );
+    setConfirmAction(() => async () => {
+      await handleRemove(admin.id);
+    });
+    setConfirmOpen(true);
+  };
 
+  const handleRemove = async (userId: number) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
       const response = await fetch(`${apiUrl}/organization/org-admins/remove`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, organization_id: organizationId }),
         credentials: "include",
+        body: JSON.stringify({
+          user_id: userId,
+          organization_id: organizationId,
+        }),
       });
 
-      if (response.ok) {
-        fetchAdmins();
-        alert("Admin removed successfully");
-      } else {
-        const data = await response.json();
-        alert(data.error || "Failed to remove admin");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setActionError(data.error || "Failed to remove admin");
+        return;
       }
-    } catch (error) {
-      console.error("Error removing admin:", error);
-      alert("An error occurred");
+
+      setActionSuccess("Admin removed successfully!");
+      await fetchAdmins();
+    } catch (err) {
+      setActionError("Error removing admin.");
     }
   };
 
@@ -235,6 +234,18 @@ export default function AdminPage({ params }: AdminPageProps) {
                 />
               </h1>
             </div>
+
+            {actionError && (
+              <div className="mb-6 bg-red-100 text-red-700 px-4 py-3 rounded-md border border-red-300">
+                {actionError}
+              </div>
+            )}
+
+            {actionSuccess && (
+              <div className="mb-6 bg-green-100 text-green-700 px-4 py-3 rounded-md border border-green-300">
+                {actionSuccess}
+              </div>
+            )}
 
             {/* Owners Section */}
             <div className="mb-12">
@@ -303,13 +314,13 @@ export default function AdminPage({ params }: AdminPageProps) {
                       </div>
                       <div className="flex items-center gap-3">
                         <button
-                          onClick={() => handlePromote(admin.id)}
+                          onClick={() => openPromoteModal(admin)}
                           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           Promote to Owner
                         </button>
                         <button
-                          onClick={() => handleRemove(admin.id)}
+                          onClick={() => openRemoveModal(admin)}
                           className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                         >
                           Remove
@@ -325,6 +336,17 @@ export default function AdminPage({ params }: AdminPageProps) {
           </main>
         )}
         <Footer />
+        <ConfirmActionModal
+          isOpen={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          message={confirmMessage}
+          onConfirm={async () => {
+            if (confirmAction) {
+              await confirmAction();
+            }
+            setConfirmOpen(false);
+          }}
+        />
       </div>
     </ProtectedRoute>
   );
