@@ -300,7 +300,7 @@
         `Accept ${req.first_name} ${req.last_name}'s request to join as an admin?`
       );
       setConfirmAction(() => async () => {
-        await handleAccept(req.id, req.user_id);
+        await handleAccept(req.id);
       });
       setConfirmOpen(true);
     };
