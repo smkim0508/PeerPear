@@ -522,11 +522,13 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleSaveEvent = async () => {
     if (!event) return;
-
+  
     setIsSavingEvent(true);
     try {
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      
+      // First, update text fields
       const response = await fetch(
         `${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`,
         {
@@ -538,23 +540,58 @@ export default function EventPage({ params }: EventPageProps) {
           body: JSON.stringify(editEventData),
         }
       );
-
-      if (response.ok) {
-        // Update local event state
-        setEvent((prev) =>
-          prev
-            ? {
-                ...prev,
-                title: editEventData.title,
-                description: editEventData.description,
-              }
-            : null
-        );
-        setIsEditingEvent(false);
-      } else {
+  
+      if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.error || "Failed to update event");
+        setIsSavingEvent(false);
+        return;
       }
+  
+      // Then, if there's a new image, upload it
+      if (previewImage) {
+        const input = document.getElementById("eventImageUpload") as HTMLInputElement;
+        if (input?.files?.[0]) {
+          const formData = new FormData();
+          formData.append("image", input.files[0]);
+  
+          const imageRes = await fetch(
+            `${API_BASE_URL}/organization_dashboard/event/image?event_id=${eventId}`,
+            { 
+              method: "PATCH", 
+              body: formData,
+              credentials: "include"
+            }
+          );
+  
+          const imageData = await imageRes.json();
+  
+          if (imageRes.ok) {
+            // Update local event state with new image URL
+            setEvent((prev) => ({ ...prev!, image_url: imageData.image_url }));
+          } else {
+            setError(imageData.error || "Failed to upload image.");
+            setIsSavingEvent(false);
+            return;
+          }
+        }
+      }
+  
+      // Update local event state with new text fields
+      setEvent((prev) =>
+        prev
+          ? {
+              ...prev,
+              title: editEventData.title,
+              description: editEventData.description,
+            }
+          : null
+      );
+      
+      // Clean up edit mode
+      setIsEditingEvent(false);
+      setPreviewImage(null);
+      setImageError(null);
     } catch (err) {
       console.error("Error updating event:", err);
       setError("Failed to update event");

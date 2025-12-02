@@ -34,4 +34,8 @@ def upload_event_image(file_bytes: bytes, filename: str, content_type: str) -> s
         return public_url
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print("ERROR TYPE:", type(e))
+        print("ERROR CONTENT:", str(e))
         raise RuntimeError(f"Failed to upload image: {e}")

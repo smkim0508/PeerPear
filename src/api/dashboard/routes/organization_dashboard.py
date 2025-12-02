@@ -112,6 +112,73 @@ def update_event():
     session_instance.refresh(event)
     return jsonify({"message": "Event updated successfully"}), 200
 
+@org_dashboard_bp.patch("/event/image")
+@require_auth
+def update_event_image():
+    """
+    Update only the event image.
+    Expects event_id as query param and image file in form data.
+    """
+    event_id = request.args.get("event_id")
+
+    if event_id is None:
+        return jsonify({"error": "event_id is required"}), 400
+
+    # Get user_id from session and look up organization
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    # Look up organization_id from orgadmins table
+    db_session = get_db_sessionmaker()
+    with db_session() as session_instance:
+        org_admin = session_instance.scalar(
+            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+        )
+
+        if org_admin is None:
+            return jsonify({"error": "User is not an organization admin"}), 403
+
+        organization_id = org_admin.organization_id
+
+        # Check if the event exists and belongs to the organization
+        event = session_instance.scalar(
+            select(EventTable).where(EventTable.id == event_id)
+        )
+
+        if event is None:
+            return jsonify({"error": "Event not found"}), 404
+
+        if event.organization_id != organization_id:
+            return jsonify({"error": "Event does not belong to the organization"}), 403
+
+        # Handle image upload
+        uploaded_file = request.files.get("image")
+        
+        if not uploaded_file:
+            return jsonify({"error": "No image file provided"}), 400
+
+        try:
+            file_bytes = uploaded_file.read()
+            content_type = uploaded_file.content_type
+            filename = uploaded_file.filename
+
+            image_url = upload_event_image(file_bytes, filename, content_type)
+            
+            # Update event with new image URL
+            event.image_url = image_url
+            session_instance.commit()
+            session_instance.refresh(event)
+            
+            return jsonify({
+                "message": "Image updated successfully",
+                "image_url": image_url
+            }), 200
+
+        except Exception as e:
+            logger.error(f"Error uploading image: {e}")
+            return jsonify({"error": "Failed to upload image"}), 500
 
 @org_dashboard_bp.post("/create-event")
 @require_auth
