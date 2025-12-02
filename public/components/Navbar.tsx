@@ -34,6 +34,7 @@ export default function Navbar({
   const pathname = usePathname();
   const router = useRouter();
   const [currentOrganization, setCurrentOrganization] = useState<OrganizationInfo | null>(null);
+  const [userOrganizations, setUserOrganizations] = useState<OrganizationInfo[]>([]);
   const [loadingOrgInfo, setLoadingOrgInfo] = useState(false);
 
   // Determine user type from auth context or localStorage or prop
@@ -71,16 +72,20 @@ export default function Navbar({
 
         if (response.ok) {
           const data = await response.json();
-          const org = data.organizations?.find((o: any) => o.id === orgId);
-
-          if (org) {
-            setCurrentOrganization({
-              id: org.id,
-              name: org.org_name,
+          if (data.organizations) {
+            const formattedOrgs = data.organizations.map((o: any) => ({
+              id: o.id,
+              name: o.org_name,
               image: "/logo.svg"
-            });
-          } else {
-            setCurrentOrganization(null);
+            }));
+            setUserOrganizations(formattedOrgs);
+
+            const org = formattedOrgs.find((o: OrganizationInfo) => o.id === orgId);
+            if (org) {
+              setCurrentOrganization(org);
+            } else {
+              setCurrentOrganization(null);
+            }
           }
         }
       } catch (error) {
@@ -197,19 +202,54 @@ export default function Navbar({
           {isAuthenticated && (
             <>
               {isOnOrganizationPage && currentOrganization && userType === "organization" ? (
-                /* Organization info when on organization slug pages */
-                <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
-                  <img
-                    src={currentOrganization.image}
-                    alt={`${currentOrganization.name} logo`}
-                    className="w-8 h-8 rounded-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
-                    }}
-                  />
-                  <span>{currentOrganization.name}</span>
-                </div>
+                /* Organization Dropdown */
+                <NavigationMenu>
+                  <NavigationMenuList>
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent">
+                        <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
+                          <img
+                            src={currentOrganization.image}
+                            alt={`${currentOrganization.name} logo`}
+                            className="w-8 h-8 rounded-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
+                            }}
+                          />
+                          <span>{currentOrganization.name}</span>
+                        </div>
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <ul className="grid w-[200px] gap-2 p-2 bg-white rounded-md shadow-md">
+                          {userOrganizations.map((org) => (
+                            <li key={org.id}>
+                              <NavigationMenuLink asChild>
+                                <Link
+                                  href={`/organization/${org.id}`}
+                                  className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                >
+                                  <img
+                                    src={org.image || "/logo.svg"}
+                                    alt={`${org.name} logo`}
+                                    className="w-6 h-6 rounded-full object-cover"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
+                                    }}
+                                  />
+                                  <span className="text-sm font-medium text-black truncate">
+                                    {org.name}
+                                  </span>
+                                </Link>
+                              </NavigationMenuLink>
+                            </li>
+                          ))}
+                        </ul>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
               ) : loadingOrgInfo && isOnOrganizationPage ? (
                 /* Loading state when fetching organization info */
                 <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
@@ -233,13 +273,6 @@ export default function Navbar({
             >
               Log In
               <CircleUserRound size={20} />
-            </button>
-          ) : isOnOrganizationPage && userType === "organization" ? (
-            <button
-              onClick={() => router.push('/organization')}
-              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap hover:font-bold"
-            >
-              Back to Organizations
             </button>
           ) : (
             <button
