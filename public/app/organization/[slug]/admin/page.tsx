@@ -111,48 +111,90 @@ export default function AdminPage({ params }: AdminPageProps) {
   };
 
   useEffect(() => {
-    validateAdminAccess();
+    validateOwnerAccess();
   }, [organizationId]);
 
-  {
-    /*  useEffect(() => {
-    if (isAuthorized) {
-      const fetchAdmins = async () => {
-        try {
-          setIsLoading(true);
-          const apiUrl =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+  const fetchAdmins = async () => {
+    try {
+      setIsLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
-          const res = await fetch(
-            `${apiUrl}/organization/org-admins/{organizationId}`,
-            {
-              credentials: "include",
-            }
-          );
-
-          if (!res.ok) {
-      console.error("Failed to load admins");
-      return;
-    }
-
-          const data = await res.json();
-          setAdmins(data.admins)
-
-        ;
-        } catch (error) {
-          console.error(
-            "Network error while loading organization profile:",
-            error
-          );
-        } finally {
-          setIsLoading(false);
+      const res = await fetch(
+        `${apiUrl}/organization/org-admins/${organizationId}`,
+        {
+          credentials: "include",
         }
-      };
+      );
+
+      if (!res.ok) {
+        console.error("Failed to load admins");
+        return;
+      }
+
+      const data = await res.json();
+      setAdmins(data.admins);
+    } catch (error) {
+      console.error("Network error while loading organization profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthorized) {
       fetchAdmins();
     }
-  }, [isAuthorized]);
- */
-  }
+  }, [isAuthorized, organizationId]);
+
+  const handlePromote = async (userId: number) => {
+    if (!confirm("Are you sure you want to promote this admin to owner?")) return;
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(`${apiUrl}/organization/org-admins/promote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, organization_id: organizationId }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        fetchAdmins();
+        alert("Admin promoted successfully");
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to promote admin");
+      }
+    } catch (error) {
+      console.error("Error promoting admin:", error);
+      alert("An error occurred");
+    }
+  };
+
+  const handleRemove = async (userId: number) => {
+    if (!confirm("Are you sure you want to remove this admin from the organization?")) return;
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(`${apiUrl}/organization/org-admins/remove`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, organization_id: organizationId }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        fetchAdmins();
+        alert("Admin removed successfully");
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to remove admin");
+      }
+    } catch (error) {
+      console.error("Error removing admin:", error);
+      alert("An error occurred");
+    }
+  };
 
   return (
     <ProtectedRoute requiredRole="organization">
@@ -195,10 +237,91 @@ export default function AdminPage({ params }: AdminPageProps) {
             </div>
 
             {/* Owners Section */}
-            <h2 className="text-2xl font-semibold mb-4">Owners</h2>
+            <div className="mb-12">
+              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                <div className="bg-pear-1 p-2 rounded-full">
+                  <CheckCircle className="w-5 h-5 text-pear-3" />
+                </div>
+                Owners
+              </h2>
+              <div className="grid gap-4">
+                {owners.length > 0 ? (
+                  owners.map((owner) => (
+                    <div
+                      key={owner.id}
+                      className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-pear-1 rounded-full flex items-center justify-center text-pear-3 font-bold text-xl">
+                          {owner.first_name[0]}
+                          {owner.last_name[0]}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {owner.first_name} {owner.last_name}
+                          </h3>
+                          <p className="text-gray-500">{owner.email}</p>
+                        </div>
+                      </div>
+                      <div className="px-4 py-1 bg-pear-1 text-pear-3 rounded-full text-sm font-medium">
+                        Owner
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">No owners found.</p>
+                )}
+              </div>
+            </div>
 
             {/* Admins Section */}
-            <h2 className="text-2xl font-semibold mb-4">Admins</h2>
+            <div>
+              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <Edit3 className="w-5 h-5 text-blue-600" />
+                </div>
+                Admins
+              </h2>
+              <div className="grid gap-4">
+                {regularAdmins.length > 0 ? (
+                  regularAdmins.map((admin) => (
+                    <div
+                      key={admin.id}
+                      className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl">
+                          {admin.first_name[0]}
+                          {admin.last_name[0]}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {admin.first_name} {admin.last_name}
+                          </h3>
+                          <p className="text-gray-500">{admin.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handlePromote(admin.id)}
+                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Promote to Owner
+                        </button>
+                        <button
+                          onClick={() => handleRemove(admin.id)}
+                          className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">No other admins found.</p>
+                )}
+              </div>
+            </div>
           </main>
         )}
         <Footer />
