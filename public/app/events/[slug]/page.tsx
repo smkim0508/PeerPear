@@ -667,6 +667,7 @@ export default function EventPage({ params }: EventPageProps) {
       setIsTriggeringPairing(false);
     }
   };
+  
 
   const handleViewPairings = async () => {
     if (!event) return;
@@ -772,173 +773,162 @@ export default function EventPage({ params }: EventPageProps) {
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-linear-to-br from-light-beige via-white to-light-beige">
         <Navbar />
-
+  
         {/* === HERO SECTION === */}
         <div className="relative bg-gradient-to-r from-nav-dark to-gray-800 text-white">
-
-        {/* CONTENT */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-
-            {/* LEFT: Event Details */}
-            <div className="space-y-6">
-
-              {/* Organization */}
-              <div className="flex items-center gap-3 mb-4">
-                <Building2 className="h-7 w-7 text-green" />
-                <span className="text-green font-bold text-xl">
-                  {event.organizations.org_name}
-                </span>
-              </div>
-
-              {/* === EDIT MODE === */}
-              {isEditingEvent ? (
-                <div className="space-y-6">
-
-                  <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
-
-                  {/* Title */}
-                  <div>
-                    <label className="block text-white text-sm mb-2">Event Title *</label>
-                    <input
-                      type="text"
-                      value={editEventData.title}
-                      onChange={(e) =>
-                        setEditEventData({ ...editEventData, title: e.target.value })
-                      }
-                      className="w-full text-3xl font-bold bg-transparent border-b border-white focus:border-green-400 outline-none pb-1 text-white"
-                      maxLength={100}
-                    />
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label className="block text-white text-sm mb-2">Event Description</label>
-                    <textarea
-                      value={editEventData.description}
-                      onChange={(e) =>
-                        setEditEventData({ ...editEventData, description: e.target.value })
-                      }
-                      rows={4}
-                      className="w-full bg-transparent border border-white rounded-lg p-3 text-white focus:border-green-400 outline-none resize-none"
-                      maxLength={500}
-                    />
-                  </div>
-
-                  {/* Upload Image Button */}
-                  <div className="space-y-2">
-                    {/* Hidden file input */}
-                    <input
-                      id="eventImageUpload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageSelect}
-                    />
-
-                    {/* Fancy Upload Button */}
-                    <label
-                      htmlFor="eventImageUpload"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-lg shadow hover:bg-gray-200 cursor-pointer transition-all"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-black"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0L8 8m4-4l4 4"
+          {/* CONTENT */}
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+  
+              {/* LEFT: Event Details */}
+              <div className="space-y-6">
+  
+                {/* Organization */}
+                <div className="flex items-center gap-3 mb-4">
+                  <Building2 className="h-7 w-7 text-green" />
+                  <span className="text-green font-bold text-xl">
+                    {event.organizations.org_name}
+                  </span>
+                </div>
+  
+                {/* EDIT / VIEW MODE */}
+                {isEditingEvent ? (
+                  <div className="space-y-6">
+                    {/* Edit Mode Header */}
+                    <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+  
+                    {/* Title */}
+                    <div>
+                      <label className="block text-white text-sm mb-2">Event Title *</label>
+                      <input
+                        type="text"
+                        value={editEventData.title}
+                        onChange={(e) =>
+                          setEditEventData({ ...editEventData, title: e.target.value })
+                        }
+                        className="w-full text-3xl font-bold bg-transparent border-b border-white focus:border-green-400 outline-none pb-1 text-white"
+                        maxLength={100}
+                      />
+                    </div>
+  
+                    {/* Description */}
+                    <div>
+                      <label className="block text-white text-sm mb-2">Event Description</label>
+                      <textarea
+                        value={editEventData.description}
+                        onChange={(e) =>
+                          setEditEventData({ ...editEventData, description: e.target.value })
+                        }
+                        rows={4}
+                        className="w-full bg-transparent border border-white rounded-lg p-3 text-white focus:border-green-400 outline-none resize-none"
+                        maxLength={500}
+                      />
+                    </div>
+  
+                    {/* Upload / Remove Image Buttons */}
+                    <div className="flex gap-2 mt-2 items-center">
+                      {/* Upload Button */}
+                      <div className="space-y-2">
+                        <input
+                          id="eventImageUpload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageSelect}
                         />
-                      </svg>
-                      Upload New Image
-                    </label>
-
+                        <label
+                          htmlFor="eventImageUpload"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-lg shadow hover:bg-gray-200 cursor-pointer transition-all"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-black"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0L8 8m4-4l4 4"
+                            />
+                          </svg>
+                          Upload New Image
+                        </label>
+                      </div>
+                    </div>
+  
+                    {/* Display error */}
                     {imageError && (
-                      <p className="text-red-400 text-sm">{imageError}</p>
+                      <p className="text-red-400 text-sm mt-1">{imageError}</p>
+                    )}
+  
+                    {/* Save / Cancel Buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleSaveEvent}
+                        disabled={isSavingEvent}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        disabled={isSavingEvent}
+                        className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    {/* View Mode */}
+                    <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                      {event.title}
+                    </h1>
+                    {event.description && (
+                      <p className="text-lg text-gray-200 max-w-2xl leading-relaxed">
+                        {event.description}
+                      </p>
                     )}
                   </div>
-
-                </div>
-              ) : (
-                /* === VIEW MODE === */
-                <div>
-                  <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-                    {event.title}
-                  </h1>
-
-                  {event.description && (
-                    <p className="text-lg text-gray-200 max-w-2xl leading-relaxed">
-                      {event.description}
-                    </p>
-                  )}
-                </div>
-              )}
-              {/* Save/Cancel Buttons */}
-              {isEditingEvent && (
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleSaveEvent}
-                    disabled={isSavingEvent}
-                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                  >
-                    Save Changes
-                  </button>
-
-                  <button
-                    onClick={handleCancelEdit}
-                    disabled={isSavingEvent}
-                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT: Image Container */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-md">
-
-                {/* VIEW MODE IMAGE */}
-                {!isEditingEvent && (event.image_url || previewImage) && (
-                  <img
-                    src={previewImage || event.image_url || ""}
-                    className="rounded-xl shadow-lg object-contain w-full"
-                    alt="Event"
-                  />
                 )}
-
-                {/* EDIT MODE IMAGE + UPLOAD INPUT */}
-                {isEditingEvent && (
-                  <div className="space-y-3">
-
-                    {(previewImage || event.image_url) && (
+              </div>
+  
+              {/* RIGHT: Image Container */}
+              <div className="flex justify-center lg:justify-end">
+                <div className="relative w-full max-w-md sticky top-24">
+                  {/* VIEW MODE IMAGE */}
+                  {!isEditingEvent && (event.image_url || previewImage) && (
+                    <img
+                      src={previewImage || event.image_url || ""}
+                      className="rounded-xl shadow-lg object-contain w-full"
+                      alt="Event"
+                    />
+                  )}
+  
+                  {/* EDIT MODE IMAGE + UPLOAD / REMOVE */}
+                  {isEditingEvent && (previewImage || event.image_url) && (
+                    <div className="relative">
                       <img
                         src={previewImage || event.image_url || ""}
                         className="rounded-xl shadow-lg object-contain w-full"
                         alt="Event Preview"
                       />
-                    )}
-
-                    {imageError && (
-                      <p className="text-red-400 text-sm">{imageError}</p>
-                    )}
-                  </div>
-                )}
-
+                    </div>
+                  )}
+  
+                  {isEditingEvent && imageError && (
+                    <p className="text-red-400 text-sm mt-1">{imageError}</p>
+                  )}
+                </div>
               </div>
+  
             </div>
-
           </div>
         </div>
-      </div>
-
 
         {/* === MAIN CONTENT === */}
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -1013,205 +1003,9 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
-              
-              {/* Student Match Results - only for students with published pairings */}
-              {!isOrganizationUser &&
-                event?.status === "PAIRING_PUBLISHED" &&
-                isRegistered && (
-                  <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                    <CardHeader>
-                      <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
-                        <Users className="w-6 h-6" />
-                        Your Match
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {isLoadingMatch ? (
-                        <div className="text-center py-6">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                          <p className="text-gray-600">Loading your match...</p>
-                        </div>
-                      ) : studentMatch &&
-                        studentMatch.groups &&
-                        studentMatch.groups.length > 0 ? (
-                        <div className="space-y-4">
-                          <div className="text-center mb-4">
-                            <p className="text-gray-800 text-lg font-medium">
-                              🎉 You've been matched! Here are your teammates:
-                            </p>
-                          </div>
 
-                          {studentMatch.groups.map((group, groupIndex) => (
-                            <div
-                              key={groupIndex}
-                              className="bg-green-50 border border-green-200 rounded-lg p-4"
-                            >
-                              <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                                <Users className="w-4 h-4" />
-                                Your Group ({group.students.length} members)
-                              </h3>
-
-                              <div className="space-y-3">
-                                {group.students.map((student, studentIndex) => (
-                                  <div
-                                    key={studentIndex}
-                                    className={`flex items-center justify-between p-3 rounded-md border ${
-                                      student.id === user?.id
-                                        ? "bg-blue-100 border-blue-300"
-                                        : "bg-white border-gray-200"
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="flex items-center gap-2">
-                                        {student.role === "BIG_SIBLING" ? (
-                                          <Trophy className="w-4 h-4 text-yellow-600" />
-                                        ) : (
-                                          <Award className="w-4 h-4 text-blue-600" />
-                                        )}
-                                        <div>
-                                          <p className="font-medium text-gray-900">
-                                            {student.name}{" "}
-                                            {student.id === user?.id && "(You)"}
-                                          </p>
-                                          <p className="text-sm text-gray-600">
-                                            {student.email}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <span
-                                      className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                                        student.role === "BIG_SIBLING"
-                                          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                          : "bg-blue-100 text-blue-800 border-blue-200"
-                                      }`}
-                                    >
-                                      {student.role === "BIG_SIBLING"
-                                        ? "Big Sibling"
-                                        : "Little Sibling"}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-6">
-                          <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                          <p className="text-gray-600">
-                            No match found for this event.
-                          </p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-              {/* Registration section - only for students */}
-              {!isOrganizationUser && event?.status === "STARTED" && (
-                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-nav-dark font-bold">
-                      Registration
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center">
-                      {isRegistered ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
-                            <CheckCircle className="h-6 w-6" />
-                            <span className="font-bold text-lg">
-                              You're registered!
-                            </span>
-                          </div>
-
-                          {/* Questionnaire Status */}
-                          {event?.questions && event.questions.length > 0 && (
-                            <div className="space-y-3">
-                              <div className="border-t border-gray-200 pt-4">
-                                <h3 className="font-semibold text-lg text-nav-dark mb-3">
-                                  Questionnaire
-                                </h3>
-                                {questionnaireCompleted ? (
-                                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
-                                    <CheckCircle className="h-5 w-5" />
-                                    <span className="font-medium">
-                                      Completed
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <div className="space-y-3">
-                                    <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
-                                      <XCircle className="h-5 w-5" />
-                                      <span className="font-medium">
-                                        Incomplete
-                                      </span>
-                                    </div>
-                                    <PearButton
-                                      text="Complete Questionnaire"
-                                      onClick={() =>
-                                        router.push(
-                                          `/events/${eventId}/questionnaire`
-                                        )
-                                      }
-                                      className="w-full"
-                                    />
-                                  </div>
-                                )}
-                              </div>
-
-                              {questionnaireCompleted && (
-                                <PearButton
-                                  text="View/Edit Questionnaire"
-                                  onClick={() =>
-                                    router.push(
-                                      `/events/${eventId}/questionnaire`
-                                    )
-                                  }
-                                  dark
-                                  className="w-full"
-                                />
-                              )}
-                            </div>
-                          )}
-
-                          <PearButton
-                            text={
-                              isRegistering ? "Unregistering..." : "Unregister"
-                            }
-                            onClick={handleUnregister}
-                            dark
-                            className={`w-full ${
-                              isRegistering
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                          />
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <p className="text-gray-800 text-lg font-medium">
-                            Ready to join this event?
-                          </p>
-                          <PearButton
-                            text={
-                              isRegistering ? "Registering..." : "Register Now"
-                            }
-                            onClick={handleRegister}
-                            className="w-full"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Event Management section - only for organizations */}
-              {isOrganizationUser && (
+            {/* Event Management section - only for organizations */}
+            {isOrganizationUser && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
@@ -1429,7 +1223,244 @@ export default function EventPage({ params }: EventPageProps) {
         </div>
 
         <Footer />
-      </div>
+
+            {/* Event Image Preview + Upload - only when editing */}
+            {isEditingEvent && (
+              <div className="relative w-full max-w-md mx-auto lg:mx-0">
+                {(previewImage || event?.image_url) && (
+                  <div className="relative">
+                    <img
+                      src={previewImage || event.image_url || ""}
+                      className="rounded-xl shadow-lg object-contain w-full"
+                      alt="Event"
+                    />
+                    {/* X button to clear preview locally */}
+                    <button
+                      type="button"
+                      onClick={() => setPreviewImage(null)}
+                      className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
+                    >
+                      X
+                    </button>
+                  </div>
+                )}
+
+              {/* Upload Button */}
+              <div className="mt-3 space-y-2">
+                <input
+                  id="eventImageUploadSidebar"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setPreviewImage(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="eventImageUploadSidebar"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-lg shadow hover:bg-gray-200 cursor-pointer transition-all"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-black"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0L8 8m4-4l4 4"
+                    />
+                  </svg>
+                  Upload / Change Image
+                </label>
+              </div>
+            </div>
+          )}
+
+            {/* Student Match Results - only for students with published pairings */}
+            {!isOrganizationUser &&
+              event?.status === "PAIRING_PUBLISHED" &&
+              isRegistered && (
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+                      <Users className="w-6 h-6" />
+                      Your Match
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingMatch ? (
+                      <div className="text-center py-6">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Loading your match...</p>
+                      </div>
+                    ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
+                      <div className="space-y-4">
+                        <div className="text-center mb-4">
+                          <p className="text-gray-800 text-lg font-medium">
+                            🎉 You've been matched! Here are your teammates:
+                          </p>
+                        </div>
+
+                        {(studentMatch?.groups ?? []).map((group, groupIndex) => (
+                          <div
+                            key={groupIndex}
+                            className="bg-green-50 border border-green-200 rounded-lg p-4"
+                          >
+                            <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              Your Group ({group.students.length} members)
+                            </h3>
+
+                            <div className="space-y-3">
+                              {group.students.map((student, studentIndex) => (
+                                <div
+                                  key={studentIndex}
+                                  className={`flex items-center justify-between p-3 rounded-md border ${
+                                    student.id === user?.id
+                                      ? "bg-blue-100 border-blue-300"
+                                      : "bg-white border-gray-200"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                      {student.role === "BIG_SIBLING" ? (
+                                        <Trophy className="w-4 h-4 text-yellow-600" />
+                                      ) : (
+                                        <Award className="w-4 h-4 text-blue-600" />
+                                      )}
+                                      <div>
+                                        <p className="font-medium text-gray-900">
+                                          {student.name}{" "}
+                                          {student.id === user?.id && "(You)"}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                          {student.email}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <span
+                                    className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                      student.role === "BIG_SIBLING"
+                                        ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                        : "bg-blue-100 text-blue-800 border-blue-200"
+                                    }`}
+                                  >
+                                    {student.role === "BIG_SIBLING"
+                                      ? "Big Sibling"
+                                      : "Little Sibling"}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-gray-600">No match found for this event.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+            {/* Registration section - only for students */}
+            {!isOrganizationUser && event?.status === "STARTED" && (
+              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-nav-dark font-bold">
+                    Registration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center">
+                    {isRegistered ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
+                          <CheckCircle className="h-6 w-6" />
+                          <span className="font-bold text-lg">You're registered!</span>
+                        </div>
+
+                        {/* Questionnaire Status */}
+                        {event?.questions?.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="border-t border-gray-200 pt-4">
+                              <h3 className="font-semibold text-lg text-nav-dark mb-3">
+                                Questionnaire
+                              </h3>
+                              {questionnaireCompleted ? (
+                                <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
+                                  <CheckCircle className="h-5 w-5" />
+                                  <span className="font-medium">Completed</span>
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
+                                    <XCircle className="h-5 w-5" />
+                                    <span className="font-medium">Incomplete</span>
+                                  </div>
+                                  <PearButton
+                                    text="Complete Questionnaire"
+                                    onClick={() =>
+                                      router.push(`/events/${eventId}/questionnaire`)
+                                    }
+                                    className="w-full"
+                                  />
+                                </div>
+                              )}
+                            </div>
+
+                            {questionnaireCompleted && (
+                              <PearButton
+                                text="View/Edit Questionnaire"
+                                onClick={() =>
+                                  router.push(`/events/${eventId}/questionnaire`)
+                                }
+                                dark
+                                className="w-full"
+                              />
+                            )}
+                          </div>
+                        )}
+
+                        <PearButton
+                          text={isRegistering ? "Unregistering..." : "Unregister"}
+                          onClick={handleUnregister}
+                          dark
+                          className={`w-full ${isRegistering ? "opacity-50 cursor-not-allowed" : ""}`}
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-gray-800 text-lg font-medium">
+                          Ready to join this event?
+                        </p>
+                        <PearButton
+                          text={isRegistering ? "Registering..." : "Register Now"}
+                          onClick={handleRegister}
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            </div>
+
 
       {/* === User Modal (only for organization) === */}
       {isOrganizationUser && isModalOpen && selectedUser && (
