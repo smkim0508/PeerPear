@@ -460,3 +460,47 @@ def verify_event_access(event_id, user_type):
         return jsonify(result), result.get("status", 400)
 
     return jsonify(result), 200
+
+from db.supabase_client import upload_event_image
+from db.crud.events_crud import validate_event_and_admin, update_event_image
+
+@events_bp.post("/<int:event_id>/image")
+def update_event_image_route(event_id: int):
+    """
+    Upload a new image for an event and update DB.
+    Organization-only.
+    """
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    db_session = get_db_sessionmaker()
+
+    with db_session() as db:
+        # Ensure this admin owns the event
+        event, error = validate_event_and_admin(db, event_id, user_id)
+        if error:
+            return jsonify(error), error["status"]
+
+        old_image_url = event.image_url
+
+    # Get uploaded file
+    if "file" not in request.files:
+        return jsonify({"error": "Image file is required"}), 400
+
+    file = request.files["file"]
+
+    # Upload to Supabase (replaces old one)
+    new_url = upload_event_image(
+        event_id=event_id,
+        file_bytes=file.read(),
+        filename=file.filename,
+        content_type=file.content_type,
+        old_image_url=old_image_url
+    )
+
+    # Update DB reference
+    update_event_image(event_id, new_url)
+
+    return jsonify({"image_url": new_url}), 200

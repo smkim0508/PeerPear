@@ -932,449 +932,164 @@ export default function EventPage({ params }: EventPageProps) {
 
         {/* === MAIN CONTENT === */}
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* === LEFT COLUMN === */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* About the Organization */}
+        <div className="grid lg:grid-cols-3 gap-8">
+
+          {/* === LEFT COLUMN === */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* About the Organization */}
+            <Card className="shadow-lg border-0 bg-white rounded-xl">
+              <CardHeader>
+                <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                  <Building2 className="h-7 w-7" /> About the Organization
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-800 text-xl leading-relaxed">
+                  {event.organizations.description}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Questions Preview */}
+            {hasQuestions && (
               <Card className="shadow-lg border-0 bg-white rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                    <Building2 className="h-7 w-7" />
-                    About the Organization
+                    <Users className="h-7 w-7" /> Event Questions
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-800 text-xl leading-relaxed">
-                    {event.organizations.description}
+                  <p className="text-gray-800 text-xl mb-6 leading-relaxed">
+                    This event includes {event.questions.length} question
+                    {event.questions.length !== 1 ? "s" : ""} to help match participants effectively.
                   </p>
                 </CardContent>
               </Card>
+            )}
 
-              {/* Questions Preview */}
-              {hasQuestions && (
-                <Card className="shadow-lg border-0 bg-white rounded-xl">
-                  <CardHeader>
-                    <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                      <Users className="h-7 w-7" />
-                      Event Questions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-800 text-xl mb-6 leading-relaxed">
-                      This event includes {event.questions.length} question
-                      {event.questions.length !== 1 ? "s" : ""} to help match
-                      participants effectively.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* === Participants Section (only for organization) === */}
-              {isOrganizationUser && (
-                <Card className="shadow-lg border-0 bg-white rounded-xl">
-                  <CardHeader>
-                    <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                      <Users className="h-7 w-7" />
-                      Participants
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {participants.length === 0 ? (
-                      <p className="text-gray-600">No participants yet.</p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {participants.map((u) => (
-                          <div
-                            key={u.id}
-                            className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
-                            onClick={() => handleUserClick(u)}
-                          >
-                            <h3 className="text-center font-semibold text-lg text-nav-dark">
-                              {u.full_name || u.username}
-                            </h3>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* === RIGHT SIDEBAR === */}
-            <div className="space-y-6">
-
-            {/* Event Management section - only for organizations */}
+            {/* Participants Section (only for organization) */}
             {isOrganizationUser && (
-                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-nav-dark font-bold">
-                      Event Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <p className="text-gray-800 text-lg font-medium mb-4">
-                          Manage your event and view participant responses
-                        </p>
-
-                        <div className="grid gap-3">
-                          {/* Always available buttons */}
-                          {hasQuestions && currentStatus === "STARTED" && (
-                            <PearButton
-                              text="View Response Analytics"
-                              onClick={() =>
-                                router.push(`/events/${eventId}/questionnaire`)
-                              }
-                              className="w-full"
-                            />
-                          )}
-
-                          <PearButton
-                            text="Edit Event Details"
-                            onClick={handleEditEvent}
-                            dark
-                            className="w-full"
-                          />
-
-                          {/* Questionnaire management based on event status */}
-                          {currentStatus === "NOT_STARTED" && (
-                            <PearButton
-                              text="Edit Questionnaire"
-                              onClick={() =>
-                                router.push(`/events/${eventId}/questions`)
-                              }
-                              className="w-full bg-blue-600 hover:bg-blue-700"
-                            />
-                          )}
-
-                          {currentStatus === "STARTED" && (
-                            <PearButton
-                              text="View Questionnaire"
-                              onClick={() =>
-                                router.push(`/events/${eventId}/questions`)
-                              }
-                              className="w-full bg-blue-600 hover:bg-blue-700"
-                            />
-                          )}
-
-                          {/* Event status-specific buttons */}
-                          {currentStatus === "NOT_STARTED" && (
-                            <PearButton
-                              text={
-                                isStartingEvent
-                                  ? "Starting Event..."
-                                  : "Start Event"
-                              }
-                              onClick={
-                                isStartingEvent ? () => {} : handleStartEvent
-                              }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${
-                                isStartingEvent
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          )}
-
-                          {currentStatus === "STARTED" && (
-                            <PearButton
-                              text={
-                                isEndingEvent ? "Ending Event..." : "End Event"
-                              }
-                              onClick={
-                                isEndingEvent ? () => {} : handleEndEvent
-                              }
-                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
-                                isEndingEvent
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          )}
-
-                          {currentStatus === "TERMINATED" &&
-                            (!event.matches ||
-                              (Array.isArray(event.matches) &&
-                                event.matches.length === 0)) && (
-                              <>
-                                <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-gray-700">
-                                    Group Size
-                                  </label>
-                                  <select
-                                    value={groupSize}
-                                    onChange={(e) =>
-                                      setGroupSize(parseInt(e.target.value))
-                                    }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  >
-                                    <option value={2}>Pairs (2 people)</option>
-                                    <option value={3}>Groups of 3</option>
-                                    <option value={4}>Groups of 4</option>
-                                    <option value={5}>Groups of 5</option>
-                                  </select>
-                                </div>
-
-                                <PearButton
-                                  text={
-                                    isTriggeringPairing
-                                      ? "Creating Pairings..."
-                                      : "Create Pairings"
-                                  }
-                                  onClick={
-                                    isTriggeringPairing
-                                      ? () => {}
-                                      : handleTriggerPairing
-                                  }
-                                  className={`w-full bg-green-600 hover:bg-green-700 ${
-                                    isTriggeringPairing
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                />
-
-                                {pairingData && (
-                                  <PearButton
-                                    text={
-                                      isPublishingPairings
-                                        ? "Publishing..."
-                                        : "Publish Pairings to Students"
-                                    }
-                                    onClick={
-                                      isPublishingPairings
-                                        ? () => {}
-                                        : handlePublishPairings
-                                    }
-                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
-                                      isPublishingPairings
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
-                                    }`}
-                                  />
-                                )}
-                              </>
-                            )}
-
-                          {currentStatus === "TERMINATED" &&
-                            event.matches &&
-                            Array.isArray(event.matches) &&
-                            event.matches.length > 0 && (
-                              <>
-                                <PearButton
-                                  text="View Existing Pairings"
-                                  onClick={handleViewPairings}
-                                  className="w-full bg-purple-600 hover:bg-purple-700"
-                                />
-
-                                {/* Show publish button if pairings haven't been published yet */}
-                                <PearButton
-                                  text={
-                                    isPublishingPairings
-                                      ? "Publishing..."
-                                      : "Publish Pairings to Students"
-                                  }
-                                  onClick={
-                                    isPublishingPairings
-                                      ? () => {}
-                                      : handlePublishPairings
-                                  }
-                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
-                                    isPublishingPairings
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                />
-                              </>
-                            )}
-
-                          {currentStatus === "PAIRING_PUBLISHED" && (
-                            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                              <h3 className="font-semibold text-green-800 mb-1">
-                                Pairings Published!
-                              </h3>
-                              <p className="text-green-700 text-sm">
-                                Students can now view their matches
-                              </p>
-                              <div className="mt-3">
-                                <PearButton
-                                  text="View Published Pairings"
-                                  onClick={handleViewPairings}
-                                  className="w-full bg-green-600 hover:bg-green-700"
-                                />
-                              </div>
-                            </div>
-                          )}
+              <Card className="shadow-lg border-0 bg-white rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                    <Users className="h-7 w-7" /> Participants
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {participants.length === 0 ? (
+                    <p className="text-gray-600">No participants yet.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {participants.map((u) => (
+                        <div
+                          key={u.id}
+                          className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
+                          onClick={() => handleUserClick(u)}
+                        >
+                          <h3 className="text-center font-semibold text-lg text-nav-dark">
+                            {u.full_name || u.username}
+                          </h3>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Pairing Results section - only for organizations with pairing data */}
-              {isOrganizationUser && pairingData && (
-                <PairingResults pairingData={pairingData} eventId={eventId} />
-              )}
-            </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
-        </div>
 
-        <Footer />
+          {/* === RIGHT SIDEBAR === */}
+          <div className="space-y-6 sticky top-6">
 
-            {/* Event Image Preview + Upload - only when editing */}
-            {isEditingEvent && (
-              <div className="relative w-full max-w-md mx-auto lg:mx-0">
-                {(previewImage || event?.image_url) && (
-                  <div className="relative">
-                    <img
-                      src={previewImage || event.image_url || ""}
-                      className="rounded-xl shadow-lg object-contain w-full"
-                      alt="Event"
-                    />
-                    {/* X button to clear preview locally */}
-                    <button
-                      type="button"
-                      onClick={() => setPreviewImage(null)}
-                      className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
-                    >
-                      X
-                    </button>
-                  </div>
-                )}
+            {/* Event Management (only for orgs) */}
+            {isOrganizationUser && (
+              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-nav-dark font-bold">Event Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Buttons, status controls, etc. */}
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Upload Button */}
-              <div className="mt-3 space-y-2">
-                <input
-                  id="eventImageUploadSidebar"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setPreviewImage(reader.result as string);
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-                <label
-                  htmlFor="eventImageUploadSidebar"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-lg shadow hover:bg-gray-200 cursor-pointer transition-all"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-black"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0L8 8m4-4l4 4"
-                    />
-                  </svg>
-                  Upload / Change Image
-                </label>
-              </div>
-            </div>
-          )}
+            {/* Pairing Results (only for orgs with pairing data) */}
+            {isOrganizationUser && pairingData && (
+              <PairingResults pairingData={pairingData} eventId={eventId} />
+            )}
 
-            {/* Student Match Results - only for students with published pairings */}
-            {!isOrganizationUser &&
-              event?.status === "PAIRING_PUBLISHED" &&
-              isRegistered && (
-                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
-                      <Users className="w-6 h-6" />
-                      Your Match
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingMatch ? (
-                      <div className="text-center py-6">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading your match...</p>
-                      </div>
-                    ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
-                      <div className="space-y-4">
-                        <div className="text-center mb-4">
-                          <p className="text-gray-800 text-lg font-medium">
-                            🎉 You've been matched! Here are your teammates:
-                          </p>
-                        </div>
-
-                        {(studentMatch?.groups ?? []).map((group, groupIndex) => (
-                          <div
-                            key={groupIndex}
-                            className="bg-green-50 border border-green-200 rounded-lg p-4"
-                          >
-                            <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                              <Users className="w-4 h-4" />
-                              Your Group ({group.students.length} members)
-                            </h3>
-
-                            <div className="space-y-3">
-                              {group.students.map((student, studentIndex) => (
-                                <div
-                                  key={studentIndex}
-                                  className={`flex items-center justify-between p-3 rounded-md border ${
-                                    student.id === user?.id
-                                      ? "bg-blue-100 border-blue-300"
-                                      : "bg-white border-gray-200"
-                                  }`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                      {student.role === "BIG_SIBLING" ? (
-                                        <Trophy className="w-4 h-4 text-yellow-600" />
-                                      ) : (
-                                        <Award className="w-4 h-4 text-blue-600" />
-                                      )}
-                                      <div>
-                                        <p className="font-medium text-gray-900">
-                                          {student.name}{" "}
-                                          {student.id === user?.id && "(You)"}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                          {student.email}
-                                        </p>
-                                      </div>
+            {/* Your Match (only for students) */}
+            {!isOrganizationUser && event?.status === "PAIRING_PUBLISHED" && isRegistered && (
+              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+                    <Users className="w-6 h-6" /> Your Match
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingMatch ? (
+                    <div className="text-center py-6">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading your match...</p>
+                    </div>
+                  ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
+                    <div className="space-y-4">
+                      {studentMatch?.groups?.map((group, groupIndex) => (
+                        <div key={groupIndex} className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                            <Users className="w-4 h-4" /> Your Group ({group.students.length} members)
+                          </h3>
+                          <div className="space-y-3">
+                            {group.students.map((student, studentIndex) => (
+                              <div
+                                key={studentIndex}
+                                className={`flex items-center justify-between p-3 rounded-md border ${
+                                  student.id === user?.id ? "bg-blue-100 border-blue-300" : "bg-white border-gray-200"
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2">
+                                    {student.role === "BIG_SIBLING" ? (
+                                      <Trophy className="w-4 h-4 text-yellow-600" />
+                                    ) : (
+                                      <Award className="w-4 h-4 text-blue-600" />
+                                    )}
+                                    <div>
+                                      <p className="font-medium text-gray-900">
+                                        {student.name} {student.id === user?.id && "(You)"}
+                                      </p>
+                                      <p className="text-sm text-gray-600">{student.email}</p>
                                     </div>
                                   </div>
-
-                                  <span
-                                    className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                                      student.role === "BIG_SIBLING"
-                                        ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                        : "bg-blue-100 text-blue-800 border-blue-200"
-                                    }`}
-                                  >
-                                    {student.role === "BIG_SIBLING"
-                                      ? "Big Sibling"
-                                      : "Little Sibling"}
-                                  </span>
                                 </div>
-                              ))}
-                            </div>
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                    student.role === "BIG_SIBLING"
+                                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                      : "bg-blue-100 text-blue-800 border-blue-200"
+                                  }`}
+                                >
+                                  {student.role === "BIG_SIBLING" ? "Big Sibling" : "Little Sibling"}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-6">
-                        <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-gray-600">No match found for this event.</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-600">No match found for this event.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+
 
             {/* Registration section - only for students */}
             {!isOrganizationUser && event?.status === "STARTED" && (

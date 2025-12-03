@@ -171,7 +171,13 @@ def update_event_image():
             content_type = uploaded_file.content_type
             filename = uploaded_file.filename
 
-            image_url = upload_event_image(file_bytes, filename, content_type)
+            image_url = upload_event_image(
+                event_id=int(event_id),
+                file_bytes=file_bytes,
+                filename=filename,
+                content_type=content_type,
+                old_image_url=event.image_url
+            )
             
             event.image_url = image_url
             session_instance.commit()
@@ -182,6 +188,7 @@ def update_event_image():
         except Exception as e:
             logger.error(f"Error uploading image: {e}")
             return jsonify({"error": "Failed to upload image"}), 500
+
 
 @student_bp.get("/events")
 @require_auth

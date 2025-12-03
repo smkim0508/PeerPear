@@ -169,7 +169,7 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=f"{request.host_url}static/peerpear_logo.png",
+                    image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date,
                 )
@@ -403,3 +403,14 @@ def check_if_sibling_role_considered(event_id: int) -> bool:
         # if for any reason the value is not a bool, log and default to false
         logger.warning(f"Invalid value for check_sibling_roles: {check_sibling_roles}, defaulting to False")
         return False
+
+def update_event_image(event_id: int, new_image_url: str):
+    db_session = get_db_sessionmaker()
+
+    with db_session() as session:
+        event = session.scalar(select(EventTable).where(EventTable.id == event_id))
+        if not event:
+            return {"error": "Event not found", "status": 404}
+        event.image_url = new_image_url
+        session.commit()
+        return {"message": "Event image updated", "status": 200}
