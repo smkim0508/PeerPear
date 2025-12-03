@@ -999,19 +999,217 @@ export default function EventPage({ params }: EventPageProps) {
           </div>
 
           {/* === RIGHT SIDEBAR === */}
-          <div className="space-y-6 sticky top-6">
+          <div className="space-y-6">
 
-            {/* Event Management (only for orgs) */}
+            {/* Event Management section - only for organizations */}
             {isOrganizationUser && (
-              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-nav-dark font-bold">Event Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* Buttons, status controls, etc. */}
-                </CardContent>
-              </Card>
-            )}
+                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-nav-dark font-bold">
+                      Event Management
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <p className="text-gray-800 text-lg font-medium mb-4">
+                          Manage your event and view participant responses
+                        </p>
+
+                        <div className="grid gap-3">
+                          {/* Always available buttons */}
+                          {hasQuestions && currentStatus === "STARTED" && (
+                            <PearButton
+                              text="View Response Analytics"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questionnaire`)
+                              }
+                              className="w-full"
+                            />
+                          )}
+
+                          <PearButton
+                            text="Edit Event Details"
+                            onClick={handleEditEvent}
+                            dark
+                            className="w-full"
+                          />
+
+                          {/* Questionnaire management based on event status */}
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text="Edit Questionnaire"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questions`)
+                              }
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            />
+                          )}
+
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text="View Questionnaire"
+                              onClick={() =>
+                                router.push(`/events/${eventId}/questions`)
+                              }
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            />
+                          )}
+
+                          {/* Event status-specific buttons */}
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text={
+                                isStartingEvent
+                                  ? "Starting Event..."
+                                  : "Start Event"
+                              }
+                              onClick={
+                                isStartingEvent ? () => {} : handleStartEvent
+                              }
+                              className={`w-full bg-green-600 hover:bg-green-700 ${
+                                isStartingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          )}
+
+                          {currentStatus === "STARTED" && (
+                            <PearButton
+                              text={
+                                isEndingEvent ? "Ending Event..." : "End Event"
+                              }
+                              onClick={
+                                isEndingEvent ? () => {} : handleEndEvent
+                              }
+                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
+                                isEndingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          )}
+
+                          {currentStatus === "TERMINATED" &&
+                            (!event.matches ||
+                              (Array.isArray(event.matches) &&
+                                event.matches.length === 0)) && (
+                              <>
+                                <div className="space-y-2">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Group Size
+                                  </label>
+                                  <select
+                                    value={groupSize}
+                                    onChange={(e) =>
+                                      setGroupSize(parseInt(e.target.value))
+                                    }
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    <option value={2}>Pairs (2 people)</option>
+                                    <option value={3}>Groups of 3</option>
+                                    <option value={4}>Groups of 4</option>
+                                    <option value={5}>Groups of 5</option>
+                                  </select>
+                                </div>
+
+                                <PearButton
+                                  text={
+                                    isTriggeringPairing
+                                      ? "Creating Pairings..."
+                                      : "Create Pairings"
+                                  }
+                                  onClick={
+                                    isTriggeringPairing
+                                      ? () => {}
+                                      : handleTriggerPairing
+                                  }
+                                  className={`w-full bg-green-600 hover:bg-green-700 ${
+                                    isTriggeringPairing
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+
+                                {pairingData && (
+                                  <PearButton
+                                    text={
+                                      isPublishingPairings
+                                        ? "Publishing..."
+                                        : "Publish Pairings to Students"
+                                    }
+                                    onClick={
+                                      isPublishingPairings
+                                        ? () => {}
+                                        : handlePublishPairings
+                                    }
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                      isPublishingPairings
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  />
+                                )}
+                              </>
+                            )}
+
+                          {currentStatus === "TERMINATED" &&
+                            event.matches &&
+                            Array.isArray(event.matches) &&
+                            event.matches.length > 0 && (
+                              <>
+                                <PearButton
+                                  text="View Existing Pairings"
+                                  onClick={handleViewPairings}
+                                  className="w-full bg-purple-600 hover:bg-purple-700"
+                                />
+
+                                {/* Show publish button if pairings haven't been published yet */}
+                                <PearButton
+                                  text={
+                                    isPublishingPairings
+                                      ? "Publishing..."
+                                      : "Publish Pairings to Students"
+                                  }
+                                  onClick={
+                                    isPublishingPairings
+                                      ? () => {}
+                                      : handlePublishPairings
+                                  }
+                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                    isPublishingPairings
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+                              </>
+                            )}
+
+                          {currentStatus === "PAIRING_PUBLISHED" && (
+                            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                              <h3 className="font-semibold text-green-800 mb-1">
+                                Pairings Published!
+                              </h3>
+                              <p className="text-green-700 text-sm">
+                                Students can now view their matches
+                              </p>
+                              <div className="mt-3">
+                                <PearButton
+                                  text="View Published Pairings"
+                                  onClick={handleViewPairings}
+                                  className="w-full bg-green-600 hover:bg-green-700"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
             {/* Pairing Results (only for orgs with pairing data) */}
             {isOrganizationUser && pairingData && (
