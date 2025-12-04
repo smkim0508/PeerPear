@@ -154,7 +154,7 @@ export default function Navbar({
 
   return (
     <div className="w-full bg-[#C3DD90]">
-      <div className="flex items-center w-screen h-16 px-6">
+      <div className="flex items-center w-full h-16 px-6">
         {/* Logo - Fixed width */}
         <div className="flex items-center gap-2 w-48">
           <img
