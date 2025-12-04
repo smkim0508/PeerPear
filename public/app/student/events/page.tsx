@@ -84,9 +84,9 @@ export default function StudentDashBoard() {
     const isEnded = endDate ? isPast(endDate) : false;
     switch (filterOption) {
       case "Active":
-        return event.status === "STARTED" && !isEnded;
+        return event.status === "STARTED";
       case "Ended":
-        return event.status === "TERMINATED" || isEnded;
+        return event.status === "TERMINATED";
       case "Results Available":
         return event.status === "PAIRING_PUBLISHED";
       default:
