@@ -18,6 +18,7 @@ import {
   Trophy,
   Award,
   Timer,
+  Bell,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
@@ -71,6 +72,7 @@ type Event = {
   title: string | null;
   description: string | null;
   matches: any | null;
+  check_sibling_roles: boolean;
   organizations: {
     id: number;
     org_name: string;
@@ -109,6 +111,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [checkedAutoTerminate, setCheckedAutoTerminate] = useState(false);
+  const [userClassYear, setUserClassYear] = useState<string | null>(null);
 
   // Organization-only section states
   const [participants, setParticipants] = useState<any[]>([]);
@@ -198,17 +201,15 @@ export default function EventPage({ params }: EventPageProps) {
           { credentials: "include" }
         );
 
-        const data = await res.json()
+        const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || "You do not have access to view this event")
+          setError(data.error || "You do not have access to view this event");
         }
-      }
-      catch (err) {
+      } catch (err) {
         console.error("Error verifying access:", err);
         setError("You do not have access to view this event");
       }
-
     };
 
     checkAccess();
@@ -218,6 +219,7 @@ export default function EventPage({ params }: EventPageProps) {
     // Only check registration for students
     if (user?.username && !isOrganizationUser) {
       checkRegistration();
+      getUserClassYear();
     }
   }, [user, isOrganizationUser]);
 
@@ -234,11 +236,7 @@ export default function EventPage({ params }: EventPageProps) {
     }
 
     // Auto-fetch pairings for organization users
-    if (
-      event &&
-      event.status === "PAIRING_PUBLISHED" &&
-      isOrganizationUser
-    ) {
+    if (event && event.status === "PAIRING_PUBLISHED" && isOrganizationUser) {
       handleViewPairings();
     }
   }, [event?.status, user?.id, isOrganizationUser, isRegistered]);
@@ -272,12 +270,11 @@ export default function EventPage({ params }: EventPageProps) {
 
     const expired = timeLeft.expired;
 
-    const color =
-      expired
-        ? "text-red-700 bg-red-100 border-red-300"
-        : timeLeft.days < 2
-          ? "text-orange-700 bg-orange-100 border-orange-300"
-          : "text-green-700 bg-green-100 border-green-300";
+    const color = expired
+      ? "text-red-700 bg-red-100 border-red-300"
+      : timeLeft.days < 2
+      ? "text-orange-700 bg-orange-100 border-orange-300"
+      : "text-green-700 bg-green-100 border-green-300";
 
     return (
       <Card className="shadow-xl border-0 bg-white rounded-xl">
@@ -344,7 +341,9 @@ export default function EventPage({ params }: EventPageProps) {
       return;
     }
 
-    const input = document.getElementById("eventImageUpload") as HTMLInputElement;
+    const input = document.getElementById(
+      "eventImageUpload"
+    ) as HTMLInputElement;
     if (!input?.files?.[0]) return;
 
     const formData = new FormData();
@@ -407,6 +406,25 @@ export default function EventPage({ params }: EventPageProps) {
       }
     } catch (err) {
       console.error("Error checking registration:", err);
+    }
+  };
+
+  const getUserClassYear = async () => {
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const statusResponse = await fetch(
+        `${API_BASE_URL}/event_registration/class-year`,
+        { credentials: "include" }
+      );
+
+      const statusData = await statusResponse.json();
+
+      if (statusResponse.ok) {
+        setUserClassYear(statusData.class_year || null);
+      }
+    } catch (err) {
+      console.error("Error obtaining student class year:", error);
     }
   };
 
@@ -561,7 +579,9 @@ export default function EventPage({ params }: EventPageProps) {
 
       // Then, if there's a new image, upload it
       if (previewImage) {
-        const input = document.getElementById("eventImageUpload") as HTMLInputElement;
+        const input = document.getElementById(
+          "eventImageUpload"
+        ) as HTMLInputElement;
         if (input?.files?.[0]) {
           const formData = new FormData();
           formData.append("image", input.files[0]);
@@ -571,7 +591,7 @@ export default function EventPage({ params }: EventPageProps) {
             {
               method: "PATCH",
               body: formData,
-              credentials: "include"
+              credentials: "include",
             }
           );
 
@@ -592,10 +612,10 @@ export default function EventPage({ params }: EventPageProps) {
       setEvent((prev) =>
         prev
           ? {
-            ...prev,
-            title: editEventData.title,
-            description: editEventData.description,
-          }
+              ...prev,
+              title: editEventData.title,
+              description: editEventData.description,
+            }
           : null
       );
 
@@ -678,7 +698,6 @@ export default function EventPage({ params }: EventPageProps) {
       setIsTriggeringPairing(false);
     }
   };
-
 
   const handleViewPairings = async () => {
     if (!event) return;
@@ -789,32 +808,46 @@ export default function EventPage({ params }: EventPageProps) {
           {/* CONTENT */}
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-
               {/* LEFT: Event Details */}
               <div className="space-y-6">
-
                 {/* Organization */}
                 <div className="flex items-center gap-3 mb-4">
                   <Building2 className="h-7 w-7 text-green" />
                   <span className="text-green font-bold text-xl">
                     {event.organizations.org_name}
                   </span>
+
+                  {event.check_sibling_roles && (
+                    <div className="flex items-center gap-2 before:content-['•'] before:text-green before:text-xl before:mx-1">
+                      <Users className="h-7 w-7 text-green" />
+                      <span className="text-green font-bold text-xl">
+                        Big Sib Little Sib Pairing
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* EDIT / VIEW MODE */}
                 {isEditingEvent ? (
                   <div className="space-y-6">
                     {/* Edit Mode Header */}
-                    <h2 className="text-2xl font-bold text-white">Edit Program Details</h2>
+                    <h2 className="text-2xl font-bold text-white">
+                      Edit Program Details
+                    </h2>
 
                     {/* Title */}
                     <div>
-                      <label className="block text-white text-sm mb-2">Program Title *</label>
+                      <label className="block text-white text-sm mb-2">
+                        Program Title *
+                      </label>
                       <input
                         type="text"
                         value={editEventData.title}
                         onChange={(e) =>
-                          setEditEventData({ ...editEventData, title: e.target.value })
+                          setEditEventData({
+                            ...editEventData,
+                            title: e.target.value,
+                          })
                         }
                         className="w-full text-3xl font-bold bg-transparent border-b border-white focus:border-green-400 outline-none pb-1 text-white"
                         maxLength={100}
@@ -823,11 +856,16 @@ export default function EventPage({ params }: EventPageProps) {
 
                     {/* Description */}
                     <div>
-                      <label className="block text-white text-sm mb-2">Program Description</label>
+                      <label className="block text-white text-sm mb-2">
+                        Program Description
+                      </label>
                       <textarea
                         value={editEventData.description}
                         onChange={(e) =>
-                          setEditEventData({ ...editEventData, description: e.target.value })
+                          setEditEventData({
+                            ...editEventData,
+                            description: e.target.value,
+                          })
                         }
                         rows={4}
                         className="w-full bg-transparent border border-white rounded-lg p-3 text-white focus:border-green-400 outline-none resize-none"
@@ -935,7 +973,6 @@ export default function EventPage({ params }: EventPageProps) {
                   )}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -943,7 +980,6 @@ export default function EventPage({ params }: EventPageProps) {
         {/* === MAIN CONTENT === */}
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid lg:grid-cols-3 gap-8">
-
             {/* === LEFT COLUMN === */}
             <div className="lg:col-span-2 space-y-8">
               {/* Published Pairings Section (New Location) */}
@@ -968,7 +1004,8 @@ export default function EventPage({ params }: EventPageProps) {
                           Pairings have been successfully published!
                         </p>
                         <p className="text-gray-600 leading-relaxed">
-                          All students have been notified of their matches. The complete list of pairings is shown below.
+                          All students have been notified of their matches. The
+                          complete list of pairings is shown below.
                         </p>
                       </div>
                     </div>
@@ -976,7 +1013,10 @@ export default function EventPage({ params }: EventPageProps) {
                     {/* Pairing Results Content */}
                     <div className="mt-8 border-t border-gray-100 pt-6">
                       {pairingData && (
-                        <PairingResults pairingData={pairingData} eventId={eventId} />
+                        <PairingResults
+                          pairingData={pairingData}
+                          eventId={eventId}
+                        />
                       )}
                     </div>
                   </CardContent>
@@ -1008,7 +1048,8 @@ export default function EventPage({ params }: EventPageProps) {
                   <CardContent>
                     <p className="text-gray-800 text-xl mb-6 leading-relaxed">
                       This program includes {event.questions.length} question
-                      {event.questions.length !== 1 ? "s" : ""} to help match participants effectively.
+                      {event.questions.length !== 1 ? "s" : ""} to help match
+                      participants effectively.
                     </p>
                   </CardContent>
                 </Card>
@@ -1047,7 +1088,6 @@ export default function EventPage({ params }: EventPageProps) {
 
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
-
               {/* Event Management section - only for organizations */}
               {isOrganizationUser && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
@@ -1112,27 +1152,31 @@ export default function EventPage({ params }: EventPageProps) {
                                   : "Start Event"
                               }
                               onClick={
-                                isStartingEvent ? () => { } : handleStartEvent
+                                isStartingEvent ? () => {} : handleStartEvent
                               }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
+                              className={`w-full bg-green-600 hover:bg-green-700 ${
+                                isStartingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
                             />
                           )}
 
                           {currentStatus === "STARTED" && (
                             <PearButton
                               text={
-                                isEndingEvent ? "Ending Program..." : "End Program"
+                                isEndingEvent
+                                  ? "Ending Program..."
+                                  : "End Program"
                               }
                               onClick={
-                                isEndingEvent ? () => { } : handleEndEvent
+                                isEndingEvent ? () => {} : handleEndEvent
                               }
-                              className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
+                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
+                                isEndingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
                             />
                           )}
 
@@ -1167,13 +1211,14 @@ export default function EventPage({ params }: EventPageProps) {
                                   }
                                   onClick={
                                     isTriggeringPairing
-                                      ? () => { }
+                                      ? () => {}
                                       : handleTriggerPairing
                                   }
-                                  className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                  className={`w-full bg-green-600 hover:bg-green-700 ${
+                                    isTriggeringPairing
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 />
 
                                 {pairingData && (
@@ -1185,13 +1230,14 @@ export default function EventPage({ params }: EventPageProps) {
                                     }
                                     onClick={
                                       isPublishingPairings
-                                        ? () => { }
+                                        ? () => {}
                                         : handlePublishPairings
                                     }
-                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                      }`}
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                      isPublishingPairings
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
                                   />
                                 )}
                               </>
@@ -1217,17 +1263,17 @@ export default function EventPage({ params }: EventPageProps) {
                                   }
                                   onClick={
                                     isPublishingPairings
-                                      ? () => { }
+                                      ? () => {}
                                       : handlePublishPairings
                                   }
-                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                    isPublishingPairings
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 />
                               </>
                             )}
-
                         </div>
                       </div>
                     </div>
@@ -1235,78 +1281,94 @@ export default function EventPage({ params }: EventPageProps) {
                 </Card>
               )}
 
-
-
               {/* Your Match (only for students) */}
-              {!isOrganizationUser && event?.status === "PAIRING_PUBLISHED" && isRegistered && (
-                <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
-                      <Users className="w-6 h-6" /> Your Match
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingMatch ? (
-                      <div className="text-center py-6">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading your match...</p>
-                      </div>
-                    ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
-                      <div className="space-y-4">
-                        {studentMatch?.groups?.map((group, groupIndex) => (
-                          <div key={groupIndex} className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                              <Users className="w-4 h-4" /> Your Group ({group.students.length} members)
-                            </h3>
-                            <div className="space-y-3">
-                              {group.students.map((student, studentIndex) => (
-                                <div
-                                  key={studentIndex}
-                                  className={`flex items-center justify-between p-3 rounded-md border ${student.id === user?.id ? "bg-blue-100 border-blue-300" : "bg-white border-gray-200"
+              {!isOrganizationUser &&
+                event?.status === "PAIRING_PUBLISHED" &&
+                isRegistered && (
+                  <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+                        <Users className="w-6 h-6" /> Your Match
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {isLoadingMatch ? (
+                        <div className="text-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Loading your match...</p>
+                        </div>
+                      ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
+                        <div className="space-y-4">
+                          {studentMatch?.groups?.map((group, groupIndex) => (
+                            <div
+                              key={groupIndex}
+                              className="bg-green-50 border border-green-200 rounded-lg p-4"
+                            >
+                              <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                                <Users className="w-4 h-4" /> Your Group (
+                                {group.students.length} members)
+                              </h3>
+                              <div className="space-y-3">
+                                {group.students.map((student, studentIndex) => (
+                                  <div
+                                    key={studentIndex}
+                                    className={`flex items-center justify-between p-3 rounded-md border ${
+                                      student.id === user?.id
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-white border-gray-200"
                                     }`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                      {student.role === "BIG_SIBLING" ? (
-                                        <Trophy className="w-4 h-4 text-yellow-600" />
-                                      ) : (
-                                        <Award className="w-4 h-4 text-blue-600" />
-                                      )}
-                                      <div>
-                                        <p className="font-medium text-gray-900">
-                                          {student.name} {student.id === user?.id && "(You)"}
-                                        </p>
-                                        <p className="text-sm text-gray-600">{student.email}</p>
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-2">
+                                        {student.role === "BIG_SIBLING" ? (
+                                          <Trophy className="w-4 h-4 text-yellow-600" />
+                                        ) : (
+                                          <Award className="w-4 h-4 text-blue-600" />
+                                        )}
+                                        <div>
+                                          <p className="font-medium text-gray-900">
+                                            {student.name}{" "}
+                                            {student.id === user?.id && "(You)"}
+                                          </p>
+                                          <p className="text-sm text-gray-600">
+                                            {student.email}
+                                          </p>
+                                        </div>
                                       </div>
                                     </div>
+                                    {event.check_sibling_roles && (
+                                      <span
+                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                          student.role === "BIG_SIBLING"
+                                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                            : "bg-blue-100 text-blue-800 border-blue-200"
+                                        }`}
+                                      >
+                                        {student.role === "BIG_SIBLING"
+                                          ? "Big Sibling"
+                                          : "Little Sibling"}
+                                      </span>
+                                    )}
                                   </div>
-                                  <span
-                                    className={`px-2 py-1 text-xs font-medium rounded-full border ${student.role === "BIG_SIBLING"
-                                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                      : "bg-blue-100 text-blue-800 border-blue-200"
-                                      }`}
-                                  >
-                                    {student.role === "BIG_SIBLING" ? "Big Sibling" : "Little Sibling"}
-                                  </span>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-6">
-                        <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p className="text-gray-600">No match found for this event.</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-gray-600">
+                            No match found for this event.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
             </div>
           </div>
         </div>
-
 
         {/* Registration section - only for students */}
         {!isOrganizationUser && event?.status === "STARTED" && (
@@ -1322,7 +1384,9 @@ export default function EventPage({ params }: EventPageProps) {
                   <div className="space-y-4">
                     <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
                       <CheckCircle className="h-6 w-6" />
-                      <span className="font-bold text-lg">You're registered!</span>
+                      <span className="font-bold text-lg">
+                        You're registered!
+                      </span>
                     </div>
 
                     {/* Questionnaire Status */}
@@ -1346,7 +1410,9 @@ export default function EventPage({ params }: EventPageProps) {
                               <PearButton
                                 text="Complete Questionnaire"
                                 onClick={() =>
-                                  router.push(`/events/${eventId}/questionnaire`)
+                                  router.push(
+                                    `/events/${eventId}/questionnaire`
+                                  )
                                 }
                                 className="w-full"
                               />
@@ -1371,14 +1437,37 @@ export default function EventPage({ params }: EventPageProps) {
                       text={isRegistering ? "Unregistering..." : "Unregister"}
                       onClick={handleUnregister}
                       dark
-                      className={`w-full ${isRegistering ? "opacity-50 cursor-not-allowed" : ""}`}
+                      className={`w-full ${
+                        isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                     />
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 ">
                     <p className="text-gray-800 text-lg font-medium">
                       Ready to join this program?
                     </p>
+                    {/* Show Big/Little badge only if event uses sibling roles */}
+                    {event.check_sibling_roles && userClassYear && (
+                      <div className="flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-green" />
+
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full border 
+          ${
+            userClassYear === "FRESHMAN" || userClassYear === "SOPHOMORE"
+              ? "bg-blue-100 text-blue-800 border-blue-200"
+              : "bg-yellow-100 text-yellow-800 border-yellow-200"
+          }`}
+                        >
+                          {userClassYear === "FRESHMAN" ||
+                          userClassYear === "SOPHOMORE"
+                            ? "You are registering as a Little Sibling"
+                            : "You are registering as a Big Sibling"}
+                        </span>
+                      </div>
+                    )}
+
                     <PearButton
                       text={isRegistering ? "Registering..." : "Register Now"}
                       onClick={() => setShowAIWarning(true)}
@@ -1390,48 +1479,44 @@ export default function EventPage({ params }: EventPageProps) {
             </CardContent>
           </Card>
         )}
-
       </div>
 
-
       {/* === User Modal (only for organization) === */}
-      {
-        isOrganizationUser && isModalOpen && selectedUser && (
-          <div className="fixed inset-0 bg-[#00000078] flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
-              <button
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer"
-                onClick={() => setIsModalOpen(false)}
-              >
-                ✕
-              </button>
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-nav-dark">
-                  {selectedUser.full_name || selectedUser.username}
-                </h2>
-              </div>
-
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                Questionnaire Answers
-              </h3>
-              {userAnswers.length === 0 ? (
-                <p className="text-gray-600 text-center">No answers submitted.</p>
-              ) : (
-                <div className="space-y-4 max-h-80 overflow-y-auto">
-                  {userAnswers.map((ans, idx) => (
-                    <div key={idx} className="bg-light-beige rounded-lg p-4">
-                      <p className="font-medium text-nav-dark">
-                        {ans.questions.question}
-                      </p>
-                      <p className="text-gray-700 mt-1">{ans.answer}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+      {isOrganizationUser && isModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-[#00000078] flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-lg w-full shadow-xl relative">
+            <button
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 cursor-pointer"
+              onClick={() => setIsModalOpen(false)}
+            >
+              ✕
+            </button>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-nav-dark">
+                {selectedUser.full_name || selectedUser.username}
+              </h2>
             </div>
+
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              Questionnaire Answers
+            </h3>
+            {userAnswers.length === 0 ? (
+              <p className="text-gray-600 text-center">No answers submitted.</p>
+            ) : (
+              <div className="space-y-4 max-h-80 overflow-y-auto">
+                {userAnswers.map((ans, idx) => (
+                  <div key={idx} className="bg-light-beige rounded-lg p-4">
+                    <p className="font-medium text-nav-dark">
+                      {ans.questions.question}
+                    </p>
+                    <p className="text-gray-700 mt-1">{ans.answer}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )
-      }
+        </div>
+      )}
       <ConfirmActionModal
         isOpen={showAIWarning}
         onClose={() => setShowAIWarning(false)}
@@ -1442,6 +1527,6 @@ export default function EventPage({ params }: EventPageProps) {
           await handleRegister();
         }}
       />
-    </ProtectedRoute >
+    </ProtectedRoute>
   );
 }
