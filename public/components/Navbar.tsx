@@ -300,7 +300,7 @@ export default function Navbar({
                 /* Default user info */
                 <p className="text-black font-medium whitespace-nowrap">
                   {user?.user_info.attributes?.displayname
-                    ? `${user.user_info.attributes.displayname.toString().toLowerCase()} (${userType})`
+                    ? `${user.user_info.attributes.displayname.toString()}`
                     : ""}
                 </p>
               )}
