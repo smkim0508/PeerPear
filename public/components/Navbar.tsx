@@ -307,13 +307,18 @@ export default function Navbar({
             </>
           )}
           {userType === "guest" ? (
-            <button
-              onClick={onLoginClick}
-              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
-            >
-              Log In
-              <CircleUserRound size={20} />
-            </button>
+            <div className="flex items-center gap-4">
+              <Link href="/about" className="text-black font-medium hover:underline">
+                About Us
+              </Link>
+              <button
+                onClick={onLoginClick}
+                className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
+              >
+                Log In
+                <CircleUserRound size={20} />
+              </button>
+            </div>
           ) : (
             <button
               onClick={logout}
