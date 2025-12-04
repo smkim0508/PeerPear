@@ -1,5 +1,5 @@
 import os
-import uuid
+import time
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -21,43 +21,37 @@ def upload_event_image(
     old_image_url: str | None = None
 ) -> str:
     """
-    Upload an event image to Supabase Storage and return its public URL.
-
-    Args:
-        event_id: ID of the event
-        file_bytes: Image bytes
-        filename: Original filename
-        content_type: MIME type of the image (optional)
-        old_image_url: URL of old image to delete (optional)
-
-    Returns:
-        Public URL of uploaded image
+    Upload an event image to Supabase Storage and return its public URL
+    (with cache-busting to force refresh).
     """
+
     bucket = os.environ.get("SUPABASE_BUCKET", "event-images")
 
-    # ensure content_type is a string
+    # Ensure MIME type
     content_type = content_type or "application/octet-stream"
 
-    # deterministic filename
-    ext = filename.split('.')[-1]
+    # Deterministic filename
+    ext = filename.split(".")[-1]
     file_name = f"event_{event_id}.{ext}"
 
-    # delete old image if exists
-    if old_image_url:
-        try:
-            old_path = old_image_url.split("/")[-1]
-            supabase.storage.from_(bucket).remove([old_path])
-        except Exception as e:
-            print("Failed to delete old image:", e)
+    # 1. Delete existing file BEFORE upload
+    try:
+        supabase.storage.from_(bucket).remove([file_name])
+    except Exception as e:
+        print("No existing file to delete or error deleting:", e)
 
+    # 2. Upload file normally (no upsert)
     try:
         supabase.storage.from_(bucket).upload(
             path=file_name,
             file=file_bytes,
-            file_options={"content-type": content_type}  # no upsert here
+            file_options={"content-type": content_type}
         )
 
+        # 3. Add cache-busting timestamp
         public_url = supabase.storage.from_(bucket).get_public_url(file_name)
+        public_url = f"{public_url}?t={int(time.time())}"
+
         return public_url
 
     except Exception as e:
