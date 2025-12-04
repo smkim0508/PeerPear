@@ -795,11 +795,11 @@ export default function EventPage({ params }: EventPageProps) {
                 {isEditingEvent ? (
                   <div className="space-y-6">
                     {/* Edit Mode Header */}
-                    <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+                    <h2 className="text-2xl font-bold text-white">Edit Program Details</h2>
   
                     {/* Title */}
                     <div>
-                      <label className="block text-white text-sm mb-2">Event Title *</label>
+                      <label className="block text-white text-sm mb-2">Program Title *</label>
                       <input
                         type="text"
                         value={editEventData.title}
@@ -813,7 +813,7 @@ export default function EventPage({ params }: EventPageProps) {
   
                     {/* Description */}
                     <div>
-                      <label className="block text-white text-sm mb-2">Event Description</label>
+                      <label className="block text-white text-sm mb-2">Program Description</label>
                       <textarea
                         value={editEventData.description}
                         onChange={(e) =>
@@ -915,7 +915,7 @@ export default function EventPage({ params }: EventPageProps) {
                       <img
                         src={previewImage || event.image_url || ""}
                         className="rounded-xl shadow-lg object-contain w-full"
-                        alt="Event Preview"
+                        alt="Program Preview"
                       />
                     </div>
                   )}
@@ -955,12 +955,12 @@ export default function EventPage({ params }: EventPageProps) {
               <Card className="shadow-lg border-0 bg-white rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                    <Users className="h-7 w-7" /> Event Questions
+                    <Users className="h-7 w-7" /> Program Questions
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-800 text-xl mb-6 leading-relaxed">
-                    This event includes {event.questions.length} question
+                    This program includes {event.questions.length} question
                     {event.questions.length !== 1 ? "s" : ""} to help match participants effectively.
                   </p>
                 </CardContent>
@@ -1358,7 +1358,7 @@ export default function EventPage({ params }: EventPageProps) {
                     ) : (
                       <div className="space-y-4">
                         <p className="text-gray-800 text-lg font-medium">
-                          Ready to join this event?
+                          Ready to join this program?
                         </p>
                         <PearButton
                           text={isRegistering ? "Registering..." : "Register Now"}
