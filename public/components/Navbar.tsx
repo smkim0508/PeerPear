@@ -36,6 +36,7 @@ export default function Navbar({
   const [currentOrganization, setCurrentOrganization] = useState<OrganizationInfo | null>(null);
   const [userOrganizations, setUserOrganizations] = useState<OrganizationInfo[]>([]);
   const [loadingOrgInfo, setLoadingOrgInfo] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
 
   // Determine user type from auth context or localStorage or prop
   const getUserType = (): "student" | "organization" | "guest" => {
@@ -102,6 +103,29 @@ export default function Navbar({
       setCurrentOrganization(null);
     }
   }, [organizationId, isAuthenticated, userType]);
+
+  useEffect(() => {
+    const checkOwnerAccess = async () => {
+      if (!organizationId || userType !== "organization") {
+        setIsOwner(false);
+        return;
+      }
+
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const response = await fetch(
+          `${apiUrl}/organization/validate-owner/${organizationId}`,
+          { credentials: "include" }
+        );
+        setIsOwner(response.ok);
+      } catch (error) {
+        console.error("Error checking owner access:", error);
+        setIsOwner(false);
+      }
+    };
+
+    checkOwnerAccess();
+  }, [organizationId, userType]);
 
   // Get the correct dashboard URL based on context
   const getDashboardUrl = (): string => {
@@ -190,6 +214,22 @@ export default function Navbar({
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
+
+                {isOwner && (
+                  <NavigationMenuItem className="bg-[#C3DD90] relative">
+                    <NavigationMenuLink
+                      asChild
+                      className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                    >
+                      <Link href={`/organization/${organizationId}/admin`} className="relative">
+                        Admin
+                        {isActiveTab(`/organization/${organizationId}/admin`) && (
+                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                        )}
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                )}
               </NavigationMenuList>
             ) : (
               <></>
