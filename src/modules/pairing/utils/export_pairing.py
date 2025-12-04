@@ -18,6 +18,7 @@ def format_pairing_export(pairing_result: PairingResult, event_title: str, organ
     """
     helper to format pairing result for export.
     Returns a string, which can be handled as .txt or .pdf file content with Flask.
+    If sibling roles are considered, we sort the students by role and alphabetical order within each role.
     """
     template = f"Pairing Result for {event_title} by {organization_name}:\n"
 
@@ -36,6 +37,3 @@ def format_pairing_export(pairing_result: PairingResult, event_title: str, organ
                 template += f"  - {student.name}, {student.email}\n"
 
     return template
-
-
-
