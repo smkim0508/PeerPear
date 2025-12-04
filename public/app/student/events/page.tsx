@@ -2,7 +2,6 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import PearButton from "@/components/PearButton";
@@ -12,7 +11,6 @@ import { isPast, parseISO } from "date-fns";
 
 export default function StudentDashBoard() {
   const router = useRouter();
-  const { user } = useAuth();
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [filterOption, setFilterOption] = useState<string>("All Programs");
   const [loading, setLoading] = useState(true);
@@ -42,7 +40,6 @@ export default function StudentDashBoard() {
         const data = await res.json();
         setEvents(data.events || []);
       } catch (err) {
-        console.log("Error fetching programs", err);
         setError("Failed to load programs. Please check your connection.");
       } finally {
         setLoading(false);
@@ -72,7 +69,6 @@ export default function StudentDashBoard() {
       const data = await res.json();
       setEvents(data.events || []);
     } catch (err) {
-      console.log(err);
       setError("Failed to load programs. Please check your connection.");
     } finally {
       setLoading(false);

@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PairingResults from "@/components/PairingResults";
 import { PairingResultData } from "@/types/events";
@@ -409,7 +408,6 @@ export default function EventPage({ params }: EventPageProps) {
       try {
         const data = await getEventParticipants(eventId);
         setParticipants(data);
-        console.log("Participants data:", data);
       } catch (error) {
         console.error("Error fetching participants:", error);
       }
@@ -729,7 +727,6 @@ export default function EventPage({ params }: EventPageProps) {
       if (result.success && result.data) {
         setStudentMatch(result.data.pairing_results);
       } else {
-        console.log("No match found or error:", result.error);
         setStudentMatch(null);
       }
     } catch (err) {

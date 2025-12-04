@@ -1,10 +1,8 @@
 "use client";
 
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
 import EventCard from "@/components/EventCard";
 import CreateEventModal from "@/components/CreateEventModal";
 import { useRouter } from "next/navigation";
@@ -23,7 +21,6 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
   const { slug } = use(params);
   const organizationId = parseInt(slug);
   const router = useRouter();
-  const { user } = useAuth();
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("All Programs");
@@ -119,9 +116,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
 
       const data = await res.json();
       setEvents(data.events);
-      console.log(data.events);
     } catch (err) {
-      console.log("Error fetching programs", err);
       setError("Failed to load programs. Please check your connection.");
     } finally {
       setLoading(false);
@@ -141,8 +136,6 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
   const handleEventSuccess = async () => {
     await fetchEvents();
   };
-
-  const today = new Date();
 
   const filteredEvents = events.filter((event) => {
     const filterValue = getFilterValue(activeTab);

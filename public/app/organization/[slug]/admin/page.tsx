@@ -1,10 +1,9 @@
   "use client";
   import { useState, useEffect, use } from "react";
   import { useRouter } from "next/navigation";
-  import Navbar from "@/components/Navbar";
-  import Footer from "@/components/Footer";
-  import ProtectedRoute from "@/components/ProtectedRoute";
-  import { useAuth } from "@/contexts/AuthContext";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
   import { Squiggle } from "@/components/ui/Squiggle";
   import { Building2, Edit3, Save, AlertCircle, CheckCircle } from "lucide-react";
   import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -35,7 +34,7 @@
     const { slug } = use(params);
     const organizationId = parseInt(slug);
     const router = useRouter();
-    const { user, refreshAuth } = useAuth();
+    
     const [admins, setAdmins] = useState<Admin[]>([]);
     const [requests, setRequests] = useState<AdminRequest[]>([]);
 
@@ -45,7 +44,7 @@
     const [message, setMessage] = useState<string | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+    
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
     const [confirmOpen, setConfirmOpen] = useState(false);

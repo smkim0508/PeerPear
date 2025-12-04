@@ -3,7 +3,6 @@
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
-import PearButton from "@/components/PearButton";
 import JoinOrganizationModal from "@/components/JoinOrganizationModal";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
 
@@ -14,14 +13,7 @@ interface Organization {
   description?: string;
 }
 
-interface OrganizationProps {
-  params: { slug: string };
-}
-interface OrganizationProps {
-  params: { slug: string };
-}
-
-export default function OrganizationPage({ params }: OrganizationProps) {
+export default function OrganizationPage() {
   const { logout } = useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);

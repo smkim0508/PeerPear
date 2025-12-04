@@ -103,7 +103,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
             }
             return [];
           } catch (err) {
-            console.error(`Error fetching responses for user ${participant.user_id}:`, err);
             return [];
           }
         });
@@ -113,7 +112,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         setAllResponses(flattenedResponses);
       }
     } catch (err) {
-      console.error("Error fetching participants and responses:", err);
     }
   };
 
@@ -144,11 +142,9 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
           setAnswers(normalizedAnswers);
         }
       } else {
-        console.error("Error from server:", data.error);
         setError(data.error || "Failed to load questions");
       }
     } catch (err) {
-      console.log("Error fetching programs", err);
       setError("Failed to fetch questions");
     } finally {
       setLoading(false);
@@ -158,7 +154,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   useEffect(() => {
     const verify_registration = async () => {
       if (!user_id) {
-        console.log("User ID not available yet");
         return;
       }
 
@@ -187,7 +182,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         setValidRegistration(data.valid_registration);
         await get_questions();
       } catch (err) {
-        console.log("Error retrieving registration", err);
         // Even if registration check fails, try to load questions
         await get_questions();
       }
@@ -204,10 +198,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     }
   }, [event_id, user_id, apiUrl, router, user, isOrganizationUser]);
 
-  useEffect(() => {
-    console.log("Current questions", questions);
-    console.log("Current answers:", answers);
-  }, [answers, questions]);
+  
 
   const handleSubmit = async () => {
     if (!user_id) {
@@ -272,7 +263,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         });
       }
     } catch (err) {
-      console.error("Submit error:", err);
       setAlert({
         type: "error",
         message: "Server error. Please try again later.",
@@ -301,7 +291,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
 
       setValidRegistration(true);
     } catch (err) {
-      console.error("Error marking registration valid:", err);
       setAlert({
         type: "error",
         message: "Server error finalizing registration.",

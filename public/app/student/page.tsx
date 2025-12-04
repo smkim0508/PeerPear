@@ -3,7 +3,6 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import SearchBar from "@/components/SearchBar";
 import { PairingEvent } from "@/types/events";
@@ -11,7 +10,6 @@ import { useEffect, useState } from "react";
 import { checkUserRegistration } from "@/lib/events";
 
 export default function StudentDashBoard() {
-  const router = useRouter();
   const { user } = useAuth();
 
   // SearchBar filters
@@ -52,7 +50,6 @@ export default function StudentDashBoard() {
         const data = await res.json();
         setEvents(data.events || []);
       } catch (err) {
-        console.log("Error fetching programs", err);
         setError("Failed to load programs. Please check your connection.");
       } finally {
         setLoading(false);
@@ -79,7 +76,6 @@ export default function StudentDashBoard() {
           new Set(results.filter((r) => r.isRegistered).map((r) => r.id))
         );
       } catch (err) {
-        console.log("Error checking registration", err);
       }
     };
 
