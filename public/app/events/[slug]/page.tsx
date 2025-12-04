@@ -243,13 +243,13 @@ export default function EventPage({ params }: EventPageProps) {
 
       const eventData = await fetchEventById(eventId);
       if (!eventData) {
-        setError("Event not found");
+        setError("Program not found");
         return;
       }
       setEvent(eventData);
     } catch (err) {
       console.error("Error:", err);
-      setError("Failed to load event");
+      setError("Failed to load program");
     } finally {
       setIsLoading(false);
     }
@@ -323,7 +323,7 @@ export default function EventPage({ params }: EventPageProps) {
   // Save the uploaded image
   const handleImageSave = async () => {
     if (!event) {
-      setImageError("Event not loaded yet.");
+      setImageError("Program not loaded yet.");
       return;
     }
   
@@ -428,7 +428,7 @@ export default function EventPage({ params }: EventPageProps) {
           return;
         }
 
-        setError(result.error || "Failed to register for event");
+        setError(result.error || "Failed to register for program");
         return;
       }
 
@@ -443,7 +443,7 @@ export default function EventPage({ params }: EventPageProps) {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setError("Failed to register for event");
+      setError("Failed to register for program");
     } finally {
       setIsRegistering(false);
     }
@@ -465,7 +465,7 @@ export default function EventPage({ params }: EventPageProps) {
       setQuestionnaireCompleted(false);
     } catch (err) {
       console.error("Unregistration error:", err);
-      setError("Failed to unregister");
+      setError("Failed to unregister from program");
     } finally {
       setIsRegistering(false);
     }
@@ -703,7 +703,7 @@ export default function EventPage({ params }: EventPageProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading event...</p>
+          <p className="text-gray-600">Loading program...</p>
         </div>
       </div>
     );
@@ -715,12 +715,12 @@ export default function EventPage({ params }: EventPageProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center py-8">
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Event Error</h2>
+            <h2 className="text-xl font-semibold mb-2">Program Error</h2>
             <p className="text-gray-600 mb-4">
-              {error || "The event you are looking for does not exist."}
+              {error || "The program you are looking for does not exist."}
             </p>
             <PearButton
-              text="Back to Events"
+              text="Back to Programs"
               onClick={() => router.push("/student")}
             />
           </CardContent>
@@ -759,11 +759,11 @@ export default function EventPage({ params }: EventPageProps) {
               {isEditingEvent ? (
                 <div className="space-y-6">
 
-                  <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
+                  <h2 className="text-2xl font-bold text-white">Edit Program Details</h2>
 
                   {/* Title */}
                   <div>
-                    <label className="block text-white text-sm mb-2">Event Title *</label>
+                    <label className="block text-white text-sm mb-2">Program Title *</label>
                     <input
                       type="text"
                       value={editEventData.title}
@@ -777,7 +777,7 @@ export default function EventPage({ params }: EventPageProps) {
 
                   {/* Description */}
                   <div>
-                    <label className="block text-white text-sm mb-2">Event Description</label>
+                    <label className="block text-white text-sm mb-2">Program Description</label>
                     <textarea
                       value={editEventData.description}
                       onChange={(e) =>
@@ -929,12 +929,12 @@ export default function EventPage({ params }: EventPageProps) {
                   <CardHeader>
                     <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
                       <Users className="h-7 w-7" />
-                      Event Questions
+                      Program Questions
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-800 text-xl mb-6 leading-relaxed">
-                      This event includes {event.questions.length} question
+                      This program includes {event.questions.length} question
                       {event.questions.length !== 1 ? "s" : ""} to help match
                       participants effectively.
                     </p>
@@ -1064,7 +1064,7 @@ export default function EventPage({ params }: EventPageProps) {
                         <div className="text-center py-6">
                           <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                           <p className="text-gray-600">
-                            No match found for this event.
+                            No match found for this program.
                           </p>
                         </div>
                       )}
@@ -1157,7 +1157,7 @@ export default function EventPage({ params }: EventPageProps) {
                       ) : (
                         <div className="space-y-4">
                           <p className="text-gray-800 text-lg font-medium">
-                            Ready to join this event?
+                            Ready to join this program?
                           </p>
                           <PearButton
                             text={
@@ -1178,14 +1178,14 @@ export default function EventPage({ params }: EventPageProps) {
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
-                      Event Management
+                      Program Management
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="text-center">
                         <p className="text-gray-800 text-lg font-medium mb-4">
-                          Manage your event and view participant responses
+                          Manage your program and view participant responses
                         </p>
 
                         <div className="grid gap-3">
@@ -1250,7 +1250,7 @@ export default function EventPage({ params }: EventPageProps) {
                           {currentStatus === "STARTED" && (
                             <PearButton
                               text={
-                                isEndingEvent ? "Ending Event..." : "End Event"
+                                isEndingEvent ? "Ending Program..." : "End Program"
                               }
                               onClick={
                                 isEndingEvent ? () => {} : handleEndEvent

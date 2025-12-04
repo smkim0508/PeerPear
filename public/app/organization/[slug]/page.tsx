@@ -26,7 +26,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
   const { user } = useAuth();
   const [events, setEvents] = useState<PairingEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("All Events");
+  const [activeTab, setActiveTab] = useState<string>("All Programs");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
@@ -70,7 +70,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
   };
 
   const tabOptions = [
-    "All Events",
+    "All Programs",
     "Not Started",
     "Active",
     "Unpublished",
@@ -79,7 +79,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
 
   const getFilterValue = (tabName: string) => {
     switch (tabName) {
-      case "All Events":
+      case "All Programs":
         return "all";
       case "Not Started":
         return "notStarted";
@@ -108,11 +108,11 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
 
       if (!res.ok) {
         if (res.status === 401) {
-          setError("Please log in to view events.");
+          setError("Please log in to view programs.");
         } else if (res.status === 403) {
-          setError("You do not have permission to access organization events.");
+          setError("You do not have permission to access organization programs.");
         } else {
-          setError("Failed to load events. Please try again.");
+          setError("Failed to load programs. Please try again.");
         }
         return;
       }
@@ -121,8 +121,8 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
       setEvents(data.events);
       console.log(data.events);
     } catch (err) {
-      console.log("Error fetching events", err);
-      setError("Failed to load events. Please check your connection.");
+      console.log("Error fetching programs", err);
+      setError("Failed to load programs. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -199,7 +199,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
             <div className="max-w-7xl mx-auto mb-6">
               <div className="flex justify-center my-8">
                 <PearButton
-                  text="Create New Event"
+                  text="Create New Program"
                   className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
                   onClick={() => setIsModalOpen(true)}
                 />

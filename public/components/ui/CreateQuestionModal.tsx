@@ -96,7 +96,7 @@ export default function CreateQuestionModal({
 
       if (!res.ok) {
         const errmessage = await res.text();
-        throw new Error(errmessage || "Failed to create event");
+        throw new Error(errmessage || "Failed to create program");
       }
 
       setQuestion("");

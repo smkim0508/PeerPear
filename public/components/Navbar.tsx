@@ -153,7 +153,7 @@ export default function Navbar({
                       className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
                     >
                       <Link href="/student/events" className="relative">
-                        My Events
+                        My Programs
                         {isActiveTab("/student/events") && (
                           <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
                         )}
