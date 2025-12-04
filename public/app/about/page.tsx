@@ -13,7 +13,7 @@ export default function About() {
 
     const teamMembers = [
         { name: "Sungmin Kim", role: "Project Lead" },
-        { name: "Dongkon Lee", role: "Full Stack Developer" },
+        { name: "Dongkon Lee", role: "Full Stack Developer", image: "/DK.png" },
         { name: "Gary Yang", role: "Full Stack Developer" },
         { name: "Nadula", role: "Full Stack Developer" },
         { name: "Jaden", role: "Full Stack Developer" },
@@ -40,7 +40,7 @@ export default function About() {
                     <div className="bg-light-beige p-8 rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-lg text-gray-700 leading-relaxed mb-6">
                             PeerPear is a platform designed to simplify and automate the process of pairing individuals within campus-wide organizations.
-                            Whether it's for mentorship programs, coffee chats, or collaborative projects, we help you build
+                            Whether it's for mentorship programs, coffee chats, or club-wide events, we help you build
                             meaningful connections.
                         </p>
                         <p className="text-lg text-gray-700 leading-relaxed">
@@ -49,6 +49,8 @@ export default function About() {
                         </p>
                     </div>
                 </section>
+
+
 
                 {/* Our Team Section */}
                 <section className="py-16 px-8 bg-gray-50">
@@ -60,8 +62,16 @@ export default function About() {
                                     key={index}
                                     className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-[#C3DD90] flex flex-col items-center text-center"
                                 >
-                                    <div className="w-24 h-24 bg-[#C3DD90] rounded-full flex items-center justify-center mb-4 text-2xl font-bold text-[#393D3F]">
-                                        {member.name.charAt(0)}
+                                    <div className="w-24 h-24 bg-[#C3DD90] rounded-full flex items-center justify-center mb-4 text-2xl font-bold text-[#393D3F] overflow-hidden">
+                                        {member.image ? (
+                                            <img
+                                                src={member.image}
+                                                alt={member.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            member.name.charAt(0)
+                                        )}
                                     </div>
                                     <h3 className="text-xl font-bold text-[#393D3F] mb-2">{member.name}</h3>
                                     <p className="text-gray-600 font-medium">{member.role}</p>
