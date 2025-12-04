@@ -25,6 +25,7 @@ import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PairingResults from "@/components/PairingResults";
 import { PairingResultData } from "@/types/events";
+import ConfirmActionModal from "@/components/ConfirmActionModal";
 import {
   fetchEventById,
   checkUserRegistration,
@@ -147,6 +148,9 @@ export default function EventPage({ params }: EventPageProps) {
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  const [showAIWarning, setShowAIWarning] = useState(false);
+  let pendingRegister = false;
 
   useEffect(() => {
     if (!event?.ends_at) return;
@@ -1362,7 +1366,7 @@ export default function EventPage({ params }: EventPageProps) {
                         </p>
                         <PearButton
                           text={isRegistering ? "Registering..." : "Register Now"}
-                          onClick={handleRegister}
+                          onClick={() => setShowAIWarning(true)}
                           className="w-full"
                         />
                       </div>
@@ -1411,6 +1415,16 @@ export default function EventPage({ params }: EventPageProps) {
           </div>
         </div>
       )}
+      <ConfirmActionModal
+        isOpen={showAIWarning}
+        onClose={() => setShowAIWarning(false)}
+        message="Before registering, please note that this program uses AI/LLM technology to match participants based on questionnaire responses."
+        confirmText="I Understand & Register"
+        cancelText="Cancel"
+        onConfirm={async () => {
+          await handleRegister();
+        }}
+      />
     </ProtectedRoute>
   );
 }
