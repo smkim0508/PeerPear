@@ -151,8 +151,16 @@ export default function EventPage({ params }: EventPageProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  const [showAIWarning, setShowAIWarning] = useState(false);
-  let pendingRegister = false;
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState<string>("");
+  const [confirmCheckBox, setConfirmCheckbox] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] =
+  useState<() => Promise<void>>(() => Promise.resolve());
+
+  const [confirmYes, setConfirmYes] = useState<string>("");
+  const [confirmNo, setConfirmNo] = useState<string>("");
+
+  const pendingRegister = false;
 
   useEffect(() => {
     if (!event?.ends_at) return;
@@ -273,8 +281,8 @@ export default function EventPage({ params }: EventPageProps) {
     const color = expired
       ? "text-red-700 bg-red-100 border-red-300"
       : timeLeft.days < 2
-        ? "text-orange-700 bg-orange-100 border-orange-300"
-        : "text-green-700 bg-green-100 border-green-300";
+      ? "text-orange-700 bg-orange-100 border-orange-300"
+      : "text-green-700 bg-green-100 border-green-300";
 
     return (
       <Card className="shadow-xl border-0 bg-white rounded-xl">
@@ -442,6 +450,23 @@ export default function EventPage({ params }: EventPageProps) {
 
     fetchParticipants();
   }, [eventId, isOrganizationUser]);
+
+  const openRegisterModal = () => {
+    setConfirmMessage(
+      `Before registering, please note that this program uses AI/LLM technology to match participants based on questionnaire responses.`
+    );
+
+    setConfirmCheckbox(
+      "I understand this program uses AI/LLM technology to match participants."
+    );
+
+    setConfirmYes("Register for Event");
+    setConfirmNo("Cancel");
+    setConfirmAction(() => async () => {
+      await handleStartEvent;
+    });
+    setConfirmModalOpen(true);
+  };
 
   const handleRegister = async () => {
     if (!user || !event) return;
@@ -612,10 +637,10 @@ export default function EventPage({ params }: EventPageProps) {
       setEvent((prev) =>
         prev
           ? {
-            ...prev,
-            title: editEventData.title,
-            description: editEventData.description,
-          }
+              ...prev,
+              title: editEventData.title,
+              description: editEventData.description,
+            }
           : null
       );
 
@@ -634,6 +659,21 @@ export default function EventPage({ params }: EventPageProps) {
   const handleCancelEdit = () => {
     setIsEditingEvent(false);
     setEditEventData({ title: "", description: "" });
+  };
+
+  const openStartModal = () => {
+    setConfirmMessage(`Are you sure you want to start this event?`);
+
+    setConfirmCheckbox(
+      "I understand that I cannot edit this event or its questions once I start this event"
+    );
+
+    setConfirmYes("Start Event");
+    setConfirmNo("Cancel");
+    setConfirmAction(() => async () => {
+      await handleStartEvent;
+    });
+    setConfirmModalOpen(true);
   };
 
   // Start event handler
@@ -1163,12 +1203,13 @@ export default function EventPage({ params }: EventPageProps) {
                                   : "Start Event"
                               }
                               onClick={
-                                isStartingEvent ? () => { } : handleStartEvent
+                                isStartingEvent ? () => {} : openStartModal
                               }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
+                              className={`w-full bg-green-600 hover:bg-green-700 ${
+                                isStartingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
                             />
                           )}
 
@@ -1180,12 +1221,13 @@ export default function EventPage({ params }: EventPageProps) {
                                   : "End Program"
                               }
                               onClick={
-                                isEndingEvent ? () => { } : handleEndEvent
+                                isEndingEvent ? () => {} : handleEndEvent
                               }
-                              className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
+                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
+                                isEndingEvent
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
                             />
                           )}
 
@@ -1220,13 +1262,14 @@ export default function EventPage({ params }: EventPageProps) {
                                   }
                                   onClick={
                                     isTriggeringPairing
-                                      ? () => { }
+                                      ? () => {}
                                       : handleTriggerPairing
                                   }
-                                  className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                  className={`w-full bg-green-600 hover:bg-green-700 ${
+                                    isTriggeringPairing
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 />
 
                                 {pairingData && (
@@ -1238,13 +1281,14 @@ export default function EventPage({ params }: EventPageProps) {
                                     }
                                     onClick={
                                       isPublishingPairings
-                                        ? () => { }
+                                        ? () => {}
                                         : handlePublishPairings
                                     }
-                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                      }`}
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                      isPublishingPairings
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
                                   />
                                 )}
                               </>
@@ -1270,13 +1314,14 @@ export default function EventPage({ params }: EventPageProps) {
                                   }
                                   onClick={
                                     isPublishingPairings
-                                      ? () => { }
+                                      ? () => {}
                                       : handlePublishPairings
                                   }
-                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
+                                    isPublishingPairings
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                 />
                               </>
                             )}
@@ -1318,10 +1363,11 @@ export default function EventPage({ params }: EventPageProps) {
                                 {group.students.map((student, studentIndex) => (
                                   <div
                                     key={studentIndex}
-                                    className={`flex items-center justify-between p-3 rounded-md border ${student.id === user?.id
-                                      ? "bg-blue-100 border-blue-300"
-                                      : "bg-white border-gray-200"
-                                      }`}
+                                    className={`flex items-center justify-between p-3 rounded-md border ${
+                                      student.id === user?.id
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-white border-gray-200"
+                                    }`}
                                   >
                                     <div className="flex items-center gap-3">
                                       <div className="flex items-center gap-2">
@@ -1343,10 +1389,11 @@ export default function EventPage({ params }: EventPageProps) {
                                     </div>
                                     {event.check_sibling_roles && (
                                       <span
-                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${student.role === "BIG_SIBLING"
-                                          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                          : "bg-blue-100 text-blue-800 border-blue-200"
-                                          }`}
+                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                          student.role === "BIG_SIBLING"
+                                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                            : "bg-blue-100 text-blue-800 border-blue-200"
+                                        }`}
                                       >
                                         {student.role === "BIG_SIBLING"
                                           ? "Big Sibling"
@@ -1441,8 +1488,9 @@ export default function EventPage({ params }: EventPageProps) {
                       text={isRegistering ? "Unregistering..." : "Unregister"}
                       onClick={handleUnregister}
                       dark
-                      className={`w-full ${isRegistering ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                      className={`w-full ${
+                        isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                     />
                   </div>
                 ) : (
@@ -1457,13 +1505,14 @@ export default function EventPage({ params }: EventPageProps) {
 
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full border 
-          ${userClassYear === "FRESHMAN" || userClassYear === "SOPHOMORE"
-                              ? "bg-blue-100 text-blue-800 border-blue-200"
-                              : "bg-yellow-100 text-yellow-800 border-yellow-200"
-                            }`}
+          ${
+            userClassYear === "FRESHMAN" || userClassYear === "SOPHOMORE"
+              ? "bg-blue-100 text-blue-800 border-blue-200"
+              : "bg-yellow-100 text-yellow-800 border-yellow-200"
+          }`}
                         >
                           {userClassYear === "FRESHMAN" ||
-                            userClassYear === "SOPHOMORE"
+                          userClassYear === "SOPHOMORE"
                             ? "You are registering as a Little Sibling"
                             : "You are registering as a Big Sibling"}
                         </span>
@@ -1472,7 +1521,7 @@ export default function EventPage({ params }: EventPageProps) {
 
                     <PearButton
                       text={isRegistering ? "Registering..." : "Register Now"}
-                      onClick={() => setShowAIWarning(true)}
+                      onClick={() => openRegisterModal}
                       className="w-full"
                     />
                   </div>
@@ -1520,14 +1569,13 @@ export default function EventPage({ params }: EventPageProps) {
         </div>
       )}
       <ConfirmActionModal
-        isOpen={showAIWarning}
-        onClose={() => setShowAIWarning(false)}
-        message="Before registering, please note that this program uses AI/LLM technology to match participants based on questionnaire responses."
-        confirmText="I Understand & Register"
-        cancelText="Cancel"
-        onConfirm={async () => {
-          await handleRegister();
-        }}
+        isOpen={confirmModalOpen}
+        onClose={() => setConfirmModalOpen(false)}
+        checkbox={confirmCheckBox ? confirmCheckBox : undefined}
+        message={confirmMessage}
+        confirmText={confirmYes}
+        cancelText={confirmNo}
+        onConfirm={confirmAction}
       />
     </ProtectedRoute>
   );
