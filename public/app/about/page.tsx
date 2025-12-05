@@ -94,7 +94,7 @@ export default function About() {
                 </section>
 
                 {/* Organization Carousel */}
-                <section className="py-10 bg-white border-t border-gray-100">
+                <section className="pt-10 bg-white border-t border-gray-100">
                     <h2 className="text-2xl font-bold text-[#393D3F] mb-6 text-center opacity-80">Trusted by</h2>
                     <OrganizationCarousel />
                 </section>
