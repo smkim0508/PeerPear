@@ -154,8 +154,9 @@ export default function EventPage({ params }: EventPageProps) {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState<string>("");
   const [confirmCheckBox, setConfirmCheckbox] = useState<string | null>(null);
-  const [confirmAction, setConfirmAction] =
-  useState<() => Promise<void>>(() => Promise.resolve());
+  const [confirmAction, setConfirmAction] = useState<() => Promise<void>>(() =>
+    Promise.resolve()
+  );
 
   const [confirmYes, setConfirmYes] = useState<string>("");
   const [confirmNo, setConfirmNo] = useState<string>("");
@@ -463,7 +464,7 @@ export default function EventPage({ params }: EventPageProps) {
     setConfirmYes("Register for Event");
     setConfirmNo("Cancel");
     setConfirmAction(() => async () => {
-      await handleStartEvent;
+      await handleRegister();
     });
     setConfirmModalOpen(true);
   };
@@ -671,7 +672,7 @@ export default function EventPage({ params }: EventPageProps) {
     setConfirmYes("Start Event");
     setConfirmNo("Cancel");
     setConfirmAction(() => async () => {
-      await handleStartEvent;
+      await handleStartEvent();
     });
     setConfirmModalOpen(true);
   };
@@ -1521,7 +1522,7 @@ export default function EventPage({ params }: EventPageProps) {
 
                     <PearButton
                       text={isRegistering ? "Registering..." : "Register Now"}
-                      onClick={() => openRegisterModal}
+                      onClick={openRegisterModal}
                       className="w-full"
                     />
                   </div>
