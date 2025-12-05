@@ -16,7 +16,7 @@ export default function About() {
         { name: "Dongkon Lee", role: "Full Stack Developer", image: "/DK.png" },
         { name: "Gary Yang", role: "Full Stack Developer" },
         { name: "Nadula", role: "Full Stack Developer", image: "/nadula.jpg" },
-        { name: "Jaden", role: "Full Stack Developer" },
+        { name: "Jaden", role: "Full Stack Developer", image: "/jaden.jpg" },
     ];
 
     return (
