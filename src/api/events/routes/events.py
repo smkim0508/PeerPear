@@ -56,6 +56,7 @@ def get_event_details(event_id: int):
                 "description": event.description,
                 "matches": event.matches,
                 "check_sibling_roles": event.check_sibling_roles,
+                "image_url": event.image_url,
                 "organizations": {
                     "id": organization.id,
                     "org_name": organization.org_name,
@@ -118,6 +119,7 @@ def get_active_events():
                     "title": event.title,
                     "description": event.description,
                     "matches": event.matches,
+                    "image_url": event.image_url,
                     "organizations": {
                         "id": organization.id,
                         "org_name": organization.org_name,

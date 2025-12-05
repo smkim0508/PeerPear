@@ -9,9 +9,9 @@ module.exports = {
         extend: {
             colors: {
                 'pear': {
-                    1: '#5f8f28',
-                    2: '#d7f90c',
-                    3: '#c3dd90',
+                    1: '#8cbf70',
+                    2: '#8cbf70',
+                    3: '#8cbf70',
                     4: '#393D3F',
                     5: '#EBECE4'
                 },

@@ -28,6 +28,7 @@ export default function CreateEventModal({
     description: "",
     endDate: "",
     imageFile: null as File | null,
+    checkSiblingRoles: false,
   });
   const [showAlert, setShowAlert] = useState(false);
   const [dateAlert, setDateAlert] = useState(false);
@@ -74,6 +75,7 @@ export default function CreateEventModal({
     form.append("title", formData.title);
     form.append("description", formData.description);
     form.append("end_date", new Date(formData.endDate).toISOString());
+    form.append("check_sibling_roles", String(formData.checkSiblingRoles));
 
     if (formData.imageFile) {
       form.append("image", formData.imageFile);
@@ -101,6 +103,7 @@ export default function CreateEventModal({
         description: "",
         endDate: "",
         imageFile: null,
+        checkSiblingRoles: false,
       });
 
       const data = await res.json();
@@ -127,7 +130,7 @@ export default function CreateEventModal({
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#D7FF9C] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${
+        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#8cbf70] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${
           isAnimating
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
@@ -138,7 +141,7 @@ export default function CreateEventModal({
           <PearButton
             text="×"
             onClick={onClose}
-            className="w-8 h-8 p-0 text-lg font-bold leading-none rounded-full bg-[#D7FF9C] hover:bg-[#c7f47e] shadow-md"
+            className="w-8 h-8 p-0 text-lg font-bold leading-none rounded-full bg-[#8cbf70] hover:bg-[#8cbf70] shadow-md"
           />
         </div>
 
@@ -216,7 +219,7 @@ export default function CreateEventModal({
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           placeholder="Enter program title"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Description
@@ -228,7 +231,7 @@ export default function CreateEventModal({
           onChange={(e) =>
             setFormData({ ...formData, description: e.target.value })
           }
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           End Date
@@ -239,7 +242,7 @@ export default function CreateEventModal({
             setFormData({ ...formData, endDate: e.target.value })
           }
           type="date"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Optional Program Image
@@ -251,8 +254,26 @@ export default function CreateEventModal({
           }}
           type="file"
           accept="image/*"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-lg border border-gray-200 p-3">
+          <input
+            id="checkSiblingRoles"
+            type="checkbox"
+            checked={formData.checkSiblingRoles}
+            onChange={(e) =>
+              setFormData({ ...formData, checkSiblingRoles: e.target.checked })
+            }
+            className="mt-1 size-4 rounded border-gray-300"
+          />
+          <label htmlFor="checkSiblingRoles" className="text-sm">
+            Big-Little pairing mode
+            <span className="block text-xs text-gray-600">
+              When enabled, participants are assigned Big/Little sibling roles.
+            </span>
+          </label>
+        </div>
 
         <PearButton
           className={`w-full px-3 py-2 mt-6 ${

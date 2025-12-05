@@ -243,7 +243,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           <div className="mb-6">
             <button
               onClick={() => router.push(`/events/${event_id}`)}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Back to Program

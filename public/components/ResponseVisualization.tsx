@@ -10,7 +10,7 @@ interface ResponseVisualizationProps {
   questionIndex: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
+const COLORS = ['#0088FE', '#8cbf70', '#FFBB28', '#FF8042', '#8884d8', '#8cbf70', '#ffc658'];
 
 export default function ResponseVisualization({ 
   question, 
@@ -197,7 +197,7 @@ export default function ResponseVisualization({
                   <XAxis type="number" />
                   <YAxis dataKey="word" type="category" width={80} tick={{ fontSize: 12 }} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#82ca9d" />
+                  <Bar dataKey="count" fill="#8cbf70" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -205,27 +205,27 @@ export default function ResponseVisualization({
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-4 bg-green-50 rounded-lg p-4">
+        <div className="mt-4 bg-green rounded-lg p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-green-600">{questionResponses.length}</div>
-              <div className="text-sm text-green-800">Text Responses</div>
+              <div className="text-2xl font-bold text-green">{questionResponses.length}</div>
+              <div className="text-sm text-green">Text Responses</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">{participants.length}</div>
-              <div className="text-sm text-green-800">Total Participants</div>
+              <div className="text-2xl font-bold text-green">{participants.length}</div>
+              <div className="text-sm text-green">Total Participants</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-green">
                 {Math.round((questionResponses.length / participants.length) * 100)}%
               </div>
-              <div className="text-sm text-green-800">Response Rate</div>
+              <div className="text-sm text-green">Response Rate</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-green">
                 {Math.round(allText.length / questionResponses.length || 0)}
               </div>
-              <div className="text-sm text-green-800">Avg. Words</div>
+              <div className="text-sm text-green">Avg. Words</div>
             </div>
           </div>
         </div>

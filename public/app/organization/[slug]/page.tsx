@@ -8,10 +8,12 @@ import CreateEventModal from "@/components/CreateEventModal";
 import { useRouter } from "next/navigation";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState, use } from "react";
-import PearButton from "@/components/PearButton";
-import PearSwitch from "@/components/PearSwitch";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { parseISO, isPast } from "date-fns";
+  import PearButton from "@/components/PearButton";
+  import { Button } from "@/components/ui/button";
+  import PearSwitch from "@/components/PearSwitch";
+  import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+  import { parseISO, isPast } from "date-fns";
+  import { Plus } from "lucide-react";
 
 interface OrganizationDashboardProps {
   params: Promise<{ slug: string }>;
@@ -163,7 +165,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
 
   return (
     <ProtectedRoute requiredRole="organization">
-      <div className="font-sans flex flex-col min-h-screen">
+      <div className="font-sans flex flex-col min-h-screen bg-light-beige">
         <Navbar userType="organization" />
 
         {/* Authorization Check */}
@@ -190,12 +192,9 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
         ) : (
           <main className="m-4 p-6 flex-1 min-h-screen">
             <div className="max-w-7xl mx-auto mb-6">
-              <div className="flex justify-center my-8">
-                <PearButton
-                  text="Create New Program"
-                  className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
-                  onClick={() => setIsModalOpen(true)}
-                />
+              <div className="text-center mb-6">
+                <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">Programs</h1>
+                <p className="text-foreground/70">Create and manage programs for your organization.</p>
               </div>
             </div>
 
@@ -218,6 +217,21 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
               onSuccess={handleEventSuccess}
               organizationId={organizationId}
             />
+            {!isModalOpen && (
+              <div className="fixed bottom-8 right-8 z-50">
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="cursor-pointer rounded-full h-12 px-6 shadow-2xl hover:shadow-3xl hover:scale-105"
+                  onClick={() => setIsModalOpen(true)}
+                  aria-label="Create new program"
+                  title="Create new program"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="hidden sm:inline ml-2 font-semibold">New Program</span>
+                </Button>
+              </div>
+            )}
           </main>
         )}
         <Footer />

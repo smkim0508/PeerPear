@@ -218,6 +218,7 @@ def create_event():
     - description
     - image_url (optional)
     - end_date
+    - 
 
     The organization_id is determined from the authenticated user's session.
 
@@ -255,8 +256,9 @@ def create_event():
         if org_admin is None:
             return jsonify({"error": "User is not an organization admin"}), 403
 
-    title = data.get("title", "Untitled Event")
+    title = data.get("title", "Untitled Program")
     description = data.get("description", "")
+    check_sibling_roles = data.get("check_sibling_roles", False)
 
     uploaded_file = request.files.get("image")
     image_url = None
@@ -290,6 +292,7 @@ def create_event():
         description=description,
         image_url=image_url,
         end_date=end_dt,
+        check_sibling_roles=check_sibling_roles,
         status=EventStatus.NOT_STARTED
     )
 

@@ -28,7 +28,7 @@ export default function About() {
 
             <main className="flex-1 bg-white">
                 {/* Hero Section */}
-                <section className="bg-[#C3DD90] py-20 px-8 text-center relative">
+                <section className="bg-green py-20 px-8 text-center relative">
                     <div className="absolute top-8 left-8">
                         <Link href="/" className="flex items-center gap-2 text-[#393D3F] font-bold hover:underline">
                             <ArrowLeft size={20} />
@@ -71,9 +71,9 @@ export default function About() {
                             {teamMembers.map((member, index) => (
                                 <div
                                     key={index}
-                                    className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-[#C3DD90] flex flex-col items-center text-center"
+                                    className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 border-t-4 border-green flex flex-col items-center text-center"
                                 >
-                                    <div className="w-24 h-24 bg-[#C3DD90] rounded-full flex items-center justify-center mb-4 text-2xl font-bold text-[#393D3F] overflow-hidden">
+                                    <div className="w-24 h-24 bg-green rounded-full flex items-center justify-center mb-4 text-2xl font-bold text-[#393D3F] overflow-hidden">
                                         {member.image ? (
                                             <img
                                                 src={member.image}
@@ -94,7 +94,7 @@ export default function About() {
                 </section>
 
                 {/* Organization Carousel */}
-                <section className="py-10 bg-white border-t border-gray-100">
+                <section className="pt-10 bg-white border-t border-gray-100">
                     <h2 className="text-2xl font-bold text-[#393D3F] mb-6 text-center opacity-80">Trusted by</h2>
                     <OrganizationCarousel />
                 </section>
