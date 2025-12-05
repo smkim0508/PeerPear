@@ -241,6 +241,10 @@ def create_event_data(session):
     print("Dummy events added.")
 
 def create_event_registration_data(session):
+    """
+    "response_summary" field is supposed to be populated by LLM after semantically summarizing each student's questionnaire responses.
+    However, for demo purposes, we will populate it manually.
+    """
     registrations = [
         # demo test event registrations
         EventRegistrationsTable(
