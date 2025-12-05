@@ -232,9 +232,9 @@ def create_event():
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
-    
-    payload = request.get_json(silent=True) or {}
-    organization_id = payload.get("organization_id", None)
+
+    # get organization_id from form
+    organization_id = data.get("organization_id", None)
 
     if organization_id is None:
         return jsonify({"error": "organization_id is required"}), 400
