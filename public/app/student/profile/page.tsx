@@ -212,11 +212,10 @@ export default function ProfilePage() {
           {/* 🔥 Moved success/error message to top */}
           {saveMessage && (
             <div
-              className={`p-4 mb-8 rounded-lg text-center font-semibold ${
-                saveMessage.includes("successfully")
+              className={`p-4 mb-8 rounded-lg text-center font-semibold ${saveMessage.includes("successfully")
                   ? "bg-green text-nav-dark"
                   : "bg-red-100 text-red-800"
-              }`}
+                }`}
             >
               {saveMessage}
             </div>
@@ -254,12 +253,12 @@ export default function ProfilePage() {
                       name={name}
                       value={(profile as any)[name]}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                        isFieldError(label)
+                      className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError(label)
                           ? "border-red-500 bg-red-50"
                           : "border-gray-200 bg-transparent focus:border-green"
-                      }`}
+                        }`}
                       placeholder={`Enter your ${label.toLowerCase()}`}
+                      maxLength={30}
                     />
                   </div>
                 ))}
@@ -301,11 +300,10 @@ export default function ProfilePage() {
                     name="class_year"
                     value={profile.class_year || ""}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                      isFieldError("Class Year")
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Class Year")
                         ? "border-red-500 bg-red-50"
                         : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
+                      }`}
                   >
                     <option value="" disabled>
                       Select your class year
@@ -327,11 +325,10 @@ export default function ProfilePage() {
                     name="major"
                     value={profile.major}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                      isFieldError("Major")
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Major")
                         ? "border-red-500 bg-red-50"
                         : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
+                      }`}
                     placeholder="Your field of study"
                   />
                 </div>

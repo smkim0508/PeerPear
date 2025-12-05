@@ -1075,12 +1075,14 @@ export default function EventPage({ params }: EventPageProps) {
                             />
                           )}
 
-                          <PearButton
-                            text="Edit Event Details"
-                            onClick={handleEditEvent}
-                            dark
-                            className="w-full"
-                          />
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text="Edit Event Details"
+                              onClick={handleEditEvent}
+                              dark
+                              className="w-full"
+                            />
+                          )}
 
                           {/* Questionnaire management based on event status */}
                           {currentStatus === "NOT_STARTED" && (

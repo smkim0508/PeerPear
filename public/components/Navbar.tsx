@@ -63,7 +63,7 @@ export default function Navbar({
   const isOnOrganizationPage = organizationId !== null;
 
   useEffect(() => {
-    const fetchOrganizationInfo = async (orgId: number) => {
+    const fetchUserOrganizations = async () => {
       try {
         setLoadingOrgInfo(true);
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -80,29 +80,28 @@ export default function Navbar({
               image: "/logo.svg"
             }));
             setUserOrganizations(formattedOrgs);
-
-            const org = formattedOrgs.find((o: OrganizationInfo) => o.id === orgId);
-            if (org) {
-              setCurrentOrganization(org);
-            } else {
-              setCurrentOrganization(null);
-            }
           }
         }
       } catch (error) {
         console.error("Error fetching organization info:", error);
-        setCurrentOrganization(null);
       } finally {
         setLoadingOrgInfo(false);
       }
     };
 
-    if (organizationId && isAuthenticated && userType === "organization") {
-      fetchOrganizationInfo(organizationId);
+    if (isAuthenticated && userType === "organization") {
+      fetchUserOrganizations();
+    }
+  }, [isAuthenticated, userType]);
+
+  useEffect(() => {
+    if (organizationId && userOrganizations.length > 0) {
+      const org = userOrganizations.find((o) => o.id === organizationId);
+      setCurrentOrganization(org || null);
     } else {
       setCurrentOrganization(null);
     }
-  }, [organizationId, isAuthenticated, userType]);
+  }, [organizationId, userOrganizations]);
 
   useEffect(() => {
     const checkOwnerAccess = async () => {
@@ -129,15 +128,19 @@ export default function Navbar({
 
   // Get the correct dashboard URL based on context
   const getDashboardUrl = (): string => {
-    if (userType === "organization" && organizationId) {
-      return `/organization/${organizationId}`;
+    if (userType === "organization") {
+      if (organizationId) return `/organization/${organizationId}`;
+      if (userOrganizations.length > 0) return `/organization/${userOrganizations[0].id}`;
+      return "/organization";
     }
     return `/${userType}`;
   };
 
   const getProfileUrl = (): string => {
-    if (userType === "organization" && organizationId) {
-      return `/organization/${organizationId}/profile`;
+    if (userType === "organization") {
+      if (organizationId) return `/organization/${organizationId}/profile`;
+      if (userOrganizations.length > 0) return `/organization/${userOrganizations[0].id}/profile`;
+      return "/organization";
     }
     return `/${userType}/profile`;
   };
@@ -152,23 +155,28 @@ export default function Navbar({
     return pathname === path;
   };
 
+  const getHomeLink = (): string => {
+    if (!isAuthenticated) return "/";
+    return getDashboardUrl();
+  };
+
   return (
     <div className="w-full bg-[#C3DD90]">
-      <div className="flex items-center w-full h-16 px-6">
-        {/* Logo - Fixed width */}
-        <div className="flex items-center gap-2 w-48">
-          <Link href="/">
+      <div className="relative flex items-center justify-between w-full h-16 px-6">
+        {/* Logo - Left aligned */}
+        <div className="flex items-center gap-2 z-10">
+          <Link href={getHomeLink()}>
             <img
               src="/logo.svg"
               alt="Logo"
               className="h-10 w-10 border-2 border-[#393D3F] rounded-lg p-1 bg-[#393D3F] transition-transform hover:rotate-12"
             />
           </Link>
-          <span className="text-black"><Link href="/">PeerPear</Link></span>
+          <span className="text-black"><Link href={getHomeLink()}>PeerPear</Link></span>
         </div>
 
-        {/* Navigation - Centered */}
-        <div className="flex-1 flex justify-center">
+        {/* Navigation - Absolutely Centered */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <NavigationMenu>
             {userType !== "guest" ? (
               <NavigationMenuList className="flex gap-6">
@@ -239,8 +247,8 @@ export default function Navbar({
           </NavigationMenu>
         </div>
 
-        {/* User info and logout - Flexible width, no wrapping */}
-        <div className="flex items-center gap-3 justify-end whitespace-nowrap">
+        {/* User info and logout - Right aligned */}
+        <div className="flex items-center gap-3 justify-end whitespace-nowrap z-10">
           {isAuthenticated && (
             <>
               {isOnOrganizationPage && currentOrganization && userType === "organization" ? (
@@ -248,18 +256,18 @@ export default function Navbar({
                 <NavigationMenu>
                   <NavigationMenuList>
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent">
-                        <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
+                      <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent max-w-[200px]">
+                        <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap overflow-hidden">
                           <img
                             src={currentOrganization.image}
                             alt={`${currentOrganization.name} logo`}
-                            className="w-8 h-8 rounded-full object-cover"
+                            className="w-8 h-8 rounded-full object-cover shrink-0"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
                             }}
                           />
-                          <span>{currentOrganization.name}</span>
+                          <span className="truncate">{currentOrganization.name}</span>
                         </div>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
@@ -300,7 +308,7 @@ export default function Navbar({
                 </div>
               ) : (
                 /* Default user info */
-                <p className="text-black font-medium whitespace-nowrap">
+                <p className="text-black font-medium truncate max-w-[150px]">
                   {user?.user_info.attributes?.displayname
                     ? `${user.user_info.attributes.displayname.toString()}`
                     : ""}
