@@ -430,7 +430,7 @@ def fill_all_tables(engine):
     # warn users if they don't want to commit this action
     print(
         f"""
-        CREATING DUMMY DATA IN MAIN DB IN 3 SEC...
+        CREATING DUMMY DATA FOR STANDARDIZED DEMO IN MAIN DB IN 3 SEC...
         PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
         """
     )
