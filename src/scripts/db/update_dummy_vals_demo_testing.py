@@ -207,28 +207,32 @@ def create_event_data(session):
             description="This is a big little family pairing for new members of the Asian American Students Association.",
             end_date=datetime.now() + timedelta(weeks=52),
             organization_id=1,
-            status=EventStatus.STARTED
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
         ),
         EventTable( # event id 2
             title="Asian American Students Big Little Family Program",
             description="This is a big little family pairing for new members of the Asian American Students Association.",
             end_date=datetime.now() + timedelta(weeks=52),
             organization_id=1,
-            status=EventStatus.STARTED
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
         ),
         EventTable( # event id 3
             title="Korean Students Big Little Gajok Program",
             description="This is a big little family pairing for new members of the Korean Students Association of Princeton.",
             end_date=datetime.now() + timedelta(weeks=52),
             organization_id=2,
-            status=EventStatus.STARTED
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
         ),
         EventTable( # event id 4
             title="Jocelyn's Test Program",
             description="Demo Test Program for Jocelyn.",
             end_date=datetime.now() + timedelta(weeks=52),
             organization_id=3,
-            status=EventStatus.STARTED
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
         )
     ]
     for event in events:
@@ -242,17 +246,20 @@ def create_event_registration_data(session):
         EventRegistrationsTable(
             user_id=2, # sungmin
             event_id=4,
-            role=EventRole.BIG_SIBLING
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True
         ),
         EventRegistrationsTable(
             user_id=3, # nadula
             event_id=4,
-            role=EventRole.LITTLE_SIBLING
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True
         ),
         EventRegistrationsTable(
             user_id=4, # jaden
             event_id=4,
-            role=EventRole.LITTLE_SIBLING
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True
         )
     ]
 
@@ -262,12 +269,14 @@ def create_event_registration_data(session):
             EventRegistrationsTable(
                 user_id=1, # gary
                 event_id=4,
-                role=EventRole.BIG_SIBLING
+                role=EventRole.BIG_SIBLING,
+                valid_registration=True
             ),
             EventRegistrationsTable(
                 user_id=5, # dk
                 event_id=4,
-                role=EventRole.BIG_SIBLING
+                role=EventRole.BIG_SIBLING,
+                valid_registration=True
             )
         ])
 
