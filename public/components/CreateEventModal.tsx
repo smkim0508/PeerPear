@@ -162,7 +162,7 @@ export default function CreateEventModal({
         {dateAlert && (
           <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
             <AlertTitle className="font-semibold text-red-700">
-              Invalid Dates
+              Invalid Date
             </AlertTitle>
             <AlertDescription className="text-red-600">
               Please make sure the end date is later than today.
