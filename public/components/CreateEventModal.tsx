@@ -9,6 +9,7 @@ interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  organizationId: number;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -17,6 +18,7 @@ export default function CreateEventModal({
   isOpen,
   onClose,
   onSuccess,
+  organizationId,
 }: CreateEventModalProps) {
   const router = useRouter();
 
@@ -76,6 +78,8 @@ export default function CreateEventModal({
     if (formData.imageFile) {
       form.append("image", formData.imageFile);
     }
+
+    form.append("organization_id", organizationId);
 
     try {
       const res = await fetch(

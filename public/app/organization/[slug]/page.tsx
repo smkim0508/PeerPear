@@ -216,6 +216,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               onSuccess={handleEventSuccess}
+              organizationId={organizationId}
             />
           </main>
         )}
