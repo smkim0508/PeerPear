@@ -16,7 +16,8 @@ from db.models.orgadmin import OrgAdminTable
 from db.models.orgadmin_requests import OrgAdminRequestTable
 
 from scripts.db.create_tables import create_all_tables
-from scripts.db.update_dummy_vals import fill_all_tables
+# from scripts.db.update_dummy_vals import fill_all_tables
+from scripts.db.update_dummy_vals_demo_testing import fill_all_tables # NOTE: temporarily using the demo version of reset
 from scripts.db.delete_tables import delete_all_tables, delete_table 
 
 if __name__ == "__main__":

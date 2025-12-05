@@ -211,18 +211,21 @@ def validate_event_and_admin(session, event_id: int, user_id: int):
     )
 
     if not event:
+        logger.info("Event not found")
         return None, {"error": "Event not found", "status": 404}
 
-    org_admin = session.scalar(
+    org_admins = session.scalars(
         select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
-    )
+    ).all()
 
-    if org_admin is None:
+    if not org_admins:
+        logger.info("User is not an organization admin")
         return None, {"error": "User is not an organization admin", "status": 403}
 
-    organization_id = org_admin.organization_id
+    organization_ids = [org_admin.organization_id for org_admin in org_admins]
 
-    if event.organization_id != organization_id:
+    if event.organization_id not in organization_ids:
+        logger.info(f"Organization does not own this event, event org id: {event.organization_id}, admin org ids: {organization_ids}")
         return None, {"error": "Organization does not own this event", "status": 403}
 
     return event, None

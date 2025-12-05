@@ -151,16 +151,16 @@ def verify_view(event_id):
         if not event:
             return jsonify({"error": "Event not found"}), 404
     
-        org_admin = session_instance.scalar(
+        org_admins = session_instance.scalars(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
-        )
+        ).all()
 
-        if org_admin is None:
+        if not org_admins:
             return jsonify({"canView": False,"canEdit": False }), 200
 
-        organization_id = org_admin.organization_id
+        organization_ids = [org_admin.organization_id for org_admin in org_admins]
 
-        if event.organization_id != organization_id:
+        if event.organization_id not in organization_ids:
             return jsonify({"canView": False,"canEdit": False }), 200
         
         if event.status != EventStatus.NOT_STARTED:

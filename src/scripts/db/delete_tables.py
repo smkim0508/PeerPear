@@ -19,6 +19,7 @@ def delete_all_tables(engine):
     print(list(MainDB_Base.metadata.tables.keys()))
     print(f"WARNING: THIS WILL DELETE **ALL** TABLES IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
     time.sleep(5)
+    print(f"Dropping all tables now...")
     MainDB_Base.metadata.drop_all(engine)
 
 # helper to delete a single table
@@ -27,6 +28,7 @@ def delete_table(table_name, engine):
     time.sleep(5)
     
     try:
+        print(f"Dropping table {table_name} now...")
         table = MainDB_Base.metadata.tables[table_name]
     except KeyError:
         raise ValueError(f"Table '{table_name}' not found in metadata")
