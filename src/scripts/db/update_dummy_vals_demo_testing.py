@@ -247,19 +247,15 @@ def create_event_registration_data(session):
             user_id=2, # sungmin
             event_id=4,
             role=EventRole.BIG_SIBLING,
-            valid_registration=True
+            valid_registration=True,
+            response_summary="Enjoys Sushi and Facebook."
         ),
         EventRegistrationsTable(
             user_id=3, # nadula
             event_id=4,
             role=EventRole.LITTLE_SIBLING,
-            valid_registration=True
-        ),
-        EventRegistrationsTable(
-            user_id=4, # jaden
-            event_id=4,
-            role=EventRole.LITTLE_SIBLING,
-            valid_registration=True
+            valid_registration=True,
+            response_summary="Enjoys Hamburger and Instagram."
         )
     ]
 
@@ -270,17 +266,36 @@ def create_event_registration_data(session):
                 user_id=1, # gary
                 event_id=4,
                 role=EventRole.BIG_SIBLING,
-                valid_registration=True
+                valid_registration=True,
+                response_summary="Enjoys Pizza and Instagram."
             ),
             EventRegistrationsTable(
                 user_id=5, # dk
                 event_id=4,
                 role=EventRole.BIG_SIBLING,
-                valid_registration=True
+                valid_registration=True,
+                response_summary="Enjoys Waffles and TikTok."
+            ),
+            EventRegistrationsTable(
+                user_id=4, # jaden
+                event_id=4,
+                role=EventRole.LITTLE_SIBLING,
+                valid_registration=True,
+                response_summary="Enjoys Pancakes and TikTok."
             )
         ])
 
-    # if demo case 2, only 3 people are registered
+    # if demo case 2, only 3 people are registered, and jaden should be paired with sungmin
+    if DEMO_CASE == "2":
+        registrations.extend([
+            EventRegistrationsTable(
+            user_id=4, # jaden
+            event_id=4,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Sashimi and Facebook."
+        )
+        ])
 
     for registration in registrations:
         session.add(registration)
