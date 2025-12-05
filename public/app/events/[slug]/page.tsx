@@ -530,10 +530,10 @@ export default function EventPage2({ params }: EventPageProps) {
                 </div>
                 {isEditingEvent ? (
                   <Card className="border border-gray-200">
-                    <CardHeader>
+                    <CardHeader className="pt-6">
                       <CardTitle className="text-xl">Edit Program Details</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6 px-6 pb-6">
                       <div>
                         <label className="block text-sm mb-2">Program Title *</label>
                         <input
@@ -633,7 +633,7 @@ export default function EventPage2({ params }: EventPageProps) {
             <div className="space-y-8">
               {isOrganizationUser && (currentStatus === "PAIRING_PUBLISHED" || (currentStatus === "TERMINATED" && pairingData)) && (
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
+                  <CardHeader className="flex flex-row items-center justify-between pt-6">
                     <CardTitle className="flex items-center gap-3 text-2xl">
                       <CheckCircle className="h-6 w-6 text-green" />
                       {currentStatus === "PAIRING_PUBLISHED" ? "Published Pairings" : "Pairing Preview"}
@@ -642,7 +642,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       {currentStatus === "PAIRING_PUBLISHED" ? "Active" : "Draft"}
                     </span>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-6 pb-6">
                     <p className="text-gray-800 text-lg">
                       {currentStatus === "PAIRING_PUBLISHED" ? "Pairings have been successfully published!" : "Review pairings before publishing."}
                     </p>
@@ -766,7 +766,7 @@ export default function EventPage2({ params }: EventPageProps) {
                   <CardContent className="px-6 pb-6">
                     <div className="grid gap-3">
                       {hasQuestions && currentStatus === "STARTED" && (
-                        <PearButton text="View Response Analytics" onClick={() => router.push(`/events/${eventId}/questionnaire`)} className="w-full" />
+                        <PearButton text="View Response Analytics" onClick={() => router.push(`/events/${eventId}/questionnaire`)} className="w-full cursor-pointer" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
                         <PearButton text="Edit Program Details" onClick={handleEditEvent} className="w-full cursor-pointer" />
@@ -781,7 +781,7 @@ export default function EventPage2({ params }: EventPageProps) {
                         <PearButton text={isStartingEvent ? "Starting Program..." : "Start Program"} onClick={isStartingEvent ? () => {} : openStartModal} className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer`} />
                       )}
                       {currentStatus === "STARTED" && (
-                        <PearButton text={isEndingEvent ? "Ending Program..." : "End Program"} onClick={isEndingEvent ? () => {} : handleEndEvent} className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent ? "opacity-50 cursor-not-allowed" : ""}`} />
+                        <PearButton text={isEndingEvent ? "Ending Program..." : "End Program"} onClick={isEndingEvent ? () => {} : handleEndEvent} className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer`} />
                       )}
                       {currentStatus === "TERMINATED" && (!event.matches || (Array.isArray(event.matches) && event.matches.length === 0)) && (
                         <>
