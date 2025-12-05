@@ -253,7 +253,7 @@ export default function PearForm({
 
                     <button
                         onClick={handleAddOption}
-                        className="mt-2 flex items-center gap-2 text-sm text-green-700 hover:text-green-800 font-medium"
+                        className="mt-2 flex items-center gap-2 text-sm text-green hover:text-green font-medium"
                     >
                         <Plus size={16} />
                         Add Option

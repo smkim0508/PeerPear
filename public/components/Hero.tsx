@@ -31,9 +31,9 @@ export default function Hero({ onTryNowClick }: HeroProps) {
           </p>
 
           <div className="mt-7 flex gap-3 justify-center">
-            <PearButton text="Try now" onClick={onTryNowClick} />
+            <PearButton text="Try now" onClick={onTryNowClick} className="cursor-pointer" />
             <a href="#features">
-              <PearButton text="Learn more" onClick={() => {}} dark />
+              <PearButton text="Learn more" onClick={() => {}} dark className="cursor-pointer" />
             </a>
           </div>
         </div>

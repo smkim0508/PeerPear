@@ -48,7 +48,7 @@ export default function Home() {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#C3DD90]">
+      <div className="flex items-center justify-center min-h-screen bg-light-beige">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading...</p>
@@ -58,7 +58,7 @@ export default function Home() {
   }
 
   return (
-    <div className="font-sans min-h-screen flex flex-col">
+    <div className="font-sans min-h-screen flex flex-col bg-light-beige">
       <Navbar onLoginClick={openLoginModal} userType="guest" />
 
       {/* Error message display */}
@@ -86,12 +86,12 @@ export default function Home() {
             <img src="/wave-2.svg" alt="" className="block w-full" />
           </div>
 
-          <div className="px-8 py-6 pb-18">
-            <h3 className="text-4xl m-0 mt-8 font-extrabold italic text-[rgb(10,10,10)] tracking-tight">
+          <div className="px-8 py-12 bg-light-beige">
+            <h3 className="text-4xl m-0 mt-2 font-extrabold text-nav-dark tracking-tight">
               Ready to simplify your pairings?
             </h3>
             <div className="mt-5">
-              <PearButton text="Get started" onClick={openLoginModal} />
+              <PearButton text="Get started" onClick={openLoginModal} className="cursor-pointer" />
             </div>
           </div>
         </section>

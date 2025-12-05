@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="bg-nav-dark text-white font-sans">
+    <footer className="bg-green text-white font-sans">
       <div className="max-w-[1200px] mx-auto px-8 py-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 group cursor-pointer">
@@ -18,7 +18,7 @@ export default function Footer() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400">Made with ❤️ for <a className="hover:underline" href="https://www.cs.princeton.edu/courses/cos333" target="_blank">COS333</a> by Nadula, Jaden, Sungmin, Gary, and DK.</span>
+          <span className="text-sm text-white">Made with ❤️ for <a className="hover:underline" href="https://www.cs.princeton.edu/courses/cos333" target="_blank">COS333</a> by Nadula, Jaden, Sungmin, Gary, and DK.</span>
           </div>
       </div>
     </footer>

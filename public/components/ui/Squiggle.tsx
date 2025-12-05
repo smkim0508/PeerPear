@@ -14,7 +14,7 @@ export function Squiggle({ width = 140, className = "" }: SquiggleProps) {
     >
       <path
         d="M0 7 Q10 2, 20 7 T40 7 T60 7 T80 7 T100 7 T120 7 T140 7"
-        stroke="#D7FF9C"
+        stroke="#8cbf70"
         strokeWidth="8"
         strokeLinecap="round"
         fill="none"

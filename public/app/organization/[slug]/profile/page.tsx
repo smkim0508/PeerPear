@@ -187,43 +187,37 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
           <main className="flex-1 p-8 max-w-5xl mx-auto">
             {/* Header Section */}
             <div className="text-center mb-12">
-              <h1 className="text-[56px] font-extrabold text-[#0a0a0a] relative inline-block tracking-tight">
+              <h1 className="text-[56px] font-extrabold text-nav-dark relative inline-block tracking-tight">
                 Organization Profile
                 <Squiggle
                   width={530}
                   className="left-1/2 -translate-x-1/2 -bottom-2"
                 />
               </h1>
-              <p className="mt-6 text-lg text-[#1a1a1a] max-w-2xl mx-auto">
+              <p className="mt-6 text-lg text-foreground/80 max-w-2xl mx-auto">
                 Manage your organization's profile information and settings
               </p>
             </div>
 
             {/* Profile Card */}
-            <div className="bg-[#C3DD90] rounded-xl shadow-lg p-8 transition-all duration-300 hover:shadow-2xl hover:brightness-105 mb-8">
+            <div className="bg-white rounded-xl shadow-sm border p-8 transition-all duration-300 hover:shadow-md mb-8">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="bg-white rounded-full p-3 shadow-md">
-                    <Building2 className="w-8 h-8 text-[#1a1a1a]" />
+                  <div className="bg-primary/10 rounded-full p-3">
+                    <Building2 className="w-8 h-8 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-[#0a0a0a]">
+                    <h2 className="text-3xl font-bold text-nav-dark">
                       {orgName || "Your Organization"}
                     </h2>
-                    <p className="text-[#1a1a1a] font-medium">
+                    <p className="text-foreground/80 font-medium">
                       Organization Details
                     </p>
                   </div>
                 </div>
 
                 {!isEditing && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="cursor-pointer bg-white hover:bg-gray-50 text-[#1a1a1a] px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    Edit Profile
-                  </button>
+                  <PearButton text="Edit Profile" onClick={() => setIsEditing(true)} variant="outline" />
                 )}
               </div>
 
@@ -293,27 +287,17 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   </div>
 
                   <div className="flex gap-4 pt-4">
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="cursor-pointer bg-[#1a1a1a] hover:bg-[#0a0a0a] text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Save className="w-4 h-4" />
-                      {isLoading ? "Saving..." : "Save Changes"}
-                    </button>
-
-                    <button
-                      type="button"
+                    <PearButton text={isLoading ? "Saving..." : "Save Changes"} variant="default" disabled={isLoading} />
+                    <PearButton
+                      text="Cancel"
+                      variant="outline"
                       onClick={() => {
                         setIsEditing(false);
                         setEditName(orgName);
                         setMessage(null);
                         setErrors({});
                       }}
-                      className="cursor-pointer bg-white hover:bg-gray-50 text-[#1a1a1a] px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                    >
-                      Cancel
-                    </button>
+                    />
                   </div>
 
                   {message && (
@@ -367,17 +351,15 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
             {/* Additional Info Cards */}
             <div className="grid md:grid-cols-1 gap-6 mt-8">
-              <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105">
-                <h3 className="text-xl font-bold text-[#0a0a0a] mb-3">
+              <div className="bg-white rounded-xl shadow-sm border p-6 transition-all duration-300 hover:shadow-md">
+                <h3 className="text-xl font-bold text-nav-dark mb-3">
                   Need Help?
                 </h3>
-                <p className="text-[#1a1a1a] mb-4">
+                <p className="text-foreground/80 mb-4">
                   Having trouble with your profile? Check out our help
                   resources.
                 </p>
-                <button className="bg-green cursor-pointer hover:bg-[#c4de90] text-[#0a0a0a] px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105">
-                  Contact Support
-                </button>
+                <PearButton text="Contact Support" />
               </div>
             </div>
           </main>

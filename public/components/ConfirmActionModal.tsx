@@ -86,11 +86,7 @@ export default function ConfirmActionModal({
               await onConfirm();
               onClose();
             }}
-            className={`px-4 py-2 rounded-md text-white transition 
-             
-                 bg-green-600 hover:bg-green-500
-                
-            `}
+            className={`px-4 py-2 rounded-md text-white transition bg-green cursor-pointer`}
           >
             {confirmText}
           </button>

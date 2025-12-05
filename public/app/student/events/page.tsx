@@ -5,6 +5,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import PearButton from "@/components/PearButton";
+import PearSwitch from "@/components/PearSwitch";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
 import { isPast, parseISO } from "date-fns";
@@ -92,58 +93,20 @@ export default function StudentDashBoard() {
 
   return (
     <ProtectedRoute requiredRole="student">
-      <div className="font-sans flex flex-col min-h-screen bg-gray-50">
+      <div className="font-sans flex flex-col min-h-screen bg-light-beige">
         <Navbar userType="student" />
 
         <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
-          <div className="flex flex-col items-center max-w-7xl mx-auto mb-6">
-            <h1 className="text-3xl font-bold mb-4 text-gray-800">
-              My Registered Programs
-            </h1>
-
-            {/* Native dropdown */}
-            <div className="w-full max-w-xs">
-              <label
-                htmlFor="eventFilter"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Filter Programs
-              </label>
-              <div className="relative">
-                <select
-                  id="eventFilter"
-                  value={filterOption}
-                  onChange={(e) => setFilterOption(e.target.value)}
-                  className="
-                    block w-full appearance-none bg-white border border-gray-300
-                    rounded-xl py-2 pl-4 pr-10 text-gray-700 shadow-sm
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                    sm:text-sm transition-all duration-200 hover:border-gray-400
-                  "
-                >
-                  {["All Programs", "Active", "Ended", "Results Available"].map(
-                    (option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    )
-                  )}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <svg
-                    className="h-4 w-4 text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
+          <div className="max-w-7xl mx-auto mb-6">
+            <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">My Registered Programs</h1>
+            <div className="mt-1 flex items-center justify-between">
+              <p className="text-foreground/70">View and filter programs you’ve joined.</p>
+              <PearSwitch
+                options={["All Programs", "Active", "Ended", "Results Available"]}
+                activeOption={filterOption}
+                onOptionChange={(opt) => setFilterOption(opt)}
+                className="shrink-0"
+              />
             </div>
           </div>
 

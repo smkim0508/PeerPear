@@ -17,7 +17,9 @@ export default function StudentDashBoard() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [events, setEvents] = useState<PairingEvent[]>([]);
-  const [registeredEvents, setRegisteredEvents] = useState<Set<number>>(new Set());
+  const [registeredEvents, setRegisteredEvents] = useState<Set<number>>(
+    new Set()
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,14 +38,19 @@ export default function StudentDashBoard() {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
         const res = await fetch(`${apiUrl}/student_dashboard/event-browse`, {
           credentials: "include",
         });
 
         if (!res.ok) {
-          setError(res.status === 401 ? "Please log in to view programs." : "Failed to load programs.");
+          setError(
+            res.status === 401
+              ? "Please log in to view programs."
+              : "Failed to load programs."
+          );
           return;
         }
 
@@ -66,7 +73,10 @@ export default function StudentDashBoard() {
     const checkStatuses = async () => {
       try {
         const checks = events.map(async (event) => {
-          const isRegistered = await checkUserRegistration(user.username, event.id);
+          const isRegistered = await checkUserRegistration(
+            user.username,
+            event.id
+          );
           return { id: event.id, isRegistered };
         });
 
@@ -75,8 +85,7 @@ export default function StudentDashBoard() {
         setRegisteredEvents(
           new Set(results.filter((r) => r.isRegistered).map((r) => r.id))
         );
-      } catch (err) {
-      }
+      } catch (err) {}
     };
 
     checkStatuses();
@@ -96,12 +105,20 @@ export default function StudentDashBoard() {
 
   return (
     <ProtectedRoute requiredRole="student">
-      <div className="font-sans flex flex-col min-h-screen">
+      <div className="font-sans flex flex-col min-h-screen bg-light-beige">
         <Navbar userType="student" />
 
         <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
+          <div className="max-w-7xl mx-auto px-2 sm:px-0 mb-6">
+            <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">
+              Dashboard
+            </h1>
+            <p className="text-foreground/70 mt-1">
+              Browse active programs or search by organization.
+            </p>
+          </div>
           {/* Search + event/org filter */}
-          <div className="max-w-7xl mx-auto mb-2">
+          <div className="max-w-328 mx-auto mb-6">
             <SearchBar
               activeTab={eventTab}
               setActiveTab={setEventTab}
@@ -121,7 +138,9 @@ export default function StudentDashBoard() {
           ) : error ? (
             <p className="text-center text-red-600 text-lg">{error}</p>
           ) : filteredEvents.length === 0 ? (
-            <p className="text-center text-gray-600 text-lg">No programs found.</p>
+            <p className="text-center text-gray-600 text-lg">
+              No programs found.
+            </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
               {filteredEvents.map((event) => (

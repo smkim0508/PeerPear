@@ -32,7 +32,7 @@ function Card({
 
 export default function Features() {
   return (
-    <section className="relative bg-dark-beige font-sans" id="features">
+    <section className="relative bg-[#CCCEC1] font-sans" id="features">
       <div className="mx-auto px-8 py-15 pb-20 text-center">
         <h2 className="text-[56px] mx-auto font-extrabold text-[#0a0a0a] relative inline-block tracking-tight">
           Features
@@ -58,7 +58,7 @@ export default function Features() {
             text="Create programs, track participants, and export final matches instantly."
             rotation={-2}
           />
-          <Card
+          {/* <Card
             title="Flexible Match Modes"
             text="Choose between similarity-based or diversity-driven pairing."
             rotation={6}
@@ -67,7 +67,7 @@ export default function Features() {
             title="Instant Exports"
             text="Generate polished PDFs or text files for quick announcements."
             rotation={-4}
-          />
+          /> */}
         </div>
       </div>
     </section>

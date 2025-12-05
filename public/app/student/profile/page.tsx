@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { Squiggle } from "@/components/ui/Squiggle";
 import { User, Mail, Phone, BookOpen, GraduationCap, Heart } from "lucide-react";
+import PearButton from "@/components/PearButton";
 
 interface Profile {
   user_id: number;
@@ -235,14 +236,14 @@ export default function ProfilePage() {
 
         <div className="bg-linear-to-br from-light-beige to-dark-beige relative overflow-hidden">
           <div className="max-w-6xl mx-auto px-8 py-16 text-center">
-            <h1 className="text-6xl md:text-7xl font-extrabold text-[#0a0a0a] tracking-tight mb-4">
+            <h1 className="text-6xl md:text-7xl font-extrabold text-nav-dark tracking-tight mb-4">
               Your{" "}
               <span className="relative inline-block whitespace-nowrap">
                 Profile
                 <Squiggle width={225} className="left-0 right-0 -bottom-2" />
               </span>
             </h1>
-            <p className="text-xl text-[#1a1a1a] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
               Tell us about yourself! This information helps us create better matches
               and makes you part of the PeerPear community.
             </p>
@@ -269,15 +270,11 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* (ALL OTHER FORM CONTENT UNCHANGED) */}
-            {/* Personal Info */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-green rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-nav-dark" />
-                </div>
-                <h2 className="text-3xl font-bold text-nav-dark">Personal Information</h2>
+          <form onSubmit={handleSubmit} className="space-y-10">
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <User className="w-6 h-6 text-green" />
+                <h2 className="text-2xl font-semibold text-nav-dark">Personal Information</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -337,13 +334,10 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Academic Info */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-green rounded-full flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6 text-nav-dark" />
-                </div>
-                <h2 className="text-3xl font-bold text-nav-dark">Academic Information</h2>
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <GraduationCap className="w-6 h-6 text-green" />
+                <h2 className="text-2xl font-semibold text-nav-dark">Academic Information</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -392,13 +386,10 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Hobbies */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-green rounded-full flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-nav-dark" />
-                </div>
-                <h2 className="text-3xl font-bold text-nav-dark">
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Heart className="w-6 h-6 text-green" />
+                <h2 className="text-2xl font-semibold text-nav-dark">
                   Interests & Hobbies <span className="text-red-500">*</span>
                 </h2>
               </div>
@@ -425,13 +416,7 @@ export default function ProfilePage() {
                     }
                   />
 
-                  <button
-                    type="button"
-                    onClick={handleAddHobby}
-                    className="px-6 py-3 bg-green text-nav-dark font-semibold rounded-lg hover:scale-105 hover:shadow-lg transition-all"
-                  >
-                    Add
-                  </button>
+                  <PearButton text="Add" onClick={handleAddHobby} />
                 </div>
 
                 {hobbyError && (
@@ -470,20 +455,7 @@ export default function ProfilePage() {
 
             {/* Save Button */}
             <div className="text-center">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="inline-flex items-center justify-center px-8 py-4 bg-green text-nav-dark font-bold text-lg rounded-lg transition-all hover:scale-105 hover:shadow-xl disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-nav-dark border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Saving Profile...
-                  </>
-                ) : (
-                  "Save Profile"
-                )}
-              </button>
+              <PearButton text={isLoading ? "Saving Profile..." : "Save Profile"} disabled={isLoading} />
             </div>
           </form>
         </main>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleUserRound, ArrowLeft } from "lucide-react";
+import { CircleUserRound, ArrowLeft, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -164,7 +164,7 @@ export default function Navbar({
   };
 
   return (
-    <div className="w-full bg-[#C3DD90]">
+    <div className="w-full bg-white border-b shadow-sm">
       <div className="relative flex items-center justify-between w-full h-16 px-6">
         {/* Logo - Left aligned */}
         <div className="flex items-center gap-2 z-10">
@@ -172,10 +172,10 @@ export default function Navbar({
             <img
               src="/logo.svg"
               alt="Logo"
-              className="h-10 w-10 border-2 border-[#393D3F] rounded-lg p-1 bg-[#393D3F] transition-transform hover:rotate-12"
+              className="h-10 w-10 rounded-lg p-1 bg-nav-dark text-white transition-transform hover:rotate-12"
             />
           </Link>
-          <span className="text-black"><Link href={getHomeLink()}>PeerPear</Link></span>
+          <span className="text-nav-dark font-semibold"><Link href={getHomeLink()}>PeerPear</Link></span>
         </div>
 
         {/* Navigation - Absolutely Centered */}
@@ -184,15 +184,15 @@ export default function Navbar({
             {userType !== "guest" ? (
               <NavigationMenuList className="flex gap-6">
                 {userType === "student" ? (
-                  <NavigationMenuItem className="bg-[#C3DD90] relative">
+                  <NavigationMenuItem className="relative">
                     <NavigationMenuLink
                       asChild
-                      className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                      className={navigationMenuTriggerStyle()}
                     >
                       <Link href="/student/events" className="relative">
                         My Programs
                         {isActiveTab("/student/events") && (
-                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                         )}
                       </Link>
                     </NavigationMenuLink>
@@ -200,44 +200,44 @@ export default function Navbar({
                 ) : (
                   <></>
                 )}
-                <NavigationMenuItem className="bg-[#C3DD90] relative">
+                <NavigationMenuItem className="relative">
                   <NavigationMenuLink
                     asChild
-                    className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                    className={navigationMenuTriggerStyle()}
                   >
                     <Link href={getDashboardUrl()} className="relative">
                       Dashboard
                       {isActiveTab("dashboard") && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                       )}
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                <NavigationMenuItem className="bg-[#C3DD90] relative">
+                <NavigationMenuItem className="relative">
                   <NavigationMenuLink
                     asChild
-                    className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                    className={navigationMenuTriggerStyle()}
                   >
                     <Link href={getProfileUrl()} className="relative">
                       Profile
                       {isActiveTab(getProfileUrl()) && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                       )}
                     </Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 {isOwner && (
-                  <NavigationMenuItem className="bg-[#C3DD90] relative">
+                  <NavigationMenuItem className="relative">
                     <NavigationMenuLink
                       asChild
-                      className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
+                      className={navigationMenuTriggerStyle()}
                     >
                       <Link href={`/organization/${organizationId}/admin`} className="relative">
                         Admin
                         {isActiveTab(`/organization/${organizationId}/admin`) && (
-                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
+                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                         )}
                       </Link>
                     </NavigationMenuLink>
@@ -305,13 +305,13 @@ export default function Navbar({
                 </NavigationMenu>
               ) : loadingOrgInfo && isOnOrganizationPage ? (
                 /* Loading state when fetching organization info */
-                <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap">
+                <div className="flex items-center gap-2 text-nav-dark font-medium whitespace-nowrap">
                   <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
                   <span className="text-gray-500">Loading...</span>
                 </div>
               ) : (
                 /* Default user info */
-                <p className="text-black font-medium truncate max-w-[150px]">
+                <p className="text-nav-dark font-medium max-w-[150px]">
                   {user?.user_info.attributes?.displayname
                     ? `${user.user_info.attributes.displayname.toString()}`
                     : ""}
@@ -321,23 +321,24 @@ export default function Navbar({
           )}
           {userType === "guest" ? (
             <div className="flex items-center gap-4">
-              <Link href="/about" className="text-black font-medium hover:underline">
+              <Link href="/about" className="text-nav-dark font-medium hover:underline">
                 About Us
               </Link>
               <button
                 onClick={onLoginClick}
-                className="px-5 py-2.5 rounded-lg bg-[#393D3F] text-white font-medium hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer whitespace-nowrap transform hover:-translate-y-0.5"
+                className="px-5 py-2.5 rounded-lg bg-nav-dark text-white font-medium hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer whitespace-nowrap transform hover:-translate-y-0.5"
               >
-                Log In
+                Log in
                 <CircleUserRound size={20} />
               </button>
             </div>
           ) : (
             <button
               onClick={logout}
-              className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
+              className="ml-2 px-4 py-2.5 rounded-lg bg-nav-dark text-white font-medium hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer whitespace-nowrap transform hover:-translate-y-0.5 text-sm"
             >
-              Log Out
+              Log out
+              <LogOut size={16} />
             </button>
           )}
         </div>

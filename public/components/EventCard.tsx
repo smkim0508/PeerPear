@@ -37,7 +37,7 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
   const badgeColor = (() => {
     switch (statusLabel) {
       case "Active":
-        return "bg-green-100 text-green-700 border-green-400";
+        return "bg-green text-nav-dark border-green";
       case "Not Started":
         return "bg-yellow-100 text-yellow-700 border-yellow-400";
       case "Results Published":
@@ -72,7 +72,7 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
   };
 
   return (
-    <Card className="group flex flex-col h-full rounded-xl shadow-md hover:shadow-xl transition-all duration-300 bg-[#C3DD90] border-0 overflow-hidden hover:-translate-y-1">
+    <Card className="group flex flex-col h-full rounded-xl shadow-sm hover:shadow-md transition-all duration-300 bg-white border overflow-hidden hover:-translate-y-0.5">
       <div className="relative h-48 overflow-hidden">
         <Image
           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -83,7 +83,7 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
 
-        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow-lg">
+        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full shadow">
           <div className="flex items-center gap-1 text-xs font-medium text-gray-700">
             <Clock className="w-3 h-3" />
             {timeUntilEvent}
@@ -91,8 +91,8 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
         </div>
 
         {isRegistered && (
-          <div className="absolute top-3 right-3 bg-[#C3DD90] backdrop-blur-sm px-3 py-1 rounded-full shadow-lg">
-            <div className="flex items-center gap-1 text-xs font-medium text-black">
+          <div className="absolute top-3 right-3 bg-primary/10 backdrop-blur-sm px-3 py-1 rounded-full shadow">
+            <div className="flex items-center gap-1 text-xs font-medium text-primary">
               <CheckCircle className="w-3 h-3" />
               Registered
             </div>
@@ -102,7 +102,7 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
 
       <div className="flex flex-col grow p-5">
         <CardHeader className="p-0 pb-3">
-          <CardTitle className="text-xl font-bold line-clamp-2 text-gray-900 group-hover:text-pear-3 transition-colors">
+          <CardTitle className="text-xl font-semibold line-clamp-2 text-gray-900">
             {event.title}
           </CardTitle>
           <CardDescription className="text-sm text-gray-600 font-medium">
@@ -117,13 +117,16 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
               <span>{formattedDate}</span>
             </div>
           </div>
+          <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${badgeColor}`}>
+            {statusLabel}
+          </div>
         </CardContent>
 
         <CardFooter className="p-0 pt-3 mt-auto">
           <PearButton
             text="View Details"
             onClick={handleViewDetails}
-            className="w-full"
+            className="w-full cursor-pointer"
           />
         </CardFooter>
       </div>

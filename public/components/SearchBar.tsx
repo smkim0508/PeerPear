@@ -19,9 +19,9 @@ export default function SearchBar({
   return (
     <div className="w-full px-4">
       <div className="w-full max-w-full mx-auto">
-        <div className="flex items-center gap-4 w-full">
+        <div className="flex w-full items-center justify-between gap-3 sm:gap-4">
           {/* Search input (left, fills remaining space) */}
-          <div className="flex-1 min-w-56">
+          <div className="flex-1 min-w-0">
             <label htmlFor="search" className="sr-only">
               Search
             </label>
@@ -33,7 +33,7 @@ export default function SearchBar({
                   }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
+                className="w-full h-12 px-4 rounded-xl border bg-input text-foreground shadow-xs focus:ring-2 focus:ring-primary/40 focus:border-primary/60 focus:outline-none transition-colors duration-200"
               />
               <svg
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
@@ -59,7 +59,7 @@ export default function SearchBar({
             onOptionChange={(option) =>
               setActiveTab(option as "event" | "organization")
             }
-            className="shrink-0 mt-4"
+            className="shrink-0"
           />
         </div>
       </div>

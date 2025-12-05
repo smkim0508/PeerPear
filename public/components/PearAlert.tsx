@@ -2,7 +2,7 @@ export function PearAlert ({ type, message }: { type: "error" | "success"; messa
   const colors =
     type === "error"
       ? "bg-red-100 text-red-800 border-red-400"
-      : "bg-green-100 text-green-800 border-green-400";
+      : "bg-green text-nav-dark border-green";
 
   return (
     <div

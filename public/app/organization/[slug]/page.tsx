@@ -163,7 +163,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
 
   return (
     <ProtectedRoute requiredRole="organization">
-      <div className="font-sans flex flex-col min-h-screen">
+      <div className="font-sans flex flex-col min-h-screen bg-light-beige">
         <Navbar userType="organization" />
 
         {/* Authorization Check */}
@@ -190,10 +190,14 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
         ) : (
           <main className="m-4 p-6 flex-1 min-h-screen">
             <div className="max-w-7xl mx-auto mb-6">
-              <div className="flex justify-center my-8">
+              <div className="text-center mb-6">
+                <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">Programs</h1>
+                <p className="text-foreground/70">Create and manage programs for your organization.</p>
+              </div>
+              <div className="flex justify-center my-6">
                 <PearButton
                   text="Create New Program"
-                  className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4 "
+                  className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4"
                   onClick={() => setIsModalOpen(true)}
                 />
               </div>

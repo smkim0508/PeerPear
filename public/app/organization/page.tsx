@@ -105,7 +105,7 @@ export default function OrganizationPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#E8F4D6] to-[#D7E8C2] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#8cbf70] to-[#8cbf70] flex items-center justify-center p-6">
       <button
         onClick={logout}
         className="flex flex-row fixed top-0 left-0 m-6 hover:font-bold cursor-pointer items-center gap-2"
@@ -125,8 +125,8 @@ export default function OrganizationPage() {
           </div>
         )}
 
-        <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-[#ABC469] p-6">
+            <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-green p-6">
             <h1 className="text-2xl font-bold text-black text-center">
               Select an Organization
             </h1>
@@ -138,7 +138,7 @@ export default function OrganizationPage() {
           <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#d7d8d1]">
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ABC469] mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green mx-auto mb-4"></div>
                 <p className="text-gray-600">Loading your organizations...</p>
               </div>
             ) : error ? (
@@ -148,7 +148,7 @@ export default function OrganizationPage() {
                 </div>
                 <button
                   onClick={fetchOrganizations}
-                  className="px-4 py-2 bg-[#ABC469] text-black rounded hover:bg-[#9BB359] transition-colors"
+                  className="px-4 py-2 bg-green text-black rounded hover:bg-green transition-colors"
                 >
                   Try Again
                 </button>
@@ -166,7 +166,7 @@ export default function OrganizationPage() {
               organizations.map((org) => (
                 <div
                   key={org.id}
-                  className="flex items-center p-4 rounded-xl border bg-[#E5E6DD] hover:bg-[#ABC469] cursor-pointer transition-colors"
+                  className="flex items-center p-4 rounded-xl border bg-[#E5E6DD] hover:bg-green cursor-pointer transition-colors"
                   onClick={() =>
                     (window.location.href = `/organization/${org.id}`)
                   }

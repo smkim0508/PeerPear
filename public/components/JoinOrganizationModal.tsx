@@ -166,7 +166,7 @@ export default function JoinOrganizationModal({
         )}
 
         {success && (
-          <div className="w-full bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded mb-3 text-sm">
+          <div className="w-full bg-green border border-green text-nav-dark px-3 py-2 rounded mb-3 text-sm">
             {success}
           </div>
         )}
@@ -181,7 +181,7 @@ export default function JoinOrganizationModal({
         <div className="max-h-64 overflow-y-auto space-y-3">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-6 text-gray-600">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ABC469] mb-3"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green mb-3"></div>
               Loading...
             </div>
           ) : filtered.length === 0 ? (
@@ -200,7 +200,7 @@ export default function JoinOrganizationModal({
                 </div>
 
                 <button
-                  className="bg-[#ABC469] hover:bg-[#9BB359] transition-colors text-black px-3 py-1 rounded-lg text-sm font-medium"
+                  className="bg-green hover:bg-green transition-colors text-black px-3 py-1 rounded-lg text-sm font-medium"
                   onClick={() => {
                     handleRequest(org.id);
                   }}

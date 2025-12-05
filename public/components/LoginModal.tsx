@@ -74,7 +74,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           }
         />
         <PearButton
-          className="w-full"
+          className="w-full mt-4 cursor-pointer"
           text="Log in with CAS"
           onClick={handleLogin}
         />
