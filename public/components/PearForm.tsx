@@ -224,8 +224,6 @@ export default function PearForm({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Options
                     </label>
-
-                    {/* OPTION INPUTS */}
                     <div className="space-y-2">
                         {options.map((option, index) => (
                             <div key={index} className="flex gap-2">
@@ -249,8 +247,6 @@ export default function PearForm({
                             </div>
                         ))}
                     </div>
-
-                    {/* ❗ PLACE ERROR HERE — BELOW ALL OPTIONS */}
                     {errors.options && (
                         <p className="text-red-500 text-sm mt-2">{errors.options}</p>
                     )}
