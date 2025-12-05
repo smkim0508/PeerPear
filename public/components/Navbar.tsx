@@ -313,7 +313,7 @@ export default function Navbar({
               </Link>
               <button
                 onClick={onLoginClick}
-                className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                className="px-5 py-2.5 rounded-lg bg-[#393D3F] text-white font-medium hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer whitespace-nowrap transform hover:-translate-y-0.5"
               >
                 Log In
                 <CircleUserRound size={20} />

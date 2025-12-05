@@ -53,11 +53,7 @@ export default function About() {
 
 
 
-                {/* Organization Carousel */}
-                <section className="py-10 bg-white border-y border-gray-100">
-                    <h2 className="text-2xl font-bold text-[#393D3F] mb-6 text-center opacity-80">Trusted by</h2>
-                    <OrganizationCarousel />
-                </section>
+
 
                 {/* Our Team Section */}
                 <section className="py-16 px-8 bg-gray-50">
@@ -87,6 +83,12 @@ export default function About() {
                             ))}
                         </div>
                     </div>
+                </section>
+
+                {/* Organization Carousel */}
+                <section className="py-10 bg-white border-t border-gray-100">
+                    <h2 className="text-2xl font-bold text-[#393D3F] mb-6 text-center opacity-80">Trusted by</h2>
+                    <OrganizationCarousel />
                 </section>
             </main>
 
