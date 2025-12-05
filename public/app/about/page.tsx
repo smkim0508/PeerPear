@@ -12,10 +12,10 @@ export default function About() {
     const closeLoginModal = () => setIsLoginModalOpen(false);
 
     const teamMembers = [
-        { name: "Sungmin Kim", role: "Project Lead" },
+        { name: "Sungmin Kim", role: "Project Lead", image: "/sungmin.jpg" },
         { name: "Dongkon Lee", role: "Full Stack Developer", image: "/DK.png" },
         { name: "Gary Yang", role: "Full Stack Developer" },
-        { name: "Nadula", role: "Full Stack Developer" },
+        { name: "Nadula", role: "Full Stack Developer", image: "/nadula.jpg" },
         { name: "Jaden", role: "Full Stack Developer" },
     ];
 
