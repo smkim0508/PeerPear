@@ -105,7 +105,7 @@ export default function OrganizationPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F7F0] via-[#8cbf70] to-[#8cbf70] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-dark-beige from-[#F5F7F0] via-[#8cbf70] to-[#8cbf70] flex items-center justify-center p-6">
       <button
         onClick={logout}
         className="flex flex-row fixed top-0 left-0 m-6 hover:font-bold cursor-pointer items-center gap-2"
