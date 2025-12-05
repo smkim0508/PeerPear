@@ -947,30 +947,25 @@ export default function EventPage({ params }: EventPageProps) {
 
               {/* RIGHT: Image Container */}
               <div className="flex justify-center lg:justify-end">
-                <div className="relative w-full max-w-md sticky top-24">
-                  {/* VIEW MODE IMAGE */}
-                  {!isEditingEvent && (event.image_url || previewImage) && (
-                    <img
-                      src={previewImage || event.image_url || ""}
-                      className="rounded-xl shadow-lg object-contain w-full"
-                      alt="Event"
+                {/* Container with fixed height - image stays inside this box */}
+                <div className="relative w-full h-64 sm:h-80 md:h-96 mb-8 rounded-xl overflow-hidden shadow-2xl bg-gray-900">
+                  
+                  {/* Background Image Layer */}
+                  {/* Shows preview if uploading, or saved URL if exists */}
+                  {(previewImage || event.image_url) ? (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-opacity duration-300"
+                      style={{ 
+                        backgroundImage: `url(${previewImage || event.image_url})` 
+                      }}
                     />
-                  )}
-
-                  {/* EDIT MODE IMAGE + UPLOAD / REMOVE */}
-                  {isEditingEvent && (previewImage || event.image_url) && (
-                    <div className="relative">
-                      <img
-                        src={previewImage || event.image_url || ""}
-                        className="rounded-xl shadow-lg object-contain w-full"
-                        alt="Program Preview"
-                      />
+                  ) : (
+                    /* Fallback if no image exists yet */
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      <span className="text-sm">No image uploaded</span>
                     </div>
                   )}
-
-                  {isEditingEvent && imageError && (
-                    <p className="text-red-400 text-sm mt-1">{imageError}</p>
-                  )}
+                  
                 </div>
               </div>
             </div>
