@@ -18,6 +18,7 @@ interface NavbarProps {
   onLoginClick?: () => void;
   onLogoutClick?: () => void;
   userType?: "student" | "organization" | "guest";
+  organizationId?: number;
 }
 
 interface OrganizationInfo {
@@ -29,6 +30,7 @@ interface OrganizationInfo {
 export default function Navbar({
   onLoginClick,
   userType: propUserType,
+  organizationId: propOrganizationId,
 }: NavbarProps) {
   const { isAuthenticated, logout, user } = useAuth();
   const pathname = usePathname();
@@ -55,6 +57,7 @@ export default function Navbar({
 
   // Check if we're on an organization slug page
   const getOrganizationId = (): number | null => {
+    if (propOrganizationId) return propOrganizationId;
     const match = pathname.match(/^\/organization\/(\d+)/);
     return match ? parseInt(match[1], 10) : null;
   };
