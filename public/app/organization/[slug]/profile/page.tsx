@@ -217,7 +217,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                 </div>
 
                 {!isEditing && (
-                  <PearButton text="Edit Profile" onClick={() => setIsEditing(true)} variant="outline" />
+                  <PearButton text="Edit Profile" onClick={() => setIsEditing(true)} variant="outline" className="cursor-pointer" />
                 )}
               </div>
 

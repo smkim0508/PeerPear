@@ -766,22 +766,22 @@ export default function EventPage2({ params }: EventPageProps) {
                   <CardContent className="px-6 pb-6">
                     <div className="grid gap-3">
                       {hasQuestions && currentStatus === "STARTED" && (
-                        <PearButton text="View Response Analytics" onClick={() => router.push(`/events/${eventId}/questionnaire`)} className="w-full cursor-pointer" />
+                        <PearButton text="View Response Analytics" onClick={() => router.push(`/events/${eventId}/questionnaire`)} className="w-full cursor-pointer py-6" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
-                        <PearButton text="Edit Program Details" onClick={handleEditEvent} className="w-full cursor-pointer" />
+                        <PearButton text="Edit Program Details" onClick={handleEditEvent} className="w-full cursor-pointer py-6" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
-                        <PearButton text="Edit Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700" />
+                        <PearButton text="Edit Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full cursor-pointer bg-blue-400 hover:bg-blue-500 py-6" />
                       )}
                       {currentStatus === "STARTED" && (
-                        <PearButton text="View Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700" />
+                        <PearButton text="View Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full cursor-pointer bg-blue-400 hover:bg-blue-500 py-6" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
-                        <PearButton text={isStartingEvent ? "Starting Program..." : "Start Program"} onClick={isStartingEvent ? () => {} : openStartModal} className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer`} />
+                        <PearButton text={isStartingEvent ? "Starting Program..." : "Start Program"} onClick={isStartingEvent ? () => {} : openStartModal} className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer py-6`} />
                       )}
                       {currentStatus === "STARTED" && (
-                        <PearButton text={isEndingEvent ? "Ending Program..." : "End Program"} onClick={isEndingEvent ? () => {} : handleEndEvent} className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer`} />
+                        <PearButton text={isEndingEvent ? "Ending Program..." : "End Program"} onClick={isEndingEvent ? () => {} : handleEndEvent} className={`w-full bg-red-400 hover:bg-red-500 ${isEndingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer py-6`} />
                       )}
                       {currentStatus === "TERMINATED" && (!event.matches || (Array.isArray(event.matches) && event.matches.length === 0)) && (
                         <>
