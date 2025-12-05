@@ -13,7 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.events import EventTable
 from common.types.pairing_event import PairingEvent, PairingResult
 from common.types.event_enums import EventStatus, EventRole
-from db.supabase_client import upload_new_image
+from db.supabase_client import upload_new_image, upload_event_image
 from flask import Blueprint
 
 # use blueprint to group routes
@@ -85,35 +85,35 @@ def update_event():
     # Look up organization_id from orgadmins table
     db_session = get_db_sessionmaker()
     with db_session() as session_instance:
-        org_admin = session_instance.scalar(
+        org_admins = session_instance.scalars(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
-        )
+        ).all()
 
-        if org_admin is None:
+        if not org_admins:
             return jsonify({"error": "User is not an organization admin"}), 403
 
-        organization_id = org_admin.organization_id
+        organization_ids = [org_admin.organization_id for org_admin in org_admins]
 
-    # Check if the event exists and belongs to the organization
-    event = session_instance.scalar(
-        select(EventTable).where(EventTable.id == event_id)
-    )
+        # Check if the event exists and belongs to the organization
+        event = session_instance.scalar(
+            select(EventTable).where(EventTable.id == event_id)
+        )
 
-    if event is None:
-        return jsonify({"error": "Event not found"}), 404
+        if event is None:
+            return jsonify({"error": "Event not found"}), 404
 
-    elif event.organization_id != organization_id:
-        return jsonify({"error": "Event does not belong to the organization"}), 404
+        if event.organization_id not in organization_ids:
+            return jsonify({"error": "Event does not belong to the organization"}), 404
 
-    payload = request.get_json(silent=True) or {}
-    allowed_fields = ["title", "description", "status", "end_date"]
-    for key, value in payload.items():
-        if key in allowed_fields and hasattr(event, key):
-            setattr(event, key, value)
+        payload = request.get_json(silent=True) or {}
+        allowed_fields = ["title", "description", "status", "end_date"]
+        for key, value in payload.items():
+            if key in allowed_fields and hasattr(event, key):
+                setattr(event, key, value)
 
-    session_instance.commit()
-    session_instance.refresh(event)
-    return jsonify({"message": "Event updated successfully"}), 200
+        session_instance.commit()
+        session_instance.refresh(event)
+        return jsonify({"message": "Event updated successfully"}), 200
 
 @org_dashboard_bp.patch("/event/image")
 @require_auth
@@ -134,13 +134,13 @@ def update_event_image():
 
     db_session = get_db_sessionmaker()
     with db_session() as session_instance:
-        # Get org admin
-        org_admin = session_instance.scalar(
+        # Get org admins
+        org_admins = session_instance.scalars(
             select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
-        )
-        if org_admin is None:
+        ).all()
+        if not org_admins:
             return jsonify({"error": "User is not an organization admin"}), 403
-        organization_id = org_admin.organization_id
+        organization_ids = [org_admin.organization_id for org_admin in org_admins]
 
         # Get event
         event = session_instance.scalar(
@@ -148,7 +148,7 @@ def update_event_image():
         )
         if event is None:
             return jsonify({"error": "Event not found"}), 404
-        if event.organization_id != organization_id:
+        if event.organization_id not in organization_ids:
             return jsonify({"error": "Event does not belong to the organization"}), 403
 
         # Get JSON payload if any
@@ -171,7 +171,7 @@ def update_event_image():
             content_type = uploaded_file.content_type
             filename = uploaded_file.filename
 
-            image_url = upload_new_image(
+            image_url = upload_event_image(
                 event_id=int(event_id),
                 file_bytes=file_bytes,
                 filename=filename,
