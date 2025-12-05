@@ -14,7 +14,7 @@ export default function Hero({ onTryNowClick }: HeroProps) {
             Pair{" "}
             <span className="relative inline-block whitespace-nowrap">
               smarter
-              <Squiggle width={250} className="left-0 right-0 -bottom-1" />
+              <Squiggle width={275} className="left-0 right-0 -bottom-1" />
             </span>
             . Build{" "}
             <span className="relative inline-block whitespace-nowrap">

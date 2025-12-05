@@ -45,7 +45,7 @@ export default function Features() {
         <div className="mt-15 flex justify-center gap-14 items-center flex-wrap">
           <Card
             title="Reusable Student Profiles"
-            text="Fill out your details once — join any pairing event without repetition."
+            text="Fill out your details once — join any pairing program without repetition."
             rotation={-6}
           />
           <Card
@@ -55,7 +55,7 @@ export default function Features() {
           />
           <Card
             title="Organizer Dashboard"
-            text="Create events, track participants, and export final matches instantly."
+            text="Create programs, track participants, and export final matches instantly."
             rotation={-2}
           />
           <Card

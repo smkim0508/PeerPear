@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from sqlalchemy import select
 from db.models.events import EventRegistrationsTable, EventTable
+from db.models.user_profile import UserProfileTable
 from db.models.question import QuestionTable
 from db.crud.registration_crud import create_new_registration, get_registration_status, mark_valid
 from common.types.registration import EventRegistration
@@ -25,6 +26,30 @@ def validate_int_inputs(event_id, user_id=None):
             return jsonify({"error": "user_id must be an integer"}), 400
 
     return None
+
+
+@event_registration_bp.get("/class-year")
+def get_user_class_year():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return jsonify({"error": "User is not properly authenticated"}), 400
+
+    try:
+        db_session = get_db_sessionmaker()
+        with db_session() as session_instance:
+
+            user_profile = session_instance.scalar(
+                select(UserProfileTable).where(UserProfileTable.id == user_id)
+            )
+
+            class_year = user_profile.class_year
+
+            return jsonify({"class_year": class_year.value if class_year else None}), 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving class year: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @event_registration_bp.post("/register")

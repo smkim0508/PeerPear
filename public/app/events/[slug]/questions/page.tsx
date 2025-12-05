@@ -221,12 +221,12 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center py-8">
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Event Access Error</h2>
+            <h2 className="text-xl font-semibold mb-2">Program Access Error</h2>
             <p className="text-gray-600 mb-4">
-              You are not able to view this Event
+              You are not able to view this Program
             </p>
             <PearButton
-              text="Back to Events"
+              text="Back to Programs"
               onClick={() => router.push("/organization")}
             />
           </CardContent>
@@ -245,8 +245,8 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
               <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
               <p className="text-gray-600 mb-8">
                 {edit
-                  ? "You are able to manage the questions participants will answer for this event before the event begins"
-                  : "The event has begun and you are no longer able to edit the event"}
+                  ? "You are able to manage the questions participants will answer for this program before the program begins"
+                  : "The program has begun and you are no longer able to edit the program"}
               </p>
             </div>
             {edit && (
@@ -278,7 +278,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {!loading && !error && questions.length === 0 && (
             <div className="bg-white p-8 rounded-lg shadow text-center">
               <p className="text-gray-500 italic">
-                No questions yet for this event. Add your first question above!
+                No questions yet for this program. Add your first question above!
               </p>
             </div>
           )}

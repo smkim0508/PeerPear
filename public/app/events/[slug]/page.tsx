@@ -18,13 +18,14 @@ import {
   Trophy,
   Award,
   Timer,
+  Bell,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PairingResults from "@/components/PairingResults";
 import { PairingResultData } from "@/types/events";
+import ConfirmActionModal from "@/components/ConfirmActionModal";
 import {
   fetchEventById,
   checkUserRegistration,
@@ -71,6 +72,7 @@ type Event = {
   title: string | null;
   description: string | null;
   matches: any | null;
+  check_sibling_roles: boolean;
   organizations: {
     id: number;
     org_name: string;
@@ -109,6 +111,7 @@ export default function EventPage({ params }: EventPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [checkedAutoTerminate, setCheckedAutoTerminate] = useState(false);
+  const [userClassYear, setUserClassYear] = useState<string | null>(null);
 
   // Organization-only section states
   const [participants, setParticipants] = useState<any[]>([]);
@@ -147,6 +150,9 @@ export default function EventPage({ params }: EventPageProps) {
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+
+  const [showAIWarning, setShowAIWarning] = useState(false);
+  let pendingRegister = false;
 
   useEffect(() => {
     if (!event?.ends_at) return;
@@ -195,17 +201,15 @@ export default function EventPage({ params }: EventPageProps) {
           { credentials: "include" }
         );
 
-        const data = await res.json()
+        const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || "You do not have access to view this event")
+          setError(data.error || "You do not have access to view this event");
         }
-      }
-      catch (err) {
+      } catch (err) {
         console.error("Error verifying access:", err);
-      setError("You do not have access to view this event");
+        setError("You do not have access to view this event");
       }
-
     };
 
     checkAccess();
@@ -215,6 +219,7 @@ export default function EventPage({ params }: EventPageProps) {
     // Only check registration for students
     if (user?.username && !isOrganizationUser) {
       checkRegistration();
+      getUserClassYear();
     }
   }, [user, isOrganizationUser]);
 
@@ -228,6 +233,11 @@ export default function EventPage({ params }: EventPageProps) {
       isRegistered
     ) {
       fetchStudentMatch();
+    }
+
+    // Auto-fetch pairings for organization users
+    if (event && event.status === "PAIRING_PUBLISHED" && isOrganizationUser) {
+      handleViewPairings();
     }
   }, [event?.status, user?.id, isOrganizationUser, isRegistered]);
 
@@ -243,13 +253,13 @@ export default function EventPage({ params }: EventPageProps) {
 
       const eventData = await fetchEventById(eventId);
       if (!eventData) {
-        setError("Event not found");
+        setError("Program not found");
         return;
       }
       setEvent(eventData);
     } catch (err) {
       console.error("Error:", err);
-      setError("Failed to load event");
+      setError("Failed to load program");
     } finally {
       setIsLoading(false);
     }
@@ -260,12 +270,11 @@ export default function EventPage({ params }: EventPageProps) {
 
     const expired = timeLeft.expired;
 
-    const color =
-      expired
-        ? "text-red-700 bg-red-100 border-red-300"
-        : timeLeft.days < 2
-        ? "text-orange-700 bg-orange-100 border-orange-300"
-        : "text-green-700 bg-green-100 border-green-300";
+    const color = expired
+      ? "text-red-700 bg-red-100 border-red-300"
+      : timeLeft.days < 2
+      ? "text-orange-700 bg-orange-100 border-orange-300"
+      : "text-green-700 bg-green-100 border-green-300";
 
     return (
       <Card className="shadow-xl border-0 bg-white rounded-xl">
@@ -310,42 +319,44 @@ export default function EventPage({ params }: EventPageProps) {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     if (!file.type.startsWith("image/")) {
       setImageError("File must be an image.");
       return;
     }
-  
+
     setImageError(null);
     setPreviewImage(URL.createObjectURL(file)); // Temporary preview
   };
-  
+
   // Save the uploaded image
   const handleImageSave = async () => {
     if (!event) {
-      setImageError("Event not loaded yet.");
+      setImageError("Program not loaded yet.");
       return;
     }
-  
+
     if (!previewImage) {
       setImageError("Please select an image first.");
       return;
     }
-  
-    const input = document.getElementById("eventImageUpload") as HTMLInputElement;
+
+    const input = document.getElementById(
+      "eventImageUpload"
+    ) as HTMLInputElement;
     if (!input?.files?.[0]) return;
-  
+
     const formData = new FormData();
     formData.append("image", input.files[0]);
-  
+
     try {
       const res = await fetch(
         `/organization_dashboard/event/image?event_id=${event.id}`,
         { method: "PATCH", body: formData }
       );
-  
+
       const data = await res.json();
-  
+
       if (res.ok) {
         setEvent((prev) => ({ ...prev!, image_url: data.image_url }));
         setPreviewImage(null);
@@ -357,7 +368,7 @@ export default function EventPage({ params }: EventPageProps) {
       setImageError("Upload failed.");
     }
   };
-  
+
   // Cancel editing
   const handleCancelEditImage = () => {
     setPreviewImage(null);
@@ -398,6 +409,25 @@ export default function EventPage({ params }: EventPageProps) {
     }
   };
 
+  const getUserClassYear = async () => {
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const statusResponse = await fetch(
+        `${API_BASE_URL}/event_registration/class-year`,
+        { credentials: "include" }
+      );
+
+      const statusData = await statusResponse.json();
+
+      if (statusResponse.ok) {
+        setUserClassYear(statusData.class_year || null);
+      }
+    } catch (err) {
+      console.error("Error obtaining student class year:", error);
+    }
+  };
+
   useEffect(() => {
     if (!eventId || !isOrganizationUser) return;
 
@@ -405,7 +435,6 @@ export default function EventPage({ params }: EventPageProps) {
       try {
         const data = await getEventParticipants(eventId);
         setParticipants(data);
-        console.log("Participants data:", data);
       } catch (error) {
         console.error("Error fetching participants:", error);
       }
@@ -428,7 +457,7 @@ export default function EventPage({ params }: EventPageProps) {
           return;
         }
 
-        setError(result.error || "Failed to register for event");
+        setError(result.error || "Failed to register for program");
         return;
       }
 
@@ -443,7 +472,7 @@ export default function EventPage({ params }: EventPageProps) {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setError("Failed to register for event");
+      setError("Failed to register for program");
     } finally {
       setIsRegistering(false);
     }
@@ -465,7 +494,7 @@ export default function EventPage({ params }: EventPageProps) {
       setQuestionnaireCompleted(false);
     } catch (err) {
       console.error("Unregistration error:", err);
-      setError("Failed to unregister");
+      setError("Failed to unregister from program");
     } finally {
       setIsRegistering(false);
     }
@@ -522,12 +551,12 @@ export default function EventPage({ params }: EventPageProps) {
 
   const handleSaveEvent = async () => {
     if (!event) return;
-  
+
     setIsSavingEvent(true);
     try {
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      
+
       // First, update text fields
       const response = await fetch(
         `${API_BASE_URL}/organization_dashboard/event?event_id=${eventId}`,
@@ -540,32 +569,34 @@ export default function EventPage({ params }: EventPageProps) {
           body: JSON.stringify(editEventData),
         }
       );
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.error || "Failed to update event");
         setIsSavingEvent(false);
         return;
       }
-  
+
       // Then, if there's a new image, upload it
       if (previewImage) {
-        const input = document.getElementById("eventImageUpload") as HTMLInputElement;
+        const input = document.getElementById(
+          "eventImageUpload"
+        ) as HTMLInputElement;
         if (input?.files?.[0]) {
           const formData = new FormData();
           formData.append("image", input.files[0]);
-  
+
           const imageRes = await fetch(
             `${API_BASE_URL}/organization_dashboard/event/image?event_id=${eventId}`,
-            { 
-              method: "PATCH", 
+            {
+              method: "PATCH",
               body: formData,
-              credentials: "include"
+              credentials: "include",
             }
           );
-  
+
           const imageData = await imageRes.json();
-  
+
           if (imageRes.ok) {
             // Update local event state with new image URL
             setEvent((prev) => ({ ...prev!, image_url: imageData.image_url }));
@@ -576,7 +607,7 @@ export default function EventPage({ params }: EventPageProps) {
           }
         }
       }
-  
+
       // Update local event state with new text fields
       setEvent((prev) =>
         prev
@@ -587,7 +618,7 @@ export default function EventPage({ params }: EventPageProps) {
             }
           : null
       );
-      
+
       // Clean up edit mode
       setIsEditingEvent(false);
       setPreviewImage(null);
@@ -667,7 +698,6 @@ export default function EventPage({ params }: EventPageProps) {
       setIsTriggeringPairing(false);
     }
   };
-  
 
   const handleViewPairings = async () => {
     if (!event) return;
@@ -725,7 +755,6 @@ export default function EventPage({ params }: EventPageProps) {
       if (result.success && result.data) {
         setStudentMatch(result.data.pairing_results);
       } else {
-        console.log("No match found or error:", result.error);
         setStudentMatch(null);
       }
     } catch (err) {
@@ -741,7 +770,7 @@ export default function EventPage({ params }: EventPageProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading event...</p>
+          <p className="text-gray-600">Loading program...</p>
         </div>
       </div>
     );
@@ -753,12 +782,12 @@ export default function EventPage({ params }: EventPageProps) {
         <Card className="max-w-md mx-auto">
           <CardContent className="text-center py-8">
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Event Error</h2>
+            <h2 className="text-xl font-semibold mb-2">Program Error</h2>
             <p className="text-gray-600 mb-4">
-              {error || "The event you are looking for does not exist."}
+              {error || "The program you are looking for does not exist."}
             </p>
             <PearButton
-              text="Back to Events"
+              text="Back to Programs"
               onClick={() => router.push("/student")}
             />
           </CardContent>
@@ -773,58 +802,77 @@ export default function EventPage({ params }: EventPageProps) {
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-linear-to-br from-light-beige via-white to-light-beige">
         <Navbar />
-  
+
         {/* === HERO SECTION === */}
         <div className="relative bg-gradient-to-r from-nav-dark to-gray-800 text-white">
           {/* CONTENT */}
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-  
               {/* LEFT: Event Details */}
               <div className="space-y-6">
-  
                 {/* Organization */}
                 <div className="flex items-center gap-3 mb-4">
                   <Building2 className="h-7 w-7 text-green" />
                   <span className="text-green font-bold text-xl">
                     {event.organizations.org_name}
                   </span>
+
+                  {event.check_sibling_roles && (
+                    <div className="flex items-center gap-2 before:content-['•'] before:text-green before:text-xl before:mx-1">
+                      <Users className="h-7 w-7 text-green" />
+                      <span className="text-green font-bold text-xl">
+                        Big Sib Little Sib Pairing
+                      </span>
+                    </div>
+                  )}
                 </div>
-  
+
                 {/* EDIT / VIEW MODE */}
                 {isEditingEvent ? (
                   <div className="space-y-6">
                     {/* Edit Mode Header */}
-                    <h2 className="text-2xl font-bold text-white">Edit Event Details</h2>
-  
+                    <h2 className="text-2xl font-bold text-white">
+                      Edit Program Details
+                    </h2>
+
                     {/* Title */}
                     <div>
-                      <label className="block text-white text-sm mb-2">Event Title *</label>
+                      <label className="block text-white text-sm mb-2">
+                        Program Title *
+                      </label>
                       <input
                         type="text"
                         value={editEventData.title}
                         onChange={(e) =>
-                          setEditEventData({ ...editEventData, title: e.target.value })
+                          setEditEventData({
+                            ...editEventData,
+                            title: e.target.value,
+                          })
                         }
                         className="w-full text-3xl font-bold bg-transparent border-b border-white focus:border-green-400 outline-none pb-1 text-white"
                         maxLength={100}
                       />
                     </div>
-  
+
                     {/* Description */}
                     <div>
-                      <label className="block text-white text-sm mb-2">Event Description</label>
+                      <label className="block text-white text-sm mb-2">
+                        Program Description
+                      </label>
                       <textarea
                         value={editEventData.description}
                         onChange={(e) =>
-                          setEditEventData({ ...editEventData, description: e.target.value })
+                          setEditEventData({
+                            ...editEventData,
+                            description: e.target.value,
+                          })
                         }
                         rows={4}
                         className="w-full bg-transparent border border-white rounded-lg p-3 text-white focus:border-green-400 outline-none resize-none"
                         maxLength={500}
                       />
                     </div>
-  
+
                     {/* Upload / Remove Image Buttons */}
                     <div className="flex gap-2 mt-2 items-center">
                       {/* Upload Button */}
@@ -858,12 +906,12 @@ export default function EventPage({ params }: EventPageProps) {
                         </label>
                       </div>
                     </div>
-  
+
                     {/* Display error */}
                     {imageError && (
                       <p className="text-red-400 text-sm mt-1">{imageError}</p>
                     )}
-  
+
                     {/* Save / Cancel Buttons */}
                     <div className="flex gap-3">
                       <button
@@ -896,7 +944,7 @@ export default function EventPage({ params }: EventPageProps) {
                   </div>
                 )}
               </div>
-  
+
               {/* RIGHT: Image Container */}
               <div className="flex justify-center lg:justify-end">
                 <div className="relative w-full max-w-md sticky top-24">
@@ -908,112 +956,151 @@ export default function EventPage({ params }: EventPageProps) {
                       alt="Event"
                     />
                   )}
-  
+
                   {/* EDIT MODE IMAGE + UPLOAD / REMOVE */}
                   {isEditingEvent && (previewImage || event.image_url) && (
                     <div className="relative">
                       <img
                         src={previewImage || event.image_url || ""}
                         className="rounded-xl shadow-lg object-contain w-full"
-                        alt="Event Preview"
+                        alt="Program Preview"
                       />
                     </div>
                   )}
-  
+
                   {isEditingEvent && imageError && (
                     <p className="text-red-400 text-sm mt-1">{imageError}</p>
                   )}
                 </div>
               </div>
-  
             </div>
           </div>
         </div>
 
         {/* === MAIN CONTENT === */}
         <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* === LEFT COLUMN === */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Published Pairings Section (New Location) */}
+              {isOrganizationUser && currentStatus === "PAIRING_PUBLISHED" && (
+                <Card className="shadow-lg border-2 border-green-100 bg-linear-to-br from-green-50 to-white rounded-xl overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                        <CheckCircle className="h-8 w-8 text-green-600" />
+                        Published Pairings
+                      </CardTitle>
+                      <span className="px-4 py-1.5 bg-green-100 text-green-800 text-sm font-bold rounded-full border border-green-200 shadow-xs">
+                        Active
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                      <div className="space-y-2 flex-1">
+                        <p className="text-gray-800 text-lg font-medium">
+                          Pairings have been successfully published!
+                        </p>
+                        <p className="text-gray-600 leading-relaxed">
+                          All students have been notified of their matches. The
+                          complete list of pairings is shown below.
+                        </p>
+                      </div>
+                    </div>
 
-          {/* === LEFT COLUMN === */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* About the Organization */}
-            <Card className="shadow-lg border-0 bg-white rounded-xl">
-              <CardHeader>
-                <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                  <Building2 className="h-7 w-7" /> About the Organization
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-800 text-xl leading-relaxed">
-                  {event.organizations.description}
-                </p>
-              </CardContent>
-            </Card>
+                    {/* Pairing Results Content */}
+                    <div className="mt-8 border-t border-gray-100 pt-6">
+                      {pairingData && (
+                        <PairingResults
+                          pairingData={pairingData}
+                          eventId={eventId}
+                        />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Questions Preview */}
-            {hasQuestions && (
+              {/* About the Organization */}
               <Card className="shadow-lg border-0 bg-white rounded-xl">
                 <CardHeader>
                   <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                    <Users className="h-7 w-7" /> Event Questions
+                    <Building2 className="h-7 w-7" /> About the Organization
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-800 text-xl mb-6 leading-relaxed">
-                    This event includes {event.questions.length} question
-                    {event.questions.length !== 1 ? "s" : ""} to help match participants effectively.
+                  <p className="text-gray-800 text-xl leading-relaxed">
+                    {event.organizations.description}
                   </p>
                 </CardContent>
               </Card>
-            )}
 
-            {/* Participants Section (only for organization) */}
-            {isOrganizationUser && (
-              <Card className="shadow-lg border-0 bg-white rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                    <Users className="h-7 w-7" /> Participants
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {participants.length === 0 ? (
-                    <p className="text-gray-600">No participants yet.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {participants.map((u) => (
-                        <div
-                          key={u.id}
-                          className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
-                          onClick={() => handleUserClick(u)}
-                        >
-                          <h3 className="text-center font-semibold text-lg text-nav-dark">
-                            {u.full_name || u.username}
-                          </h3>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+              {/* Questions Preview */}
+              {hasQuestions && (
+                <Card className="shadow-lg border-0 bg-white rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                      <Users className="h-7 w-7" /> Program Questions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-800 text-xl mb-6 leading-relaxed">
+                      This program includes {event.questions.length} question
+                      {event.questions.length !== 1 ? "s" : ""} to help match
+                      participants effectively.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
-          {/* === RIGHT SIDEBAR === */}
-          <div className="space-y-6">
+              {/* Participants Section (only for organization) */}
+              {isOrganizationUser && (
+                <Card className="shadow-lg border-0 bg-white rounded-xl">
+                  <CardHeader>
+                    <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                      <Users className="h-7 w-7" /> Participants
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {participants.length === 0 ? (
+                      <p className="text-gray-600">No participants yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {participants.map((u) => (
+                          <div
+                            key={u.id}
+                            className="cursor-pointer bg-light-beige rounded-xl p-4 hover:bg-[#f0f0e8] transition"
+                            onClick={() => handleUserClick(u)}
+                          >
+                            <h3 className="text-center font-semibold text-lg text-nav-dark">
+                              {u.full_name || u.username}
+                            </h3>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
-            {/* Event Management section - only for organizations */}
-            {isOrganizationUser && (
+            {/* === RIGHT SIDEBAR === */}
+            <div className="space-y-6">
+              {/* Event Management section - only for organizations */}
+              {isOrganizationUser && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
-                      Event Management
+                      Program Management
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="text-center">
                         <p className="text-gray-800 text-lg font-medium mb-4">
-                          Manage your event and view participant responses
+                          Manage your program and view participant responses
                         </p>
 
                         <div className="grid gap-3">
@@ -1078,7 +1165,9 @@ export default function EventPage({ params }: EventPageProps) {
                           {currentStatus === "STARTED" && (
                             <PearButton
                               text={
-                                isEndingEvent ? "Ending Event..." : "End Event"
+                                isEndingEvent
+                                  ? "Ending Program..."
+                                  : "End Program"
                               }
                               onClick={
                                 isEndingEvent ? () => {} : handleEndEvent
@@ -1185,25 +1274,6 @@ export default function EventPage({ params }: EventPageProps) {
                                 />
                               </>
                             )}
-
-                          {currentStatus === "PAIRING_PUBLISHED" && (
-                            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                              <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                              <h3 className="font-semibold text-green-800 mb-1">
-                                Pairings Published!
-                              </h3>
-                              <p className="text-green-700 text-sm">
-                                Students can now view their matches
-                              </p>
-                              <div className="mt-3">
-                                <PearButton
-                                  text="View Published Pairings"
-                                  onClick={handleViewPairings}
-                                  className="w-full bg-green-600 hover:bg-green-700"
-                                />
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1211,169 +1281,205 @@ export default function EventPage({ params }: EventPageProps) {
                 </Card>
               )}
 
-            {/* Pairing Results (only for orgs with pairing data) */}
-            {isOrganizationUser && pairingData && (
-              <PairingResults pairingData={pairingData} eventId={eventId} />
-            )}
-
-            {/* Your Match (only for students) */}
-            {!isOrganizationUser && event?.status === "PAIRING_PUBLISHED" && isRegistered && (
-              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
-                    <Users className="w-6 h-6" /> Your Match
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingMatch ? (
-                    <div className="text-center py-6">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                      <p className="text-gray-600">Loading your match...</p>
-                    </div>
-                  ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
-                    <div className="space-y-4">
-                      {studentMatch?.groups?.map((group, groupIndex) => (
-                        <div key={groupIndex} className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                            <Users className="w-4 h-4" /> Your Group ({group.students.length} members)
-                          </h3>
-                          <div className="space-y-3">
-                            {group.students.map((student, studentIndex) => (
-                              <div
-                                key={studentIndex}
-                                className={`flex items-center justify-between p-3 rounded-md border ${
-                                  student.id === user?.id ? "bg-blue-100 border-blue-300" : "bg-white border-gray-200"
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center gap-2">
-                                    {student.role === "BIG_SIBLING" ? (
-                                      <Trophy className="w-4 h-4 text-yellow-600" />
-                                    ) : (
-                                      <Award className="w-4 h-4 text-blue-600" />
-                                    )}
-                                    <div>
-                                      <p className="font-medium text-gray-900">
-                                        {student.name} {student.id === user?.id && "(You)"}
-                                      </p>
-                                      <p className="text-sm text-gray-600">{student.email}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <span
-                                  className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                                    student.role === "BIG_SIBLING"
-                                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                      : "bg-blue-100 text-blue-800 border-blue-200"
-                                  }`}
-                                >
-                                  {student.role === "BIG_SIBLING" ? "Big Sibling" : "Little Sibling"}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+              {/* Your Match (only for students) */}
+              {!isOrganizationUser &&
+                event?.status === "PAIRING_PUBLISHED" &&
+                isRegistered && (
+                  <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl text-nav-dark font-bold flex items-center gap-2">
+                        <Users className="w-6 h-6" /> Your Match
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {isLoadingMatch ? (
+                        <div className="text-center py-6">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Loading your match...</p>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-6">
-                      <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p className="text-gray-600">No match found for this event.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                      ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
+                        <div className="space-y-4">
+                          {studentMatch?.groups?.map((group, groupIndex) => (
+                            <div
+                              key={groupIndex}
+                              className="bg-green-50 border border-green-200 rounded-lg p-4"
+                            >
+                              <h3 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                                <Users className="w-4 h-4" /> Your Group (
+                                {group.students.length} members)
+                              </h3>
+                              <div className="space-y-3">
+                                {group.students.map((student, studentIndex) => (
+                                  <div
+                                    key={studentIndex}
+                                    className={`flex items-center justify-between p-3 rounded-md border ${
+                                      student.id === user?.id
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-white border-gray-200"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-2">
+                                        {student.role === "BIG_SIBLING" ? (
+                                          <Trophy className="w-4 h-4 text-yellow-600" />
+                                        ) : (
+                                          <Award className="w-4 h-4 text-blue-600" />
+                                        )}
+                                        <div>
+                                          <p className="font-medium text-gray-900">
+                                            {student.name}{" "}
+                                            {student.id === user?.id && "(You)"}
+                                          </p>
+                                          <p className="text-sm text-gray-600">
+                                            {student.email}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {event.check_sibling_roles && (
+                                      <span
+                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                                          student.role === "BIG_SIBLING"
+                                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                            : "bg-blue-100 text-blue-800 border-blue-200"
+                                        }`}
+                                      >
+                                        {student.role === "BIG_SIBLING"
+                                          ? "Big Sibling"
+                                          : "Little Sibling"}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6">
+                          <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-gray-600">
+                            No match found for this event.
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+            </div>
           </div>
         </div>
-      </div>
 
+        {/* Registration section - only for students */}
+        {!isOrganizationUser && event?.status === "STARTED" && (
+          <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl text-nav-dark font-bold">
+                Registration
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center">
+                {isRegistered ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
+                      <CheckCircle className="h-6 w-6" />
+                      <span className="font-bold text-lg">
+                        You're registered!
+                      </span>
+                    </div>
 
-            {/* Registration section - only for students */}
-            {!isOrganizationUser && event?.status === "STARTED" && (
-              <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-nav-dark font-bold">
-                    Registration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    {isRegistered ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center gap-3 text-green-700 bg-green-50 rounded-xl p-4">
-                          <CheckCircle className="h-6 w-6" />
-                          <span className="font-bold text-lg">You're registered!</span>
-                        </div>
-
-                        {/* Questionnaire Status */}
-                        {event?.questions?.length > 0 && (
-                          <div className="space-y-3">
-                            <div className="border-t border-gray-200 pt-4">
-                              <h3 className="font-semibold text-lg text-nav-dark mb-3">
-                                Questionnaire
-                              </h3>
-                              {questionnaireCompleted ? (
-                                <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
-                                  <CheckCircle className="h-5 w-5" />
-                                  <span className="font-medium">Completed</span>
-                                </div>
-                              ) : (
-                                <div className="space-y-3">
-                                  <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
-                                    <XCircle className="h-5 w-5" />
-                                    <span className="font-medium">Incomplete</span>
-                                  </div>
-                                  <PearButton
-                                    text="Complete Questionnaire"
-                                    onClick={() =>
-                                      router.push(`/events/${eventId}/questionnaire`)
-                                    }
-                                    className="w-full"
-                                  />
-                                </div>
-                              )}
+                    {/* Questionnaire Status */}
+                    {event?.questions?.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="border-t border-gray-200 pt-4">
+                          <h3 className="font-semibold text-lg text-nav-dark mb-3">
+                            Questionnaire
+                          </h3>
+                          {questionnaireCompleted ? (
+                            <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 rounded-lg p-3">
+                              <CheckCircle className="h-5 w-5" />
+                              <span className="font-medium">Completed</span>
                             </div>
-
-                            {questionnaireCompleted && (
+                          ) : (
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-center gap-2 text-orange-700 bg-orange-50 rounded-lg p-3">
+                                <XCircle className="h-5 w-5" />
+                                <span className="font-medium">Incomplete</span>
+                              </div>
                               <PearButton
-                                text="View/Edit Questionnaire"
+                                text="Complete Questionnaire"
                                 onClick={() =>
-                                  router.push(`/events/${eventId}/questionnaire`)
+                                  router.push(
+                                    `/events/${eventId}/questionnaire`
+                                  )
                                 }
-                                dark
                                 className="w-full"
                               />
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
+                        </div>
 
-                        <PearButton
-                          text={isRegistering ? "Unregistering..." : "Unregister"}
-                          onClick={handleUnregister}
-                          dark
-                          className={`w-full ${isRegistering ? "opacity-50 cursor-not-allowed" : ""}`}
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <p className="text-gray-800 text-lg font-medium">
-                          Ready to join this event?
-                        </p>
-                        <PearButton
-                          text={isRegistering ? "Registering..." : "Register Now"}
-                          onClick={handleRegister}
-                          className="w-full"
-                        />
+                        {questionnaireCompleted && (
+                          <PearButton
+                            text="View/Edit Questionnaire"
+                            onClick={() =>
+                              router.push(`/events/${eventId}/questionnaire`)
+                            }
+                            dark
+                            className="w-full"
+                          />
+                        )}
                       </div>
                     )}
+
+                    <PearButton
+                      text={isRegistering ? "Unregistering..." : "Unregister"}
+                      onClick={handleUnregister}
+                      dark
+                      className={`w-full ${
+                        isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="space-y-4 ">
+                    <p className="text-gray-800 text-lg font-medium">
+                      Ready to join this program?
+                    </p>
+                    {/* Show Big/Little badge only if event uses sibling roles */}
+                    {event.check_sibling_roles && userClassYear && (
+                      <div className="flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-green" />
 
-            </div>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full border 
+          ${
+            userClassYear === "FRESHMAN" || userClassYear === "SOPHOMORE"
+              ? "bg-blue-100 text-blue-800 border-blue-200"
+              : "bg-yellow-100 text-yellow-800 border-yellow-200"
+          }`}
+                        >
+                          {userClassYear === "FRESHMAN" ||
+                          userClassYear === "SOPHOMORE"
+                            ? "You are registering as a Little Sibling"
+                            : "You are registering as a Big Sibling"}
+                        </span>
+                      </div>
+                    )}
 
+                    <PearButton
+                      text={isRegistering ? "Registering..." : "Register Now"}
+                      onClick={() => setShowAIWarning(true)}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* === User Modal (only for organization) === */}
       {isOrganizationUser && isModalOpen && selectedUser && (
@@ -1411,6 +1517,16 @@ export default function EventPage({ params }: EventPageProps) {
           </div>
         </div>
       )}
+      <ConfirmActionModal
+        isOpen={showAIWarning}
+        onClose={() => setShowAIWarning(false)}
+        message="Before registering, please note that this program uses AI/LLM technology to match participants based on questionnaire responses."
+        confirmText="I Understand & Register"
+        cancelText="Cancel"
+        onConfirm={async () => {
+          await handleRegister();
+        }}
+      />
     </ProtectedRoute>
   );
 }

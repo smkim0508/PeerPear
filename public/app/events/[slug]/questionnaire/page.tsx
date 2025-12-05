@@ -103,7 +103,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
             }
             return [];
           } catch (err) {
-            console.error(`Error fetching responses for user ${participant.user_id}:`, err);
             return [];
           }
         });
@@ -113,7 +112,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         setAllResponses(flattenedResponses);
       }
     } catch (err) {
-      console.error("Error fetching participants and responses:", err);
     }
   };
 
@@ -144,11 +142,9 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
           setAnswers(normalizedAnswers);
         }
       } else {
-        console.error("Error from server:", data.error);
         setError(data.error || "Failed to load questions");
       }
     } catch (err) {
-      console.log("Error fetching events", err);
       setError("Failed to fetch questions");
     } finally {
       setLoading(false);
@@ -158,7 +154,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   useEffect(() => {
     const verify_registration = async () => {
       if (!user_id) {
-        console.log("User ID not available yet");
         return;
       }
 
@@ -187,7 +182,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         setValidRegistration(data.valid_registration);
         await get_questions();
       } catch (err) {
-        console.log("Error retrieving registration", err);
         // Even if registration check fails, try to load questions
         await get_questions();
       }
@@ -199,15 +193,12 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       // User is not authenticated, redirect to login
       router.push(`/events/${event_id}`);
     } else if (isNaN(event_id)) {
-      setError("Invalid event ID");
+      setError("Invalid program ID");
       setLoading(false);
     }
   }, [event_id, user_id, apiUrl, router, user, isOrganizationUser]);
 
-  useEffect(() => {
-    console.log("Current questions", questions);
-    console.log("Current answers:", answers);
-  }, [answers, questions]);
+  
 
   const handleSubmit = async () => {
     if (!user_id) {
@@ -272,7 +263,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         });
       }
     } catch (err) {
-      console.error("Submit error:", err);
       setAlert({
         type: "error",
         message: "Server error. Please try again later.",
@@ -301,7 +291,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
 
       setValidRegistration(true);
     } catch (err) {
-      console.error("Error marking registration valid:", err);
       setAlert({
         type: "error",
         message: "Server error finalizing registration.",
@@ -323,11 +312,11 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         <div className="flex flex-col items-center p-6 pt-12">
           <div className="text-center mb-8 max-w-2xl">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              {isOrganizationUser ? "Event Responses" : "Questionnaire Form"}
+              {isOrganizationUser ? "Program Responses" : "Questionnaire Form"}
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed mb-3">
               {isOrganizationUser
-                ? "View all participant responses for this event."
+                ? "View all participant responses for this program."
                 : "Help us find the perfect peer match for you by answering a few questions about your preferences and goals."}
             </p>
             {alert && <PearAlert type={alert.type} message={alert.message} />}
@@ -346,15 +335,15 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                   <div className="text-center">
                     <h3 className="text-red-500 text-xl mb-4">{error}</h3>
                     <PearButton
-                      text="Back to Event"
+                      text="Back to Program"
                       onClick={() => router.push(`/events/${event_id}`)}
                     />
                   </div>
                 ) : questions.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-gray-600 text-xl">No questionnaire has been set up for this event.</p>
+                    <p className="text-gray-600 text-xl">No questionnaire has been set up for this program.</p>
                     <PearButton
-                      text="Back to Event"
+                      text="Back to Program"
                       onClick={() => router.push(`/events/${event_id}`)}
                       className="mt-4"
                     />
@@ -375,7 +364,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                     
                     <div className="text-center pt-8">
                       <PearButton
-                        text="Back to Event"
+                        text="Back to Program"
                         onClick={() => router.push(`/events/${event_id}`)}
                         dark
                       />

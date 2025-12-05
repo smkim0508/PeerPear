@@ -40,7 +40,7 @@ export default function PairingResults({ pairingData, eventId }: PairingResultsP
         <CardContent>
           <div className="text-center text-gray-600 py-6">
             <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No pairings available for this event.</p>
+            <p>No pairings available for this program.</p>
           </div>
         </CardContent>
       </Card>

@@ -2,7 +2,6 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import PearButton from "@/components/PearButton";
@@ -12,9 +11,8 @@ import { isPast, parseISO } from "date-fns";
 
 export default function StudentDashBoard() {
   const router = useRouter();
-  const { user } = useAuth();
   const [events, setEvents] = useState<PairingEvent[]>([]);
-  const [filterOption, setFilterOption] = useState<string>("All Events");
+  const [filterOption, setFilterOption] = useState<string>("All Programs");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +31,8 @@ export default function StudentDashBoard() {
         if (!res.ok) {
           setError(
             res.status === 401
-              ? "Please log in to view your registered events."
-              : "Failed to load events. Please try again."
+              ? "Please log in to view your registered programs."
+              : "Failed to load programs. Please try again."
           );
           return;
         }
@@ -42,8 +40,7 @@ export default function StudentDashBoard() {
         const data = await res.json();
         setEvents(data.events || []);
       } catch (err) {
-        console.log("Error fetching events", err);
-        setError("Failed to load events. Please check your connection.");
+        setError("Failed to load programs. Please check your connection.");
       } finally {
         setLoading(false);
       }
@@ -64,16 +61,15 @@ export default function StudentDashBoard() {
       if (!res.ok) {
         setError(
           res.status === 401
-            ? "Please log in to view your registered events."
-            : "Failed to load events. Please try again."
+            ? "Please log in to view your registered programs."
+            : "Failed to load programs. Please try again."
         );
         return;
       }
       const data = await res.json();
       setEvents(data.events || []);
     } catch (err) {
-      console.log(err);
-      setError("Failed to load events. Please check your connection.");
+      setError("Failed to load programs. Please check your connection.");
     } finally {
       setLoading(false);
     }
@@ -84,9 +80,9 @@ export default function StudentDashBoard() {
     const isEnded = endDate ? isPast(endDate) : false;
     switch (filterOption) {
       case "Active":
-        return event.status === "STARTED" && !isEnded;
+        return event.status === "STARTED";
       case "Ended":
-        return event.status === "TERMINATED" || isEnded;
+        return event.status === "TERMINATED";
       case "Results Available":
         return event.status === "PAIRING_PUBLISHED";
       default:
@@ -102,7 +98,7 @@ export default function StudentDashBoard() {
         <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
           <div className="flex flex-col items-center max-w-7xl mx-auto mb-6">
             <h1 className="text-3xl font-bold mb-4 text-gray-800">
-              My Registered Events
+              My Registered Programs
             </h1>
 
             {/* Native dropdown */}
@@ -111,7 +107,7 @@ export default function StudentDashBoard() {
                 htmlFor="eventFilter"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Filter Events
+                Filter Programs
               </label>
               <div className="relative">
                 <select
@@ -125,7 +121,7 @@ export default function StudentDashBoard() {
                     sm:text-sm transition-all duration-200 hover:border-gray-400
                   "
                 >
-                  {["All Events", "Active", "Ended", "Results Available"].map(
+                  {["All Programs", "Active", "Ended", "Results Available"].map(
                     (option) => (
                       <option key={option} value={option}>
                         {option}
@@ -156,7 +152,7 @@ export default function StudentDashBoard() {
             <div className="flex justify-center items-center min-h-[200px]">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading your events...</p>
+                <p className="text-gray-600">Loading your programs...</p>
               </div>
             </div>
           ) : error ? (
@@ -170,7 +166,7 @@ export default function StudentDashBoard() {
             <div className="flex justify-center items-center min-h-[200px]">
               <div className="text-center">
                 <p className="text-gray-600 text-lg">
-                  No events found for the selected filter.
+                  No programs found for the selected filter.
                 </p>
               </div>
             </div>

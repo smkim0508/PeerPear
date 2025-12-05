@@ -89,7 +89,7 @@ export default function CreateEventModal({
 
       if (!res.ok) {
         const errmessage = await res.text();
-        throw new Error(errmessage || "Failed to create event");
+        throw new Error(errmessage || "Failed to create program");
       }
 
       setFormData({
@@ -102,7 +102,7 @@ export default function CreateEventModal({
       const data = await res.json();
       const newEventId = data.event_id;
 
-      setSuccessMessage("Event created successfully!");
+      setSuccessMessage("Program created successfully!");
 
       setTimeout(() => {
         setSuccessMessage(null);
@@ -139,7 +139,7 @@ export default function CreateEventModal({
         </div>
 
         <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a] text-center">
-          Create New Event
+          Create New Program
         </h2>
         {showAlert && (
           <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
@@ -211,14 +211,14 @@ export default function CreateEventModal({
           type="text"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="Enter event title"
+          placeholder="Enter program title"
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Description
         </label>
         <textarea
-          placeholder="Describe your event"
+          placeholder="Describe your program"
           rows={3}
           value={formData.description}
           onChange={(e) =>
@@ -238,7 +238,7 @@ export default function CreateEventModal({
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D7FF9C]"
         />
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          Optional Event Image
+          Optional Program Image
         </label>
         <input
           onChange={(e) => {
@@ -254,7 +254,7 @@ export default function CreateEventModal({
           className={`w-full px-3 py-2 mt-6 ${
             submitting ? "opacity-70 cursor-not-allowed" : ""
           }`}
-          text={submitting ? "Submitting..." : "Submit Event"}
+          text={submitting ? "Submitting..." : "Submit Program"}
           onClick={handleSubmit}
         />
       </div>

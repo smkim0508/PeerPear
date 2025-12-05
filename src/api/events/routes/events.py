@@ -56,6 +56,7 @@ def get_event_details(event_id: int):
                 "title": event.title,
                 "description": event.description,
                 "matches": event.matches,
+                "check_sibling_roles": event.check_sibling_roles,
                 "organizations": {
                     "id": organization.id,
                     "org_name": organization.org_name,
@@ -69,6 +70,8 @@ def get_event_details(event_id: int):
                         "event_id": q.event_id
                     } for q in questions
                 ]
+                ,
+                
             }
 
             return jsonify(event_data), 200

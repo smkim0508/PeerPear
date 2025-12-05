@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Hero from "../components/Hero";
 import Features from "../components/Features";

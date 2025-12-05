@@ -154,7 +154,7 @@ export default function Navbar({
 
   return (
     <div className="w-full bg-[#C3DD90]">
-      <div className="flex items-center w-screen h-16 px-6">
+      <div className="flex items-center w-full h-16 px-6">
         {/* Logo - Fixed width */}
         <div className="flex items-center gap-2 w-48">
           <img
@@ -177,7 +177,7 @@ export default function Navbar({
                       className={"bg-[#C3DD90]! " + navigationMenuTriggerStyle()}
                     >
                       <Link href="/student/events" className="relative">
-                        My Events
+                        My Programs
                         {isActiveTab("/student/events") && (
                           <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#393D3F]"></div>
                         )}
@@ -300,7 +300,7 @@ export default function Navbar({
                 /* Default user info */
                 <p className="text-black font-medium whitespace-nowrap">
                   {user?.user_info.attributes?.displayname
-                    ? `${user.user_info.attributes.displayname.toString().toLowerCase()} (${userType})`
+                    ? `${user.user_info.attributes.displayname.toString()}`
                     : ""}
                 </p>
               )}

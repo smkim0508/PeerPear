@@ -3,7 +3,6 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
 import EventCard from "@/components/EventCard";
 import SearchBar from "@/components/SearchBar";
 import { PairingEvent } from "@/types/events";
@@ -11,7 +10,6 @@ import { useEffect, useState } from "react";
 import { checkUserRegistration } from "@/lib/events";
 
 export default function StudentDashBoard() {
-  const router = useRouter();
   const { user } = useAuth();
 
   // SearchBar filters
@@ -45,15 +43,14 @@ export default function StudentDashBoard() {
         });
 
         if (!res.ok) {
-          setError(res.status === 401 ? "Please log in to view events." : "Failed to load events.");
+          setError(res.status === 401 ? "Please log in to view programs." : "Failed to load programs.");
           return;
         }
 
         const data = await res.json();
         setEvents(data.events || []);
       } catch (err) {
-        console.log("Error fetching events", err);
-        setError("Failed to load events. Please check your connection.");
+        setError("Failed to load programs. Please check your connection.");
       } finally {
         setLoading(false);
       }
@@ -79,7 +76,6 @@ export default function StudentDashBoard() {
           new Set(results.filter((r) => r.isRegistered).map((r) => r.id))
         );
       } catch (err) {
-        console.log("Error checking registration", err);
       }
     };
 
@@ -119,13 +115,13 @@ export default function StudentDashBoard() {
             <div className="flex justify-center items-center min-h-[200px]">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading events...</p>
+                <p className="text-gray-600">Loading programs...</p>
               </div>
             </div>
           ) : error ? (
             <p className="text-center text-red-600 text-lg">{error}</p>
           ) : filteredEvents.length === 0 ? (
-            <p className="text-center text-gray-600 text-lg">No events found.</p>
+            <p className="text-center text-gray-600 text-lg">No programs found.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
               {filteredEvents.map((event) => (

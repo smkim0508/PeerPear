@@ -6,9 +6,9 @@ interface ConfirmActionModalProps {
   isOpen: boolean;
   onClose: () => void;
   message: string;
-  confirmText?: string; // default: "Yes"
-  cancelText?: string; // default: "No"
-  onConfirm: () => Promise<void> | void; // parent-provided callback
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => Promise<void> | void;
 }
 
 export default function ConfirmActionModal({
@@ -20,6 +20,7 @@ export default function ConfirmActionModal({
   onConfirm,
 }: ConfirmActionModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -28,6 +29,7 @@ export default function ConfirmActionModal({
     } else {
       document.body.style.overflow = "auto";
       setIsAnimating(false);
+      setIsChecked(false); // reset state when closed
     }
     return () => {
       document.body.style.overflow = "auto";
@@ -53,6 +55,19 @@ export default function ConfirmActionModal({
       >
         <h2 className="text-xl font-bold text-[#1a1a1a] mb-4">{message}</h2>
 
+        {/* Acknowledgement checkbox */}
+        <div className="flex items-center justify-start gap-3 mt-4">
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={(e) => setIsChecked(e.target.checked)}
+            className="h-5 w-5"
+          />
+          <label className="text-left text-sm text-gray-700">
+            I understand this program uses AI/LLM technology to match participants.
+          </label>
+        </div>
+
         <div className="flex justify-center gap-10 mt-6">
           <button
             onClick={onClose}
@@ -62,11 +77,17 @@ export default function ConfirmActionModal({
           </button>
 
           <button
+            disabled={!isChecked}
             onClick={async () => {
+              if (!isChecked) return;
               await onConfirm();
               onClose();
             }}
-            className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-400 transition"
+            className={`px-4 py-2 rounded-md text-white transition ${
+              isChecked
+                ? "bg-green-600 hover:bg-green-500"
+                : "bg-green-300 cursor-not-allowed"
+            }`}
           >
             {confirmText}
           </button>

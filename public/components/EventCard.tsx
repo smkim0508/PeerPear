@@ -60,7 +60,7 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
       return "Results published";
     }
     if (event.status === "TERMINATED" || hasEnded) {
-      return "Event has ended";
+      return "Program has ended";
     }
     return "TBA";
   })();
