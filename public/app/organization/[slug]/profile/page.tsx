@@ -27,6 +27,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+  const [nameTooLong, setNameTooLong] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // Validate organization admin access
@@ -109,6 +110,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
     const newErrors: { [key: string]: boolean } = {};
     if (!editName.trim()) newErrors.org_name = true;
+    if (editName.length > 10) newErrors.nameTooLong = true;
     if (!orgDescription.trim()) newErrors.description = true;
 
     setErrors(newErrors);
@@ -228,23 +230,39 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
               {isEditing ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
-                        Organization Name{" "}
-                        <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${errors.org_name
-                            ? "border-red-500 focus:ring-red-500"
-                            : "border-white focus:ring-white"
-                          }`}
-                        placeholder="Enter organization name"
-                        maxLength={50}
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
+                      Organization Name <span className="text-red-600">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setEditName(value);
+
+                        if (value.length > 10) {
+                          setErrors((prev) => ({ ...prev, nameTooLong: true }));
+                        } else {
+                          setErrors((prev) => ({ ...prev, nameTooLong: false }));
+                        }
+                      }}
+                      className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${
+                        errors.org_name || errors.nameTooLong
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-white focus:ring-white"
+                      }`}
+                      placeholder="Enter organization name"
+                    />
+
+                    {errors.nameTooLong && (
+                      <p className="text-red-600 text-sm mt-1">
+                        Organization name must be 10 characters or fewer.
+                      </p>
+                    )}
+                  </div>
+
 
                     <div>
                       <label className="block text-lg font-semibold text-[#0a0a0a] mb-2">
