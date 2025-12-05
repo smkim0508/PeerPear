@@ -273,8 +273,8 @@ export default function EventPage({ params }: EventPageProps) {
     const color = expired
       ? "text-red-700 bg-red-100 border-red-300"
       : timeLeft.days < 2
-      ? "text-orange-700 bg-orange-100 border-orange-300"
-      : "text-green-700 bg-green-100 border-green-300";
+        ? "text-orange-700 bg-orange-100 border-orange-300"
+        : "text-green-700 bg-green-100 border-green-300";
 
     return (
       <Card className="shadow-xl border-0 bg-white rounded-xl">
@@ -612,10 +612,10 @@ export default function EventPage({ params }: EventPageProps) {
       setEvent((prev) =>
         prev
           ? {
-              ...prev,
-              title: editEventData.title,
-              description: editEventData.description,
-            }
+            ...prev,
+            title: editEventData.title,
+            description: editEventData.description,
+          }
           : null
       );
 
@@ -801,7 +801,7 @@ export default function EventPage({ params }: EventPageProps) {
   return (
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-linear-to-br from-light-beige via-white to-light-beige">
-        <Navbar />
+        <Navbar organizationId={event.organization_id} />
 
         {/* === HERO SECTION === */}
         <div className="relative bg-gradient-to-r from-nav-dark to-gray-800 text-white">
@@ -983,45 +983,54 @@ export default function EventPage({ params }: EventPageProps) {
             {/* === LEFT COLUMN === */}
             <div className="lg:col-span-2 space-y-8">
               {/* Published Pairings Section (New Location) */}
-              {isOrganizationUser && currentStatus === "PAIRING_PUBLISHED" && (
-                <Card className="shadow-lg border-2 border-green-100 bg-linear-to-br from-green-50 to-white rounded-xl overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                        <CheckCircle className="h-8 w-8 text-green-600" />
-                        Published Pairings
-                      </CardTitle>
-                      <span className="px-4 py-1.5 bg-green-100 text-green-800 text-sm font-bold rounded-full border border-green-200 shadow-xs">
-                        Active
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="space-y-2 flex-1">
-                        <p className="text-gray-800 text-lg font-medium">
-                          Pairings have been successfully published!
-                        </p>
-                        <p className="text-gray-600 leading-relaxed">
-                          All students have been notified of their matches. The
-                          complete list of pairings is shown below.
-                        </p>
+              {isOrganizationUser &&
+                (currentStatus === "PAIRING_PUBLISHED" ||
+                  (currentStatus === "TERMINATED" && pairingData)) && (
+                  <Card className="shadow-lg border-2 border-green-100 bg-linear-to-br from-green-50 to-white rounded-xl overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                          <CheckCircle className="h-8 w-8 text-green-600" />
+                          {currentStatus === "PAIRING_PUBLISHED"
+                            ? "Published Pairings"
+                            : "Pairing Preview"}
+                        </CardTitle>
+                        <span className="px-4 py-1.5 bg-green-100 text-green-800 text-sm font-bold rounded-full border border-green-200 shadow-xs">
+                          {currentStatus === "PAIRING_PUBLISHED"
+                            ? "Active"
+                            : "Draft"}
+                        </span>
                       </div>
-                    </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="space-y-2 flex-1">
+                          <p className="text-gray-800 text-lg font-medium">
+                            {currentStatus === "PAIRING_PUBLISHED"
+                              ? "Pairings have been successfully published!"
+                              : "Review pairings before publishing."}
+                          </p>
+                          <p className="text-gray-600 leading-relaxed">
+                            {currentStatus === "PAIRING_PUBLISHED"
+                              ? "All students have been notified of their matches. The complete list of pairings is shown below."
+                              : "These matches are not yet visible to students. Review them below and click 'Publish Pairings' when ready."}
+                          </p>
+                        </div>
+                      </div>
 
-                    {/* Pairing Results Content */}
-                    <div className="mt-8 border-t border-gray-100 pt-6">
-                      {pairingData && (
-                        <PairingResults
-                          pairingData={pairingData}
-                          eventId={eventId}
-                        />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      {/* Pairing Results Content */}
+                      <div className="mt-8 border-t border-gray-100 pt-6">
+                        {pairingData && (
+                          <PairingResults
+                            pairingData={pairingData}
+                            eventId={eventId}
+                          />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
               {/* About the Organization */}
               <Card className="shadow-lg border-0 bg-white rounded-xl">
@@ -1089,7 +1098,7 @@ export default function EventPage({ params }: EventPageProps) {
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
               {/* Event Management section - only for organizations */}
-              {isOrganizationUser && (
+              {isOrganizationUser && currentStatus !== "PAIRING_PUBLISHED" && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
@@ -1154,13 +1163,12 @@ export default function EventPage({ params }: EventPageProps) {
                                   : "Start Event"
                               }
                               onClick={
-                                isStartingEvent ? () => {} : handleStartEvent
+                                isStartingEvent ? () => { } : handleStartEvent
                               }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${
-                                isStartingEvent
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
+                              className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                                }`}
                             />
                           )}
 
@@ -1172,13 +1180,12 @@ export default function EventPage({ params }: EventPageProps) {
                                   : "End Program"
                               }
                               onClick={
-                                isEndingEvent ? () => {} : handleEndEvent
+                                isEndingEvent ? () => { } : handleEndEvent
                               }
-                              className={`w-full bg-orange-600 hover:bg-orange-700 ${
-                                isEndingEvent
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
+                              className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                                }`}
                             />
                           )}
 
@@ -1213,14 +1220,13 @@ export default function EventPage({ params }: EventPageProps) {
                                   }
                                   onClick={
                                     isTriggeringPairing
-                                      ? () => {}
+                                      ? () => { }
                                       : handleTriggerPairing
                                   }
-                                  className={`w-full bg-green-600 hover:bg-green-700 ${
-                                    isTriggeringPairing
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
+                                  className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                    }`}
                                 />
 
                                 {pairingData && (
@@ -1232,14 +1238,13 @@ export default function EventPage({ params }: EventPageProps) {
                                     }
                                     onClick={
                                       isPublishingPairings
-                                        ? () => {}
+                                        ? () => { }
                                         : handlePublishPairings
                                     }
-                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${
-                                      isPublishingPairings
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
-                                    }`}
+                                    className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                      }`}
                                   />
                                 )}
                               </>
@@ -1265,14 +1270,13 @@ export default function EventPage({ params }: EventPageProps) {
                                   }
                                   onClick={
                                     isPublishingPairings
-                                      ? () => {}
+                                      ? () => { }
                                       : handlePublishPairings
                                   }
-                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${
-                                    isPublishingPairings
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
+                                  className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                    }`}
                                 />
                               </>
                             )}
@@ -1314,11 +1318,10 @@ export default function EventPage({ params }: EventPageProps) {
                                 {group.students.map((student, studentIndex) => (
                                   <div
                                     key={studentIndex}
-                                    className={`flex items-center justify-between p-3 rounded-md border ${
-                                      student.id === user?.id
-                                        ? "bg-blue-100 border-blue-300"
-                                        : "bg-white border-gray-200"
-                                    }`}
+                                    className={`flex items-center justify-between p-3 rounded-md border ${student.id === user?.id
+                                      ? "bg-blue-100 border-blue-300"
+                                      : "bg-white border-gray-200"
+                                      }`}
                                   >
                                     <div className="flex items-center gap-3">
                                       <div className="flex items-center gap-2">
@@ -1340,11 +1343,10 @@ export default function EventPage({ params }: EventPageProps) {
                                     </div>
                                     {event.check_sibling_roles && (
                                       <span
-                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                                          student.role === "BIG_SIBLING"
-                                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                            : "bg-blue-100 text-blue-800 border-blue-200"
-                                        }`}
+                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${student.role === "BIG_SIBLING"
+                                          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                          : "bg-blue-100 text-blue-800 border-blue-200"
+                                          }`}
                                       >
                                         {student.role === "BIG_SIBLING"
                                           ? "Big Sibling"
@@ -1439,9 +1441,8 @@ export default function EventPage({ params }: EventPageProps) {
                       text={isRegistering ? "Unregistering..." : "Unregister"}
                       onClick={handleUnregister}
                       dark
-                      className={`w-full ${
-                        isRegistering ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
+                      className={`w-full ${isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                     />
                   </div>
                 ) : (
@@ -1456,14 +1457,13 @@ export default function EventPage({ params }: EventPageProps) {
 
                         <span
                           className={`px-2 py-1 text-xs font-medium rounded-full border 
-          ${
-            userClassYear === "FRESHMAN" || userClassYear === "SOPHOMORE"
-              ? "bg-blue-100 text-blue-800 border-blue-200"
-              : "bg-yellow-100 text-yellow-800 border-yellow-200"
-          }`}
+          ${userClassYear === "FRESHMAN" || userClassYear === "SOPHOMORE"
+                              ? "bg-blue-100 text-blue-800 border-blue-200"
+                              : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                            }`}
                         >
                           {userClassYear === "FRESHMAN" ||
-                          userClassYear === "SOPHOMORE"
+                            userClassYear === "SOPHOMORE"
                             ? "You are registering as a Little Sibling"
                             : "You are registering as a Big Sibling"}
                         </span>

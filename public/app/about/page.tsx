@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import { useState } from "react";
 import LoginModal from "@/components/LoginModal";
 import OrganizationCarousel from "@/components/OrganizationCarousel";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function About() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -26,7 +28,13 @@ export default function About() {
 
             <main className="flex-1 bg-white">
                 {/* Hero Section */}
-                <section className="bg-[#C3DD90] py-20 px-8 text-center">
+                <section className="bg-[#C3DD90] py-20 px-8 text-center relative">
+                    <div className="absolute top-8 left-8">
+                        <Link href="/" className="flex items-center gap-2 text-[#393D3F] font-bold hover:underline">
+                            <ArrowLeft size={20} />
+                            Back
+                        </Link>
+                    </div>
                     <h1 className="text-5xl font-extrabold text-[#393D3F] mb-6 tracking-tight">
                         About Us
                     </h1>
