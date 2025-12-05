@@ -28,6 +28,7 @@ export default function CreateEventModal({
     description: "",
     endDate: "",
     imageFile: null as File | null,
+    checkSiblingRoles: false,
   });
   const [showAlert, setShowAlert] = useState(false);
   const [dateAlert, setDateAlert] = useState(false);
@@ -74,6 +75,7 @@ export default function CreateEventModal({
     form.append("title", formData.title);
     form.append("description", formData.description);
     form.append("end_date", new Date(formData.endDate).toISOString());
+    form.append("check_sibling_roles", String(formData.checkSiblingRoles));
 
     if (formData.imageFile) {
       form.append("image", formData.imageFile);
@@ -101,6 +103,7 @@ export default function CreateEventModal({
         description: "",
         endDate: "",
         imageFile: null,
+        checkSiblingRoles: false,
       });
 
       const data = await res.json();
@@ -253,6 +256,24 @@ export default function CreateEventModal({
           accept="image/*"
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
         />
+
+        <div className="mt-4 flex items-start gap-3 rounded-lg border border-gray-200 p-3">
+          <input
+            id="checkSiblingRoles"
+            type="checkbox"
+            checked={formData.checkSiblingRoles}
+            onChange={(e) =>
+              setFormData({ ...formData, checkSiblingRoles: e.target.checked })
+            }
+            className="mt-1 size-4 rounded border-gray-300"
+          />
+          <label htmlFor="checkSiblingRoles" className="text-sm">
+            Big-Little pairing mode
+            <span className="block text-xs text-gray-600">
+              When enabled, participants are assigned Big/Little sibling roles.
+            </span>
+          </label>
+        </div>
 
         <PearButton
           className={`w-full px-3 py-2 mt-6 ${
