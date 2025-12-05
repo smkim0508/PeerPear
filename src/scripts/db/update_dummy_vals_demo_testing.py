@@ -25,12 +25,12 @@ OVERVIEW:
 
 A. The intended pairings are:
 
-1) (6 students)
+Case 1, (6 students)
 gary - nadula
 sungmin - jocelyn
 dk - jaden
 
-2) (4 students)
+Case 2, (4 students)
 gary - nadula
 sungmin - jaden
 ------
@@ -38,7 +38,16 @@ sungmin - jaden
 B. Simulating in absence of Jocelyn:
 - Gary is student version of Jocelyn
 - Sungmin is admin owner version of Jocelyn
+------
+
+C. Toggle between the two demo cases with the following environmental variable:
+`DEMO_CASE=1`: Case 1
+`DEMO_CASE=2`: Case 2
 """
+
+# fetch the demo case, default 1 (6 students) 
+DEMO_CASE = os.getenv("DEMO_CASE", "1")
+
 def create_user_data(session):
     users = [
         UserTable(
@@ -75,23 +84,29 @@ def create_user_data(session):
             last_name="Lee",
             phone_number="1234567890",
             email="dl2635@princeton.edu"
-        ),
-        # NOTE: id 6 -> student account
-        UserTable(
-            username="jocelyn",
-            first_name="Jocelyn",
-            last_name="W",
-            phone_number="1234567890",
-            email="jocelyn@example.com"
-        ),
-        # NOTE: id 7 -> org admin account
-        UserTable(
-            username="cs-jocelyn",
-            first_name="Jocelyn 2",
-            last_name="W",
-            phone_number="1234567890",
-            email="cs-jocelyn@example.com"
-        )]
+        )
+    ]
+
+    if DEMO_CASE == "1": # with jocelyn, 6 people
+        users.extend([
+            # NOTE: id 6 -> student account
+            UserTable(
+                username="jocelyn",
+                first_name="Jocelyn",
+                last_name="W",
+                phone_number="1234567890",
+                email="jocelyn@example.com"
+            ),
+            # NOTE: id 7 -> org admin account
+            UserTable(
+                username="cs-jocelyn",
+                first_name="Jocelyn 2",
+                last_name="W",
+                phone_number="1234567890",
+                email="cs-jocelyn@example.com"
+            )
+        ])
+    
     for user in users:
         session.add(user)
     session.commit()
@@ -142,11 +157,6 @@ def create_orgadmin_data(session):
             is_owner=True
         ),
         OrgAdminTable(
-            user_id=2, # sungmin
-            organization_id=3, # NOTE: Jocelyn's Test Org, simulating as demo org owner
-            is_owner=True
-        ),
-        OrgAdminTable(
             user_id=3, # nadula
             organization_id=1 # AASA
         ),
@@ -169,13 +179,26 @@ def create_orgadmin_data(session):
         OrgAdminTable(
             user_id=5, # dk
             organization_id=2 # KSAP
-        ),
-        OrgAdminTable(
-            user_id=7, # jocelyn - org
-            organization_id=3, # demo org
-            is_owner=True
-        ),
+        )
     ]
+
+    if DEMO_CASE == "1":
+        org_admins.extend([
+            OrgAdminTable(
+                user_id=7, # jocelyn - org
+                organization_id=3, # demo org
+                is_owner=True
+            ),
+        ])
+    
+    if DEMO_CASE == "2":
+        org_admins.extend([
+            OrgAdminTable(
+                user_id=2, # sungmin
+                organization_id=3, # NOTE: Jocelyn's Test Org, simulating as demo org owner
+                is_owner=True
+            ),
+        ])
 
     for admin in org_admins:
         session.add(admin)
@@ -220,13 +243,7 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     registrations = [
-        # demo test event registrations with 2 users
-        # NOTE: gary removed from this event for live-demo purposes
-        # EventRegistrationsTable(
-        #     user_id=1, # gary
-        #     event_id=4,
-        #     role=EventRole.BIG_SIBLING
-        # ),
+        # demo test event registrations
         EventRegistrationsTable(
             user_id=2, # sungmin
             event_id=4,
@@ -241,14 +258,26 @@ def create_event_registration_data(session):
             user_id=4, # jaden
             event_id=4,
             role=EventRole.LITTLE_SIBLING
-        ),
-        # NOTE: dk removed from this event temporarily, to demo 4-person pairing (including gary)
-        # EventRegistrationsTable(
-        #     user_id=5, # dk
-        #     event_id=4,
-        #     role=EventRole.BIG_SIBLING
-        # )
+        )
     ]
+
+    if DEMO_CASE == "1":
+        # if jocelyn's included, gary and dk should be registered
+        registrations.extend([
+            EventRegistrationsTable(
+                user_id=1, # gary
+                event_id=4,
+                role=EventRole.BIG_SIBLING
+            ),
+            EventRegistrationsTable(
+                user_id=5, # dk
+                event_id=4,
+                role=EventRole.BIG_SIBLING
+            )
+        ])
+
+    # if demo case 2, only 3 people are registered
+
     for registration in registrations:
         session.add(registration)
     session.commit()
@@ -290,15 +319,22 @@ def create_user_profile_data(session):
             class_year=ClassYear.JUNIOR,
             major="Economics",
             hobbies=["Basketball", "Scooter", "Sports Racing", "Soccer"]
-        ),
-        UserProfileTable(
-            user_id=6, # jocelyn - student account
-            gender="Female",
-            class_year=ClassYear.FRESHMAN,
-            major="Computer Science",
-            hobbies=["Neural Networks", "Artificial Intelligence", "Deep Learning", "Natural Language Processing"]
         )
     ]
+
+    if DEMO_CASE == "1":
+        # if jocelyn's included, add her student account to profile
+        profiles.extend([
+            UserProfileTable(
+                user_id=6, # jocelyn - student account
+                gender="Female",
+                class_year=ClassYear.FRESHMAN,
+                major="Computer Science",
+                hobbies=["Neural Networks", "Artificial Intelligence", "Deep Learning", "Natural Language Processing"]
+            )
+        ])
+
+    # in case 2, current suffices
 
     for profile in profiles:
         session.add(profile)
@@ -339,11 +375,6 @@ def create_response_data(session):
     sungmin - jaden
     """
     responses = [
-        # ResponseTable(
-        #     user_id=1, # gary
-        #     question_id=1, # open-ended question, favorite food?
-        #     answer="Pizza"
-        # ),
         ResponseTable(
             user_id=2, # sungmin
             question_id=1,
@@ -353,27 +384,43 @@ def create_response_data(session):
             user_id=3, # nadula
             question_id=1,
             answer="Hamburger"
-        ),
-        ResponseTable(
-            user_id=4, # jaden
-            question_id=1,
-            # NOTE: toggle sashimi/pancakes depending on demo occasion
-            answer="Sashimi"
-            # answer="Pancakes"
-        ),
-        # NOTE: dk not joining for this demo right now
-        # ResponseTable(
-        #     user_id=5, # dk
-        #     question_id=1,
-        #     answer="Waffles"
-        # ),
+        )
     ]
+
+    if DEMO_CASE == "1":
+        # add gary and dk, and encourage jaden to be paired with dk
+        responses.extend([
+            ResponseTable(
+                user_id=1, # gary
+                question_id=1, # open-ended question, favorite food?
+                answer="Pizza"
+            ),
+            ResponseTable(
+                user_id=5, # dk
+                question_id=1,
+                answer="Waffles"
+            ),
+            ResponseTable(
+                user_id=4, # jaden
+                question_id=1,
+                answer="Pancakes"
+            )
+        ])
+
+    if DEMO_CASE == "2":
+        # remove gary and dk, and encourage jaden to be paired with sungmin
+        responses.extend([
+            ResponseTable(
+                user_id=4, # jaden
+                question_id=1,
+                answer="Sashimi"
+            )
+        ])
 
     for response in responses:
         session.add(response)
     session.commit()
     print("Dummy responses added.")
-
 
 def fill_all_tables(engine):
 
