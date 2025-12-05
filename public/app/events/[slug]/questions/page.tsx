@@ -8,7 +8,7 @@ import { PearAlert } from "@/components/PearAlert";
 import PearButton from "@/components/PearButton";
 import PearForm from "@/components/PearForm";
 import { Card, CardContent } from "@/components/ui/card";
-import { XCircle } from "lucide-react";
+import { XCircle, ArrowLeft } from "lucide-react";
 
 interface QuestionnairePageProps {
   params: Promise<{ slug: string }>;
@@ -240,6 +240,15 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
       <Navbar userType="organization" />
       <div className="min-h-screen bg-[#EBECE4] p-8">
         <div className="max-w-5xl mx-auto">
+          <div className="mb-6">
+            <button
+              onClick={() => router.push(`/events/${event_id}`)}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Program
+            </button>
+          </div>
           <div className="flex flex-row justify-between items-start mb-8">
             <div>
               <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
