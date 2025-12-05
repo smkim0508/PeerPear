@@ -157,11 +157,13 @@ export default function Navbar({
       <div className="flex items-center w-full h-16 px-6">
         {/* Logo - Fixed width */}
         <div className="flex items-center gap-2 w-48">
-          <img
-            src="/logo.svg"
-            alt="Logo"
-            className="h-10 w-10 border-2 border-[#393D3F] rounded-lg p-1 bg-[#393D3F] transition-transform hover:rotate-12"
-          />
+          <Link href="/">
+            <img
+              src="/logo.svg"
+              alt="Logo"
+              className="h-10 w-10 border-2 border-[#393D3F] rounded-lg p-1 bg-[#393D3F] transition-transform hover:rotate-12"
+            />
+          </Link>
           <span className="text-black"><Link href="/">PeerPear</Link></span>
         </div>
 
@@ -313,7 +315,7 @@ export default function Navbar({
               </Link>
               <button
                 onClick={onLoginClick}
-                className="px-5 py-2.5 rounded-lg bg-[#393D3F] text-white font-medium hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer whitespace-nowrap transform hover:-translate-y-0.5"
+                className="px-4 py-2 rounded hover:bg-opacity-90 transition-colors flex items-center gap-2 cursor-pointer whitespace-nowrap"
               >
                 Log In
                 <CircleUserRound size={20} />
