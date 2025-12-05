@@ -9,6 +9,7 @@ interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  organizationId: number;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -17,6 +18,7 @@ export default function CreateEventModal({
   isOpen,
   onClose,
   onSuccess,
+  organizationId,
 }: CreateEventModalProps) {
   const router = useRouter();
 
@@ -76,6 +78,8 @@ export default function CreateEventModal({
     if (formData.imageFile) {
       form.append("image", formData.imageFile);
     }
+
+    form.append("organization_id", organizationId.toString());
 
     try {
       const res = await fetch(
@@ -162,7 +166,7 @@ export default function CreateEventModal({
         {dateAlert && (
           <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
             <AlertTitle className="font-semibold text-red-700">
-              Invalid Dates
+              Invalid Date
             </AlertTitle>
             <AlertDescription className="text-red-600">
               Please make sure the end date is later than today.

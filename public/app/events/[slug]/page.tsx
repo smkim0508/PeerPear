@@ -151,8 +151,17 @@ export default function EventPage({ params }: EventPageProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
 
-  const [showAIWarning, setShowAIWarning] = useState(false);
-  let pendingRegister = false;
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState<string>("");
+  const [confirmCheckBox, setConfirmCheckbox] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<() => Promise<void>>(() =>
+    Promise.resolve()
+  );
+
+  const [confirmYes, setConfirmYes] = useState<string>("");
+  const [confirmNo, setConfirmNo] = useState<string>("");
+
+  const pendingRegister = false;
 
   useEffect(() => {
     if (!event?.ends_at) return;
@@ -443,6 +452,23 @@ export default function EventPage({ params }: EventPageProps) {
     fetchParticipants();
   }, [eventId, isOrganizationUser]);
 
+  const openRegisterModal = () => {
+    setConfirmMessage(
+      `Before registering, please note that this program uses AI/LLM technology to match participants based on questionnaire responses.`
+    );
+
+    setConfirmCheckbox(
+      "I understand this program uses AI/LLM technology to match participants."
+    );
+
+    setConfirmYes("Register for Event");
+    setConfirmNo("Cancel");
+    setConfirmAction(() => async () => {
+      await handleRegister();
+    });
+    setConfirmModalOpen(true);
+  };
+
   const handleRegister = async () => {
     if (!user || !event) return;
 
@@ -636,6 +662,21 @@ export default function EventPage({ params }: EventPageProps) {
     setEditEventData({ title: "", description: "" });
   };
 
+  const openStartModal = () => {
+    setConfirmMessage(`Are you sure you want to start this event?`);
+
+    setConfirmCheckbox(
+      "I understand that I cannot edit this event or its questions once I start this event"
+    );
+
+    setConfirmYes("Start Event");
+    setConfirmNo("Cancel");
+    setConfirmAction(() => async () => {
+      await handleStartEvent();
+    });
+    setConfirmModalOpen(true);
+  };
+
   // Start event handler
   const handleStartEvent = async () => {
     if (!event) return;
@@ -801,7 +842,7 @@ export default function EventPage({ params }: EventPageProps) {
   return (
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-linear-to-br from-light-beige via-white to-light-beige">
-        <Navbar />
+        <Navbar organizationId={event.organization_id} />
 
         {/* === HERO SECTION === */}
         <div className="relative bg-gradient-to-r from-nav-dark to-gray-800 text-white">
@@ -983,45 +1024,54 @@ export default function EventPage({ params }: EventPageProps) {
             {/* === LEFT COLUMN === */}
             <div className="lg:col-span-2 space-y-8">
               {/* Published Pairings Section (New Location) */}
-              {isOrganizationUser && currentStatus === "PAIRING_PUBLISHED" && (
-                <Card className="shadow-lg border-2 border-green-100 bg-linear-to-br from-green-50 to-white rounded-xl overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
-                        <CheckCircle className="h-8 w-8 text-green-600" />
-                        Published Pairings
-                      </CardTitle>
-                      <span className="px-4 py-1.5 bg-green-100 text-green-800 text-sm font-bold rounded-full border border-green-200 shadow-xs">
-                        Active
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="space-y-2 flex-1">
-                        <p className="text-gray-800 text-lg font-medium">
-                          Pairings have been successfully published!
-                        </p>
-                        <p className="text-gray-600 leading-relaxed">
-                          All students have been notified of their matches. The
-                          complete list of pairings is shown below.
-                        </p>
+              {isOrganizationUser &&
+                (currentStatus === "PAIRING_PUBLISHED" ||
+                  (currentStatus === "TERMINATED" && pairingData)) && (
+                  <Card className="shadow-lg border-2 border-green-100 bg-linear-to-br from-green-50 to-white rounded-xl overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-3xl text-nav-dark flex items-center gap-3 font-bold">
+                          <CheckCircle className="h-8 w-8 text-green-600" />
+                          {currentStatus === "PAIRING_PUBLISHED"
+                            ? "Published Pairings"
+                            : "Pairing Preview"}
+                        </CardTitle>
+                        <span className="px-4 py-1.5 bg-green-100 text-green-800 text-sm font-bold rounded-full border border-green-200 shadow-xs">
+                          {currentStatus === "PAIRING_PUBLISHED"
+                            ? "Active"
+                            : "Draft"}
+                        </span>
                       </div>
-                    </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="space-y-2 flex-1">
+                          <p className="text-gray-800 text-lg font-medium">
+                            {currentStatus === "PAIRING_PUBLISHED"
+                              ? "Pairings have been successfully published!"
+                              : "Review pairings before publishing."}
+                          </p>
+                          <p className="text-gray-600 leading-relaxed">
+                            {currentStatus === "PAIRING_PUBLISHED"
+                              ? "All students have been notified of their matches. The complete list of pairings is shown below."
+                              : "These matches are not yet visible to students. Review them below and click 'Publish Pairings' when ready."}
+                          </p>
+                        </div>
+                      </div>
 
-                    {/* Pairing Results Content */}
-                    <div className="mt-8 border-t border-gray-100 pt-6">
-                      {pairingData && (
-                        <PairingResults
-                          pairingData={pairingData}
-                          eventId={eventId}
-                        />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      {/* Pairing Results Content */}
+                      <div className="mt-8 border-t border-gray-100 pt-6">
+                        {pairingData && (
+                          <PairingResults
+                            pairingData={pairingData}
+                            eventId={eventId}
+                          />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
               {/* About the Organization */}
               <Card className="shadow-lg border-0 bg-white rounded-xl">
@@ -1089,7 +1139,7 @@ export default function EventPage({ params }: EventPageProps) {
             {/* === RIGHT SIDEBAR === */}
             <div className="space-y-6">
               {/* Event Management section - only for organizations */}
-              {isOrganizationUser && (
+              {isOrganizationUser && currentStatus !== "PAIRING_PUBLISHED" && (
                 <Card className="shadow-xl border-0 bg-white top-6 rounded-xl">
                   <CardHeader>
                     <CardTitle className="text-2xl text-nav-dark font-bold">
@@ -1115,12 +1165,14 @@ export default function EventPage({ params }: EventPageProps) {
                             />
                           )}
 
-                          <PearButton
-                            text="Edit Event Details"
-                            onClick={handleEditEvent}
-                            dark
-                            className="w-full"
-                          />
+                          {currentStatus === "NOT_STARTED" && (
+                            <PearButton
+                              text="Edit Event Details"
+                              onClick={handleEditEvent}
+                              dark
+                              className="w-full"
+                            />
+                          )}
 
                           {/* Questionnaire management based on event status */}
                           {currentStatus === "NOT_STARTED" && (
@@ -1152,7 +1204,7 @@ export default function EventPage({ params }: EventPageProps) {
                                   : "Start Event"
                               }
                               onClick={
-                                isStartingEvent ? () => {} : handleStartEvent
+                                isStartingEvent ? () => {} : openStartModal
                               }
                               className={`w-full bg-green-600 hover:bg-green-700 ${
                                 isStartingEvent
@@ -1470,7 +1522,7 @@ export default function EventPage({ params }: EventPageProps) {
 
                     <PearButton
                       text={isRegistering ? "Registering..." : "Register Now"}
-                      onClick={() => setShowAIWarning(true)}
+                      onClick={openRegisterModal}
                       className="w-full"
                     />
                   </div>
@@ -1518,14 +1570,13 @@ export default function EventPage({ params }: EventPageProps) {
         </div>
       )}
       <ConfirmActionModal
-        isOpen={showAIWarning}
-        onClose={() => setShowAIWarning(false)}
-        message="Before registering, please note that this program uses AI/LLM technology to match participants based on questionnaire responses."
-        confirmText="I Understand & Register"
-        cancelText="Cancel"
-        onConfirm={async () => {
-          await handleRegister();
-        }}
+        isOpen={confirmModalOpen}
+        onClose={() => setConfirmModalOpen(false)}
+        checkbox={confirmCheckBox ? confirmCheckBox : undefined}
+        message={confirmMessage}
+        confirmText={confirmYes}
+        cancelText={confirmNo}
+        onConfirm={confirmAction}
       />
     </ProtectedRoute>
   );

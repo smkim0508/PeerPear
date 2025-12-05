@@ -413,6 +413,7 @@ def get_event_participants(event_id: int):
                 select(EventRegistrationsTable, UserTable)
                 .join(UserTable, EventRegistrationsTable.user_id == UserTable.id)
                 .where(EventRegistrationsTable.event_id == event_id)
+                .where(EventRegistrationsTable.valid_registration == True)
             )
 
             results = session.execute(query).all()

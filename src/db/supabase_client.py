@@ -2,6 +2,7 @@ import os
 import time
 from supabase import create_client, Client
 from dotenv import load_dotenv
+import uuid
 
 load_dotenv()
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -52,6 +53,29 @@ def upload_event_image(
         public_url = supabase.storage.from_(bucket).get_public_url(file_name)
         public_url = f"{public_url}?t={int(time.time())}"
 
+        return public_url
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to upload image: {e}")
+
+def upload_new_image(file_bytes: bytes, filename: str, content_type: str) -> str:
+    bucket = os.environ.get("SUPABASE_BUCKET", "event-images")
+
+    # Ensure unique filename
+    ext = filename.split('.')[-1]
+    unique_name = f"{uuid.uuid4()}.{ext}"
+
+    try:
+        res = supabase.storage.from_(bucket).upload(
+            path=unique_name,
+            file=file_bytes,
+            file_options={
+                "content-type": content_type,
+                "upsert": "true"
+            }
+        )
+
+        public_url = supabase.storage.from_(bucket).get_public_url(unique_name)
         return public_url
 
     except Exception as e:

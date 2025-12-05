@@ -27,6 +27,12 @@ export default function ProfilePage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [nameErrors, setNameErrors] = useState({
+    first: false,
+    last: false,
+  });
+  const [phoneError, setPhoneError] = useState(false);
+  const [hobbyError, setHobbyError] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -90,12 +96,47 @@ export default function ProfilePage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    if (name === "first_name") {
+      setNameErrors((prev) => ({ ...prev, first: value.length > 10 }));
+    }
+    if (name === "last_name") {
+      setNameErrors((prev) => ({ ...prev, last: value.length > 10 }));
+    }
+    if (name === "phone_number") {
+      let digits = value.replace(/\D/g, "");
+  
+      setPhoneError(digits.length > 10);
+  
+      digits = digits.slice(0, 10);
+  
+      let formatted = digits;
+  
+      if (digits.length > 3) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      }
+      if (digits.length > 6) {
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      }
+  
+      setProfile((prev) =>
+        prev ? { ...prev, [name]: formatted } : prev
+      );
+      return;
+    }  
     setProfile((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
+  
 
   // Add hobby
   const handleAddHobby = () => {
     const trimmed = newHobby.trim();
+  
+    if (trimmed.length > 15) {
+      setHobbyError(true);
+      return;
+    }
+    setHobbyError(false);
+  
     if (trimmed && profile && !profile.hobbies.includes(trimmed)) {
       setProfile((prev) =>
         prev ? { ...prev, hobbies: [...prev.hobbies, trimmed] } : prev
@@ -103,6 +144,7 @@ export default function ProfilePage() {
       setNewHobby("");
     }
   };
+  
 
   // Remove hobby
   const handleRemoveHobby = (hobby: string) => {
@@ -212,11 +254,10 @@ export default function ProfilePage() {
           {/* 🔥 Moved success/error message to top */}
           {saveMessage && (
             <div
-              className={`p-4 mb-8 rounded-lg text-center font-semibold ${
-                saveMessage.includes("successfully")
+              className={`p-4 mb-8 rounded-lg text-center font-semibold ${saveMessage.includes("successfully")
                   ? "bg-green text-nav-dark"
                   : "bg-red-100 text-red-800"
-              }`}
+                }`}
             >
               {saveMessage}
             </div>
@@ -250,6 +291,7 @@ export default function ProfilePage() {
                       <Icon className="w-4 h-4" />
                       {label} <span className="text-red-500">*</span>
                     </label>
+
                     <input
                       name={name}
                       value={(profile as any)[name]}
@@ -260,11 +302,25 @@ export default function ProfilePage() {
                           : "border-gray-200 bg-transparent focus:border-green"
                       }`}
                       placeholder={`Enter your ${label.toLowerCase()}`}
+                      maxLength={name === "phone_number" ? 20 : 10}
                     />
+                    {name === "first_name" && nameErrors.first && (
+                      <p className="text-red-600 text-sm">
+                        First name must be 10 characters or fewer.
+                      </p>
+                    )}
+                    {name === "last_name" && nameErrors.last && (
+                      <p className="text-red-600 text-sm">
+                        Last name must be 10 characters or fewer.
+                      </p>
+                    )}
+                    {name === "phone_number" && phoneError && (
+                      <p className="text-red-600 text-sm">
+                        Phone number must contain only 10 digits.
+                      </p>
+                    )}
                   </div>
                 ))}
-
-                {/* Email (readonly) */}
                 <div className="space-y-2">
                   <label className="text-lg font-semibold text-nav-dark flex items-center gap-2">
                     <Mail className="w-4 h-4" />
@@ -301,11 +357,10 @@ export default function ProfilePage() {
                     name="class_year"
                     value={profile.class_year || ""}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                      isFieldError("Class Year")
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Class Year")
                         ? "border-red-500 bg-red-50"
                         : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
+                      }`}
                   >
                     <option value="" disabled>
                       Select your class year
@@ -327,11 +382,10 @@ export default function ProfilePage() {
                     name="major"
                     value={profile.major}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                      isFieldError("Major")
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Major")
                         ? "border-red-500 bg-red-50"
                         : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
+                      }`}
                     placeholder="Your field of study"
                   />
                 </div>
@@ -353,13 +407,24 @@ export default function ProfilePage() {
                 <div className="flex gap-3">
                   <input
                     value={newHobby}
-                    onChange={(e) => setNewHobby(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewHobby(val);
+
+                      if (val.length > 15) {
+                        setHobbyError(true);
+                      } else {
+                        setHobbyError(false);
+                      }
+                    }}
                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green"
                     placeholder="Add a hobby or interest..."
+                    maxLength={20}
                     onKeyPress={(e) =>
                       e.key === "Enter" && (e.preventDefault(), handleAddHobby())
                     }
                   />
+
                   <button
                     type="button"
                     onClick={handleAddHobby}
@@ -368,6 +433,12 @@ export default function ProfilePage() {
                     Add
                   </button>
                 </div>
+
+                {hobbyError && (
+                  <p className="text-red-600 text-sm">
+                    Hobbies must be 15 characters or fewer.
+                  </p>
+                )}
 
                 {profile.hobbies.length > 0 && (
                   <div className="space-y-3">

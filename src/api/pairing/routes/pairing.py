@@ -32,9 +32,21 @@ def pair_students_baseline():
     db_session = get_db_sessionmaker()
     llm_client = get_llm()
 
-    # NOTE: pass args through request, currently has defaults set
-    group_size = request.args.get("group_size", default=2, type=int)
-    event_id = request.args.get("event_id", default=2, type=int)
+    try:
+        group_size = request.args.get("group_size", type=int)
+        if not isinstance(group_size, int):
+            return jsonify({"error": "Group size must be a valid integer"}), 400
+    except:
+        return jsonify({"error": "Group size must be a valid integer"}), 400
+    
+    try:
+        event_id = request.args.get("event_id", default=2, type=int)
+        if not isinstance(event_id, int):
+            return jsonify({"error": "Event id must be a valid integer"}), 400
+    except:
+        return jsonify({"error": "Event id must be a valid integer"}), 400
+    
+    logger.info(f"Received pairing request for event {event_id} with group size {group_size}")
 
     # users should not be able to request groups of size < 2
     if group_size <= 1:
@@ -52,6 +64,7 @@ def pair_students_baseline():
         logger.error(f"Error fetching registered users and event details: {e}")
         return jsonify(generic_error_response), 500
 
+    logger.info(f"Found {len(students) if students else 0} registered users for event {event_id}, studnets: {students}")
     if not students:
         # return empty pairing response
         return jsonify({"event_id": event_id, "pairing_results": {}}), 200

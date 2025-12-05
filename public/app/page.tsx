@@ -10,6 +10,7 @@ import LoginModal from "../components/LoginModal";
 import Navbar from "@/components/Navbar";
 import PearButton from "@/components/PearButton";
 
+
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -34,7 +35,7 @@ export default function Home() {
         | "student"
         | "organization"
         | null;
-      
+
       if (storedUserType === "organization") {
         // Verify organization access before redirecting
         verifyAndRedirectToOrganization();
@@ -95,6 +96,7 @@ export default function Home() {
           </div>
         </section>
       </main>
+
 
       <Footer />
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />

@@ -14,6 +14,7 @@ from db.models.user_profile import UserProfileTable
 from db.models.question import QuestionTable
 from db.models.response import ResponseTable
 from db.models.orgadmin import OrgAdminTable
+from db.models.orgadmin_requests import OrgAdminRequestTable
 
 from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
@@ -27,7 +28,6 @@ def create_user_data(session):
             phone_number="7188441945",
             email="gy4937@example.com"
         ),
-
         UserTable(
             username="NadulaG",
             first_name="nadula",
