@@ -233,11 +233,15 @@ def create_event():
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
 
-    # get organization_id from form
+    # get organization_id from form data, validate that it's an int
     organization_id = data.get("organization_id", None)
-
     if organization_id is None:
         return jsonify({"error": "organization_id is required"}), 400
+
+    try:
+        organization_id = int(organization_id)
+    except ValueError:
+        return jsonify({"error": "organization_id must be an integer"}), 400
 
     # Look up orgadmins table to make sure user has access
     db_session = get_db_sessionmaker()
