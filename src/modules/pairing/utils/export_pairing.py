@@ -14,7 +14,7 @@ ROLE_PRIORITY = {
 def role_priority(role: Optional[EventRole]) -> int:
     return ROLE_PRIORITY.get(role, 99)
 
-def format_pairing_export(pairing_result: PairingResult, event_title: str, organization_name: str, check_sibling_roles: bool = False) -> str:
+def format_pairings_for_export(pairing_result: PairingResult, event_title: str, organization_name: str, check_sibling_roles: bool = False) -> str:
     """
     helper to format pairing result for export.
     Returns a string, which can be handled as .txt or .pdf file content with Flask.

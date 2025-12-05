@@ -20,6 +20,7 @@ from db.crud.pairing_crud import store_new_pairing, get_pairings_for_event
 from db.crud.events_crud import get_event_by_id, check_if_sibling_role_considered
 from common.error_response import generic_error_response
 import uuid
+from modules.pairing.utils.export_pairing import format_pairings_for_export
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)
@@ -268,3 +269,41 @@ def get_student_match(event_id: int):
         logger.error(
             f"Error retrieving student match for event {event_id}: {e}")
         return jsonify({"error": "Internal server error"}), 500
+
+@pairing_bp.get("/event/<int:event_id>/my-match")
+def export_pairings_as_pdf(event_id: int):
+    """
+    Exports pairing results into a PDF file for user to download.
+    
+    1) Retrieves pairing results for the event
+    2) Retrieves event details such as event title, org name, if big/little pairings are considered
+    3) Formats the pairing results for export using universal helper
+    4) Returns the formatted text as a PDF content type
+    """
+
+    try:
+        event_id = int(event_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    # retrieve pairing result
+    try:
+        client_error_msg, pairing_result = get_pairings_for_event(event_id)
+        
+        if client_error_msg:
+            return jsonify(client_error_msg), 404
+
+        if not pairing_result:
+            return jsonify({"error": "No matches were found"}), 404
+
+    except Exception as e:
+        logger.error(f"Error getting matches of an event: {e}")
+        return jsonify(generic_error_response), 500
+    
+    # retrieve event details
+    try:
+        pass
+    except:
+        pass
+    
+    format_pairings_for_export
