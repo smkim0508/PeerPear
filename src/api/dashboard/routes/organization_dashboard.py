@@ -227,23 +227,29 @@ def create_event():
 
     data = request.form
 
-    # Get user_id from session and look up organization
+    # Get user_i and organization_id from session and look up on db to verify access
     user_id = session.get("user_id")
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
+    
+    payload = request.get_json(silent=True) or {}
+    organization_id = payload.get("organization_id", None)
 
-    # Look up organization_id from orgadmins table
+    if organization_id is None:
+        return jsonify({"error": "organization_id is required"}), 400
+
+    # Look up orgadmins table to make sure user has access
     db_session = get_db_sessionmaker()
     with db_session() as db_session_instance:
         org_admin = db_session_instance.scalar(
-            select(OrgAdminTable).where(OrgAdminTable.user_id == user_id)
+            select(OrgAdminTable)
+            .where(OrgAdminTable.user_id == user_id)
+            .where(OrgAdminTable.organization_id == organization_id)
         )
 
         if org_admin is None:
             return jsonify({"error": "User is not an organization admin"}), 403
-
-        organization_id = org_admin.organization_id
 
     title = data.get("title", "Untitled Event")
     description = data.get("description", "")
@@ -259,7 +265,6 @@ def create_event():
         image_url = upload_event_image(file_bytes, filename, content_type)
     else:
         image_url = f"{request.host_url}static/peerpear_logo.png"
-
 
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)
