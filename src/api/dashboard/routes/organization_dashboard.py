@@ -13,7 +13,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.models.events import EventTable
 from common.types.pairing_event import PairingEvent, PairingResult
 from common.types.event_enums import EventStatus, EventRole
-from db.supabase_client import upload_event_image
+from db.supabase_client import upload_new_image
 from flask import Blueprint
 
 # use blueprint to group routes
@@ -171,7 +171,7 @@ def update_event_image():
             content_type = uploaded_file.content_type
             filename = uploaded_file.filename
 
-            image_url = upload_event_image(
+            image_url = upload_new_image(
                 event_id=int(event_id),
                 file_bytes=file_bytes,
                 filename=filename,
@@ -266,7 +266,7 @@ def create_event():
         content_type = uploaded_file.content_type
         filename = uploaded_file.filename
 
-        image_url = upload_event_image(file_bytes, filename, content_type)
+        image_url = upload_new_image(file_bytes, filename, content_type)
     else:
         image_url = f"{request.host_url}static/peerpear_logo.png"
 
