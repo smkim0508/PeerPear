@@ -29,8 +29,8 @@ export default function SearchBar({
               <input
                 id="search"
                 type="text"
-                placeholder={`Search ${activeTab === "event" ? "programs" : "organizations"
-                  }...`}
+                placeholder={`Search by ${activeTab === "event" ? "program" : "organization"
+                  }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border-2 border-[#CCCEC1] bg-white focus:border-[#D7FF9C] focus:outline-none transition-colors duration-200"
