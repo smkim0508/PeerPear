@@ -505,7 +505,13 @@ export default function EventPage2({ params }: EventPageProps) {
         <Navbar organizationId={event.organization_id} />
 
         <section>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 overflow-hidden">
+            {event.image_url && (
+              <div
+                className="absolute inset-0 z-0 opacity-10 bg-cover bg-center bg-no-repeat pointer-events-none"
+                style={{ backgroundImage: `url(${event.image_url})` }}
+              />
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
@@ -572,22 +578,10 @@ export default function EventPage2({ params }: EventPageProps) {
                     {event.description && (
                       <p className="text-lg text-gray-700 max-w-2xl leading-relaxed">{event.description}</p>
                     )}
-                    {isOrganizationUser && currentStatus === "NOT_STARTED" && (
-                      <div className="mt-6">
-                        <PearButton text="Edit Event Details" onClick={handleEditEvent} />
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
               <div className="space-y-6">
-                {event.image_url && (
-                  <div className="flex justify-center lg:justify-end">
-                    <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl overflow-hidden shadow bg-[#f4f4ef]">
-                      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${event.image_url})` }} />
-                    </div>
-                  </div>
-                )}
                 <div className="w-full max-w-md lg:ml-auto space-y-6">
                   {!isOrganizationUser && event?.status === "STARTED" && (
                     <Card>
@@ -628,7 +622,6 @@ export default function EventPage2({ params }: EventPageProps) {
                       </CardContent>
                     </Card>
                   )}
-                  {currentStatus === "STARTED" && <CountdownCard />}
                 </div>
               </div>
             </div>
@@ -662,11 +655,11 @@ export default function EventPage2({ params }: EventPageProps) {
 
               {hasQuestions && (
                 <Card>
-                  <CardHeader className="flex items-center gap-3">
+                  <CardHeader className="flex items-center gap-3 pt-6">
                     <Users className="h-6 w-6 text-green" />
                     <CardTitle className="text-2xl">Program Questions</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-6 pb-6">
                     <p className="text-gray-800 text-lg">
                       This program includes {event.questions.length} question{event.questions.length !== 1 ? "s" : ""} to help match participants effectively.
                     </p>
@@ -675,11 +668,11 @@ export default function EventPage2({ params }: EventPageProps) {
               )}
               {isOrganizationUser && (
                 <Card>
-                  <CardHeader className="flex items-center gap-3">
+                  <CardHeader className="flex items-center gap-3 pt-6">
                     <Users className="h-6 w-6 text-green" />
                     <CardTitle className="text-2xl">Participants</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-6 pb-6">
                     {participants.length === 0 ? (
                       <p className="text-gray-600">No participants yet.</p>
                     ) : (
@@ -763,27 +756,29 @@ export default function EventPage2({ params }: EventPageProps) {
               )}
             </div>
             <div className="space-y-6">
+
+                  {currentStatus === "STARTED" && <CountdownCard />}
               {isOrganizationUser && currentStatus !== "PAIRING_PUBLISHED" && (
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="pt-6">
                     <CardTitle className="text-2xl">Program Management</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-6 pb-6">
                     <div className="grid gap-3">
                       {hasQuestions && currentStatus === "STARTED" && (
                         <PearButton text="View Response Analytics" onClick={() => router.push(`/events/${eventId}/questionnaire`)} className="w-full" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
-                        <PearButton text="Edit Event Details" onClick={handleEditEvent} className="w-full" />
+                        <PearButton text="Edit Program Details" onClick={handleEditEvent} className="w-full cursor-pointer" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
-                        <PearButton text="Edit Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full bg-blue-600 hover:bg-blue-700" />
+                        <PearButton text="Edit Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700" />
                       )}
                       {currentStatus === "STARTED" && (
-                        <PearButton text="View Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full bg-blue-600 hover:bg-blue-700" />
+                        <PearButton text="View Questionnaire" onClick={() => router.push(`/events/${eventId}/questions`)} className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700" />
                       )}
                       {currentStatus === "NOT_STARTED" && (
-                        <PearButton text={isStartingEvent ? "Starting Event..." : "Start Event"} onClick={isStartingEvent ? () => {} : openStartModal} className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent ? "opacity-50 cursor-not-allowed" : ""}`} />
+                        <PearButton text={isStartingEvent ? "Starting Program..." : "Start Program"} onClick={isStartingEvent ? () => {} : openStartModal} className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent ? "opacity-50 cursor-not-allowed" : ""} cursor-pointer`} />
                       )}
                       {currentStatus === "STARTED" && (
                         <PearButton text={isEndingEvent ? "Ending Program..." : "End Program"} onClick={isEndingEvent ? () => {} : handleEndEvent} className={`w-full bg-orange-600 hover:bg-orange-700 ${isEndingEvent ? "opacity-50 cursor-not-allowed" : ""}`} />
