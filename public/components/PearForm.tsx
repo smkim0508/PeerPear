@@ -36,6 +36,32 @@ export default function PearForm({
         existingOptions.length > 0 ? existingOptions : [""]
     );
     const [showForm, setShowForm] = useState(!isEditing);
+    const [errors, setErrors] = useState({
+        question: "",
+        options: "",
+    });
+
+    const validate = () => {
+        let newErrors = { question: "", options: "" };
+        let valid = true;
+
+        if (!question.trim()) {
+            newErrors.question = "Please enter a valid question";
+            valid = false;
+        }
+
+        if (type === "multiple_choice") {
+            const validOptions = options.filter((o) => o.trim() !== "");
+
+            if (validOptions.length < 2) {
+                newErrors.options = "Please provide at least 2 options for multiple choice";
+                valid = false;
+            }
+        }
+
+        setErrors(newErrors);
+        return valid;
+    };
 
     const handleAddOption = () => {
         setOptions([...options, ""]);
@@ -63,39 +89,29 @@ export default function PearForm({
     };
 
     const handleSave = () => {
-        if (!question.trim()) {
-            alert("Please enter a question");
-            return;
-        }
-
-        if (type === "multiple_choice") {
-            const validOptions = options.filter((opt) => opt.trim() !== "");
-            if (validOptions.length < 2) {
-                alert("Please provide at least 2 options for multiple choice");
-                return;
-            }
-            onSave({
-                id: questionId,
-                question,
-                type,
-                options: validOptions,
-            });
-        } else {
-            onSave({
-                id: questionId,
-                question,
-                type,
-            });
-        }
-
-        // Reset form if not editing
+        if (!validate()) return;
+    
+        const validOptions =
+            type === "multiple_choice"
+                ? options.filter((opt) => opt.trim() !== "")
+                : [];
+    
+        onSave({
+            id: questionId,
+            question,
+            type,
+            options: validOptions,
+        });
+    
         if (!isEditing) {
             setQuestion("");
             setType("text");
             setOptions([""]);
         }
+    
         setShowForm(false);
     };
+    
 
     const handleCancel = () => {
         if (isEditing) {
@@ -161,9 +177,14 @@ export default function PearForm({
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Enter your question here..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green focus:border-transparent"
+                    className={`w-full px-4 py-2 border rounded-lg
+                        ${errors.question ? "border-red-500" : "border-gray-300"}
+                    `}
                 />
+
+                {errors.question && (
+                    <p className="text-red-500 text-sm mt-1">{errors.question}</p>
+                )}
             </div>
 
             {/* Question Type Selector */}
@@ -203,6 +224,8 @@ export default function PearForm({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Options
                     </label>
+
+                    {/* OPTION INPUTS */}
                     <div className="space-y-2">
                         {options.map((option, index) => (
                             <div key={index} className="flex gap-2">
@@ -211,13 +234,14 @@ export default function PearForm({
                                     value={option}
                                     onChange={(e) => handleOptionChange(index, e.target.value)}
                                     placeholder={`Option ${index + 1}`}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green focus:border-transparent"
+                                    className={`flex-1 px-4 py-2 border rounded-lg ${
+                                        errors.options ? "border-red-500" : "border-gray-300"
+                                    }`}
                                 />
                                 {options.length > 1 && (
                                     <button
                                         onClick={() => handleRemoveOption(index)}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Remove option"
                                     >
                                         <X size={20} />
                                     </button>
@@ -225,6 +249,12 @@ export default function PearForm({
                             </div>
                         ))}
                     </div>
+
+                    {/* ❗ PLACE ERROR HERE — BELOW ALL OPTIONS */}
+                    {errors.options && (
+                        <p className="text-red-500 text-sm mt-2">{errors.options}</p>
+                    )}
+
                     <button
                         onClick={handleAddOption}
                         className="mt-2 flex items-center gap-2 text-sm text-green-700 hover:text-green-800 font-medium"
@@ -233,7 +263,7 @@ export default function PearForm({
                         Add Option
                     </button>
                 </div>
-            )}
+)}
 
             {/* Action Buttons */}
             <div className="flex gap-3 justify-end">
