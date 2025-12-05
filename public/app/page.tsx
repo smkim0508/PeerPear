@@ -9,7 +9,7 @@ import Footer from "../components/Footer";
 import LoginModal from "../components/LoginModal";
 import Navbar from "@/components/Navbar";
 import PearButton from "@/components/PearButton";
-import OrganizationCarousel from "@/components/OrganizationCarousel";
+
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -97,7 +97,7 @@ export default function Home() {
         </section>
       </main>
 
-      <OrganizationCarousel />
+
       <Footer />
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </div>

@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useState } from "react";
 import LoginModal from "@/components/LoginModal";
+import OrganizationCarousel from "@/components/OrganizationCarousel";
 
 export default function About() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -13,10 +14,10 @@ export default function About() {
 
     const teamMembers = [
         { name: "Sungmin Kim", role: "Project Lead", image: "/sungmin.jpg" },
-        { name: "Dongkon Lee", role: "Full Stack Developer", image: "/DK.png" },
-        { name: "Gary Yang", role: "Full Stack Developer" },
+        { name: "Dongkon Lee", role: "Full Stack Developer", image: "/dk.png" },
+        { name: "Gary Yang", role: "Full Stack Developer", image: "/gary.png" },
         { name: "Nadula", role: "Full Stack Developer", image: "/nadula.jpg" },
-        { name: "Jaden", role: "Full Stack Developer", image: "/jaden.jpg" },
+        { name: "Jaden", role: "Full Stack Developer", image: "/jaden.png" },
     ];
 
     return (
@@ -52,6 +53,12 @@ export default function About() {
 
 
 
+                {/* Organization Carousel */}
+                <section className="py-10 bg-white border-y border-gray-100">
+                    <h2 className="text-2xl font-bold text-[#393D3F] mb-6 text-center opacity-80">Trusted by</h2>
+                    <OrganizationCarousel />
+                </section>
+
                 {/* Our Team Section */}
                 <section className="py-16 px-8 bg-gray-50">
                     <div className="max-w-5xl mx-auto">
@@ -73,7 +80,8 @@ export default function About() {
                                             member.name.charAt(0)
                                         )}
                                     </div>
-                                    <h3 className="text-xl font-bold text-[#393D3F] mb-2">{member.name}</h3>
+                                    <h3 className="text-xl font-bold text-[#393D3F] mb-1">{member.name}</h3>
+                                    <p className="text-gray-500 text-sm mb-2">Princeton University</p>
                                     <p className="text-gray-600 font-medium">{member.role}</p>
                                 </div>
                             ))}

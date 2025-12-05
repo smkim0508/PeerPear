@@ -9,6 +9,7 @@ import { use, useEffect, useState } from "react";
 import { PearAlert } from "@/components/PearAlert";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { ArrowLeft } from "lucide-react";
 
 interface QuestionnairePageProps {
   params: Promise<{ slug: string }>;
@@ -17,17 +18,17 @@ interface QuestionnairePageProps {
 function validateAnswers(questions: any[], answers: Record<number, string>) {
   const invalidAnswers = [];
 
-  for (const [index, q] of questions.entries())  {
+  for (const [index, q] of questions.entries()) {
     const question_id = q.id;
     const value = answers[question_id];
 
     if (!value || value.trim() === "") {
-      invalidAnswers.push(index+1);
+      invalidAnswers.push(index + 1);
       continue;
     }
 
     if (q.options && q.options.length > 0 && !q.options.includes(value)) {
-      invalidAnswers.push(index+1);
+      invalidAnswers.push(index + 1);
     }
   }
 
@@ -65,10 +66,10 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         | null;
       return storedUserType || "student";
     }
-    
+
     return "student"; // Default to student
   };
-  
+
   const userType = getUserType();
   const isOrganizationUser = userType === "organization";
 
@@ -85,18 +86,18 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       const participantsRes = await fetch(`${apiUrl}/events/${event_id}/participants`, {
         credentials: "include",
       });
-      
+
       if (participantsRes.ok) {
         const participantsData = await participantsRes.json();
         setParticipants(participantsData);
-        
+
         // Fetch all responses for all participants
         const responsePromises = participantsData.map(async (participant: any) => {
           try {
             const responseRes = await fetch(`${apiUrl}/questionnaire/${event_id}/${participant.user_id}`, {
               credentials: 'include',
             });
-            
+
             if (responseRes.ok) {
               const responseData = await responseRes.json();
               return responseData.answers || [];
@@ -106,7 +107,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
             return [];
           }
         });
-        
+
         const allResponsesArrays = await Promise.all(responsePromises);
         const flattenedResponses = allResponsesArrays.flat();
         setAllResponses(flattenedResponses);
@@ -124,7 +125,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       const data = await res.json();
       if (res.ok) {
         setQuestions(data.questions || []);
-        
+
         // For students, load their existing answers
         if (!isOrganizationUser) {
           const normalizedAnswers: Record<number, string> = (
@@ -186,7 +187,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         await get_questions();
       }
     };
-    
+
     if (event_id && !isNaN(event_id) && user_id) {
       verify_registration();
     } else if (!user_id && user === null) {
@@ -198,7 +199,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     }
   }, [event_id, user_id, apiUrl, router, user, isOrganizationUser]);
 
-  
+
 
   const handleSubmit = async () => {
     if (!user_id) {
@@ -310,6 +311,15 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       <Navbar userType={userType} />
       <div className="min-h-screen bg-[#EBECE4]">
         <div className="flex flex-col items-center p-6 pt-12">
+          <div className="w-full max-w-6xl mb-4">
+            <button
+              onClick={() => router.push(`/events/${event_id}`)}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Program
+            </button>
+          </div>
           <div className="text-center mb-8 max-w-2xl">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               {isOrganizationUser ? "Program Responses" : "Questionnaire Form"}
@@ -321,7 +331,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
             </p>
             {alert && <PearAlert type={alert.type} message={alert.message} />}
           </div>
-          
+
           {isOrganizationUser ? (
             // Organization view - Show all responses
             <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl border border-gray-100">
@@ -361,7 +371,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                         />
                       ))}
                     </div>
-                    
+
                     <div className="text-center pt-8">
                       <PearButton
                         text="Back to Program"
