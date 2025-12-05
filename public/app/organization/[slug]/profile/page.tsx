@@ -61,7 +61,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
         "Failed to validate organization access. Please check your connection. Redirecting..."
       );
       setIsAuthorized(false);
-              setTimeout(() => router.push("/organization"), 2000);
+      setTimeout(() => router.push("/organization"), 2000);
 
     }
   };
@@ -237,12 +237,12 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${
-                          errors.org_name
+                        className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium ${errors.org_name
                             ? "border-red-500 focus:ring-red-500"
                             : "border-white focus:ring-white"
-                        }`}
+                          }`}
                         placeholder="Enter organization name"
+                        maxLength={50}
                       />
                     </div>
 
@@ -266,11 +266,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                       value={orgDescription}
                       onChange={(e) => setOrgDescription(e.target.value)}
                       rows={4}
-                      className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none ${
-                        errors.description
+                      className={`w-full p-4 border-2 rounded-lg focus:outline-none focus:ring-2 bg-white/80 backdrop-blur-sm text-[#1a1a1a] font-medium resize-none ${errors.description
                           ? "border-red-500 focus:ring-red-500"
                           : "border-white focus:ring-white"
-                      }`}
+                        }`}
                       placeholder="Tell us about your organization..."
                     />
                   </div>
@@ -301,11 +300,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
                   {message && (
                     <div
-                      className={`p-4 rounded-lg text-center font-semibold ${
-                        message.includes("success")
+                      className={`p-4 rounded-lg text-center font-semibold ${message.includes("success")
                           ? "bg-green text-nav-dark"
                           : "bg-red-100 text-red-800"
-                      }`}
+                        }`}
                     >
                       {message}
                     </div>
