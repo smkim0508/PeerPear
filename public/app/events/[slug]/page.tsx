@@ -249,7 +249,7 @@ export default function EventPage2({ params }: EventPageProps) {
     setConfirmCheckbox(
       "I understand this program uses AI/LLM technology to match participants."
     );
-    setConfirmYes("Register for Event");
+    setConfirmYes("Register for Program");
     setConfirmNo("Cancel");
     setConfirmAction(() => async () => {
       await handleRegister();
@@ -338,7 +338,7 @@ export default function EventPage2({ params }: EventPageProps) {
     setConfirmCheckbox(
       "I understand that I cannot edit this event or its questions once I start this event"
     );
-    setConfirmYes("Start Event");
+    setConfirmYes("Start Program");
     setConfirmNo("Cancel");
     setConfirmAction(() => async () => {
       await handleStartEvent();

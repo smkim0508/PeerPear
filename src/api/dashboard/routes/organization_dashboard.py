@@ -256,7 +256,7 @@ def create_event():
         if org_admin is None:
             return jsonify({"error": "User is not an organization admin"}), 403
 
-    title = data.get("title", "Untitled Event")
+    title = data.get("title", "Untitled Program")
     description = data.get("description", "")
     check_sibling_roles = data.get("check_sibling_roles", False)
 
