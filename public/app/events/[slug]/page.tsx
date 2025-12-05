@@ -140,6 +140,11 @@ export default function EventPage2({ params }: EventPageProps) {
   const eventId = parseInt(slug);
   const [checkedAutoTerminate, setCheckedAutoTerminate] = useState(false);
 
+  const [eventImage, setEventImage] = useState<File | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+
   const getUserType = (): "student" | "organization" => {
     if (typeof window !== "undefined") {
       const storedUserType = localStorage.getItem("userType") as
@@ -268,6 +273,14 @@ export default function EventPage2({ params }: EventPageProps) {
     } catch {}
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImageFile(file); 
+      setImagePreview(URL.createObjectURL(file)); 
+    }
+  };
+
   const getUserClassYear = async () => {
     try {
       const API_BASE_URL =
@@ -387,6 +400,24 @@ export default function EventPage2({ params }: EventPageProps) {
           : null
       );
       setIsEditingEvent(false);
+      if (selectedImageFile) {
+        const formData = new FormData();
+        formData.append("file", selectedImageFile);
+      
+        const res = await fetch(`${API_BASE_URL}/events/${eventId}/image`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+      
+        if (!res.ok) {
+          console.error("Failed to upload image");
+          return;
+        }
+      
+        const data = await res.json();
+        setEditEventData((prev) => ({ ...prev, image_url: data.image_url }));
+      }
     } catch {
       setError("Failed to update event");
     } finally {
@@ -726,6 +757,28 @@ export default function EventPage2({ params }: EventPageProps) {
                           maxLength={500}
                         />
                       </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Event Image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
+                        />
+                      </div>
+                      {imagePreview && (
+                        <div className="flex items-center justify-center">
+                          <img
+                            src={imagePreview}
+                            alt="Event Preview"
+                            className="max-h-64 rounded-lg border border-gray-200 object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
                       <div className="flex gap-3">
                         <button
                           onClick={handleSaveEvent}
