@@ -217,18 +217,21 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
               onSuccess={handleEventSuccess}
               organizationId={organizationId}
             />
-            <div className="fixed bottom-6 right-6 z-50">
-              <Button
-                variant="default"
-                size="icon-lg"
-                className="rounded-full shadow-lg hover:shadow-xl hover:scale-105"
-                onClick={() => setIsModalOpen(true)}
-                aria-label="Create new program"
-                title="Create new program"
-              >
-                <Plus className="w-5 h-5" />
-              </Button>
-            </div>
+            {!isModalOpen && (
+              <div className="fixed bottom-8 right-8 z-50">
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="cursor-pointer rounded-full h-12 px-6 shadow-2xl hover:shadow-3xl hover:scale-105"
+                  onClick={() => setIsModalOpen(true)}
+                  aria-label="Create new program"
+                  title="Create new program"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="hidden sm:inline ml-2 font-semibold">New Program</span>
+                </Button>
+              </div>
+            )}
           </main>
         )}
         <Footer />
