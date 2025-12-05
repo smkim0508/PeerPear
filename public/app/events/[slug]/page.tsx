@@ -19,6 +19,7 @@ import {
   Award,
   Timer,
   Bell,
+  Download,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
@@ -1058,6 +1059,20 @@ export default function EventPage({ params }: EventPageProps) {
                               : "These matches are not yet visible to students. Review them below and click 'Publish Pairings' when ready."}
                           </p>
                         </div>
+                        {currentStatus === "PAIRING_PUBLISHED" && (
+                          <div className="flex-shrink-0">
+                            <a
+                              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/pairing/event/${eventId}/pairing_pdf`}
+                              download
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-md"
+                            >
+                              <Download className="w-5 h-5" />
+                              Download PDF
+                            </a>
+                          </div>
+                        )}
                       </div>
 
                       {/* Pairing Results Content */}
