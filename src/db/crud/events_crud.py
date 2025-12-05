@@ -69,7 +69,7 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
-                    end_date=event.end_date,
+                    end_date=event.end_date
                 )
             )
 
@@ -109,7 +109,7 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
-                    end_date=event.end_date,
+                    end_date=event.end_date
                 )
             )
 
@@ -171,7 +171,7 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
-                    end_date=event.end_date,
+                    end_date=event.end_date
                 )
             )
 
