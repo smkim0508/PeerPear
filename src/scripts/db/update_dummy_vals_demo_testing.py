@@ -46,7 +46,9 @@ C. Toggle between the two demo cases with the following environmental variable:
 """
 
 # fetch the demo case, default 1 (6 students) 
-DEMO_CASE = os.getenv("DEMO_CASE", "1")
+DEMO_CASE = str(os.getenv("DEMO_CASE", 1))
+
+print(f"DEMO CASE: {DEMO_CASE}, type: {type(DEMO_CASE)}")
 
 def create_user_data(session):
     users = [
@@ -54,7 +56,6 @@ def create_user_data(session):
             username="gy4937",
             first_name="Gary",
             last_name="Yang",
-            phone_number="1234567890",
             email="gy4937@princeton.edu"
         ),
         UserTable(
@@ -62,27 +63,23 @@ def create_user_data(session):
             first_name="Sungmin",
             last_name="Kim",
             email="sk3378@prineton.edu",
-            phone_number="1234567890"
         ),
         UserTable(
             username="ng3922",
             first_name="Nadula",
             last_name="Gardiyehewa",
-            phone_number="1234567890",
             email="ng3922@princeton.edu"
         ),
         UserTable(
             username="jc3311",
             first_name="Jaden",
             last_name="Cutinha",
-            phone_number="1234567890",
             email="jc3311@princeton.edu"
         ),
         UserTable(
             username="dl2635",
             first_name="Dongkon",
             last_name="Lee",
-            phone_number="1234567890",
             email="dl2635@princeton.edu"
         )
     ]
@@ -94,7 +91,6 @@ def create_user_data(session):
                 username="jocelyn",
                 first_name="Jocelyn",
                 last_name="W",
-                phone_number="1234567890",
                 email="jocelyn@example.com"
             ),
             # NOTE: id 7 -> org admin account
@@ -102,7 +98,6 @@ def create_user_data(session):
                 username="cs-jocelyn",
                 first_name="Jocelyn 2",
                 last_name="W",
-                phone_number="1234567890",
                 email="cs-jocelyn@example.com"
             )
         ])
@@ -286,13 +281,6 @@ def create_event_registration_data(session):
 def create_user_profile_data(session):
     profiles = [
         UserProfileTable(
-            user_id=1, # gary
-            gender="Male",
-            class_year=ClassYear.JUNIOR,
-            major="Art",
-            hobbies=["Graphic Design", "Art", "Painting", "Drawing"]
-        ),
-        UserProfileTable(
             user_id=2, # sungmin
             gender="Male",
             class_year=ClassYear.JUNIOR,
@@ -324,17 +312,28 @@ def create_user_profile_data(session):
 
     if DEMO_CASE == "1":
         # if jocelyn's included, add her student account to profile
+        # profiles.extend([
+        #     UserProfileTable(
+        #         user_id=6, # jocelyn - student account
+        #         gender="Female",
+        #         class_year=ClassYear.FRESHMAN,
+        #         major="Computer Science",
+        #         hobbies=["Neural Networks", "Artificial Intelligence", "Deep Learning", "Natural Language Processing"]
+        #     )
+        # ])
+        pass
+
+    # in case 2, gary shouldn't have profile
+    if DEMO_CASE == "1":
         profiles.extend([
             UserProfileTable(
-                user_id=6, # jocelyn - student account
-                gender="Female",
-                class_year=ClassYear.FRESHMAN,
-                major="Computer Science",
-                hobbies=["Neural Networks", "Artificial Intelligence", "Deep Learning", "Natural Language Processing"]
-            )
+                user_id=1, # gary
+                gender="Male",
+                class_year=ClassYear.JUNIOR,
+                major="Art",
+                hobbies=["Graphic Design", "Art", "Painting", "Drawing"]
+            ),
         ])
-
-    # in case 2, current suffices
 
     for profile in profiles:
         session.add(profile)
@@ -351,7 +350,7 @@ def create_question_data(session):
         QuestionTable(
             # multiple choice question
             question="What's your favorite social media app?",
-            options=["1","2","3","4"],
+            options=["Instagram","Facebook","TikTok","Snapchat"],
             event_id=4
         )
     ]
@@ -381,9 +380,19 @@ def create_response_data(session):
             answer="Sushi"
         ),
         ResponseTable(
+            user_id=2, # sungmin
+            question_id=2, # open-ended question, favorite food?
+            answer="Facebook"
+        ),
+        ResponseTable(
             user_id=3, # nadula
             question_id=1,
             answer="Hamburger"
+        ),
+        ResponseTable(
+            user_id=3, # nadula
+            question_id=2,
+            answer="Instagram"
         )
     ]
 
@@ -396,14 +405,29 @@ def create_response_data(session):
                 answer="Pizza"
             ),
             ResponseTable(
+                user_id=1, # gary
+                question_id=2, # mcq
+                answer="Instagram"
+            ),
+            ResponseTable(
                 user_id=5, # dk
                 question_id=1,
                 answer="Waffles"
             ),
             ResponseTable(
+                user_id=5, # dk
+                question_id=2,
+                answer="TikTok"
+            ),
+            ResponseTable(
                 user_id=4, # jaden
                 question_id=1,
                 answer="Pancakes"
+            ),
+            ResponseTable(
+                user_id=4, # jaden
+                question_id=2,
+                answer="TikTok"
             )
         ])
 
@@ -414,6 +438,11 @@ def create_response_data(session):
                 user_id=4, # jaden
                 question_id=1,
                 answer="Sashimi"
+            ),
+            ResponseTable(
+                user_id=4, # jaden
+                question_id=2,
+                answer="Facebook"
             )
         ])
 
