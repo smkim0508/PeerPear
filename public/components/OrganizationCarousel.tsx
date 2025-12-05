@@ -19,7 +19,7 @@ export default function OrganizationCarousel() {
                 {allOrganizations.map((org, index) => (
                     <div
                         key={index}
-                        className={`flex items-center justify-center mx-8 w-32 h-32 transition-all duration-300 opacity-70 hover:opacity-100 hover:scale-110 ${org.name === "Charter" || org.name === "PSV" ? "scale-150 hover:scale-[1.6]" : ""
+                        className={`flex items-center justify-center mx-16 w-32 h-32 transition-all duration-300 opacity-70 hover:opacity-100 hover:scale-110 ${org.name === "Charter" || org.name === "PSV" ? "scale-150 hover:scale-[1.6]" : ""
                             }`}
                     >
                         <img
