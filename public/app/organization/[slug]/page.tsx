@@ -8,10 +8,12 @@ import CreateEventModal from "@/components/CreateEventModal";
 import { useRouter } from "next/navigation";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState, use } from "react";
-import PearButton from "@/components/PearButton";
-import PearSwitch from "@/components/PearSwitch";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { parseISO, isPast } from "date-fns";
+  import PearButton from "@/components/PearButton";
+  import { Button } from "@/components/ui/button";
+  import PearSwitch from "@/components/PearSwitch";
+  import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+  import { parseISO, isPast } from "date-fns";
+  import { Plus } from "lucide-react";
 
 interface OrganizationDashboardProps {
   params: Promise<{ slug: string }>;
@@ -194,13 +196,6 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
                 <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">Programs</h1>
                 <p className="text-foreground/70">Create and manage programs for your organization.</p>
               </div>
-              <div className="flex justify-center my-6">
-                <PearButton
-                  text="Create New Program"
-                  className="w-[300px] sm:w-[400px] lg:w-[500px] text-xl py-4"
-                  onClick={() => setIsModalOpen(true)}
-                />
-              </div>
             </div>
 
             <div className="flex justify-center mb-8">
@@ -222,6 +217,18 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
               onSuccess={handleEventSuccess}
               organizationId={organizationId}
             />
+            <div className="fixed bottom-6 right-6 z-50">
+              <Button
+                variant="default"
+                size="icon-lg"
+                className="rounded-full shadow-lg hover:shadow-xl hover:scale-105"
+                onClick={() => setIsModalOpen(true)}
+                aria-label="Create new program"
+                title="Create new program"
+              >
+                <Plus className="w-5 h-5" />
+              </Button>
+            </div>
           </main>
         )}
         <Footer />
