@@ -529,6 +529,44 @@ export default function EventPage2({ params }: EventPageProps) {
     }
   };
 
+  const handleUserClick = async (selectedUser: any) => {
+    setSelectedUser(selectedUser);
+    setIsModalOpen(true);
+
+    setUserAnswers([]); // Clear previous answers
+
+    try {
+      // Get user's responses for this event
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${API_BASE_URL}/questionnaire/${eventId}/${selectedUser.user_id}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Transform the data to match expected format
+        const formattedAnswers =
+          data.answers?.map((answer: any) => ({
+            answer: answer.answer,
+            question_id: answer.question_id,
+            questions: {
+              question:
+                data.questions?.find((q: any) => q.id === answer.question_id)
+                  ?.question || "",
+            },
+          })) || [];
+        setUserAnswers(formattedAnswers);
+      } else {
+        console.error("Error fetching user answers:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching user answers:", error);
+    }
+  };
   const currentStatus = event ? event.status : "Unknown";
   const hasQuestions = !!event?.questions?.length;
 
@@ -884,8 +922,7 @@ export default function EventPage2({ params }: EventPageProps) {
                             key={u.id}
                             className="cursor-pointer rounded-xl p-4 border border-gray-200 hover:bg-[#f7f7f2] transition"
                             onClick={() => {
-                              setSelectedUser(u);
-                              setIsModalOpen(true);
+                              handleUserClick(u);
                             }}
                           >
                             <p className="text-center font-semibold text-lg text-nav-dark">
