@@ -79,7 +79,7 @@ export default function CreateEventModal({
       form.append("image", formData.imageFile);
     }
 
-    form.append("organization_id", organizationId);
+    form.append("organization_id", organizationId.toString());
 
     try {
       const res = await fetch(
