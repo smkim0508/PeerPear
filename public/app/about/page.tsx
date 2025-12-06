@@ -16,7 +16,7 @@ export default function About() {
 
     const teamMembers = [
         { name: "Sungmin Kim", role: "Project Lead", image: "/sungmin.jpg" },
-        { name: "Dongkon Lee", role: "Full Stack Developer", image: "/dk.png" },
+        { name: "Dongkon Lee", role: "Full Stack Developer", image: "/DK.png" },
         { name: "Gary Yang", role: "Full Stack Developer", image: "/gary.png" },
         { name: "Nadula", role: "Full Stack Developer", image: "/nadula.jpg" },
         { name: "Jaden", role: "Full Stack Developer", image: "/jaden.png" },
