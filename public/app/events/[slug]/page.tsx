@@ -1038,7 +1038,7 @@ export default function EventPage2({ params }: EventPageProps) {
                         {pairingData && (
                           <button
                             onClick={handleDownloadPairings}
-                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-lg hover:bg-green-700 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/90 transition-colors font-semibold shadow-sm"
                           >
                             <Download className="h-4 w-4" />
                             Export as Text
