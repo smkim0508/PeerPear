@@ -31,6 +31,12 @@ interface Question {
   options?: string[];
 }
 
+interface Organization {
+  id: number;
+  org_name: string;
+  description: string;
+}
+
 export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   const { slug } = use(params);
   const { user } = useAuth();
@@ -46,15 +52,34 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [orgLoading, setOrgLoading] = useState(true);
 
   useEffect(() => {
     fetchQuestions();
+    fetchOrganization();
   }, [event_id]);
 
   useEffect(() => {
     fetchPermissions();
   }, [event_id]);
 
+  const fetchOrganization = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const res = await fetch(`${apiUrl}/events/${event_id}/organization`);
+      const data = await res.json();
+      if (res.ok) {
+        setOrganization(data.organization || null);
+      } else {
+        setError(data.error || "Failed to load organization.");
+      }
+    } catch (err) {
+      setError("Server error fetching organization.");
+    } finally {
+      setOrgLoading(false);
+    }
+  };
   const fetchPermissions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -207,7 +232,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
     }
   };
 
-  if (permissionsLoading) {
+  if (permissionsLoading || orgLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-lg text-gray-600">Checking permissions...</p>
@@ -237,7 +262,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
 
   return (
     <>
-      <Navbar userType="organization" />
+      <Navbar userType="organization" organizationId={organization?.id} />
       <div className="min-h-screen bg-[#EBECE4] p-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-6">
@@ -251,7 +276,12 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           </div>
           <div className="flex flex-row justify-between items-start mb-8">
             <div>
-              <h1 className="text-3xl font-bold mb-4">Questionnaire Page</h1>
+              <h1 className="text-3xl font-bold mb-3">Questionnaire Page</h1>
+              {organization && (
+                <h2 className="text-2xl font-bold mb-4">
+                  {organization.org_name}
+                </h2>
+              )}
               <p className="text-gray-600 mb-8">
                 {edit
                   ? "You are able to manage the questions participants will answer for this program before the program begins"
@@ -287,7 +317,8 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {!loading && !error && questions.length === 0 && (
             <div className="bg-white p-8 rounded-lg shadow text-center">
               <p className="text-gray-500 italic">
-                No questions yet for this program. Add your first question above!
+                No questions yet for this program. Add your first question
+                above!
               </p>
             </div>
           )}
