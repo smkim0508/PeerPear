@@ -969,32 +969,49 @@ export default function EventPage2({ params }: EventPageProps) {
 
                               {event.status === "STARTED" && (
                                 <PearButton
-                                  text={isRegistering ? "Unregistering..." : "Unregister"}
-                                  onClick={isRegistering ? () => {} : openUnregisterModal}
+                                  text={
+                                    isRegistering
+                                      ? "Unregistering..."
+                                      : "Unregister"
+                                  }
+                                  onClick={
+                                    isRegistering
+                                      ? () => {}
+                                      : openUnregisterModal
+                                  }
                                   className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${
-                                    isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                                    isRegistering
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
                                   }`}
                                 />
                               )}
                             </div>
-                          ) : (
-                            // Not Registered View
-                            <div className="space-y-4">
-                              <p className="text-gray-700">
-                                Register to participate in this program.
-                              </p>
-                              <PearButton
-                                text={isRegistering ? "Registering..." : "Register"}
-                                onClick={isRegistering ? () => {} : openRegisterModal}
-                                className={`w-full bg-green mb-4 cursor-pointer ${
-                                  isRegistering ? "opacity-50 cursor-not-allowed" : ""
-                                }`}
-                              />
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )}
+                          )
+                        ) : (
+                          // Not Registered View
+                          <div className="space-y-4">
+                            <p className="text-gray-700">
+                              Register to participate in this program.
+                            </p>
+                            <PearButton
+                              text={
+                                isRegistering ? "Registering..." : "Register"
+                              }
+                              onClick={
+                                isRegistering ? () => {} : openRegisterModal
+                              }
+                              className={`w-full bg-green mb-4 cursor-pointer ${
+                                isRegistering
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            />
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               </div>
             </div>
@@ -1113,10 +1130,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
                         <div className="space-y-4">
                           {studentMatch?.groups?.map((group, groupIndex) => (
-                            <div
-                              key={groupIndex}
-                              className="p-4"
-                            >
+                            <div key={groupIndex} className="p-4">
                               <div className="space-y-3">
                                 {group.students.map((student, studentIndex) => (
                                   <div
