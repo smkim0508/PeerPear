@@ -1,5 +1,5 @@
 from db.models.base import MainDB_Base
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 import time
 from db.models.events import EventTable, EventRegistrationsTable
@@ -14,13 +14,60 @@ from db.models.orgadmin_requests import OrgAdminRequestTable
 from dotenv import load_dotenv
 import os
 
+def delete_all_tables_ordered(engine):
+    """Delete tables in dependency order"""
+    print("WARNING: Deleting all tables in 5 seconds...")
+    time.sleep(5)
+    
+    # drop in reverse dependency order (children first, parents last)
+    tables_in_order = [
+        "responses", # depends on questions & users
+        "questions", # depends on events
+        "event_registrations", # depends on events & users
+        "events", # depends on organizations
+        "user_profiles", # depends on users
+        "orgadmins", # depends on users & organizations
+        "org_admin_requests", # depends on users & organizations
+        "users", # referenced by many tables
+        "organizations", # referenced by events
+    ]
+    
+    for table_name in tables_in_order:
+        try:
+            print(f"Dropping {table_name}...")
+            table = MainDB_Base.metadata.tables[table_name]
+            table.drop(engine, checkfirst=True)
+            print(f"✓ Dropped {table_name}")
+        except Exception as e:
+            print(f"✗ Error dropping {table_name}: {e}")
+
 # helper to delete all tables
 def delete_all_tables(engine):
     print(list(MainDB_Base.metadata.tables.keys()))
     print(f"WARNING: THIS WILL DELETE **ALL** TABLES IN THE MAIN DB IN 5 SECONDS, PLEASE DOUBLE CHECK!!")
     time.sleep(5)
     print(f"Dropping all tables now...")
-    MainDB_Base.metadata.drop_all(engine)
+
+    # Set statement timeout to prevent hanging
+    with engine.connect() as conn:
+        conn.execute(text("SET statement_timeout = '30s';"))
+        conn.commit()
+
+    try:
+        MainDB_Base.metadata.drop_all(engine, checkfirst=True)
+    except Exception as e:
+        print(f"✗ Error: {e}")
+        print("\nTrying alternative method...")
+        
+        # Fallback: drop each table individually with CASCADE
+        for table_name in reversed(list(MainDB_Base.metadata.tables.keys())):
+            try:
+                with engine.connect() as conn:
+                    conn.execute(text(f"DROP TABLE IF EXISTS {table_name} CASCADE;"))
+                    conn.commit()
+                print(f"✓ Dropped {table_name}")
+            except Exception as e2:
+                print(f"✗ Error dropping {table_name}: {e2}")
 
 # helper to delete a single table
 def delete_table(table_name, engine):
