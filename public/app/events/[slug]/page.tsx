@@ -860,9 +860,9 @@ export default function EventPage2({ params }: EventPageProps) {
                       </CardHeader>
                       <CardContent className="pb-4">
                         {isRegistered ? (
-                          /* User is registered - check if questionnaire is complete */
+                          // if user is registered, then check if questionnaire is complete
                           (!event?.questions?.length || questionnaireCompleted) ? (
-                            /* Registered AND (no questions OR questionnaire complete) - show green success */
+                            // if user registered AND (no questions OR questionnaire complete) - show green success
                             <div className="space-y-4">
                               <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
                                 <CheckCircle className="h-6 w-6 text-white" />
@@ -946,7 +946,7 @@ export default function EventPage2({ params }: EventPageProps) {
                             </div>
                           )
                         ) : (
-                          /* Not registered - show registration prompt */
+                          // not registered -> show registration prompt
                           <div className="space-y-4">
                             <p className="text-gray-700">
                               Register to participate in this program.
