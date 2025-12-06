@@ -199,7 +199,7 @@ export default function OrganizationPage() {
                       setCurrentOrgToLeave(org);
                       setConfirmOpen(true);
                     }}
-                    className="ml-4 px-3 py-1 text-sm bg-red-300 hover:bg-red-400 text-black rounded-md"
+                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                   >
                     Leave
                   </button>
