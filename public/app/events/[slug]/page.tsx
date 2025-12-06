@@ -109,9 +109,14 @@ export default function EventPage2({ params }: EventPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isEditingEvent, setIsEditingEvent] = useState(false);
-  const [editEventData, setEditEventData] = useState({
+  const [editEventData, setEditEventData] = useState<{
+    title: string;
+    description: string;
+    image_url: string;
+  }>({
     title: "",
     description: "",
+    image_url: "",
   });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [isStartingEvent, setIsStartingEvent] = useState(false);
@@ -139,6 +144,12 @@ export default function EventPage2({ params }: EventPageProps) {
 
   const eventId = parseInt(slug);
   const [checkedAutoTerminate, setCheckedAutoTerminate] = useState(false);
+
+  const [eventImage, setEventImage] = useState<File | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
   const getUserType = (): "student" | "organization" => {
     if (typeof window !== "undefined") {
@@ -219,6 +230,18 @@ export default function EventPage2({ params }: EventPageProps) {
     fetchParticipantsData();
   }, [eventId, isOrganizationUser]);
 
+  const handleCancelEdit = () => {
+    setIsEditingEvent(false);
+    setSelectedImageFile(null);
+    setImagePreview(null);
+    if (!event) return;
+    setEditEventData({
+      title: event.title || "",
+      description: event.description || "",
+      image_url: event.image_url || "",
+    });
+  };
+
   const fetchEvent = async () => {
     try {
       setIsLoading(true);
@@ -266,6 +289,15 @@ export default function EventPage2({ params }: EventPageProps) {
         setQuestionnaireCompleted(false);
       }
     } catch {}
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
   };
 
   const getUserClassYear = async () => {
@@ -351,6 +383,7 @@ export default function EventPage2({ params }: EventPageProps) {
       setEditEventData({
         title: event.title || "",
         description: event.description || "",
+        image_url: event.image_url || "",
       });
       setIsEditingEvent(true);
     }
@@ -387,6 +420,26 @@ export default function EventPage2({ params }: EventPageProps) {
           : null
       );
       setIsEditingEvent(false);
+      if (selectedImageFile) {
+        const formData = new FormData();
+        formData.append("file", selectedImageFile);
+
+        const res = await fetch(`${API_BASE_URL}/events/${eventId}/image`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          console.error("Failed to upload image");
+          return;
+        }
+
+        const data = await res.json();
+        setEvent((prev) =>
+          prev ? { ...prev, image_url: data.image_url } : prev
+        );
+      }
     } catch {
       setError("Failed to update event");
     } finally {
@@ -570,6 +623,16 @@ export default function EventPage2({ params }: EventPageProps) {
   const currentStatus = event ? event.status : "Unknown";
   const hasQuestions = !!event?.questions?.length;
 
+  const hasPairing =
+    currentStatus === "TERMINATED" &&
+    event &&
+    event.matches &&
+    Array.isArray(event.matches) &&
+    event.matches.length > 0;
+  useEffect(() => {
+    handleViewPairings();
+  }, [hasPairing]);
+
   const CountdownCard = () => {
     if (!event?.ends_at || !timeLeft) return null;
     const expired = timeLeft.expired;
@@ -709,6 +772,7 @@ export default function EventPage2({ params }: EventPageProps) {
                           maxLength={100}
                         />
                       </div>
+
                       <div>
                         <label className="block text-sm mb-2">
                           Program Description
@@ -726,6 +790,33 @@ export default function EventPage2({ params }: EventPageProps) {
                           maxLength={500}
                         />
                       </div>
+                      {/* Image input and preview */}
+                      <div className="flex flex-row items-start gap-6 w-full">
+                        <div className="flex-1 min-w-0">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Event Image
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4 file:rounded-full
+                                      file:border-0 file:text-sm file:font-semibold
+                                      file:bg-green-600 file:text-white hover:file:bg-green-700"
+                          />
+                        </div>
+                        {imagePreview && (
+                          <div className="w-40 h-40 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 flex items-center justify-center">
+                            <img
+                              src={imagePreview}
+                              alt="Event Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex gap-3">
                         <button
                           onClick={handleSaveEvent}
@@ -735,7 +826,7 @@ export default function EventPage2({ params }: EventPageProps) {
                           Save Changes
                         </button>
                         <button
-                          onClick={() => setIsEditingEvent(false)}
+                          onClick={handleCancelEdit}
                           disabled={isSavingEvent}
                           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
                         >
@@ -757,6 +848,7 @@ export default function EventPage2({ params }: EventPageProps) {
                   </div>
                 )}
               </div>
+              <div className="flex justify-between items-center"></div>
               <div className="space-y-6">
                 <div className="w-full max-w-md lg:ml-auto space-y-6">
                   {!isOrganizationUser && event?.status === "STARTED" && (
@@ -768,30 +860,61 @@ export default function EventPage2({ params }: EventPageProps) {
                       </CardHeader>
                       <CardContent className="pb-4">
                         {isRegistered ? (
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
-                              <CheckCircle className="h-6 w-6" />
-                              <span className="font-bold text-lg text-white">
-                                You're registered!
-                              </span>
-                            </div>
-                            {event?.questions?.length > 0 && (
-                              <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">
-                                  Questionnaire Status
-                                </h3>
-                                {questionnaireCompleted ? (
+                          // if user is registered, then check if questionnaire is complete
+                          (!event?.questions?.length || questionnaireCompleted) ? (
+                            // if user registered AND (no questions OR questionnaire complete) - show green success
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
+                                <CheckCircle className="h-6 w-6 text-white" />
+                                <span className="font-bold text-lg text-white text-center">
+                                  You're registered!
+                                </span>
+                              </div>
+                              {event?.questions?.length > 0 && (
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg">
+                                    Questionnaire Status
+                                  </h3>
                                   <div className="flex items-center gap-2 text-green">
                                     <CheckCircle className="h-5 w-5" />
                                     <span className="font-medium">
                                       Completed
                                     </span>
                                   </div>
-                                ) : (
+                                </div>
+                              )}
+                              <PearButton
+                                text={
+                                  isRegistering
+                                    ? "Unregistering..."
+                                    : "Unregister"
+                                }
+                                onClick={
+                                  isRegistering ? () => {} : openUnregisterModal
+                                }
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
+                                  isRegistering
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }`}
+                              />
+                            </div>
+                          ) : (
+                            // registered, but questionnaire incomplete -> show warning
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-center gap-3 text-blue-700 bg-blue-100 border-2 border-blue-300 rounded-xl p-4">
+                                <span className="font-bold text-lg text-blue-700 text-center">
+                                    Questionnaire Incomplete
+                                </span>
+                              </div>
+                              {event?.questions?.length > 0 && (
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg">
+                                    Questionnaire Status
+                                  </h3>
                                   <div className="space-y-3">
                                     <p className="text-gray-700">
-                                      Please complete your questionnaire to
-                                      receive a match.
+                                      You are not eligible for a match until you complete the questionnaire below.
                                     </p>
                                     <PearButton
                                       text="Go to Questionnaire"
@@ -803,26 +926,27 @@ export default function EventPage2({ params }: EventPageProps) {
                                       className="w-full"
                                     />
                                   </div>
-                                )}
-                              </div>
-                            )}
-                            <PearButton
-                              text={
-                                isRegistering
-                                  ? "Unregistering..."
-                                  : "Unregister"
-                              }
-                              onClick={
-                                isRegistering ? () => {} : openUnregisterModal
-                              }
-                              className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
-                                isRegistering
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          </div>
+                                </div>
+                              )}
+                              <PearButton
+                                text={
+                                  isRegistering
+                                    ? "Unregistering..."
+                                    : "Unregister"
+                                }
+                                onClick={
+                                  isRegistering ? () => {} : openUnregisterModal
+                                }
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
+                                  isRegistering
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }`}
+                              />
+                            </div>
+                          )
                         ) : (
+                          // not registered -> show registration prompt
                           <div className="space-y-4">
                             <p className="text-gray-700">
                               Register to participate in this program.
@@ -1155,11 +1279,7 @@ export default function EventPage2({ params }: EventPageProps) {
                         Array.isArray(event.matches) &&
                         event.matches.length > 0 && (
                           <>
-                            <PearButton
-                              text="View Existing Pairings"
-                              onClick={handleViewPairings}
-                              className="w-full bg-purple-600 hover:bg-purple-700"
-                            />
+                            
                             <PearButton
                               text={
                                 isPublishingPairings

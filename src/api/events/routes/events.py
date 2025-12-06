@@ -1,3 +1,5 @@
+from db.supabase_client import upload_event_image
+from db.crud.events_crud import validate_event_and_admin, update_event_image
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import select
 from db.models.events import EventTable, EventRegistrationsTable
@@ -69,9 +71,8 @@ def get_event_details(event_id: int):
                         "options": q.options,
                         "event_id": q.event_id
                     } for q in questions
-                ]
-                ,
-                
+                ],
+
             }
 
             return jsonify(event_data), 200
@@ -438,6 +439,7 @@ def get_event_participants(event_id: int):
         logger.error(f"Error getting event participants: {e}")
         return jsonify(generic_error_response), 500
 
+
 @events_bp.get("/verify/<int:event_id>/<string:user_type>")
 def verify_event_access(event_id, user_type):
     try:
@@ -449,13 +451,12 @@ def verify_event_access(event_id, user_type):
 
     if user_id is None:
         return jsonify({"error": "User not authenticated"}), 401
-    
+
     if user_type not in ["student", "organization"]:
         return jsonify({"error": "User type must be specified"}), 400
-        
 
     try:
-        result = verify_access(event_id, user_id,user_type)
+        result = verify_access(event_id, user_id, user_type)
     except Exception as e:
         logger.error(f"Error starting event: {e}")
         return jsonify(generic_error_response), 500
@@ -465,8 +466,6 @@ def verify_event_access(event_id, user_type):
 
     return jsonify(result), 200
 
-from db.supabase_client import upload_event_image
-from db.crud.events_crud import validate_event_and_admin, update_event_image
 
 @events_bp.post("/<int:event_id>/image")
 def update_event_image_route(event_id: int):
@@ -508,3 +507,30 @@ def update_event_image_route(event_id: int):
     update_event_image(event_id, new_url)
 
     return jsonify({"image_url": new_url}), 200
+
+
+@events_bp.get("<int:event_id>/organization")
+def get_event_organization(event_id: int):
+    try:
+        db_session = get_db_sessionmaker()
+
+        with db_session() as session:
+            # Get event with organization
+            event_query = (
+                select(OrganizationTable)
+                .join(EventTable, EventTable.organization_id == OrganizationTable.id)
+                .where(EventTable.id == event_id)
+            )
+
+            organization = session.execute(event_query).scalar_one_or_none()
+            if not organization:
+                return jsonify({"error": "Event not found"}), 404
+
+            return jsonify({"organization": {"id": organization.id,
+                                             "org_name": organization.org_name,
+                                             "description": organization.description
+                                             }}), 200
+
+    except Exception as e:
+        logger.error(f"Error getting event organization: {e}")
+        return jsonify(generic_error_response), 500
