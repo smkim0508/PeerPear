@@ -280,7 +280,7 @@ export default function Navbar({
                           <img
                             src={currentOrganization.image}
                             alt={`${currentOrganization.name} logo`}
-                            className="w-8 h-8 rounded-full object-cover shrink-0"
+                            className="w-6 h-6 shrink-0"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src =
@@ -304,7 +304,7 @@ export default function Navbar({
                                   <img
                                     src={org.image || "/logo.svg"}
                                     alt={`${org.name} logo`}
-                                    className="w-6 h-6 rounded-full object-cover shrink-0"
+                                    className="w-5 h-5 rounded-full shrink-0"
                                     onError={(e) => {
                                       const target =
                                         e.target as HTMLImageElement;

@@ -42,7 +42,7 @@ export default function Features() {
           />
         </h2>
 
-        <div className="mt-15 flex justify-center gap-14 items-center flex-wrap">
+        <div className="mt-15 flex justify-center gap-14 items-center flex-wrap bg">
           <Card
             title="Reusable Student Profiles"
             text="Fill out your details once — join any pairing program without repetition."
