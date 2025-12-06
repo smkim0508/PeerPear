@@ -665,7 +665,7 @@ export default function EventPage2({ params }: EventPageProps) {
     Array.isArray(event.matches) &&
     event.matches.length > 0;
   useEffect(() => {
-    handleViewPairings();
+    if (hasPairing) handleViewPairings();
   }, [hasPairing]);
 
   const CountdownCard = () => {
