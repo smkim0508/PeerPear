@@ -8,6 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import PearButton from "@/components/PearButton";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
 import PairingResults from "@/components/PairingResults";
+import { XCircle } from "lucide-react";
+
 import {
   Timer,
   Users,
@@ -894,7 +896,8 @@ export default function EventPage2({ params }: EventPageProps) {
                       <CardContent className="pb-4">
                         {isRegistered ? (
                           // if user is registered, then check if questionnaire is complete
-                          (!event?.questions?.length || questionnaireCompleted) ? (
+                          !event?.questions?.length ||
+                          questionnaireCompleted ? (
                             // if user registered AND (no questions OR questionnaire complete) - show green success
                             <div className="space-y-4">
                               <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
@@ -903,6 +906,7 @@ export default function EventPage2({ params }: EventPageProps) {
                                   You're registered!
                                 </span>
                               </div>
+
                               {event?.questions?.length > 0 && (
                                 <div className="space-y-3">
                                   <h3 className="font-semibold text-lg">
@@ -937,7 +941,7 @@ export default function EventPage2({ params }: EventPageProps) {
                             <div className="space-y-4">
                               <div className="flex items-center justify-center gap-3 text-blue-700 bg-blue-100 border-2 border-blue-300 rounded-xl p-4">
                                 <span className="font-bold text-lg text-blue-700 text-center">
-                                    Questionnaire Incomplete
+                                  Questionnaire Incomplete
                                 </span>
                               </div>
                               {event?.questions?.length > 0 && (
@@ -947,7 +951,8 @@ export default function EventPage2({ params }: EventPageProps) {
                                   </h3>
                                   <div className="space-y-3">
                                     <p className="text-gray-700">
-                                      You are not eligible for a match until you complete the questionnaire below.
+                                      You are not eligible for a match until you
+                                      complete the questionnaire below.
                                     </p>
                                     <PearButton
                                       text="Go to Questionnaire"
@@ -961,25 +966,30 @@ export default function EventPage2({ params }: EventPageProps) {
                                   </div>
                                 </div>
                               )}
-                              <PearButton
-                                text={
-                                  isRegistering
-                                    ? "Unregistering..."
-                                    : "Unregister"
-                                }
-                                onClick={
-                                  isRegistering ? () => {} : openUnregisterModal
-                                }
-                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
-                                  isRegistering
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }`}
-                              />
+
+                              {event.status === "STARTED" && (
+                                <PearButton
+                                  text={
+                                    isRegistering
+                                      ? "Unregistering..."
+                                      : "Unregister"
+                                  }
+                                  onClick={
+                                    isRegistering
+                                      ? () => {}
+                                      : openUnregisterModal
+                                  }
+                                  className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${
+                                    isRegistering
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+                              )}
                             </div>
                           )
                         ) : (
-                          // not registered -> show registration prompt
+                          // Not Registered View
                           <div className="space-y-4">
                             <p className="text-gray-700">
                               Register to participate in this program.
@@ -1107,7 +1117,7 @@ export default function EventPage2({ params }: EventPageProps) {
                 event?.status === "PAIRING_PUBLISHED" &&
                 isRegistered && (
                   <Card>
-                    <CardHeader className="flex items-center gap-2">
+                    <CardHeader className="flex items-center gap-2 pt-4">
                       <Users className="w-5 h-5" />
                       <CardTitle className="text-2xl">Your Match</CardTitle>
                     </CardHeader>
@@ -1120,14 +1130,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
                         <div className="space-y-4">
                           {studentMatch?.groups?.map((group, groupIndex) => (
-                            <div
-                              key={groupIndex}
-                              className="bg-green border border-green rounded-lg p-4"
-                            >
-                              <h3 className="font-semibold text-green mb-3 flex items-center gap-2">
-                                <Users className="w-4 h-4" /> Your Group (
-                                {group.students.length} members)
-                              </h3>
+                            <div key={groupIndex} className="p-4">
                               <div className="space-y-3">
                                 {group.students.map((student, studentIndex) => (
                                   <div
@@ -1323,7 +1326,6 @@ export default function EventPage2({ params }: EventPageProps) {
                         Array.isArray(event.matches) &&
                         event.matches.length > 0 && (
                           <>
-                            
                             <PearButton
                               text={
                                 isPublishingPairings
