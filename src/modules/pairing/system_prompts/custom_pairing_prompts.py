@@ -121,6 +121,7 @@ class CustomRequestPairingPrompts:
     - If two students share no clear commonalities with anyone, place them where they minimally lower group satisfaction.
     - Deterministic tie-breaking by ascending student_id.
     - Return ONLY the required JSON.
+    - Make the reasoning clear and concise. Refer to students by name, not id when you output.
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for reference. DO NOT copy their results directly; reason fresh on new data.
@@ -146,7 +147,7 @@ class CustomRequestPairingPrompts:
             [101, 102, 103],
             [104, 105, 106]
         ],
-        "reasoning": "Custom request emphasizes mixing software/CS with quant/finance where possible. Event theme is tech/design/quant networking. Group 1 (101 CS/ML, 102 economics/quant, 103 CS+HCI) blends software, quant, and design interests in a tech-heavy pod. Group 2 (104 data science/ML, 105 applied math/quant, 106 biology) combines quantitative/technical profiles with a non-CS STEM student. All groups respect group_size=3, avoid singletons, and align with the event’s tech/design/quant focus while honoring the custom_request."
+        "reasoning": "Custom request emphasizes mixing software/CS with quant/finance where possible. Event theme is tech/design/quant networking. Group 1 (Ava CS/ML, Marco economics/quant, Priya CS+HCI) blends software, quant, and design interests in a tech-heavy pod. Group 2 (Sora data science/ML, Jon applied math/quant, Mina biology) combines quantitative/technical profiles with a non-CS STEM student. All groups respect group_size=3, avoid singletons, and align with the event's tech/design/quant focus while honoring the custom_request."
     }}
 
     2)
@@ -175,7 +176,7 @@ class CustomRequestPairingPrompts:
             [205, 206, 207, 208],
             [209, 210]
         ],
-        "reasoning": "Custom request requires at least one technical field-work sustainability group and one creative-media sustainability group. Group 1 (201 environmental engineering, 202 ecology, 203 civil engineering, 204 geosciences/climate modeling) fulfills the technical/field-work sustainability cluster. Group 2 (205 film, 206 audio/music production, 207 digital media/video editing, 208 theater/stage design) forms a creative-media pod ideal for sustainability storytelling. Remaining students (209 entrepreneurship/product, 210 marketing/UX) naturally form a product/UX strategy group. All groups align with the event description and respect group_size=4, with the final pair sized to avoid singletons under the custom_request."
+        "reasoning": "Custom request requires at least one technical field-work sustainability group and one creative-media sustainability group. Group 1 (Riley environmental engineering, Elena ecology, Mateo civil engineering, Nora geosciences/climate modeling) fulfills the technical/field-work sustainability cluster. Group 2 (Samir film, Ivy audio/music production, Leo digital media/video editing, Harper theater/stage design) forms a creative-media pod ideal for sustainability storytelling. Remaining students (Quinn entrepreneurship/product, Zara marketing/UX) naturally form a product/UX strategy group. All groups align with the event description and respect group_size=4, with the final pair sized to avoid singletons under the custom_request."
     }}
 
     3)
@@ -203,7 +204,7 @@ class CustomRequestPairingPrompts:
             [305, 306],
             [307, 308]
         ],
-        "reasoning": "Custom request strictly enforces pairing within the same hobby/activity domain. Event is pair-based, which aligns naturally with homogeneous duos. Chess/strategy games pair (301,302), basketball/sports pair (303,304), cooking/baking pair (305,306), and dance/choreography pair (307,308) each share strong overlapping interests per profile_summary. All groups meet group_size=2 with no singletons, and the structure is fully consistent with the event’s duo-focused activities and the custom_request."
+        "reasoning": "Custom request strictly enforces pairing within the same hobby/activity domain. Event is pair-based, which aligns naturally with homogeneous duos. Chess/strategy games pair (Oliver, Sofia), basketball/sports pair (Devin, Amara), cooking/baking pair (Gianna, Noah), and dance/choreography pair (Yuna, Marcus) each share strong overlapping interests per profile_summary. All groups meet group_size=2 with no singletons, and the structure is fully consistent with the event's duo-focused activities and the custom_request."
     }}
     </FEW-SHOT EXAMPLES>
     """
@@ -364,6 +365,7 @@ class CustomRequestPairingPrompts:
     - Determinism & Formatting
         - Be deterministic; break ties by ascending student_id.
         - Return only the JSON for PairingLLMOutput (with groups) and reasoning.
+    - Make the reasoning clear and concise. Refer to students by name, not id when you output.
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for you to reference and guide your reasoning for new data.
@@ -402,7 +404,7 @@ class CustomRequestPairingPrompts:
             [101, 102, 103],
             [104, 105, 106]
         ],
-        "reasoning": "Custom request requires mixing technical and non-technical majors in each group. Event description prioritizes interdisciplinary pre-med collaboration. Group 1 (101 technical, 102 non-technical, 103 technical/HCI) satisfies the constraint while aligning on human-centered healthcare innovation and economics. Group 2 (104 technical, 105 applied math/quant, 106 biology pre-med) balances technical with clinical perspectives, supporting predictive modeling, statistical analysis, and clinical narratives. All groups meet group_size=3 and maintain fairness while obeying the custom_request."
+        "reasoning": "Custom request requires mixing technical and non-technical majors in each group. Event description prioritizes interdisciplinary pre-med collaboration. Group 1 (Ava technical, Marco non-technical, Priya technical/HCI) satisfies the constraint while aligning on human-centered healthcare innovation and economics. Group 2 (Sora technical, Jon applied math/quant, Mina biology pre-med) balances technical with clinical perspectives, supporting predictive modeling, statistical analysis, and clinical narratives. All groups meet group_size=3 and maintain fairness while obeying the custom_request."
     }}
 
     2)
@@ -436,7 +438,7 @@ class CustomRequestPairingPrompts:
             [202, 203],
             [204]
         ],
-        "reasoning": "Custom request requires creating one ecology-focused team. (201 environmental engineering + 205 ecology) forms the strongest ecology-conservation pair. Remaining students are grouped to avoid singleton where possible, but with 5 students and group_size=2, one singleton is unavoidable. (202,203) aligns climate modeling with sustainability film documentation. (204) forms a singleton but is unavoidable under strict custom_request + group_size constraints. All constraints—custom ecology team, fairness, and event alignment—are respected."
+        "reasoning": "Custom request requires creating one ecology-focused team. (Riley environmental engineering + Elena ecology) forms the strongest ecology-conservation pair. Remaining students are grouped to avoid singleton where possible, but with 5 students and group_size=2, one singleton is unavoidable. (Nora, Samir) aligns climate modeling with sustainability film documentation. (Ivy) forms a singleton but is unavoidable under strict custom_request + group_size constraints. All constraints—custom ecology team, fairness, and event alignment—are respected."
     }}
 
     3)
@@ -480,7 +482,7 @@ class CustomRequestPairingPrompts:
             [305, 306],
             [307, 308]
         ],
-        "reasoning": "Custom request requires strictly pairing students only within their activity domain. This naturally yields four homogenous pairs: strategy games (301,302), basketball/sports (303,304), cooking (305,306), and choreography/dance (307,308). This also matches the event's pair-based format and questionnaire-driven preferences. No remainder students; all groups meet group_size=2."
+        "reasoning": "Custom request requires strictly pairing students only within their activity domain. This naturally yields four homogenous pairs: strategy games (Oliver, Sofia), basketball/sports (Devin, Amara), cooking (Gianna, Noah), and choreography/dance (Yuna, Marcus). This also matches the event's pair-based format and questionnaire-driven preferences. No remainder students; all groups meet group_size=2."
     }}
 
     4)
@@ -516,7 +518,7 @@ class CustomRequestPairingPrompts:
             [403, 401, 404],
             [405, 402, 406]
         ],
-        "reasoning": "Custom request requires at least one arts-oriented student per group. Arts-leaning students are 403 (violin, museums) and 405 (visual arts). Each is placed into a separate group first. Group 1 (403 with 401 and 404) clusters reflective/creative interests with flexible social hobbies. Group 2 (405 with 402,406) mixes visual arts with gaming, photography, and general social interests. Event is low-structure, questionnaire responses are vague, so profile_summary drives cohesion. All groups satisfy group_size=3 and custom_request conditions."
+        "reasoning": "Custom request requires at least one arts-oriented student per group. Arts-leaning students are Hana (violin, museums) and Sophia (visual arts). Each is placed into a separate group first. Group 1 (Hana with Emily and Kevin) clusters reflective/creative interests with flexible social hobbies. Group 2 (Sophia with Daniel, Brian) mixes visual arts with gaming, photography, and general social interests. Event is low-structure, questionnaire responses are vague, so profile_summary drives cohesion. All groups satisfy group_size=3 and custom_request conditions."
     }}
     </FEW-SHOT EXAMPLES>
     """
