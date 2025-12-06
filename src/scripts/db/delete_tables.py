@@ -59,4 +59,13 @@ if __name__ == "__main__":
 
     # NOTE: change below to determine which table(s) to delete
     # delete_all_tables(engine)
-    delete_table("event_registrations", engine)
+    # delete_table("event_registrations", engine)
+    delete_table("orgadmins", engine)
+    delete_table("users", engine)
+    # delete_table("user_profiles", engine)
+    delete_table("organizations", engine)
+
+    # delete_table("org_admin_requests", engine)
+    # delete_table("questions", engine)
+    # delete_table("responses", engine)
+    # delete_table("events", engine)

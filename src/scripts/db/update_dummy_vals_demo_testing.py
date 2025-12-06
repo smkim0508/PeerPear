@@ -88,17 +88,17 @@ def create_user_data(session):
         users.extend([
             # NOTE: id 6 -> student account
             UserTable(
-                username="jocelyn",
+                username="jw5134",
                 first_name="Jocelyn",
-                last_name="W",
-                email="jocelyn@example.com"
+                last_name="Wang",
+                email="jw5134@princeton.edu"
             ),
             # NOTE: id 7 -> org admin account
             UserTable(
-                username="cs-jocelyn",
+                username="cs-jw5134",
                 first_name="Jocelyn 2",
-                last_name="W",
-                email="cs-jocelyn@example.com"
+                last_name="Wang",
+                email="cs-jw5134@princeton.edu"
             )
         ])
     
