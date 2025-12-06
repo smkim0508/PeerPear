@@ -295,7 +295,7 @@ export default function Navbar({
                       <NavigationMenuContent>
                         <ul className="grid w-[200px] auto-rows-min justify-start  gap-2 p-2 bg-white rounded-md shadow-md gap-3">
                           {userOrganizations.map((org) => (
-                            <li key={org.id} w-full>
+                            <li key={org.id}>
                               <NavigationMenuLink asChild>
                                 <Link
                                   href={`/organization/${org.id}`}
