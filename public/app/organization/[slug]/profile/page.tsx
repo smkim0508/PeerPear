@@ -110,7 +110,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
     const newErrors: { [key: string]: boolean } = {};
     if (!editName.trim()) newErrors.org_name = true;
-    if (editName.length > 10) newErrors.nameTooLong = true;
+    if (editName.length > 30) newErrors.nameTooLong = true;
     if (!orgDescription.trim()) newErrors.description = true;
 
     setErrors(newErrors);
@@ -197,17 +197,16 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   onChange={(e) => {
                     const value = e.target.value;
                     setEditName(value);
-                    if (value.length > 10) setErrors((prev) => ({ ...prev, nameTooLong: true }));
+                    if (value.length > 30) setErrors((prev) => ({ ...prev, nameTooLong: true }));
                     else setErrors((prev) => ({ ...prev, nameTooLong: false }));
                   }}
-                  className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                    errors.org_name || errors.nameTooLong ? "border-red-500 bg-red-50" : "border-gray-200 bg-transparent focus:border-green"
-                  }`}
+                  className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${errors.org_name || errors.nameTooLong ? "border-red-500 bg-red-50" : "border-gray-200 bg-transparent focus:border-green"
+                    }`}
                   placeholder="Enter organization name"
                   maxLength={50}
                 />
                 {errors.nameTooLong && (
-                  <p className="text-red-600 text-sm mt-1">Organization name must be 10 characters or fewer.</p>
+                  <p className="text-red-600 text-sm mt-1">Organization name must be 30 characters or fewer.</p>
                 )}
               </div>
 
@@ -217,16 +216,15 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   value={orgDescription}
                   onChange={(e) => setOrgDescription(e.target.value)}
                   rows={4}
-                  className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors resize-none ${
-                    errors.description ? "border-red-500 bg-red-50" : "border-gray-200 bg-transparent focus:border-green"
-                  }`}
+                  className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors resize-none ${errors.description ? "border-red-500 bg-red-50" : "border-gray-200 bg-transparent focus:border-green"
+                    }`}
                   placeholder="Tell us about your organization..."
                   maxLength={500}
                 />
               </div>
 
               <div className="flex gap-3">
-                <PearButton text={isLoading ? "Saving..." : "Save Changes"} onClick={() => {}} />
+                <PearButton text={isLoading ? "Saving..." : "Save Changes"} onClick={() => { }} />
                 <PearButton
                   text="Cancel"
                   variant="outline"
