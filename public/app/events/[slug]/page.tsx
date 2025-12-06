@@ -841,8 +841,8 @@ export default function EventPage2({ params }: EventPageProps) {
                         {isRegistered ? (
                           <div className="space-y-4">
                             <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
-                              <CheckCircle className="h-6 w-6" />
-                              <span className="font-bold text-lg text-white">
+                              <CheckCircle className="h-6 w-6 text-white" />
+                              <span className="font-bold text-lg text-white text-center">
                                 You're registered!
                               </span>
                             </div>
@@ -861,8 +861,7 @@ export default function EventPage2({ params }: EventPageProps) {
                                 ) : (
                                   <div className="space-y-3">
                                     <p className="text-gray-700">
-                                      Please complete your questionnaire to
-                                      receive a match.
+                                      Incomplete - you are not eligible for a match until you complete the questionnaire.
                                     </p>
                                     <PearButton
                                       text="Go to Questionnaire"
