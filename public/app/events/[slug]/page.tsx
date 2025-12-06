@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Award,
   Trophy,
+  Download,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
@@ -620,6 +621,38 @@ export default function EventPage2({ params }: EventPageProps) {
       console.error("Error fetching user answers:", error);
     }
   };
+
+  const handleDownloadPairings = async () => {
+    try {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const response = await fetch(
+        `${API_BASE_URL}/pairing/event/${eventId}/pairing_txt`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        setError("Failed to download pairings");
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `pairing_results_${eventId}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading pairings:", error);
+      setError("Failed to download pairings");
+    }
+  };
+
   const currentStatus = event ? event.status : "Unknown";
   const hasQuestions = !!event?.questions?.length;
 
@@ -998,11 +1031,22 @@ export default function EventPage2({ params }: EventPageProps) {
                       </span>
                     </CardHeader>
                     <CardContent className="px-6 pb-6">
-                      <p className="text-gray-800 text-lg">
-                        {currentStatus === "PAIRING_PUBLISHED"
-                          ? "Pairings have been successfully published!"
-                          : "Review pairings before publishing."}
-                      </p>
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-gray-800 text-lg">
+                          {currentStatus === "PAIRING_PUBLISHED"
+                            ? "Pairings have been successfully published!"
+                            : "Review pairings before publishing."}
+                        </p>
+                        {pairingData && (
+                          <button
+                            onClick={handleDownloadPairings}
+                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/90 transition-colors font-semibold shadow-sm"
+                          >
+                            <Download className="h-4 w-4" />
+                            Export as Text
+                          </button>
+                        )}
+                      </div>
                       <div className="mt-6">
                         {pairingData && (
                           <PairingResults
