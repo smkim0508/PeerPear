@@ -35,8 +35,11 @@ export default function Navbar({
   const { isAuthenticated, logout, user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const [currentOrganization, setCurrentOrganization] = useState<OrganizationInfo | null>(null);
-  const [userOrganizations, setUserOrganizations] = useState<OrganizationInfo[]>([]);
+  const [currentOrganization, setCurrentOrganization] =
+    useState<OrganizationInfo | null>(null);
+  const [userOrganizations, setUserOrganizations] = useState<
+    OrganizationInfo[]
+  >([]);
   const [loadingOrgInfo, setLoadingOrgInfo] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
 
@@ -69,7 +72,8 @@ export default function Navbar({
     const fetchUserOrganizations = async () => {
       try {
         setLoadingOrgInfo(true);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
         const response = await fetch(`${apiUrl}/organization/myorganizations`, {
           credentials: "include",
         });
@@ -80,7 +84,7 @@ export default function Navbar({
             const formattedOrgs = data.organizations.map((o: any) => ({
               id: o.id,
               name: o.org_name,
-              image: "/logo.svg"
+              image: "/logo.svg",
             }));
             setUserOrganizations(formattedOrgs);
           }
@@ -114,7 +118,8 @@ export default function Navbar({
       }
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
         const response = await fetch(
           `${apiUrl}/organization/validate-owner/${organizationId}`,
           { credentials: "include" }
@@ -133,7 +138,8 @@ export default function Navbar({
   const getDashboardUrl = (): string => {
     if (userType === "organization") {
       if (organizationId) return `/organization/${organizationId}`;
-      if (userOrganizations.length > 0) return `/organization/${userOrganizations[0].id}`;
+      if (userOrganizations.length > 0)
+        return `/organization/${userOrganizations[0].id}`;
       return "/organization";
     }
     return `/${userType}`;
@@ -142,7 +148,8 @@ export default function Navbar({
   const getProfileUrl = (): string => {
     if (userType === "organization") {
       if (organizationId) return `/organization/${organizationId}/profile`;
-      if (userOrganizations.length > 0) return `/organization/${userOrganizations[0].id}/profile`;
+      if (userOrganizations.length > 0)
+        return `/organization/${userOrganizations[0].id}/profile`;
       return "/organization";
     }
     return `/${userType}/profile`;
@@ -175,7 +182,9 @@ export default function Navbar({
               className="h-10 w-10 rounded-lg p-1 bg-nav-dark text-white transition-transform hover:rotate-12"
             />
           </Link>
-          <span className="text-nav-dark font-semibold"><Link href={getHomeLink()}>PeerPear</Link></span>
+          <span className="text-nav-dark font-semibold">
+            <Link href={getHomeLink()}>PeerPear</Link>
+          </span>
         </div>
 
         {/* Navigation - Absolutely Centered */}
@@ -234,9 +243,14 @@ export default function Navbar({
                       asChild
                       className={navigationMenuTriggerStyle()}
                     >
-                      <Link href={`/organization/${organizationId}/admin`} className="relative">
+                      <Link
+                        href={`/organization/${organizationId}/admin`}
+                        className="relative"
+                      >
                         Admin
-                        {isActiveTab(`/organization/${organizationId}/admin`) && (
+                        {isActiveTab(
+                          `/organization/${organizationId}/admin`
+                        ) && (
                           <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
                         )}
                       </Link>
@@ -254,7 +268,9 @@ export default function Navbar({
         <div className="flex items-center gap-3 justify-end whitespace-nowrap z-10">
           {isAuthenticated && (
             <>
-              {isOnOrganizationPage && currentOrganization && userType === "organization" ? (
+              {isOnOrganizationPage &&
+              currentOrganization &&
+              userType === "organization" ? (
                 /* Organization Dropdown */
                 <NavigationMenu>
                   <NavigationMenuList>
@@ -267,37 +283,54 @@ export default function Navbar({
                             className="w-8 h-8 rounded-full object-cover shrink-0"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
+                              target.src =
+                                "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
                             }}
                           />
-                          <span className="truncate">{currentOrganization.name}</span>
+                          <span className="truncate">
+                            {currentOrganization.name}
+                          </span>
                         </div>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
-                        <ul className="grid w-[200px] gap-2 p-2 bg-white rounded-md shadow-md">
+                        <ul className="grid w-[200px] auto-rows-min justify-start  gap-2 p-2 bg-white rounded-md shadow-md gap-3">
                           {userOrganizations.map((org) => (
-                            <li key={org.id}>
+                            <li key={org.id} w-full>
                               <NavigationMenuLink asChild>
                                 <Link
                                   href={`/organization/${org.id}`}
-                                  className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                  className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors  w-full min-w-0"
                                 >
                                   <img
                                     src={org.image || "/logo.svg"}
                                     alt={`${org.name} logo`}
                                     className="w-6 h-6 rounded-full object-cover"
                                     onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      target.src = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      target.src =
+                                        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
                                     }}
                                   />
-                                  <span className="text-sm font-medium text-black truncate">
+                                  <span className="text-sm font-medium text-black truncate min-w-0">
                                     {org.name}
                                   </span>
                                 </Link>
                               </NavigationMenuLink>
                             </li>
                           ))}
+                        </ul>
+                        <ul className="grid w-[200px] gap-2 mt-3  bg-primary rounded-md shadow-md  ">
+                          <NavigationMenuLink asChild>
+                            <Link
+                              href={`/organization/`}
+                              className="flex items-center gap-2 p-2 rounded-md transition-all hover:bg-primary/90  "
+                            >
+                              <span className="text-sm font-medium text-white truncate ">
+                                Manage All Organizations
+                              </span>
+                            </Link>
+                          </NavigationMenuLink>
                         </ul>
                       </NavigationMenuContent>
                     </NavigationMenuItem>
@@ -321,7 +354,10 @@ export default function Navbar({
           )}
           {userType === "guest" ? (
             <div className="flex items-center gap-4">
-              <Link href="/about" className="text-nav-dark font-medium hover:underline">
+              <Link
+                href="/about"
+                className="text-nav-dark font-medium hover:underline"
+              >
                 About Us
               </Link>
               <button
