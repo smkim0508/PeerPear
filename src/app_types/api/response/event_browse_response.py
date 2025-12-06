@@ -16,8 +16,7 @@ class PublishedEvent(BaseModel):
     status: EventStatus
 
     class Config:
-        use_enum_values = True  
-
+        use_enum_values = True
 
 class EventBrowseResponse(BaseModel):
     """
