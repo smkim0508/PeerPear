@@ -117,7 +117,7 @@ def create_app() -> Flask:
         session_id_var.set(f"session_id: {session_id}")
         logger.info(f"Starting session for request.")
 
-        authenticate() # authenticate user on every request
+        # authenticate() # authenticate user on every request
 
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
