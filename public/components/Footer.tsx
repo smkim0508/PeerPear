@@ -9,7 +9,7 @@ export default function Footer() {
               alt="PeerPear logo"
               className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110"
             />
-            <span className="text-base font-bold transition-colors duration-300 group-hover:text-green">
+            <span className="text-base font-bold transition-colors duration-300 group-hover:text-green-100">
               PeerPear
             </span>
           </div>
@@ -17,9 +17,6 @@ export default function Footer() {
             © {new Date().getFullYear()} PeerPear. All rights reserved.
           </span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-white">Made with ❤️ for <a className="hover:underline" href="https://www.cs.princeton.edu/courses/cos333" target="_blank">COS333</a> by Nadula, Jaden, Sungmin, Gary, and DK.</span>
-          </div>
       </div>
     </footer>
   );

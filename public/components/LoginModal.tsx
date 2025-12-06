@@ -53,7 +53,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#D7FF9C] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${isAnimating
+        className={`bg-[#EBECE4] rounded-2xl border-4 border-primary p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${isAnimating
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
           }`}

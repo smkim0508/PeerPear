@@ -836,7 +836,7 @@ export default function EventPage2({ params }: EventPageProps) {
                             className="block w-full text-sm text-gray-500
                                       file:mr-4 file:py-2 file:px-4 file:rounded-full
                                       file:border-0 file:text-sm file:font-semibold
-                                      file:bg-green-600 file:text-white hover:file:bg-green-700"
+                                      file:bg-primary file:text-white hover:file:bg-gray-400"
                           />
                         </div>
                         {imagePreview && (
@@ -854,14 +854,14 @@ export default function EventPage2({ params }: EventPageProps) {
                         <button
                           onClick={handleSaveEvent}
                           disabled={isSavingEvent}
-                          className="px-4 py-2 bg-green text-white rounded hover:bg-green"
+                          className="px-4 py-2 bg-green text-white rounded hover:bg-green cursor-pointer"
                         >
                           Save Changes
                         </button>
                         <button
                           onClick={handleCancelEdit}
                           disabled={isSavingEvent}
-                          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 cursor-pointer"
                         >
                           Cancel
                         </button>
