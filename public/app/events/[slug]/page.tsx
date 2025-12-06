@@ -116,7 +116,7 @@ export default function EventPage2({ params }: EventPageProps) {
   }>({
     title: "",
     description: "",
-    image_url: "", 
+    image_url: "",
   });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [isStartingEvent, setIsStartingEvent] = useState(false);
@@ -148,7 +148,8 @@ export default function EventPage2({ params }: EventPageProps) {
   const [eventImage, setEventImage] = useState<File | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
   const getUserType = (): "student" | "organization" => {
     if (typeof window !== "undefined") {
@@ -233,14 +234,13 @@ export default function EventPage2({ params }: EventPageProps) {
     setIsEditingEvent(false);
     setSelectedImageFile(null);
     setImagePreview(null);
-    if (!event) return; 
+    if (!event) return;
     setEditEventData({
-      title: event.title || "",       
-      description: event.description || "", 
+      title: event.title || "",
+      description: event.description || "",
       image_url: event.image_url || "",
-    }); 
+    });
   };
-  
 
   const fetchEvent = async () => {
     try {
@@ -294,9 +294,9 @@ export default function EventPage2({ params }: EventPageProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setSelectedImageFile(file); 
+      setSelectedImageFile(file);
       const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);  
+      setImagePreview(previewUrl);
     }
   };
 
@@ -383,7 +383,7 @@ export default function EventPage2({ params }: EventPageProps) {
       setEditEventData({
         title: event.title || "",
         description: event.description || "",
-        image_url: event.image_url || "", 
+        image_url: event.image_url || "",
       });
       setIsEditingEvent(true);
     }
@@ -423,22 +423,22 @@ export default function EventPage2({ params }: EventPageProps) {
       if (selectedImageFile) {
         const formData = new FormData();
         formData.append("file", selectedImageFile);
-      
+
         const res = await fetch(`${API_BASE_URL}/events/${eventId}/image`, {
           method: "POST",
           body: formData,
           credentials: "include",
         });
-      
+
         if (!res.ok) {
           console.error("Failed to upload image");
           return;
         }
-      
+
         const data = await res.json();
         setEvent((prev) =>
           prev ? { ...prev, image_url: data.image_url } : prev
-        );      
+        );
       }
     } catch {
       setError("Failed to update event");
@@ -623,6 +623,16 @@ export default function EventPage2({ params }: EventPageProps) {
   const currentStatus = event ? event.status : "Unknown";
   const hasQuestions = !!event?.questions?.length;
 
+  const hasPairing =
+    currentStatus === "TERMINATED" &&
+    event &&
+    event.matches &&
+    Array.isArray(event.matches) &&
+    event.matches.length > 0;
+  useEffect(() => {
+    handleViewPairings();
+  }, [hasPairing]);
+
   const CountdownCard = () => {
     if (!event?.ends_at || !timeLeft) return null;
     const expired = timeLeft.expired;
@@ -704,7 +714,7 @@ export default function EventPage2({ params }: EventPageProps) {
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-light-beige via-white to-light-beige">
         <Navbar organizationId={event.organization_id} />
-    
+
         <section>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 overflow-hidden">
             {event.image_url && (
@@ -736,39 +746,51 @@ export default function EventPage2({ params }: EventPageProps) {
                       ? "Pairings Published"
                       : "Upcoming"}
                   </span>
-              </div>
+                </div>
                 {isEditingEvent ? (
                   <Card className="border border-gray-200">
                     <CardHeader className="pt-6">
-                      <CardTitle className="text-xl">Edit Program Details</CardTitle>
+                      <CardTitle className="text-xl">
+                        Edit Program Details
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6 px-6 pb-6">
                       <div>
-                        <label className="block text-sm mb-2">Program Title *</label>
+                        <label className="block text-sm mb-2">
+                          Program Title *
+                        </label>
                         <input
                           type="text"
                           value={editEventData.title}
                           onChange={(e) =>
-                            setEditEventData({ ...editEventData, title: e.target.value })
+                            setEditEventData({
+                              ...editEventData,
+                              title: e.target.value,
+                            })
                           }
                           className="w-full text-2xl font-bold bg-transparent border-b border-gray-400 focus:border-green outline-none pb-1"
                           maxLength={100}
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm mb-2">Program Description</label>
+                        <label className="block text-sm mb-2">
+                          Program Description
+                        </label>
                         <textarea
                           value={editEventData.description}
                           onChange={(e) =>
-                            setEditEventData({ ...editEventData, description: e.target.value })
+                            setEditEventData({
+                              ...editEventData,
+                              description: e.target.value,
+                            })
                           }
                           rows={4}
                           className="w-full bg-transparent border border-gray-300 rounded-lg p-3 focus:border-green outline-none"
                           maxLength={500}
                         />
                       </div>
-                     {/* Image input and preview */}
+                      {/* Image input and preview */}
                       <div className="flex flex-row items-start gap-6 w-full">
                         <div className="flex-1 min-w-0">
                           <label className="block text-sm font-medium text-gray-700">
@@ -813,7 +835,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       </div>
                     </CardContent>
                   </Card>
-                  ) : (
+                ) : (
                   <div>
                     <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark mb-4">
                       {event.title}
@@ -826,8 +848,7 @@ export default function EventPage2({ params }: EventPageProps) {
                   </div>
                 )}
               </div>
-              <div className="flex justify-between items-center">
-            </div>
+              <div className="flex justify-between items-center"></div>
               <div className="space-y-6">
                 <div className="w-full max-w-md lg:ml-auto space-y-6">
                   {!isOrganizationUser && event?.status === "STARTED" && (
@@ -1226,11 +1247,7 @@ export default function EventPage2({ params }: EventPageProps) {
                         Array.isArray(event.matches) &&
                         event.matches.length > 0 && (
                           <>
-                            <PearButton
-                              text="View Existing Pairings"
-                              onClick={handleViewPairings}
-                              className="w-full bg-purple-600 hover:bg-purple-700"
-                            />
+                            
                             <PearButton
                               text={
                                 isPublishingPairings
