@@ -135,7 +135,7 @@ export default function OrganizationPage() {
             </p>
           </div>
 
-          <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-[#d7d8d1]">
+          <div className="p-6 space-y-4 max-h-96 overflow-y-auto bg-white">
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green mx-auto mb-4"></div>
@@ -166,7 +166,7 @@ export default function OrganizationPage() {
               organizations.map((org) => (
                 <div
                   key={org.id}
-                  className="flex items-center p-4 rounded-xl border bg-[#E5E6DD] hover:bg-green cursor-pointer transition-colors"
+                  className="flex items-center p-4 rounded-xl border-1 border-primary bg-white hover:bg-green cursor-pointer transition-colors"
                   onClick={() =>
                     (window.location.href = `/organization/${org.id}`)
                   }
@@ -223,7 +223,7 @@ export default function OrganizationPage() {
               setIsModalOpen(true);
             }}
             className=" inline-flex items-center justify-center text-[#1a1a1a] font-bold rounded-lg px-5 py-3 cursor-pointer
-        transition-all duration-300 hover:scale-100 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1 bg-[#ABC469]"
+        transition-all duration-300 hover:scale-100 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1 bg-primary"
           >
             Join an Organization
           </button>
