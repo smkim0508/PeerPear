@@ -109,9 +109,14 @@ export default function EventPage2({ params }: EventPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isEditingEvent, setIsEditingEvent] = useState(false);
-  const [editEventData, setEditEventData] = useState({
+  const [editEventData, setEditEventData] = useState<{
+    title: string;
+    description: string;
+    image_url: string;
+  }>({
     title: "",
     description: "",
+    image_url: "", 
   });
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [isStartingEvent, setIsStartingEvent] = useState(false);
@@ -224,6 +229,19 @@ export default function EventPage2({ params }: EventPageProps) {
     fetchParticipantsData();
   }, [eventId, isOrganizationUser]);
 
+  const handleCancelEdit = () => {
+    setIsEditingEvent(false);
+    setSelectedImageFile(null);
+    setImagePreview(null);
+    if (!event) return; 
+    setEditEventData({
+      title: event.title || "",       
+      description: event.description || "", 
+      image_url: event.image_url || "",
+    }); 
+  };
+  
+
   const fetchEvent = async () => {
     try {
       setIsLoading(true);
@@ -277,7 +295,8 @@ export default function EventPage2({ params }: EventPageProps) {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedImageFile(file); 
-      setImagePreview(URL.createObjectURL(file)); 
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);  
     }
   };
 
@@ -364,6 +383,7 @@ export default function EventPage2({ params }: EventPageProps) {
       setEditEventData({
         title: event.title || "",
         description: event.description || "",
+        image_url: event.image_url || "", 
       });
       setIsEditingEvent(true);
     }
@@ -416,7 +436,9 @@ export default function EventPage2({ params }: EventPageProps) {
         }
       
         const data = await res.json();
-        setEditEventData((prev) => ({ ...prev, image_url: data.image_url }));
+        setEvent((prev) =>
+          prev ? { ...prev, image_url: data.image_url } : prev
+        );      
       }
     } catch {
       setError("Failed to update event");
@@ -682,7 +704,7 @@ export default function EventPage2({ params }: EventPageProps) {
     <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-light-beige via-white to-light-beige">
         <Navbar organizationId={event.organization_id} />
-
+    
         <section>
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 overflow-hidden">
             {event.image_url && (
@@ -714,71 +736,65 @@ export default function EventPage2({ params }: EventPageProps) {
                       ? "Pairings Published"
                       : "Upcoming"}
                   </span>
-                </div>
+              </div>
                 {isEditingEvent ? (
                   <Card className="border border-gray-200">
                     <CardHeader className="pt-6">
-                      <CardTitle className="text-xl">
-                        Edit Program Details
-                      </CardTitle>
+                      <CardTitle className="text-xl">Edit Program Details</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6 px-6 pb-6">
                       <div>
-                        <label className="block text-sm mb-2">
-                          Program Title *
-                        </label>
+                        <label className="block text-sm mb-2">Program Title *</label>
                         <input
                           type="text"
                           value={editEventData.title}
                           onChange={(e) =>
-                            setEditEventData({
-                              ...editEventData,
-                              title: e.target.value,
-                            })
+                            setEditEventData({ ...editEventData, title: e.target.value })
                           }
                           className="w-full text-2xl font-bold bg-transparent border-b border-gray-400 focus:border-green outline-none pb-1"
                           maxLength={100}
                         />
                       </div>
+                      
                       <div>
-                        <label className="block text-sm mb-2">
-                          Program Description
-                        </label>
+                        <label className="block text-sm mb-2">Program Description</label>
                         <textarea
                           value={editEventData.description}
                           onChange={(e) =>
-                            setEditEventData({
-                              ...editEventData,
-                              description: e.target.value,
-                            })
+                            setEditEventData({ ...editEventData, description: e.target.value })
                           }
                           rows={4}
                           className="w-full bg-transparent border border-gray-300 rounded-lg p-3 focus:border-green outline-none"
                           maxLength={500}
                         />
                       </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-700">
-                          Event Image
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
-                        />
-                      </div>
-                      {imagePreview && (
-                        <div className="flex items-center justify-center">
-                          <img
-                            src={imagePreview}
-                            alt="Event Preview"
-                            className="max-h-64 rounded-lg border border-gray-200 object-cover"
+                     {/* Image input and preview */}
+                      <div className="flex flex-row items-start gap-6 w-full">
+                        <div className="flex-1 min-w-0">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Event Image
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4 file:rounded-full
+                                      file:border-0 file:text-sm file:font-semibold
+                                      file:bg-green-600 file:text-white hover:file:bg-green-700"
                           />
                         </div>
-                      )}
-                    </div>
+                        {imagePreview && (
+                          <div className="w-40 h-40 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 flex items-center justify-center">
+                            <img
+                              src={imagePreview}
+                              alt="Event Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex gap-3">
                         <button
                           onClick={handleSaveEvent}
@@ -788,7 +804,7 @@ export default function EventPage2({ params }: EventPageProps) {
                           Save Changes
                         </button>
                         <button
-                          onClick={() => setIsEditingEvent(false)}
+                          onClick={handleCancelEdit}
                           disabled={isSavingEvent}
                           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
                         >
@@ -797,7 +813,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       </div>
                     </CardContent>
                   </Card>
-                ) : (
+                  ) : (
                   <div>
                     <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark mb-4">
                       {event.title}
@@ -810,6 +826,8 @@ export default function EventPage2({ params }: EventPageProps) {
                   </div>
                 )}
               </div>
+              <div className="flex justify-between items-center">
+            </div>
               <div className="space-y-6">
                 <div className="w-full max-w-md lg:ml-auto space-y-6">
                   {!isOrganizationUser && event?.status === "STARTED" && (
