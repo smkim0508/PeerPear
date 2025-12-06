@@ -251,8 +251,8 @@ export default function Navbar({
                         {isActiveTab(
                           `/organization/${organizationId}/admin`
                         ) && (
-                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-                        )}
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
+                          )}
                       </Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
@@ -269,8 +269,8 @@ export default function Navbar({
           {isAuthenticated && (
             <>
               {isOnOrganizationPage &&
-              currentOrganization &&
-              userType === "organization" ? (
+                currentOrganization &&
+                userType === "organization" ? (
                 /* Organization Dropdown */
                 <NavigationMenu>
                   <NavigationMenuList>
@@ -293,18 +293,18 @@ export default function Navbar({
                         </div>
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
-                        <ul className="grid w-[200px] auto-rows-min justify-start  gap-2 p-2 bg-white rounded-md shadow-md gap-3">
+                        <ul className="grid w-[200px] gap-2 p-2 bg-white rounded-md shadow-md">
                           {userOrganizations.map((org) => (
                             <li key={org.id}>
                               <NavigationMenuLink asChild>
                                 <Link
                                   href={`/organization/${org.id}`}
-                                  className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors  w-full min-w-0"
+                                  className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-colors w-full min-w-0"
                                 >
                                   <img
                                     src={org.image || "/logo.svg"}
                                     alt={`${org.name} logo`}
-                                    className="w-6 h-6 rounded-full object-cover"
+                                    className="w-6 h-6 rounded-full object-cover shrink-0"
                                     onError={(e) => {
                                       const target =
                                         e.target as HTMLImageElement;
