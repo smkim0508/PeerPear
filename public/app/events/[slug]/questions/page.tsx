@@ -201,9 +201,6 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   };
 
   const handleDeleteQuestion = async (questionId: number) => {
-    if (!confirm("Are you sure you want to delete this question?")) {
-      return;
-    }
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
