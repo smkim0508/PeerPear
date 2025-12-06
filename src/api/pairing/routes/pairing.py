@@ -32,6 +32,8 @@ def pair_students_baseline():
     db_session = get_db_sessionmaker()
     llm_client = get_llm()
 
+    # check flask session, if exists/valid proceed, if not throw error or auth
+
     try:
         group_size = request.args.get("group_size", type=int)
         if not isinstance(group_size, int):
