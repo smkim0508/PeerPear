@@ -16,7 +16,6 @@ from db.crud.events_crud import verify_access
 
 events_bp = Blueprint("events", __name__)
 
-
 @events_bp.get("/<int:event_id>")
 def get_event_details(event_id: int):
     """
@@ -234,7 +233,6 @@ def register_user_for_event(event_id: int):
     except Exception as e:
         logger.error(f"Error registering user for event: {e}")
         return jsonify(generic_error_response), 500
-
 
 @events_bp.delete("/<int:event_id>/register")
 def unregister_user_from_event(event_id: int):

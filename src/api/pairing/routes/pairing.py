@@ -1,6 +1,6 @@
 # actual routes / API for pairing requests
 from typing import Optional
-from flask import Blueprint, request, send_from_directory, jsonify, g
+from flask import Blueprint, request, send_from_directory, jsonify, g, make_response
 from common.types.pairing_event import PairingEvent, PairingResult, PairedGroup
 from common.types.user import User, UserProfile, UserPairingInformation
 from datetime import datetime, timezone, timedelta
@@ -20,6 +20,7 @@ from db.crud.pairing_crud import store_new_pairing, get_pairings_for_event
 from db.crud.events_crud import get_event_by_id, check_if_sibling_role_considered
 from common.error_response import generic_error_response
 import uuid
+from modules.pairing.utils.export_pairing import format_pairings_for_export, generate_pairing_pdf
 
 # use blueprint to group routes
 pairing_bp = Blueprint("pairing", __name__)
@@ -281,3 +282,123 @@ def get_student_match(event_id: int):
         logger.error(
             f"Error retrieving student match for event {event_id}: {e}")
         return jsonify({"error": "Internal server error"}), 500
+
+@pairing_bp.get("/event/<int:event_id>/pairing_pdf")
+def export_pairings_as_pdf(event_id: int):
+    """
+    Exports pairing results into a PDF file for user to download.
+    
+    1) Retrieves pairing results for the event
+    2) Retrieves event details such as event title, org name, if big/little pairings are considered
+    3) Formats the pairing results for export using universal helper
+    4) Returns the formatted text as a PDF content type
+    """
+
+    try:
+        event_id = int(event_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    # retrieve pairing result
+    try:
+        client_error_msg, pairing_result = get_pairings_for_event(event_id)
+        
+        if client_error_msg:
+            return jsonify(client_error_msg), 404
+
+        if not pairing_result:
+            return jsonify({"error": "No matches were found"}), 404
+
+    except Exception as e:
+        logger.error(f"Error getting matches of an event: {e}")
+        return jsonify(generic_error_response), 500
+    
+    # retrieve event details
+    try:
+        event: PublishedEvent | None = get_event_by_id(event_id)
+        check_sibling_roles: bool = check_if_sibling_role_considered(event_id)
+    except Exception as e:
+        logger.info(f"Error getting event details: {e}")
+        return jsonify(generic_error_response), 500
+
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+    
+    # generate PDF bytes from pairing results
+    try:
+        pdf_bytes = generate_pairing_pdf(
+            pairing_result=pairing_result,
+            event_title=event.title,
+            organization_name=event.organization_name,
+            check_sibling_roles=check_sibling_roles
+        )
+    except Exception as e:
+        logger.error(f"Error generating PDF: {e}")
+        return jsonify(generic_error_response), 500
+
+    # create response with PDF content
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename="pairing_results_{event_id}.pdf"'
+
+    return response
+
+@pairing_bp.get("/event/<int:event_id>/pairing_txt")
+def export_pairings_as_txt(event_id: int):
+    """
+    Exports pairing results into a .txt file for user to download.
+    
+    1) Retrieves pairing results for the event
+    2) Retrieves event details such as event title, org name, if big/little pairings are considered
+    3) Formats the pairing results for export using universal helper
+    4) Returns the formatted text as a .txt content type
+    """
+
+    try:
+        event_id = int(event_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "event_id must be an integer"}), 400
+
+    # retrieve pairing result
+    try:
+        client_error_msg, pairing_result = get_pairings_for_event(event_id)
+        
+        if client_error_msg:
+            return jsonify(client_error_msg), 404
+
+        if not pairing_result:
+            return jsonify({"error": "No matches were found"}), 404
+
+    except Exception as e:
+        logger.error(f"Error getting matches of an event: {e}")
+        return jsonify(generic_error_response), 500
+    
+    # retrieve event details
+    try:
+        event: PublishedEvent | None = get_event_by_id(event_id)
+        check_sibling_roles: bool = check_if_sibling_role_considered(event_id)
+    except Exception as e:
+        logger.info(f"Error getting event details: {e}")
+        return jsonify(generic_error_response), 500
+
+    if not event:
+        return jsonify({"error": "Event not found"}), 404
+    
+    # generate formatted text from pairing results
+    try:
+        export_text = format_pairings_for_export(
+            pairing_result=pairing_result,
+            event_title=event.title,
+            organization_name=event.organization_name,
+            check_sibling_roles=check_sibling_roles
+        )
+    except Exception as e:
+        logger.error(f"Error generating text export: {e}")
+        return jsonify(generic_error_response), 500
+
+    # create response with text file content
+    response = make_response(export_text)
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    response.headers['Content-Disposition'] = f'attachment; filename="pairing_results_{event_id}.txt"'
+
+    return response

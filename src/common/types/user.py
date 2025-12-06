@@ -47,6 +47,7 @@ class User(BaseModel):
     """
     Lightweight representation of a single user, which holds just their id, name, email.
     NOTE: this is technically a shallow copy of the UserPairingInformation class without summary.
+    - Exported user contains this information.
     """
     id: int
     name: str
