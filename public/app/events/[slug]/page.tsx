@@ -8,6 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import PearButton from "@/components/PearButton";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
 import PairingResults from "@/components/PairingResults";
+import { XCircle } from "lucide-react";
+
 import {
   Timer,
   Users,
@@ -904,6 +906,7 @@ export default function EventPage2({ params }: EventPageProps) {
                                   You're registered!
                                 </span>
                               </div>
+
                               {event?.questions?.length > 0 && (
                                 <div className="space-y-3">
                                   <h3 className="font-semibold text-lg">
@@ -963,25 +966,30 @@ export default function EventPage2({ params }: EventPageProps) {
                                   </div>
                                 </div>
                               )}
-                              <PearButton
-                                text={
-                                  isRegistering
-                                    ? "Unregistering..."
-                                    : "Unregister"
-                                }
-                                onClick={
-                                  isRegistering ? () => {} : openUnregisterModal
-                                }
-                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
-                                  isRegistering
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }`}
-                              />
+
+                              {event.status === "STARTED" && (
+                                <PearButton
+                                  text={
+                                    isRegistering
+                                      ? "Unregistering..."
+                                      : "Unregister"
+                                  }
+                                  onClick={
+                                    isRegistering
+                                      ? () => {}
+                                      : openUnregisterModal
+                                  }
+                                  className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${
+                                    isRegistering
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                />
+                              )}
                             </div>
                           )
                         ) : (
-                          // not registered -> show registration prompt
+                          // Not Registered View
                           <div className="space-y-4">
                             <p className="text-gray-700">
                               Register to participate in this program.
@@ -1122,10 +1130,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       ) : (studentMatch?.groups?.length ?? 0) > 0 ? (
                         <div className="space-y-4">
                           {studentMatch?.groups?.map((group, groupIndex) => (
-                            <div
-                              key={groupIndex}
-                              className="p-4"
-                            >
+                            <div key={groupIndex} className="p-4">
                               <div className="space-y-3">
                                 {group.students.map((student, studentIndex) => (
                                   <div
