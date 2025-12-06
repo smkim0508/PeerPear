@@ -839,29 +839,61 @@ export default function EventPage2({ params }: EventPageProps) {
                       </CardHeader>
                       <CardContent className="pb-4">
                         {isRegistered ? (
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
-                              <CheckCircle className="h-6 w-6 text-white" />
-                              <span className="font-bold text-lg text-white text-center">
-                                You're registered!
-                              </span>
-                            </div>
-                            {event?.questions?.length > 0 && (
-                              <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">
-                                  Questionnaire Status
-                                </h3>
-                                {questionnaireCompleted ? (
+                          /* User is registered - check if questionnaire is complete */
+                          (!event?.questions?.length || questionnaireCompleted) ? (
+                            /* Registered AND (no questions OR questionnaire complete) - show green success */
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
+                                <CheckCircle className="h-6 w-6 text-white" />
+                                <span className="font-bold text-lg text-white text-center">
+                                  You're registered!
+                                </span>
+                              </div>
+                              {event?.questions?.length > 0 && (
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg">
+                                    Questionnaire Status
+                                  </h3>
                                   <div className="flex items-center gap-2 text-green">
                                     <CheckCircle className="h-5 w-5" />
                                     <span className="font-medium">
                                       Completed
                                     </span>
                                   </div>
-                                ) : (
+                                </div>
+                              )}
+                              <PearButton
+                                text={
+                                  isRegistering
+                                    ? "Unregistering..."
+                                    : "Unregister"
+                                }
+                                onClick={
+                                  isRegistering ? () => {} : openUnregisterModal
+                                }
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
+                                  isRegistering
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }`}
+                              />
+                            </div>
+                          ) : (
+                            // registered, but questionnaire incomplete -> show warning
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-center gap-3 text-blue-700 bg-blue-100 border-2 border-blue-300 rounded-xl p-4">
+                                <span className="font-bold text-lg text-blue-700 text-center">
+                                    Questionnaire Incomplete
+                                </span>
+                              </div>
+                              {event?.questions?.length > 0 && (
+                                <div className="space-y-3">
+                                  <h3 className="font-semibold text-lg">
+                                    Questionnaire Status
+                                  </h3>
                                   <div className="space-y-3">
                                     <p className="text-gray-700">
-                                      Incomplete - you are not eligible for a match until you complete the questionnaire.
+                                      You are not eligible for a match until you complete the questionnaire below.
                                     </p>
                                     <PearButton
                                       text="Go to Questionnaire"
@@ -873,26 +905,27 @@ export default function EventPage2({ params }: EventPageProps) {
                                       className="w-full"
                                     />
                                   </div>
-                                )}
-                              </div>
-                            )}
-                            <PearButton
-                              text={
-                                isRegistering
-                                  ? "Unregistering..."
-                                  : "Unregister"
-                              }
-                              onClick={
-                                isRegistering ? () => {} : openUnregisterModal
-                              }
-                              className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
-                                isRegistering
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          </div>
+                                </div>
+                              )}
+                              <PearButton
+                                text={
+                                  isRegistering
+                                    ? "Unregistering..."
+                                    : "Unregister"
+                                }
+                                onClick={
+                                  isRegistering ? () => {} : openUnregisterModal
+                                }
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
+                                  isRegistering
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                                }`}
+                              />
+                            </div>
+                          )
                         ) : (
+                          /* Not registered - show registration prompt */
                           <div className="space-y-4">
                             <p className="text-gray-700">
                               Register to participate in this program.
