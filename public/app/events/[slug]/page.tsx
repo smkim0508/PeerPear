@@ -738,6 +738,7 @@ export default function EventPage2({ params }: EventPageProps) {
             <PearButton
               text="Back to Programs"
               onClick={() => router.push("/student")}
+              className="cursor-pointer"
             />
           </CardContent>
         </Card>
@@ -751,16 +752,19 @@ export default function EventPage2({ params }: EventPageProps) {
         <Navbar organizationId={event.organization_id} />
 
         <section>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 overflow-hidden">
+          <div className="relative mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 overflow-hidden">
             {event.image_url && (
-              <div
-                className="absolute inset-0 z-0 opacity-10 bg-cover bg-center bg-no-repeat pointer-events-none"
-                style={{ backgroundImage: `url(${event.image_url})` }}
-              />
+              <>
+                <div
+                  className="absolute inset-0 z-0 opacity-100 bg-cover bg-center bg-no-repeat pointer-events-none w-full!"
+                  style={{ backgroundImage: `url(${event.image_url})` }}
+                />
+                <div className="absolute inset-0 z-0 bg-linear-to-b from-black/30 via-black/10 to-white/40 pointer-events-none" />
+              </>
             )}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
+            <div className="relative z-10 max-w-4xl">
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/70 p-6 lg:p-10 space-y-6">
+                <div className="flex items-center gap-3 flex-wrap">
                   <Building2 className="h-6 w-6 text-green" />
                   <div className="relative group">
                     <span className="text-green font-semibold text-lg">
@@ -782,6 +786,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       : "Upcoming"}
                   </span>
                 </div>
+
                 {isEditingEvent ? (
                   <Card className="border border-gray-200">
                     <CardHeader className="pt-6">
@@ -842,7 +847,7 @@ export default function EventPage2({ params }: EventPageProps) {
                           />
                         </div>
                         {imagePreview && (
-                          <div className="w-40 h-40 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 flex items-center justify-center">
+                          <div className="w-40 h-40 shrink-0 overflow-hidden rounded-lg border border-gray-200 flex items-center justify-center">
                             <img
                               src={imagePreview}
                               alt="Event Preview"
@@ -871,8 +876,8 @@ export default function EventPage2({ params }: EventPageProps) {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div>
-                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark mb-4">
+                  <div className="space-y-4">
+                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark">
                       {event.title}
                     </h1>
                     {event.description && (
@@ -882,137 +887,6 @@ export default function EventPage2({ params }: EventPageProps) {
                     )}
                   </div>
                 )}
-              </div>
-              <div className="flex justify-between items-center"></div>
-              <div className="space-y-6">
-                <div className="w-full max-w-md lg:ml-auto space-y-6">
-                  {!isOrganizationUser && event?.status === "STARTED" && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-2xl mt-4">
-                          Registration
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="pb-4">
-                        {isRegistered ? (
-                          // if user is registered, then check if questionnaire is complete
-                          !event?.questions?.length ||
-                          questionnaireCompleted ? (
-                            // if user registered AND (no questions OR questionnaire complete) - show green success
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
-                                <CheckCircle className="h-6 w-6 text-white" />
-                                <span className="font-bold text-lg text-white text-center">
-                                  You're registered!
-                                </span>
-                              </div>
-
-                              {event?.questions?.length > 0 && (
-                                <div className="space-y-3">
-                                  <h3 className="font-semibold text-lg">
-                                    Questionnaire Status
-                                  </h3>
-                                  <div className="flex items-center gap-2 text-green">
-                                    <CheckCircle className="h-5 w-5" />
-                                    <span className="font-medium">
-                                      Completed
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-                              <PearButton
-                                text={
-                                  isRegistering
-                                    ? "Unregistering..."
-                                    : "Unregister"
-                                }
-                                onClick={
-                                  isRegistering ? () => {} : openUnregisterModal
-                                }
-                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
-                                  isRegistering
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }`}
-                              />
-                            </div>
-                          ) : (
-                            // registered, but questionnaire incomplete -> show warning
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-center gap-3 text-blue-700 bg-blue-100 border-2 border-blue-300 rounded-xl p-4">
-                                <span className="font-bold text-lg text-blue-700 text-center">
-                                  Questionnaire Incomplete
-                                </span>
-                              </div>
-                              {event?.questions?.length > 0 && (
-                                <div className="space-y-3">
-                                  <h3 className="font-semibold text-lg">
-                                    Questionnaire Status
-                                  </h3>
-                                  <div className="space-y-3">
-                                    <p className="text-gray-700">
-                                      You are not eligible for a match until you
-                                      complete the questionnaire below.
-                                    </p>
-                                    <PearButton
-                                      text="Go to Questionnaire"
-                                      onClick={() =>
-                                        router.push(
-                                          `/events/${eventId}/questionnaire`
-                                        )
-                                      }
-                                      className="w-full"
-                                    />
-                                  </div>
-                                </div>
-                              )}
-
-                              {event.status === "STARTED" && (
-                                <PearButton
-                                  text={
-                                    isRegistering
-                                      ? "Unregistering..."
-                                      : "Unregister"
-                                  }
-                                  onClick={
-                                    isRegistering
-                                      ? () => {}
-                                      : openUnregisterModal
-                                  }
-                                  className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${
-                                    isRegistering
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                />
-                              )}
-                            </div>
-                          )
-                        ) : (
-                          // Not Registered View
-                          <div className="space-y-4">
-                            <p className="text-gray-700">
-                              Register to participate in this program.
-                            </p>
-                            <PearButton
-                              text={
-                                isRegistering ? "Registering..." : "Register"
-                              }
-                              onClick={
-                                isRegistering ? () => {} : openRegisterModal
-                              }
-                              className={`w-full bg-green mb-4 cursor-pointer ${
-                                isRegistering
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                            />
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -1191,6 +1065,88 @@ export default function EventPage2({ params }: EventPageProps) {
                 )}
             </div>
             <div className="space-y-6">
+              {!isOrganizationUser && event?.status === "STARTED" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-2xl mt-4">Registration</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pb-4">
+                    {isRegistered ? (
+                      !event?.questions?.length || questionnaireCompleted ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
+                            <CheckCircle className="h-6 w-6 text-white" />
+                            <span className="font-bold text-lg text-white text-center">
+                              You're registered!
+                            </span>
+                          </div>
+
+                          {event?.questions?.length > 0 && (
+                            <div className="space-y-3">
+                              <h3 className="font-semibold text-lg">Questionnaire Status</h3>
+                              <div className="flex items-center gap-2 text-green">
+                                <CheckCircle className="h-5 w-5" />
+                                <span className="font-medium">Completed</span>
+                              </div>
+                            </div>
+                          )}
+                          <PearButton
+                            text={isRegistering ? "Unregistering..." : "Unregister"}
+                            onClick={isRegistering ? () => {} : openUnregisterModal}
+                            className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
+                              isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-center gap-3 text-blue-700 bg-blue-100 border-2 border-blue-300 rounded-xl p-4">
+                            <span className="font-bold text-lg text-blue-700 text-center">
+                              Questionnaire Incomplete
+                            </span>
+                          </div>
+                          {event?.questions?.length > 0 && (
+                            <div className="space-y-3">
+                              <h3 className="font-semibold text-lg">Questionnaire Status</h3>
+                              <div className="space-y-3">
+                                <p className="text-gray-700">
+                                  You are not eligible for a match until you complete the questionnaire below.
+                                </p>
+                                <PearButton
+                                  text="Go to Questionnaire"
+                                  onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                  className="w-full"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {event.status === "STARTED" && (
+                            <PearButton
+                              text={isRegistering ? "Unregistering..." : "Unregister"}
+                              onClick={isRegistering ? () => {} : openUnregisterModal}
+                              className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${
+                                isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
+                            />
+                          )}
+                        </div>
+                      )
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-gray-700">Register to participate in this program.</p>
+                        <PearButton
+                          text={isRegistering ? "Registering..." : "Register"}
+                          onClick={isRegistering ? () => {} : openRegisterModal}
+                          className={`w-full bg-green mb-4 cursor-pointer ${
+                            isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
               {currentStatus === "STARTED" && <CountdownCard />}
               {isOrganizationUser && currentStatus !== "PAIRING_PUBLISHED" && (
                 <Card>
