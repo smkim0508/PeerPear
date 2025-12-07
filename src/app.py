@@ -117,7 +117,23 @@ def create_app() -> Flask:
         session_id_var.set(f"session_id: {session_id}")
         logger.info(f"Starting session for request.")
 
-        # is_authenticated() # authenticate user on every request
+        # routes that don't require authentication
+        PUBLIC_ROUTES = [
+            '/health',
+            '/auth/login',
+            '/auth/logout',
+            '/auth/logout-cas',
+            '/auth/status',
+            '/auth/user',
+        ]
+
+        # skip authentication for public routes and OPTIONS preflight requests (for FE AJAX)
+        if request.path not in PUBLIC_ROUTES and request.method != 'OPTIONS':
+            # otherwise, check if user is authenticated via flask session
+            # NOTE: this guards against direct API route access
+            if not is_authenticated():
+                # if not authenticated, authenticate user (will redirect to CAS and back)
+                authenticate()
 
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
