@@ -29,7 +29,7 @@ export default function SearchBar({
               <input
                 id="search"
                 type="text"
-                placeholder={`Search by ${activeTab === "event" ? "program" : "organization"
+                placeholder={`Search by ${activeTab === "event" ? "event" : "organization"
                   }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
