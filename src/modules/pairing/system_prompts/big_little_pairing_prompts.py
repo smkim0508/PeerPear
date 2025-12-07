@@ -143,7 +143,7 @@ class BigLittlePairingPrompts:
     - If two students share no clear commonalities with anyone, place them where they minimally lower group satisfaction while maintaining big/little balance.
     - Deterministic tie-breaking by ascending student_id.
     - Return ONLY the required JSON.
-    - Make the reasoning clear and concise. Refer to students by name, not id when you output.
+    - Make the reasoning clear and concise. Refer to students by name, not id when you output. Use smooth, natural language to justify, not parameter names (e.g. "group size of ..." instead of "group_size = ...").
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for reference. DO NOT copy their results directly; reason fresh on new data.
@@ -168,7 +168,7 @@ class BigLittlePairingPrompts:
             [101, 103, 104],
             [102, 105, 106]
         ],
-        "reasoning": "Total: 3 BIG_SIBLING (Ava, Priya, Mina), 3 LITTLE_SIBLING (Marco, Sora, Jon). With group_size=3 and 6 students, form 2 groups of 3. Target distribution: 1-2 BIG_SIBLING and 1-2 LITTLE_SIBLING per group. Group 1 (Ava, Priya, Sora): 2 BIG_SIBLING + 1 LITTLE_SIBLING, aligned on CS/ML/HCI/product interests. Group 2 (Marco, Jon, Mina): 1 BIG_SIBLING + 2 LITTLE_SIBLING, aligned on quant/finance interests with diverse hobbies. Each group has mixed big/little representation. Sizes meet group_size=3 with no singletons."
+        "reasoning": "Total: 3 big siblings (Ava, Priya, Mina), 3 little siblings (Marco, Sora, Jon). With group size of 3 and 6 students, form 2 groups of 3. Target distribution: 1-2 big siblings and 1-2 little siblings per group. Group 1 (Ava, Priya, Sora): 2 big siblings + 1 little sibling, aligned on CS/ML/HCI/product interests. Group 2 (Marco, Jon, Mina): 1 big sibling + 2 little siblings, aligned on quant/finance interests with diverse hobbies. Each group has mixed big/little representation. Sizes meet group size of 3 with no singletons."
     }}
 
     2)
@@ -196,7 +196,7 @@ class BigLittlePairingPrompts:
             [205, 208, 206, 207],
             [209, 210]
         ],
-        "reasoning": "Total: 5 BIG_SIBLING (Riley, Elena, Samir, Harper, Quinn), 5 LITTLE_SIBLING (Mateo, Nora, Ivy, Leo, Zara). With group_size=4 and 10 students, form groups targeting 4 students each with balanced big/little split. Group 1 (Riley, Elena, Mateo, Nora): 2 BIG_SIBLING + 2 LITTLE_SIBLING, aligned on environmental/ecology/climate/engineering themes. Group 2 (Samir, Harper, Ivy, Leo): 2 BIG_SIBLING + 2 LITTLE_SIBLING, aligned on creative media (film/theater/audio/video). Group 3 (Quinn, Zara): 1 BIG_SIBLING + 1 LITTLE_SIBLING, aligned on product/UX/entrepreneurship. All groups maintain big/little mix. Sizes satisfy group_size=4 with acceptable remainder group of 2, no singletons."
+        "reasoning": "Total: 5 big siblings (Riley, Elena, Samir, Harper, Quinn), 5 little siblings (Mateo, Nora, Ivy, Leo, Zara). With group size of 4 and 10 students, form groups targeting 4 students each with balanced big/little split. Group 1 (Riley, Elena, Mateo, Nora): 2 big siblings + 2 little siblings, aligned on environmental/ecology/climate/engineering themes. Group 2 (Samir, Harper, Ivy, Leo): 2 big siblings + 2 little siblings, aligned on creative media (film/theater/audio/video). Group 3 (Quinn, Zara): 1 big sibling + 1 little sibling, aligned on product/UX/entrepreneurship. All groups maintain big/little mix. Sizes satisfy group size of 4 with acceptable remainder group of 2, no singletons."
     }}
 
     3)
@@ -222,7 +222,7 @@ class BigLittlePairingPrompts:
             [304, 305, 306],
             [307, 308]
         ],
-        "reasoning": "Total: 4 BIG_SIBLING (Oliver, Devin, Gianna, Marcus), 4 LITTLE_SIBLING (Sofia, Amara, Noah, Yuna). With group_size=3 and 8 students, form groups with balanced big/little distribution. Group 1 (Oliver, Sofia, Devin): 2 BIG_SIBLING + 1 LITTLE_SIBLING, combines chess/programming interests (Oliver, Sofia) with sports (Devin). Group 2 (Amara, Gianna, Noah): 1 BIG_SIBLING + 2 LITTLE_SIBLING, combines basketball interest (Amara) with culinary/baking (Gianna, Noah). Group 3 (Yuna, Marcus): 1 BIG_SIBLING + 1 LITTLE_SIBLING, aligned on dance/choreography. All groups maintain big/little mix. Two groups of 3, one group of 2, no singletons."
+        "reasoning": "Total: 4 big siblings (Oliver, Devin, Gianna, Marcus), 4 little siblings (Sofia, Amara, Noah, Yuna). With group size of 3 and 8 students, form groups with balanced big/little distribution. Group 1 (Oliver, Sofia, Devin): 2 big siblings + 1 little sibling, combines chess/programming interests (Oliver, Sofia) with sports (Devin). Group 2 (Amara, Gianna, Noah): 1 big sibling + 2 little siblings, combines basketball interest (Amara) with culinary/baking (Gianna, Noah). Group 3 (Yuna, Marcus): 1 big sibling + 1 little sibling, aligned on dance/choreography. All groups maintain big/little mix. Two groups of 3, one group of 2, no singletons."
     }}
 
     4)
@@ -245,7 +245,7 @@ class BigLittlePairingPrompts:
             [401, 402, 404, 405],
             [403, 406]
         ],
-        "reasoning": "Total: 3 BIG_SIBLING (Taylor, Jordan, Casey), 3 LITTLE_SIBLING (River, Skylar, Alex). With group_size=4 and 6 students, need to balance distribution. Group 1 (Taylor, Jordan, River, Skylar): 2 BIG_SIBLING + 2 LITTLE_SIBLING, aligned on business/entrepreneurship/consulting/product/marketing themes. Group 2 (Casey, Alex): 1 BIG_SIBLING + 1 LITTLE_SIBLING, aligned on finance/economics/consulting. Both groups maintain big/little mix. Sizes are 4 and 2, no singletons."
+        "reasoning": "Total: 3 big siblings (Taylor, Jordan, Casey), 3 little siblings (River, Skylar, Alex). With group size of 4 and 6 students, need to balance distribution. Group 1 (Taylor, Jordan, River, Skylar): 2 big siblings + 2 little siblings, aligned on business/entrepreneurship/consulting/product/marketing themes. Group 2 (Casey, Alex): 1 big sibling + 1 little sibling, aligned on finance/economics/consulting. Both groups maintain big/little mix. Sizes are 4 and 2, no singletons."
     }}
     </FEW-SHOT EXAMPLES>
     """
@@ -419,7 +419,7 @@ class BigLittlePairingPrompts:
     - Determinism & Formatting
         - Be deterministic; break ties by ascending student_id.
         - Return only the JSON for PairingLLMOutput (with groups) and reasoning.
-    - Make the reasoning clear and concise. Refer to students by name, not id when you output.
+    - Make the reasoning clear and concise. Refer to students by name, not id when you output. Use smooth, natural language to justify, not parameter names (e.g. "group size of ..." instead of "group_size = ...").
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for you to reference and guide your reasoning for new data.
@@ -462,7 +462,7 @@ class BigLittlePairingPrompts:
             [101, 103, 104],
             [102, 105, 106]
         ],
-        "reasoning": "Total: 3 BIG_SIBLING (Ava, Priya, Mina), 3 LITTLE_SIBLING (Marco, Sora, Jon). Event description emphasizes interdisciplinary pre-med project groups mixing clinical and technical themes. Questionnaire responses naturally split students into (1) technical healthcare innovation and (2) clinical/policy/ethics. Group 1 (Ava, Priya, Sora): 2 BIG_SIBLING + 1 LITTLE_SIBLING, aligns with ML-for-healthcare, patient-centered design, and predictive modeling—high event-aligned cohesion. Group 2 (Marco, Jon, Mina): 1 BIG_SIBLING + 2 LITTLE_SIBLING, aligns on healthcare economics, uncertainty modeling, and clinical narrative discussions. All groups maintain big/little mix. Group sizes meet group_size=3 with no singletons. Fairness pass confirmed maximizing minimum satisfaction under event context."
+        "reasoning": "Total: 3 big siblings (Ava, Priya, Mina), 3 little siblings (Marco, Sora, Jon). Event description emphasizes interdisciplinary pre-med project groups mixing clinical and technical themes. Questionnaire responses naturally split students into (1) technical healthcare innovation and (2) clinical/policy/ethics. Group 1 (Ava, Priya, Sora): 2 big siblings + 1 little sibling, aligns with ML-for-healthcare, patient-centered design, and predictive modeling—high event-aligned cohesion. Group 2 (Marco, Jon, Mina): 1 big sibling + 2 little siblings, aligns on healthcare economics, uncertainty modeling, and clinical narrative discussions. All groups maintain big/little mix. Group sizes meet group size of 3 with no singletons. Fairness pass confirmed maximizing minimum satisfaction under event context."
     }}
 
     2)
@@ -498,7 +498,7 @@ class BigLittlePairingPrompts:
             [201, 202, 205],
             [203, 204]
         ],
-        "reasoning": "Total: 3 BIG_SIBLING (Riley, Samir, Elena), 2 LITTLE_SIBLING (Nora, Ivy). With group_size=2 and 5 students, the groups should be split into 2 and 3 to avoid singleton. The event context and questionnaire responses yield 2 natural groups: Group 1 (Riley, Nora, Elena): 2 BIG_SIBLING + 1 LITTLE_SIBLING, for conservation/field monitoring with tech and data. Group 2 (Samir, Ivy): 1 BIG_SIBLING + 1 LITTLE_SIBLING, for sustainability-focused media production. All groups maintain big/little mix. There are no singletons, and each group shares clear event-aligned project interests."
+        "reasoning": "Total: 3 big siblings (Riley, Samir, Elena), 2 little siblings (Nora, Ivy). With group size of 2 and 5 students, the groups should be split into 2 and 3 to avoid singleton. The event context and questionnaire responses yield 2 natural groups: Group 1 (Riley, Nora, Elena): 2 big siblings + 1 little sibling, for conservation/field monitoring with tech and data. Group 2 (Samir, Ivy): 1 big sibling + 1 little sibling, for sustainability-focused media production. All groups maintain big/little mix. There are no singletons, and each group shares clear event-aligned project interests."
     }}
 
     3)
@@ -548,7 +548,7 @@ class BigLittlePairingPrompts:
             [305, 306],
             [307, 308]
         ],
-        "reasoning": "Total: 4 BIG_SIBLING (Oliver, Devin, Gianna, Marcus), 4 LITTLE_SIBLING (Sofia, Amara, Noah, Yuna). Event is about pair-based strategic/tactical sessions. Questionnaire responses for each domain (strategy games, basketball drills, cooking, choreography) strongly favor tightly coupled pairs. Each pair has perfect 1 BIG_SIBLING + 1 LITTLE_SIBLING distribution: (Oliver, Sofia) for chess/strategy, (Devin, Amara) for basketball, (Gianna, Noah) for cooking, (Yuna, Marcus) for dance. Profile summaries reinforce, but questionnaire dominates. All pairs meet group_size=2; no remainder. All groups maintain big/little mix."
+        "reasoning": "Total: 4 big siblings (Oliver, Devin, Gianna, Marcus), 4 little siblings (Sofia, Amara, Noah, Yuna). Event is about pair-based strategic/tactical sessions. Questionnaire responses for each domain (strategy games, basketball drills, cooking, choreography) strongly favor tightly coupled pairs. Each pair has perfect 1 big sibling + 1 little sibling distribution: (Oliver, Sofia) for chess/strategy, (Devin, Amara) for basketball, (Gianna, Noah) for cooking, (Yuna, Marcus) for dance. Profile summaries reinforce, but questionnaire dominates. All pairs meet group size of 2; no remainder. All groups maintain big/little mix."
     }}
 
     4)
@@ -588,7 +588,7 @@ class BigLittlePairingPrompts:
             [401, 403, 405],
             [402, 404, 406]
         ],
-        "reasoning": "Total: 3 BIG_SIBLING (Emily, Daniel, Brian), 3 LITTLE_SIBLING (Hana, Kevin, Sophia). Event is a low-structure social bonding context. Questionnaire responses are uniformly vague ('open to anything'), providing almost no differentiating signals. Thus profile_summary was used to form coherent social micro-communities aligned to the event. Group 1 (Emily, Hana, Sophia): 1 BIG_SIBLING + 2 LITTLE_SIBLING, clusters reflective/arts/culture interests (music, museums, visual arts, piano). Group 2 (Daniel, Kevin, Brian): 2 BIG_SIBLING + 1 LITTLE_SIBLING, clusters social/active hobbies (gaming, badminton, cooking, board games, robotics). All groups maintain big/little mix. This grouping avoids singletons and maximizes satisfaction given minimal questionnaire guidance."
+        "reasoning": "Total: 3 big siblings (Emily, Daniel, Brian), 3 little siblings (Hana, Kevin, Sophia). Event is a low-structure social bonding context. Questionnaire responses are uniformly vague ('open to anything'), providing almost no differentiating signals. Thus profile_summary was used to form coherent social micro-communities aligned to the event. Group 1 (Emily, Hana, Sophia): 1 big sibling + 2 little siblings, clusters reflective/arts/culture interests (music, museums, visual arts, piano). Group 2 (Daniel, Kevin, Brian): 2 big siblings + 1 little sibling, clusters social/active hobbies (gaming, badminton, cooking, board games, robotics). All groups maintain big/little mix. This grouping avoids singletons and maximizes satisfaction given minimal questionnaire guidance."
     }}
     </FEW-SHOT EXAMPLES>
     """
