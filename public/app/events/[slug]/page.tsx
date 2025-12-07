@@ -968,7 +968,7 @@ export default function EventPage2({ params }: EventPageProps) {
                                         complete the questionnaire below.
                                       </p>
                                       <PearButton
-                                        text="Go to Questionnaire"
+                                        text="Edit Questionnaire"
                                         onClick={() =>
                                           router.push(
                                             `/events/${eventId}/questionnaire`
