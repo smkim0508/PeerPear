@@ -886,7 +886,79 @@ export default function EventPage2({ params }: EventPageProps) {
               <div className="flex justify-between items-center"></div>
               <div className="space-y-6">
                 <div className="w-full max-w-md lg:ml-auto space-y-6">
-                  {!isOrganizationUser && event?.status === "STARTED" && (
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
+            <div className="space-y-8">
+              {isOrganizationUser &&
+                (currentStatus === "PAIRING_PUBLISHED" ||
+                  (currentStatus === "TERMINATED" && pairingData)) && (
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pt-6">
+                      <CardTitle className="flex items-center gap-3 text-2xl">
+                        <CheckCircle className="h-6 w-6 text-green" />
+                        {currentStatus === "PAIRING_PUBLISHED"
+                          ? "Published Pairings"
+                          : "Pairing Preview"}
+                      </CardTitle>
+                      <span className="px-3 py-1 bg-green text-nav-dark text-xs font-bold rounded-full border border-green">
+                        {currentStatus === "PAIRING_PUBLISHED"
+                          ? "Active"
+                          : "Draft"}
+                      </span>
+                    </CardHeader>
+                    <CardContent className="px-6 pb-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-gray-800 text-lg">
+                          {currentStatus === "PAIRING_PUBLISHED"
+                            ? "Pairings have been successfully published!"
+                            : "Review pairings before publishing."}
+                        </p>
+                        {pairingData && (
+                          <button
+                            onClick={handleDownloadPairings}
+                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/90 transition-colors font-semibold shadow-sm"
+                          >
+                            <Download className="h-4 w-4" />
+                            Export as Text
+                          </button>
+                        )}
+                      </div>
+                      <div className="mt-6">
+                        {pairingData && (
+                          <PairingResults
+                            pairingData={pairingData}
+                            eventId={eventId}
+                          />
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+              {hasQuestions && (
+                <Card>
+                  <CardHeader className="flex items-center gap-3 pt-6">
+                    <Users className="h-6 w-6 text-green" />
+                    <CardTitle className="text-2xl">
+                      Program Questions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-6 pb-6">
+                    <p className="text-gray-800 text-lg">
+                      This program includes {event.questions.length} question
+                      {event.questions.length !== 1 ? "s" : ""} to help match
+                      participants effectively.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+              {!isOrganizationUser && event?.status === "STARTED" && (
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-2xl mt-4">
@@ -895,10 +967,8 @@ export default function EventPage2({ params }: EventPageProps) {
                       </CardHeader>
                       <CardContent className="pb-4">
                         {isRegistered ? (
-                          // if user is registered, then check if questionnaire is complete
                           !event?.questions?.length ||
                           questionnaireCompleted ? (
-                            // if user registered AND (no questions OR questionnaire complete) - show green success
                             <div className="space-y-4">
                               <div className="flex items-center justify-center gap-3 text-green bg-green rounded-xl p-4">
                                 <CheckCircle className="h-6 w-6 text-white" />
@@ -918,6 +988,19 @@ export default function EventPage2({ params }: EventPageProps) {
                                       Completed
                                     </span>
                                   </div>
+                                  <PearButton
+                                    text={
+                                      timeLeft?.expired || event.status !== "STARTED"
+                                        ? "View Questionnaire"
+                                        : "Update Questionnaire"
+                                    }
+                                    onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                    className={`w-full ${
+                                      timeLeft?.expired || event.status !== "STARTED"
+                                        ? "bg-slate-500 hover:bg-slate-600 border-slate-600" 
+                                        : "bg-blue-600 hover:bg-blue-700 border-blue-600"   
+                                    }`}
+                                  />
                                 </div>
                               )}
                               <PearButton
@@ -937,7 +1020,6 @@ export default function EventPage2({ params }: EventPageProps) {
                               />
                             </div>
                           ) : (
-                            // registered, but questionnaire incomplete -> show warning
                             <div className="space-y-4">
                               <div className="flex items-center justify-center gap-3 text-blue-700 bg-blue-100 border-2 border-blue-300 rounded-xl p-4">
                                 <span className="font-bold text-lg text-blue-700 text-center">
@@ -1012,78 +1094,6 @@ export default function EventPage2({ params }: EventPageProps) {
                       </CardContent>
                     </Card>
                   )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid lg:grid-cols-[2fr_1fr] gap-10">
-            <div className="space-y-8">
-              {isOrganizationUser &&
-                (currentStatus === "PAIRING_PUBLISHED" ||
-                  (currentStatus === "TERMINATED" && pairingData)) && (
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pt-6">
-                      <CardTitle className="flex items-center gap-3 text-2xl">
-                        <CheckCircle className="h-6 w-6 text-green" />
-                        {currentStatus === "PAIRING_PUBLISHED"
-                          ? "Published Pairings"
-                          : "Pairing Preview"}
-                      </CardTitle>
-                      <span className="px-3 py-1 bg-green text-nav-dark text-xs font-bold rounded-full border border-green">
-                        {currentStatus === "PAIRING_PUBLISHED"
-                          ? "Active"
-                          : "Draft"}
-                      </span>
-                    </CardHeader>
-                    <CardContent className="px-6 pb-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-gray-800 text-lg">
-                          {currentStatus === "PAIRING_PUBLISHED"
-                            ? "Pairings have been successfully published!"
-                            : "Review pairings before publishing."}
-                        </p>
-                        {pairingData && (
-                          <button
-                            onClick={handleDownloadPairings}
-                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/90 transition-colors font-semibold shadow-sm"
-                          >
-                            <Download className="h-4 w-4" />
-                            Export as Text
-                          </button>
-                        )}
-                      </div>
-                      <div className="mt-6">
-                        {pairingData && (
-                          <PairingResults
-                            pairingData={pairingData}
-                            eventId={eventId}
-                          />
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-              {hasQuestions && (
-                <Card>
-                  <CardHeader className="flex items-center gap-3 pt-6">
-                    <Users className="h-6 w-6 text-green" />
-                    <CardTitle className="text-2xl">
-                      Program Questions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="px-6 pb-6">
-                    <p className="text-gray-800 text-lg">
-                      This program includes {event.questions.length} question
-                      {event.questions.length !== 1 ? "s" : ""} to help match
-                      participants effectively.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
               {isOrganizationUser && (
                 <Card>
                   <CardHeader className="flex items-center gap-3 pt-6">
