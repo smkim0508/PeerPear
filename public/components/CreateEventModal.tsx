@@ -30,8 +30,7 @@ export default function CreateEventModal({
     imageFile: null as File | null,
     checkSiblingRoles: false,
   });
-  const [showAlert, setShowAlert] = useState(false);
-  const [dateAlert, setDateAlert] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -41,35 +40,65 @@ export default function CreateEventModal({
       setTimeout(() => setIsAnimating(true), 10);
     } else {
       setIsAnimating(false);
+      // Reset form and errors when closing
+      setFormData({
+        title: "",
+        description: "",
+        endDate: "",
+        imageFile: null,
+        checkSiblingRoles: false,
+      });
+      setErrors({});
+      setSubmitError(null);
+      setSuccessMessage(null);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = async () => {
-    if (!formData.title || !formData.description || !formData.endDate) {
-      setShowAlert(true);
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+    let isValid = true;
 
-      return;
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required";
+      isValid = false;
     }
 
-    const parseLocalDate = (dateStr: string) => {
-      const [year, month, day] = dateStr.split("-").map(Number);
-      return new Date(year, month - 1, day);
-    };
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+      isValid = false;
+    }
 
-    const end = parseLocalDate(formData.endDate);
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
+      isValid = false;
+    } else {
+      const parseLocalDate = (dateStr: string) => {
+        const [year, month, day] = dateStr.split("-").map(Number);
+        return new Date(year, month - 1, day);
+      };
+      const end = parseLocalDate(formData.endDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Compare dates only
 
-    // validate end date
-    if (end <= new Date()) {
-      setDateAlert(true);
+      if (end <= today) {
+        newErrors.endDate = "End date must be in the future";
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
       return;
     }
 
     setSubmitError(null);
     setSubmitting(true);
-
-    // create the form data to send over
 
     const form = new FormData();
     form.append("title", formData.title);
@@ -98,43 +127,50 @@ export default function CreateEventModal({
         throw new Error(errmessage || "Failed to create program");
       }
 
-      setFormData({
-        title: "",
-        description: "",
-        endDate: "",
-        imageFile: null,
-        checkSiblingRoles: false,
-      });
-
       const data = await res.json();
       const newEventId = data.event_id;
 
       setSuccessMessage("Program created successfully!");
+      if (onSuccess) onSuccess();
 
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
         router.push(`/events/${newEventId}`);
       }, 1500);
-    } catch (err: any) {
-      setSubmitError(err?.message || "Something went wrong");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setSubmitError(err.message);
+      } else {
+        setSubmitError("Something went wrong");
+      }
     } finally {
       setSubmitting(false);
     }
   };
+
+  const handleInputChange = (
+    field: string,
+    value: string | File | null | boolean
+  ) => {
+    setFormData({ ...formData, [field]: value });
+    // Clear error for this field if it exists
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: "" });
+    }
+  };
+
   return (
     <div
-      className={`fixed inset-0 bg-[#0000003c] flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
-        isAnimating ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 bg-[#0000003c] flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
+        }`}
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#8cbf70] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${
-          isAnimating
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 translate-y-4"
-        }`}
+        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#8cbf70] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${isAnimating
+          ? "opacity-100 scale-100 translate-y-0"
+          : "opacity-0 scale-95 translate-y-4"
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={"absolute top-3 right-3 "}>
@@ -148,40 +184,6 @@ export default function CreateEventModal({
         <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a] text-center">
           Create New Program
         </h2>
-        {showAlert && (
-          <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
-            <AlertTitle className="font-semibold text-red-700">
-              Missing fields
-            </AlertTitle>
-            <AlertDescription className="text-red-600">
-              Please include a title, description, and valid end date before
-              submitting.
-            </AlertDescription>
-            <button
-              className="absolute top-2 right-3 text-red-500 hover:text-red-700"
-              onClick={() => setShowAlert(false)}
-            >
-              ×
-            </button>
-          </Alert>
-        )}
-
-        {dateAlert && (
-          <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
-            <AlertTitle className="font-semibold text-red-700">
-              Invalid Date
-            </AlertTitle>
-            <AlertDescription className="text-red-600">
-              Please make sure the end date is later than today.
-            </AlertDescription>
-            <button
-              className="absolute top-2 right-3 text-red-500 hover:text-red-700"
-              onClick={() => setDateAlert(false)}
-            >
-              ×
-            </button>
-          </Alert>
-        )}
 
         {successMessage && (
           <Alert className="mt-4 mb-4 border-green-400 bg-green-50">
@@ -217,10 +219,17 @@ export default function CreateEventModal({
         <input
           type="text"
           value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          onChange={(e) => handleInputChange("title", e.target.value)}
           placeholder="Enter program title"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
+          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.title
+            ? "border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:ring-[#8cbf70]"
+            }`}
         />
+        {errors.title && (
+          <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+        )}
+
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Description
         </label>
@@ -228,29 +237,39 @@ export default function CreateEventModal({
           placeholder="Describe your program"
           rows={3}
           value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
+          onChange={(e) => handleInputChange("description", e.target.value)}
+          className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${errors.description
+            ? "border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:ring-[#8cbf70]"
+            }`}
         />
+        {errors.description && (
+          <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+        )}
+
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           End Date
         </label>
         <input
           value={formData.endDate}
-          onChange={(e) =>
-            setFormData({ ...formData, endDate: e.target.value })
-          }
+          onChange={(e) => handleInputChange("endDate", e.target.value)}
           type="date"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
+          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.endDate
+            ? "border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:ring-[#8cbf70]"
+            }`}
         />
+        {errors.endDate && (
+          <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>
+        )}
+
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Optional Program Image
         </label>
         <input
           onChange={(e) => {
             const file = e.target.files?.[0] || null;
-            setFormData({ ...formData, imageFile: file });
+            handleInputChange("imageFile", file);
           }}
           type="file"
           accept="image/*"
@@ -263,7 +282,7 @@ export default function CreateEventModal({
             type="checkbox"
             checked={formData.checkSiblingRoles}
             onChange={(e) =>
-              setFormData({ ...formData, checkSiblingRoles: e.target.checked })
+              handleInputChange("checkSiblingRoles", e.target.checked)
             }
             className="mt-1 size-4 rounded border-gray-300"
           />
@@ -276,9 +295,8 @@ export default function CreateEventModal({
         </div>
 
         <PearButton
-          className={`w-full px-3 py-2 mt-6 ${
-            submitting ? "opacity-70 cursor-not-allowed" : ""
-          }`}
+          className={`w-full px-3 py-2 mt-6 ${submitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           text={submitting ? "Submitting..." : "Submit Program"}
           onClick={handleSubmit}
         />
@@ -286,3 +304,4 @@ export default function CreateEventModal({
     </div>
   );
 }
+
