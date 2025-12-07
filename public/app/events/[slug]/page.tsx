@@ -930,6 +930,15 @@ export default function EventPage2({ params }: EventPageProps) {
                                         className="w-full bg-green hover:bg-green/90 mt-2"
                                       />
                                     )}
+                                    {event.status === "STARTED" && (
+                                      <PearButton
+                                        text="Edit/View Questionnaire"
+                                        onClick={() =>
+                                          router.push(`/events/${eventId}/questionnaire`)
+                                        }
+                                        className="w-full mt-2"
+                                      />
+                                    )}
                                   </div>
                                 )}
                                 {event.status === "STARTED" && (
