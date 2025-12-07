@@ -738,6 +738,7 @@ export default function EventPage2({ params }: EventPageProps) {
             <PearButton
               text="Back to Programs"
               onClick={() => router.push("/student")}
+              className="cursor-pointer"
             />
           </CardContent>
         </Card>

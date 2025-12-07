@@ -440,7 +440,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                               ? "Update Questionnaire"
                               : "Submit Questionnaire"
                           }
-                          className="px-8 py-3 text-lg font-semibold min-w-[200px]"
+                          className="px-8 py-6 text-lg font-semibold min-w-[200px] cursor-pointer"
                         />
                       </div>
                     </div>
