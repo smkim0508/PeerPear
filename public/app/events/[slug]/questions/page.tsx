@@ -54,10 +54,12 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [orgLoading, setOrgLoading] = useState(true);
+  const [eventStatus, setEventStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchQuestions();
     fetchOrganization();
+    fetchEventStatus();
   }, [event_id]);
 
   useEffect(() => {
@@ -80,6 +82,22 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
       setOrgLoading(false);
     }
   };
+
+  const fetchEventStatus = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const res = await fetch(`${apiUrl}/events/${event_id}`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEventStatus(data.status);
+      }
+    } catch (err) {
+      console.error("Failed to fetch event status", err);
+    }
+  };
+
   const fetchPermissions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -257,6 +275,9 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
     );
   }
 
+  const isEditingDisabled =
+    eventStatus === "TERMINATED" || eventStatus === "PAIRING_PUBLISHED";
+
   return (
     <>
       <Navbar userType="organization" organizationId={organization?.id} />
@@ -280,12 +301,12 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
                 </h2>
               )}
               <p className="text-gray-600 mb-8">
-                {edit
+                {edit && !isEditingDisabled
                   ? "You are able to manage the questions participants will answer for this program before the program begins"
                   : "The program has begun and you are no longer able to edit the program"}
               </p>
             </div>
-            {edit && (
+            {edit && !isEditingDisabled && (
               <div>
                 <PearButton
                   text={showAddForm ? "Cancel" : "Add a Question"}
@@ -299,6 +320,19 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {error && <PearAlert type="error" message={error} />}
           {successMessage && (
             <PearAlert type="success" message={successMessage} />
+          )}
+
+          {isEditingDisabled && (
+            <div className="mb-6">
+              <PearAlert
+                type="warning"
+                message={
+                  eventStatus === "TERMINATED"
+                    ? "This event has ended. You can no longer edit questions."
+                    : "Pairings have been published. You can no longer edit questions."
+                }
+              />
+            </div>
           )}
 
           {showAddForm && (
@@ -334,7 +368,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
                       : "text"
                   }
                   existingOptions={q.options || []}
-                  canEdit={edit}
+                  canEdit={edit && !isEditingDisabled}
                   onSave={handleSaveQuestion}
                   onDelete={handleDeleteQuestion}
                   isEditing={true}

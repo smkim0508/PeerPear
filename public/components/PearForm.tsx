@@ -90,28 +90,28 @@ export default function PearForm({
 
     const handleSave = () => {
         if (!validate()) return;
-    
+
         const validOptions =
             type === "multiple_choice"
                 ? options.filter((opt) => opt.trim() !== "")
                 : [];
-    
+
         onSave({
             id: questionId,
             question,
             type,
             options: validOptions,
         });
-    
+
         if (!isEditing) {
             setQuestion("");
             setType("text");
             setOptions([""]);
         }
-    
+
         setShowForm(false);
     };
-    
+
 
     const handleCancel = () => {
         if (isEditing) {
@@ -132,11 +132,16 @@ export default function PearForm({
                             Type: {questionType === "text" ? "Text Input" : "Multiple Choice"}
                         </p>
                         {questionType === "multiple_choice" && existingOptions.length > 0 && (
-                            <ul className="ml-5 mt-2 list-disc text-sm text-gray-600">
+                            <div className="flex flex-wrap gap-2 mt-3">
                                 {existingOptions.map((opt, i) => (
-                                    <li key={i}>{opt}</li>
+                                    <div
+                                        key={i}
+                                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border border-gray-200 font-medium"
+                                    >
+                                        {opt}
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         )}
                     </div>
                     {canEdit && <div className="flex gap-2">
@@ -232,9 +237,8 @@ export default function PearForm({
                                     value={option}
                                     onChange={(e) => handleOptionChange(index, e.target.value)}
                                     placeholder={`Option ${index + 1}`}
-                                    className={`flex-1 px-4 py-2 border rounded-lg ${
-                                        errors.options ? "border-red-500" : "border-gray-300"
-                                    }`}
+                                    className={`flex-1 px-4 py-2 border rounded-lg ${errors.options ? "border-red-500" : "border-gray-300"
+                                        }`}
                                 />
                                 {options.length > 1 && (
                                     <button
@@ -259,7 +263,7 @@ export default function PearForm({
                         Add Option
                     </button>
                 </div>
-)}
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-3 justify-end">
