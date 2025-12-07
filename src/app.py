@@ -12,7 +12,7 @@ from sqlalchemy import text
 from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
 import uuid
 from common.logging import logger, session_id_var
-from auth.routes.auth import authenticate
+from auth.routes.auth import authenticate, is_authenticated
 
 # routes
 from api.pairing.routes.pairing import pairing_bp
@@ -117,7 +117,7 @@ def create_app() -> Flask:
         session_id_var.set(f"session_id: {session_id}")
         logger.info(f"Starting session for request.")
 
-        # authenticate() # authenticate user on every request
+        # is_authenticated() # authenticate user on every request
 
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
