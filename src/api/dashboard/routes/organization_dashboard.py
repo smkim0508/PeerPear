@@ -276,7 +276,6 @@ def create_event():
         image_url = upload_new_image(file_bytes, filename, content_type)
     else:
         image_url = default_image_url
-        # image_url = f"{request.host_url}static/peerpear_logo.png"
 
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)

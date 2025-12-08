@@ -76,7 +76,6 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or default_image_url,
-                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date
                 )
@@ -124,7 +123,6 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or default_image_url,
-                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date
                 )
@@ -161,7 +159,6 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or default_image_url,
-                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     end_date=event.end_date or datetime.now(timezone.utc),
                     status=event.status
                 )
@@ -201,7 +198,6 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
                     image_url=event.image_url or default_image_url,
-                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date
                 )
@@ -238,7 +234,6 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
                 description=event.description or "",
                 organization_name=org_name,
                 image_url=event.image_url or default_image_url,
-                # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                 end_date=event.end_date or datetime.now(timezone.utc),
                 status=event.status
             )
