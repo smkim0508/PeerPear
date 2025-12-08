@@ -901,7 +901,7 @@ export default function EventPage2({ params }: EventPageProps) {
                   onClick={() =>
                     router.push(`/organization/${event.organization_id}`)
                   }
-                  className="flex items-center px-4 py-2 bg-white/90 hover:bg-white text-gray-800 rounded-lg shadow-sm transition-all cursor-pointer mb-4 w-fit"
+                  className="flex items-center px-4 py-2 bg-white/90 hover:bg-white text-gray-800 rounded-lg shadow-sm transition-all cursor-pointer mb-4 w-fit hover:scale-105"
                 >
                   <ArrowLeft className="w-5 h-5 mr-2" />
                   Back to Dashboard
@@ -936,7 +936,7 @@ export default function EventPage2({ params }: EventPageProps) {
                         {pairingData && (
                           <button
                             onClick={handleDownloadPairings}
-                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/90 transition-colors font-semibold shadow-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-green text-white rounded-md hover:bg-green/90 font-semibold shadow-sm hover:scale-105 transition hover:shadow-lg duration-300"
                           >
                             <Download className="h-4 w-4" />
                             Export as Text
@@ -1301,7 +1301,7 @@ export default function EventPage2({ params }: EventPageProps) {
                                   : openPairingModal
                               }
                               className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing || participants.length < 2
-                                ? "opacity-50 cursor-not-allowed"
+                                ? "opacity-50 cursor-not-allowed hover:scale-100 hover:bg-green-600 hover:shadow-none"
                                 : ""
                                 }`}
                             />
