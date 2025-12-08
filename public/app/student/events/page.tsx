@@ -103,7 +103,7 @@ export default function StudentDashBoard() {
               <div className=" relative inline-block whitespace-nowrap ">
                 Registered Programs
                 <Squiggle
-                  width={400}
+                  width={625}
                   className="left-0 right-0 -bottom-4 hidden lg:flex"
                 />
               </div>
