@@ -8,7 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import PearButton from "@/components/PearButton";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
 import PairingResults from "@/components/PairingResults";
-import { XCircle } from "lucide-react";
+import { XCircle, ArrowLeft } from "lucide-react";
 
 import {
   Timer,
@@ -759,6 +759,19 @@ export default function EventPage2({ params }: EventPageProps) {
               />
             )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+              {isOrganizationUser && (
+                <div className="col-span-1 lg:col-span-2">
+                  <button
+                    onClick={() =>
+                      router.push(`/organization/${event.organization_id}`)
+                    }
+                    className="flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
+                  >
+                    <ArrowLeft className="w-5 h-5 mr-2" />
+                    Back to Dashboard
+                  </button>
+                </div>
+              )}
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <Building2 className="h-6 w-6 text-green" />
@@ -1101,6 +1114,17 @@ export default function EventPage2({ params }: EventPageProps) {
                       {event.questions.length !== 1 ? "s" : ""} to help match
                       participants effectively.
                     </p>
+                    {isOrganizationUser &&
+                      (currentStatus === "TERMINATED" ||
+                        currentStatus === "PAIRING_PUBLISHED") && (
+                        <PearButton
+                          text="View Questions"
+                          onClick={() =>
+                            router.push(`/events/${eventId}/questions`)
+                          }
+                          className="w-full mt-4 bg-green hover:bg-green/90"
+                        />
+                      )}
                   </CardContent>
                 </Card>
               )}
@@ -1303,14 +1327,16 @@ export default function EventPage2({ params }: EventPageProps) {
                               text={
                                 isTriggeringPairing
                                   ? "Creating Pairings..."
-                                  : "Create Pairings"
+                                  : participants.length < 2
+                                    ? "Not Enough Participants (Min 2)"
+                                    : "Create Pairings"
                               }
                               onClick={
-                                isTriggeringPairing
+                                isTriggeringPairing || participants.length < 2
                                   ? () => { }
                                   : openPairingModal
                               }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing
+                              className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing || participants.length < 2
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
                                 }`}
