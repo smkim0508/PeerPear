@@ -5,7 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import JoinOrganizationModal from "@/components/JoinOrganizationModal";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
-
+import { Building } from 'lucide-react';
+import PearButton
+ from "@/components/PearButton";
 interface Organization {
   id: number;
   name: string;
@@ -126,11 +128,14 @@ export default function OrganizationPage() {
         )}
 
         <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-green p-6">
-            <h1 className="text-2xl font-bold text-black text-center">
-              Select an Organization
+          <div className="bg-primary/90 p-6 flex flex-col items-center text-center ">
+          <div className="bg-nav-dark rounded-full p-4 mb-4">
+            <Building className="text-white w-8 h-8"/>
+            </div>
+            <h1 className="text-3xl font-bold text-nav-dark text-center">
+              Select An Organization
             </h1>
-            <p className="text-black text-center mt-2">
+            <p className="text-gray-700 text-center mt-1">
               Choose an organization to view their dashboard
             </p>
           </div>
@@ -209,7 +214,7 @@ export default function OrganizationPage() {
                       setCurrentOrgToLeave(org);
                       setConfirmOpen(true);
                     }}
-                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors "
                   >
                     Leave
                   </button>
@@ -228,15 +233,13 @@ export default function OrganizationPage() {
 
         {/* Join Organization Button */}
         <div className="flex justify-center mb-4">
-          <button
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-            className=" inline-flex items-center justify-center text-[#1a1a1a] font-bold rounded-lg px-5 py-3 cursor-pointer
-        transition-all duration-300 hover:scale-100 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1 bg-primary"
-          >
-            Join an Organization
-          </button>
+          <PearButton
+                    className="w-full cursor-pointer p-6 text-md hover:scale-105
+                    hover:shadow-lg hover:-translate-y-2"
+                    text="Join An Organization"
+                    onClick={ () => {setIsModalOpen(true)}}
+                    
+                  />
         </div>
       </div>
       <JoinOrganizationModal

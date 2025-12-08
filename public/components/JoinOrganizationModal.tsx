@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { loginWithCAS } from "@/lib/auth";
 import PearButton from "./PearButton";
+import { LogIn, User, Building2, X } from "lucide-react";
+
 
 interface JoinOrganizationModalProps {
   isOpen: boolean;
@@ -142,26 +144,41 @@ export default function JoinOrganizationModal({
 
   return (
     <div
-      className={`fixed inset-0 bg-[#0000003c] flex items-center text-center  justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
         isAnimating ? "opacity-100" : "opacity-0"
       }`}
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-primary p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${
+        className={`bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transition-all duration-300 relative ${
           isAnimating
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a] text-center">
-          Join An Organization
-        </h2>
-        <h3 className="text-m font-semibold mb-1.5 text-gray-600 text-center mb-5">
-          Send a request to join an organization.
-        </h3>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+          aria-label="Close modal"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="bg-primary/10 rounded-full p-4 mb-4">
+            <Building2 className="w-8 h-8 text-primary" />
+          </div>
+          
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Join An Organization
+          </h2>
+          <p className="text-gray-600 text-base">
+            Send a request to join an organization
+          </p>
+        </div>
 
+        
+        
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm text-left">
             {error}
@@ -253,25 +270,7 @@ export default function JoinOrganizationModal({
           )}
         </div>
 
-        {/* Footer (placeholder for now) */}
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="
-      px-4 py-2
-      rounded-lg
-      bg-gray-100
-      text-gray-700
-      border border-gray-300
-      shadow-sm
-      hover:bg-gray-200
-      active:bg-gray-300
-      transition-all
-    "
-          >
-            Close
-          </button>
-        </div>
+       
       </div>
     </div>
   );

@@ -205,7 +205,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                     Organization
                     <Squiggle
                       width={450}
-                      className="left-0 right-0 -bottom-2 top-19"
+                      className=" hidden sm:flex left-0 right-0 -bottom-2 top-19 "
                     />
                   </span>
                 </h1>
@@ -292,7 +292,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                   <PearButton
                     text={isLoading ? "Saving..." : "Save Changes"}
                     onClick={() => {}}
-                    className="px-5 py-3 text-md"
+                    className="px-5 py-5 text-md hover:scale-105 hover:shadow-lg"
                   />
                 </div>
               </form>

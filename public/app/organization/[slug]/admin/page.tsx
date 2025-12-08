@@ -5,7 +5,16 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Squiggle } from "@/components/ui/Squiggle";
-import { Building2, Edit3, Save, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Building2,
+  Edit3,
+  Save,
+  AlertCircle,
+  CheckCircle,
+  X,
+  CircleChevronUp,
+  ChevronUpCircleIcon,
+} from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import PearButton from "@/components/PearButton";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
@@ -350,7 +359,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                   Organization Admins
                   <Squiggle
                     width={530}
-                    className="left-1/2 -translate-x-1/2 -bottom-2"
+                    className=" hidden sm:flex left-1/2 -translate-x-1/2 -bottom-2"
                   />
                 </h1>
                 <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
@@ -418,7 +427,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                   </div>
                   Admins
                 </h2>
-                <div   className="grid gap-4">
+                <div className="grid gap-4">
                   {regularAdmins.length > 0 ? (
                     regularAdmins.map((admin) => (
                       <div
@@ -440,15 +449,36 @@ export default function AdminPage({ params }: AdminPageProps) {
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => openPromoteModal(admin)}
-                            className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 cursor-pointer transition-colors"
+                            className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90  hover:scale-105 transition"
                           >
                             Promote to Owner
                           </button>
+
+                          {/* Mobile Promote Icon */}
+                          <button
+                            onClick={() => openPromoteModal(admin)}
+                            className="
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 hover:scale-105 transition
+    "
+                          >
+                            <ChevronUpCircleIcon className="w-5 h-5 text-white" />
+                          </button>
+
                           <button
                             onClick={() => openRemoveModal(admin)}
-                            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 cursor-pointer transition-colors"
+                            className="hidden sm:flex px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 hover:scale-105 transition"
                           >
                             Remove
+                          </button>
+
+                          {/* Mobile Remove Icon */}
+                          <button
+                            onClick={() => openRemoveModal(admin)}
+                            className="
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 hover:scale-105 transition
+    "
+                          >
+                            <X className="w-5 h-5 text-red-600" />
                           </button>
                         </div>
                       </div>
@@ -491,17 +521,44 @@ export default function AdminPage({ params }: AdminPageProps) {
                         </div>
 
                         <div className="flex items-center gap-3">
+                          {/* Accept */}
                           <button
                             onClick={() => openAcceptModal(req)}
-                            className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 cursor-pointer transition-colors"
+                            className="
+      hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:scale-105 hover:bg-primary/90 transition
+    "
                           >
                             Accept
                           </button>
+
+                          {/* Mobile Accept Icon */}
+                          <button
+                            onClick={() => openAcceptModal(req)}
+                            className="
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 hover:scale-105 transition
+    "
+                          >
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </button>
+
+                          {/* Deny */}
                           <button
                             onClick={() => openDenyModal(req)}
-                            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                            className="
+      hidden sm:flex px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:scale-105 hover:bg-red-100 transition
+    "
                           >
                             Deny
+                          </button>
+
+                          {/* Mobile Deny Icon */}
+                          <button
+                            onClick={() => openDenyModal(req)}
+                            className="
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-red-100 hover:scale-105 hover:bg-red-200 transition
+    "
+                          >
+                            <X className="w-5 h-5 text-red-600" />
                           </button>
                         </div>
                       </div>

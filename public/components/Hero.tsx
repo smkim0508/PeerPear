@@ -14,12 +14,18 @@ export default function Hero({ onTryNowClick }: HeroProps) {
             Pair{" "}
             <span className="relative inline-block">
               smarter
-              <Squiggle width={220} className="left-0 right-0 -bottom-1" />
+              <Squiggle
+                width={275}
+                className="left-0 right-0 -bottom-1 hidden sm:flex"
+              />
             </span>
             . Build{" "}
             <span className="relative inline-block">
               stronger communities
-              <Squiggle width={520} className="left-0 right-0 -bottom-1" />
+              <Squiggle
+                width={750}
+                className="left-0 right-0 -bottom-1 hidden sm:flex"
+              />
             </span>
             .
           </h1>
@@ -31,9 +37,18 @@ export default function Hero({ onTryNowClick }: HeroProps) {
           </p>
 
           <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
-            <PearButton text="Try now" onClick={onTryNowClick} className="cursor-pointer w-full sm:w-auto" />
-            <a href="#features" className="w-full sm:w-auto">
-              <PearButton text="Learn more" onClick={() => {}} dark className="cursor-pointer w-full sm:w-auto" />
+            <PearButton
+              text="Try now"
+              onClick={onTryNowClick}
+              className="cursor-pointer w-full sm:w-auto  hover:scale-105 transition duration-300 p-5 text-md"
+            />
+            <a href="#features" className="w-full sm:w-auto ">
+              <PearButton
+                text="Learn more"
+                onClick={() => {}}
+                dark
+                className="cursor-pointer w-full sm:w-auto hover:scale-105 transition duration-300 p-5 text-md"
+              />
             </a>
           </div>
         </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { Trash2, Edit2, Plus, X } from "lucide-react";
+import { Trash2, Edit2, Plus, X, FileQuestion } from "lucide-react";
 import PearButton from "./PearButton";
 
 interface PearFormProps {
@@ -57,6 +57,12 @@ export default function PearForm({
                 newErrors.options = "Please provide at least 2 options for multiple choice";
                 valid = false;
             }
+
+            const uniqueOptions = new Set(validOptions.map(opt => opt.trim().toLowerCase()));
+        if (uniqueOptions.size !== validOptions.length) {
+            newErrors.options = "Duplicate options are not allowed. Please ensure all options are unique.";
+            valid = false;
+        }
         }
 
         setErrors(newErrors);
@@ -124,126 +130,171 @@ export default function PearForm({
 
     if (!showForm && isEditing) {
         return (
-            <div className="bg-white p-6 rounded-lg shadow border border-gray-200 mb-4">
-                <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-2">{questionText}</h3>
-                        <p className="text-sm text-gray-500 mb-2">
-                            Type: {questionType === "text" ? "Text Input" : "Multiple Choice"}
-                        </p>
+            <div className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 mb-4">
+                <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-3 mb-3">
+                            <div className="mt-1 flex-shrink-0">
+                                <FileQuestion className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-lg text-gray-900 leading-snug break-words">
+                                    {questionText}
+                                </h3>
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                                questionType === "text" 
+                                    ? "bg-blue-100 text-blue-800" 
+                                    : "bg-purple-100 text-purple-800"
+                            }`}>
+                                {questionType === "text" ? "Text Input" : "Multiple Choice"}
+                            </span>
+                        </div>
+                        
                         {questionType === "multiple_choice" && existingOptions.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-3">
-                                {existingOptions.map((opt, i) => (
-                                    <div
-                                        key={i}
-                                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border border-gray-200 font-medium"
-                                    >
-                                        {opt}
-                                    </div>
-                                ))}
+                            <div className="mt-4">
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                                    Answer Options
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {existingOptions.map((opt, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-gray-800 shadow-sm hover:border-primary transition-colors"
+                                        >
+                                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                                                {String.fromCharCode(65 + i)}
+                                            </span>
+                                            <span className="break-words">{opt}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
-                    {canEdit && <div className="flex gap-2">
-                        <button
-                            onClick={() => setShowForm(true)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Edit question"
-                        >
-                            <Edit2 size={18} />
-                        </button>
-                        {onDelete && questionId && (
+                    
+                    {canEdit && (
+                        <div className="flex gap-2 flex-shrink-0">
                             <button
-                                onClick={() => onDelete(questionId)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Delete question"
+                                onClick={() => setShowForm(true)}
+                                className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-all hover:scale-105 active:scale-95"
+                                title="Edit question"
                             >
-                                <Trash2 size={18} />
+                                <Edit2 size={18} />
                             </button>
-                        )}
-                    </div>}
+                            {onDelete && questionId && (
+                                <button
+                                    onClick={() => onDelete(questionId)}
+                                    className="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-105 active:scale-95"
+                                    title="Delete question"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200 mb-4">
-            <h3 className="font-semibold text-lg mb-4">
-                {isEditing ? "Edit Question" : "Add New Question"}
-            </h3>
+        <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200 mb-6">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                    <FileQuestion className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-bold text-xl text-gray-900">
+                    {isEditing ? "Edit Question" : "Add New Question"}
+                </h3>
+            </div>
 
-            {/* Question Input */}
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Question
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Question Text
                 </label>
                 <input
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    className={`w-full px-4 py-2 border rounded-lg
-                        ${errors.question ? "border-red-500" : "border-gray-300"}
+                    placeholder="Enter your question here..."
+                    className={`w-full px-4 py-3 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary/20
+                        ${errors.question ? "border-red-500 focus:border-red-500" : "border-gray-300 focus:border-primary"}
                     `}
                 />
-
                 {errors.question && (
-                    <p className="text-red-500 text-sm mt-1">{errors.question}</p>
+                    <p className="text-red-500 text-sm mt-2">
+                        {errors.question}
+                    </p>
                 )}
             </div>
 
-            {/* Question Type Selector */}
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Question Type
                 </label>
                 <div className="flex gap-4">
-                    <label className="flex items-center cursor-pointer">
+                    <label className={`flex-1 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        type === "text" 
+                            ? "border-primary bg-primary/5 shadow-sm" 
+                            : "border-gray-300 hover:border-gray-400"
+                    }`}>
                         <input
                             type="radio"
                             name="questionType"
                             value="text"
                             checked={type === "text"}
                             onChange={() => handleTypeChange("text")}
-                            className="mr-2 cursor-pointer"
+                            className="cursor-pointer accent-primary"
                         />
-                        <span className="text-sm">Text Input</span>
+                        <span className="text-sm font-medium">Text Input</span>
                     </label>
-                    <label className="flex items-center cursor-pointer">
+                    <label className={`flex-1 flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        type === "multiple_choice" 
+                            ? "border-primary bg-primary/5 shadow-sm" 
+                            : "border-gray-300 hover:border-gray-400"
+                    }`}>
                         <input
                             type="radio"
                             name="questionType"
                             value="multiple_choice"
                             checked={type === "multiple_choice"}
                             onChange={() => handleTypeChange("multiple_choice")}
-                            className="mr-2 cursor-pointer"
+                            className="cursor-pointer accent-primary"
                         />
-                        <span className="text-sm">Multiple Choice</span>
+                        <span className="text-sm font-medium">Multiple Choice</span>
                     </label>
                 </div>
             </div>
 
-            {/* Multiple Choice Options */}
             {type === "multiple_choice" && (
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Options
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Answer Options
                     </label>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         {options.map((option, index) => (
-                            <div key={index} className="flex gap-2">
+                            <div key={index} className="flex items-center gap-3">
+                                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">
+                                    {String.fromCharCode(65 + index)}
+                                </span>
                                 <input
                                     type="text"
                                     value={option}
                                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                                    placeholder={`Option ${index + 1}`}
-                                    className={`flex-1 px-4 py-2 border rounded-lg ${errors.options ? "border-red-500" : "border-gray-300"
-                                        }`}
+                                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                                    className={`flex-1 px-4 py-3 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                                        errors.options ? "border-red-500" : "border-gray-300 focus:border-primary"
+                                    }`}
                                 />
                                 {options.length > 1 && (
                                     <button
                                         onClick={() => handleRemoveOption(index)}
-                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        className="flex-shrink-0 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all hover:scale-105 active:scale-95"
+                                        title="Remove option"
                                     >
                                         <X size={20} />
                                     </button>
@@ -252,27 +303,23 @@ export default function PearForm({
                         ))}
                     </div>
                     {errors.options && (
-                        <p className="text-red-500 text-sm mt-2">{errors.options}</p>
+                        <p className="text-red-500 text-sm mt-2">
+                            {errors.options}
+                        </p>
                     )}
 
                     <button
                         onClick={handleAddOption}
-                        className="mt-2 flex items-center gap-2 text-sm text-green hover:text-green font-medium"
+                        className="mt-4 flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-primary/5 rounded-lg font-semibold transition-all hover:scale-105 active:scale-95"
                     >
                         <Plus size={16} />
-                        Add Option
+                        Add Another Option
                     </button>
                 </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 justify-end">
-                <button
-                    onClick={handleCancel}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                    Cancel
-                </button>
+            <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
+                
                 <PearButton text="Save Question" onClick={handleSave} />
             </div>
         </div>

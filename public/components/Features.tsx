@@ -36,7 +36,7 @@ export default function Features() {
           />
         </h2>
 
-        <div className="mt-10 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10 justify-items-center">
+        <div className="mt-10 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 sm:gap-y-15 gap-x-6 lg:gap-x-10 justify-items-center">
           <Card
             title="Reusable Student Profiles"
             text="Fill out your details once — join any pairing program without repetition."

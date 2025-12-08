@@ -34,48 +34,84 @@ export default function PearQuestion({
   const charactersLeft = maxLength - value.length;
 
   return (
-    <div className="flex flex-col rounded-lg gap-y-4">
-      <p className="text-md font-bold">
-        {number}. {question}
-      </p>
+    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border-2 border-gray-100 hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+          <span className="text-primary font-bold text-lg">{number}</span>
+        </div>
+
+        <div className="flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-lg font-semibold text-gray-900 leading-relaxed">
+              {question}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {type === "textarea" ? (
-        <InputGroup>
-          <InputGroupTextarea
-            placeholder="Enter your message"
-            value={value}
-            onChange={(e) => onChange(questionId, e.target.value)}
-            maxLength={maxLength}
-            disabled={disabled}
-          />
-          <InputGroupAddon align="block-end">
-            <InputGroupText
-              className={`text-xs ${charactersLeft < 20 ? "text-red-500" : "text-muted-foreground"
+        <div className="ml-14">
+          <InputGroup>
+            <InputGroupTextarea
+              placeholder="Share your thousghts here."
+              value={value}
+              onChange={(e) => onChange(questionId, e.target.value)}
+              maxLength={maxLength}
+              disabled={disabled}
+              className="min-h-[120px] text-base resize-none"
+            />
+            <InputGroupAddon align="block-end">
+              <InputGroupText
+                className={`text-xs font-medium transition-colors ${
+                  charactersLeft < 20
+                    ? "text-red-500"
+                    : charactersLeft < 40
+                    ? "text-amber-500"
+                    : "text-gray-500"
                 }`}
-            >
-              {charactersLeft} characters left
-            </InputGroupText>
-          </InputGroupAddon>
-        </InputGroup>
-      ) : (
-        <RadioGroup
-          value={value}
-          onValueChange={(val) => onChange(questionId, val)}
-          className="gap-3"
-          disabled={disabled}
-        >
-          {options.map((option, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <RadioGroupItem value={option} id={`${number}-${index}`} disabled={disabled} />
-              <Label
-                htmlFor={`${number}-${index}`}
-                className="text-sm font-normal cursor-pointer"
               >
-                {option}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
+                {charactersLeft} characters remaining
+              </InputGroupText>
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+      ) : (
+        <div className="ml-14">
+          <RadioGroup
+            value={value}
+            onValueChange={(val) => onChange(questionId, val)}
+            className="gap-3"
+            disabled={disabled}
+          >
+            {options.map((option, index) => (
+              <label
+                key={index}
+                htmlFor={`${questionId}-${index}`}
+                className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all ${
+                  disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+                } ${
+                  value === option
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                <RadioGroupItem
+                  value={option}
+                  id={`${questionId}-${index}`}
+                  disabled={disabled}
+                  className="flex-shrink-0"
+                />
+                <span
+                  className={`text-base font-medium flex-1 ${
+                    value === option ? "text-primary" : "text-gray-700"
+                  }`}
+                >
+                  {option}
+                </span>
+              </label>
+            ))}
+          </RadioGroup>
+        </div>
       )}
     </div>
   );

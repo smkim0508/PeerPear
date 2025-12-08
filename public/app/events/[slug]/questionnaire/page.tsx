@@ -59,9 +59,25 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const [participants, setParticipants] = useState<any[]>([]);
   const [allResponses, setAllResponses] = useState<any[]>([]);
 
+  useEffect(() => {
+    const checkEventStatus = async () => {
+      if (!event_id) return;
+      const event = await fetchEventById(event_id);
+      if (event) {
+        if (
+          event.status === "TERMINATED" ||
+          event.status === "PAIRING_PUBLISHED"
+        ) {
+          setIsReadOnly(true);
+        }
+      }
+    };
+    checkEventStatus();
+  }, [event_id]);
+
   // Determine user type - STRICTLY from localStorage only
   const getUserType = (): "student" | "organization" => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const storedUserType = localStorage.getItem("userType") as
         | "student"
         | "organization"
@@ -86,44 +102,54 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const fetchParticipantsAndResponses = async () => {
     try {
       // Fetch participants for this event (use existing endpoint)
-      const participantsRes = await fetch(`${apiUrl}/events/${event_id}/participants`, {
-        credentials: "include",
-      });
+      const participantsRes = await fetch(
+        `${apiUrl}/events/${event_id}/participants`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (participantsRes.ok) {
         const participantsData = await participantsRes.json();
         setParticipants(participantsData);
 
         // Fetch all responses for all participants
-        const responsePromises = participantsData.map(async (participant: any) => {
-          try {
-            const responseRes = await fetch(`${apiUrl}/questionnaire/${event_id}/${participant.user_id}`, {
-              credentials: 'include',
-            });
+        const responsePromises = participantsData.map(
+          async (participant: any) => {
+            try {
+              const responseRes = await fetch(
+                `${apiUrl}/questionnaire/${event_id}/${participant.user_id}`,
+                {
+                  credentials: "include",
+                }
+              );
 
-            if (responseRes.ok) {
-              const responseData = await responseRes.json();
-              return responseData.answers || [];
+              if (responseRes.ok) {
+                const responseData = await responseRes.json();
+                return responseData.answers || [];
+              }
+              return [];
+            } catch (err) {
+              return [];
             }
-            return [];
-          } catch (err) {
-            return [];
           }
-        });
+        );
 
         const allResponsesArrays = await Promise.all(responsePromises);
         const flattenedResponses = allResponsesArrays.flat();
         setAllResponses(flattenedResponses);
       }
-    } catch (err) {
-    }
+    } catch (err) {}
   };
 
   const get_questions = async () => {
     try {
-      const res = await fetch(`${apiUrl}/questionnaire/${event_id}/${user_id}`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${apiUrl}/questionnaire/${event_id}/${user_id}`,
+        {
+          credentials: "include",
+        }
+      );
 
       const data = await res.json();
       if (res.ok) {
@@ -160,7 +186,10 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       if (!event_id) return;
       const event = await fetchEventById(event_id);
       if (event) {
-        if (event.status === "TERMINATED" || event.status === "PAIRING_PUBLISHED") {
+        if (
+          event.status === "TERMINATED" ||
+          event.status === "PAIRING_PUBLISHED"
+        ) {
           setIsReadOnly(true);
         }
       }
@@ -214,8 +243,6 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     }
   }, [event_id, user_id, apiUrl, router, user, isOrganizationUser]);
 
-
-
   const handleSubmit = async () => {
     if (isReadOnly) return;
 
@@ -240,7 +267,9 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     if (invalidQuestions.length > 0) {
       setAlert({
         type: "error",
-        message: `Please answer all required questions. Missing responses for question(s): ${invalidQuestions.join(", ")}`,
+        message: `Please answer all required questions. Missing responses for question(s): ${invalidQuestions.join(
+          ", "
+        )}`,
       });
       return;
     }
@@ -326,7 +355,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   return (
     <>
       <Navbar userType={userType} />
-      <div className="min-h-screen bg-[#EBECE4]">
+      <div className="min-h-screen ">
         <div className="flex flex-col items-center p-6 pt-12">
           <div className="w-full max-w-6xl mb-4">
             <button
@@ -338,17 +367,25 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
             </button>
           </div>
           <div className="text-center mb-8 max-w-2xl">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              {isOrganizationUser ? "Program Responses" : isReadOnly ? "Your Questionnaire Responses" : "Questionnaire Form"}
-            </h1>
-            <p className="text-lg text-gray-600 leading-relaxed mb-3">
+            <h1 className="text-5xl md:text-6xl font-bold text-nav-dark mb-4 tracking-tight">
               {isOrganizationUser
-                ? "View all participant responses for this program."
+                ? "Program Responses"
                 : isReadOnly
-                  ? "View the responses you submitted for this program."
-                  : "Help us find the perfect peer match for you by answering a few questions about your preferences and goals."}
+                ? "Your Responses"
+                : "Questionnaire"}
+            </h1>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              {isOrganizationUser
+                ? "Explore participant responses and insights from your program questionnaire."
+                : isReadOnly
+                ? "Review the responses you submitted for this program."
+                : "Share your preferences and goals to help us connect you with the perfect peer match."}
             </p>
-            {alert && <PearAlert type={alert.type} message={alert.message} />}
+            {alert && (
+              <div className="mt-4">
+                <PearAlert type={alert.type} message={alert.message} />
+              </div>
+            )}
           </div>
 
           {isOrganizationUser ? (
@@ -370,7 +407,9 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                   </div>
                 ) : questions.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-gray-600 text-xl">No questionnaire has been set up for this program.</p>
+                    <p className="text-gray-600 text-xl">
+                      No questionnaire has been set up for this program.
+                    </p>
                     <PearButton
                       text="Back to Program"
                       onClick={() => router.push(`/events/${event_id}`)}
@@ -427,44 +466,47 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                     ))
                   )}
 
-                  {!loading && !error && questions.length > 0 && !isReadOnly && (
-                    <div className="border-t border-gray-200 pt-8 mt-8">
-                      <div className="bg-gray-50 rounded-xl p-6 mb-6">
-                        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                          By submitting this questionnaire, you agree to be matched
-                          with a peer based on your responses and participate in the
-                          event activities.
-                        </p>
-                        <div className="flex items-center space-x-3">
-                          <Checkbox
-                            checked={termsAccepted}
-                            onCheckedChange={(checked) =>
-                              setTermsAccepted(!!checked)
+                  {!loading &&
+                    !error &&
+                    questions.length > 0 &&
+                    !isReadOnly && (
+                      <div className="border-t border-gray-200 pt-8 mt-8">
+                        <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                            By submitting this questionnaire, you agree to be
+                            matched with a peer based on your responses and
+                            participate in the event activities.
+                          </p>
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={termsAccepted}
+                              onCheckedChange={(checked) =>
+                                setTermsAccepted(!!checked)
+                              }
+                              id="terms"
+                            />
+                            <Label
+                              htmlFor="terms"
+                              className="text-sm font-medium cursor-pointer"
+                            >
+                              I accept the terms and conditions
+                            </Label>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-center">
+                          <PearButton
+                            onClick={handleSubmit}
+                            text={
+                              validRegistration
+                                ? "Update Questionnaire"
+                                : "Submit Questionnaire"
                             }
-                            id="terms"
+                            className="px-8 py-6 text-lg font-semibold min-w-[200px] cursor-pointer"
                           />
-                          <Label
-                            htmlFor="terms"
-                            className="text-sm font-medium cursor-pointer"
-                          >
-                            I accept the terms and conditions
-                          </Label>
                         </div>
                       </div>
-
-                      <div className="flex justify-center">
-                        <PearButton
-                          onClick={handleSubmit}
-                          text={
-                            validRegistration
-                              ? "Update Questionnaire"
-                              : "Submit Questionnaire"
-                          }
-                          className="px-8 py-6 text-lg font-semibold min-w-[200px] cursor-pointer"
-                        />
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   {isReadOnly && (
                     <div className="text-center pt-8">
