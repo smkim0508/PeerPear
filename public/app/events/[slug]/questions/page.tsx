@@ -292,6 +292,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
     <>
       <Navbar userType="organization" organizationId={organization?.id} />
       <div className="min-h-screen  p-8">
+      <div className="min-h-screen  p-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-6">
             <button
@@ -308,17 +309,61 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
               <h1 className="text-6xl md:text-7xl font-bold text-nav-dark tracking-tight mb-3">
                 Questionnaire Page
               </h1>
+
+          <div className="flex flex-col items-center text-center mb-5">
+            <div className="w-full mb-3">
+              <h1 className="text-6xl md:text-7xl font-bold text-nav-dark tracking-tight mb-3">
+                Questionnaire Page
+              </h1>
               {organization && (
+                <h2 className="text-3xl font-bold text-primary mx-auto leading-relaxed">
                 <h2 className="text-3xl font-bold text-primary mx-auto leading-relaxed">
                   {organization.org_name}
                 </h2>
               )}
-              <p className="text-gray-600 mb-8">
-                {edit && !isEditingDisabled
-                  ? "You are able to manage the questions participants will answer for this program before the program begins"
-                  : "The program has begun and you are no longer able to edit the program"}
-              </p>
             </div>
+
+            {/* Divider */}
+            <div className="w-full max-w-2xl border-t-2 border-gray-200 my-5"></div>
+
+            {/* Status Box */}
+            <div className="w-full max-w-2xl">
+              <Card
+                className={`shadow-lg border-2 ${
+                  edit && !isEditingDisabled
+                    ? "border-green-400 bg-green-50"
+                    : "border-amber-400 bg-amber-50"
+                }`}
+              >
+                <CardContent className="py-6 px-8">
+                  <div className="flex items-center justify-center gap-3">
+                    {edit && !isEditingDisabled ? (
+                      <>
+                        <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
+                        <p className="text-lg font-semibold text-green-900">
+                          Edit Access Enabled
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-3 w-3 rounded-full bg-amber-500"></div>
+                        <p className="text-lg font-semibold text-amber-900">
+                          View Only Mode
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-700 mt-3 text-center">
+                    {edit && !isEditingDisabled
+                      ? "You can manage the questions participants will answer for this program"
+                      : "The program has begun and you can no longer edit questions"}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Divider */}
+            <div className="w-full max-w-2xl border-t-2 border-gray-200 my-8"></div>
 
             {/* Divider */}
             <div className="w-full max-w-2xl border-t-2 border-gray-200 my-8"></div>
@@ -327,19 +372,6 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {error && <PearAlert type="error" message={error} />}
           {successMessage && (
             <PearAlert type="success" message={successMessage} />
-          )}
-
-          {isEditingDisabled && (
-            <div className="mb-6">
-              <PearAlert
-                type="warning"
-                message={
-                  eventStatus === "TERMINATED"
-                    ? "This event has ended. You can no longer edit questions."
-                    : "Pairings have been published. You can no longer edit questions."
-                }
-              />
-            </div>
           )}
 
           {showAddForm && (
@@ -355,6 +387,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {!loading && !error && questions.length === 0 && (
             <div className="bg-white p-8 rounded-lg shadow text-center">
               <p className="text-gray-500 italic">
+                No questions yet for this program.
                 No questions yet for this program.
               </p>
             </div>
@@ -383,6 +416,28 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
             </div>
           )}
         </div>
+        {edit && !isEditingDisabled && (
+          <div className="fixed bottom-8 right-8 z-50">
+            <Button
+              variant="default"
+              size="lg"
+              className="cursor-pointer rounded-full h-12 px-6 shadow-2xl hover:shadow-3xl hover:scale-105"
+              onClick={() => setShowAddForm(!showAddForm)}
+              aria-label={showAddForm ? "Cancel" : "Add a Question"}
+              title={showAddForm ? "Cancel" : "Add a Question"}
+            >
+              {!showAddForm ? (
+                <Plus className="w-5 h-5" />
+              ) : (
+                <X className="w-5 h-5" />
+              )}
+
+              <span className="hidden sm:inline ml-2 font-semibold">
+                {showAddForm ? "Cancel" : "Add a Question"}
+              </span>
+            </Button>
+          </div>
+        )}
         {edit && !isEditingDisabled && (
           <div className="fixed bottom-8 right-8 z-50">
             <Button
