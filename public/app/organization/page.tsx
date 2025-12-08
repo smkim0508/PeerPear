@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import JoinOrganizationModal from "@/components/JoinOrganizationModal";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
-
+import PearButton
+ from "@/components/PearButton";
 interface Organization {
   id: number;
   name: string;
@@ -228,15 +229,11 @@ export default function OrganizationPage() {
 
         {/* Join Organization Button */}
         <div className="flex justify-center mb-4">
-          <button
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-            className=" inline-flex items-center justify-center text-[#1a1a1a] font-bold rounded-lg px-5 py-3 cursor-pointer
-        transition-all duration-300 hover:scale-100 hover:shadow-2xl hover:brightness-105 hover:-translate-y-1 bg-primary"
-          >
-            Join an Organization
-          </button>
+          <PearButton
+                    className="w-full cursor-pointer p-6 text-md"
+                    text="Join An Organization"
+                    onClick={ () => {setIsModalOpen(true)}}
+                  />
         </div>
       </div>
       <JoinOrganizationModal
