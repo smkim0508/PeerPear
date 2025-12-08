@@ -11,14 +11,8 @@ function Card({
 }) {
   return (
     <div
-      className="bg-green p-9 px-[30px] max-w-[225px] rounded-xl shadow-lg transition-all duration-300 cursor-pointer hover:scale-110 hover:shadow-2xl hover:brightness-105 hover:-translate-y-2"
+      className="bg-green p-7 sm:p-8 w-full sm:w-[260px] max-w-sm rounded-xl shadow-lg transition-transform duration-300 cursor-pointer md:hover:scale-105 md:hover:shadow-2xl md:hover:-translate-y-2"
       style={{ transform: `rotate(${rotation}deg)` }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = `rotate(0deg) translateY(-8px) scale(1.1)`;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = `rotate(${rotation}deg) translateY(0) scale(1)`;
-      }}
     >
       <h4 className="m-0 text-xl font-bold leading-snug text-[#0a0a0a]">
         {title}
@@ -33,16 +27,16 @@ function Card({
 export default function Features() {
   return (
     <section className="relative bg-[#CCCEC1] font-sans" id="features">
-      <div className="mx-auto px-8 py-15 pb-20 text-center">
-        <h2 className="text-[56px] mx-auto font-extrabold text-[#0a0a0a] relative inline-block tracking-tight">
+      <div className="mx-auto px-4 sm:px-8 py-14 sm:py-20 text-center">
+        <h2 className="text-3xl sm:text-4xl lg:text-[56px] mx-auto font-extrabold text-[#0a0a0a] relative inline-block tracking-tight">
           Features
           <Squiggle
-            width={235}
+            width={200}
             className="left-1/2 -translate-x-1/2 -bottom-2"
           />
         </h2>
 
-        <div className="mt-15 flex justify-center gap-14 items-center flex-wrap bg">
+        <div className="mt-10 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10 justify-items-center">
           <Card
             title="Reusable Student Profiles"
             text="Fill out your details once — join any pairing program without repetition."

@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="bg-green text-white font-sans">
-      <div className="max-w-[1200px] mx-auto px-8 py-6 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 group cursor-pointer">
             <img
@@ -13,7 +13,7 @@ export default function Footer() {
               PeerPear
             </span>
           </div>
-          <span className="opacity-70 text-sm">
+          <span className="opacity-80 text-sm">
             © {new Date().getFullYear()} PeerPear. All rights reserved.
           </span>
         </div>

@@ -86,8 +86,8 @@ export default function Home() {
             <img src="/wave-2.svg" alt="" className="block w-full" />
           </div>
 
-          <div className="px-8 py-12 bg-light-beige">
-            <h3 className="text-4xl m-0 mt-2 font-extrabold text-nav-dark tracking-tight">
+          <div className="px-4 sm:px-8 py-10 sm:py-12 bg-light-beige">
+            <h3 className="text-3xl sm:text-4xl m-0 mt-2 font-extrabold text-nav-dark tracking-tight">
               Ready to simplify your pairings?
             </h3>
             <div className="mt-5">
