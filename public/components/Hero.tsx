@@ -14,12 +14,12 @@ export default function Hero({ onTryNowClick }: HeroProps) {
             Pair{" "}
             <span className="relative inline-block">
               smarter
-              <Squiggle width={220} className="left-0 right-0 -bottom-1" />
+              <Squiggle width={220} className="left-0 right-0 -bottom-1 hidden sm:flex" />
             </span>
             . Build{" "}
             <span className="relative inline-block">
               stronger communities
-              <Squiggle width={520} className="left-0 right-0 -bottom-1" />
+              <Squiggle width={520} className="left-0 right-0 -bottom-1 hidden sm:flex" />
             </span>
             .
           </h1>
