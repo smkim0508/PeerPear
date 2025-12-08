@@ -57,13 +57,11 @@ def create_app() -> Flask:
     if not app.secret_key:
         raise ValueError("SECRET_KEY environment variable must be set")
 
-    # Use cookie-based sessions (default Flask behavior, works everywhere)
-    # SESSION_TYPE is intentionally not set - uses signed cookies
-    app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS only
-    app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Changed from 'None'
-    app.config['SESSION_COOKIE_NAME'] = 'peerpear_session'
-    app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours
+    app.config['SESSION_TYPE'] = 'filesystem'
+    # Set to True in production with HTTPS
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 
     # sets up core services/db/clients during app start up
     # TODO: add core configuration for env here

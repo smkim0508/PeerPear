@@ -152,7 +152,6 @@ def authenticate(redirect_url=None):
     # The user is authenticated, so store the user_info in
     # the session and ensure they exist in the database
     session["user_info"] = user_info
-    session.permanent = True  # Make session persist across browser restarts
 
     # Ensure user exists in database
     db_user = ensure_user_in_database(user_info)
@@ -236,7 +235,6 @@ def login():
         if user_info:
             # Store user info in session
             session["user_info"] = user_info
-            session.permanent = True  # Make session persist across browser restarts
 
             # Ensure user exists in database
             db_user = ensure_user_in_database(user_info)
