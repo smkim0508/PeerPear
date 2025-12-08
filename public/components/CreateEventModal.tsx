@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import PearButton from "./PearButton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
-
+import { SquarePlus } from "lucide-react";
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -163,28 +163,38 @@ export default function CreateEventModal({
 
   return (
     <div
-      className={`fixed inset-0 bg-[#0000003c] flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
-        }`}
+      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
+        isAnimating ? "opacity-100" : "opacity-0"
+      }`}
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#8cbf70] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${isAnimating
-          ? "opacity-100 scale-100 translate-y-0"
-          : "opacity-0 scale-95 translate-y-4"
-          }`}
+        className={`bg-white rounded-2xl  p-8 max-w-md w-full mx-4 shadow-2xl transition-all duration-300  relative ${
+          isAnimating
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-95 translate-y-4"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={"absolute top-3 right-3 "}>
+        <div className={"absolute top-5 right-5 "}>
           <PearButton
             text="×"
             onClick={onClose}
             className="w-8 h-8 p-0 text-lg font-bold leading-none rounded-full bg-[#8cbf70] hover:bg-[#8cbf70] shadow-md"
           />
         </div>
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="bg-primary/10 rounded-full p-4 mb-4">
+            <SquarePlus className="w-8 h-8 text-primary" />
+          </div>
 
-        <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a] text-center">
-          Create New Program
-        </h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Create New Program
+          </h2>
+          <p className="text-gray-600 text-base">
+            Enter the details of your program
+          </p>
+        </div>
 
         {successMessage && (
           <Alert className="mt-4 mb-4 border-green-400 bg-green-50">
@@ -222,10 +232,11 @@ export default function CreateEventModal({
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
           placeholder="Enter program title"
-          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.title
-            ? "border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:ring-[#8cbf70]"
-            }`}
+          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+            errors.title
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-[#8cbf70]"
+          }`}
         />
         {errors.title && (
           <p className="mt-1 text-xs text-red-500">{errors.title}</p>
@@ -239,10 +250,11 @@ export default function CreateEventModal({
           rows={3}
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
-          className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${errors.description
-            ? "border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:ring-[#8cbf70]"
-            }`}
+          className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${
+            errors.description
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-[#8cbf70]"
+          }`}
         />
         {errors.description && (
           <p className="mt-1 text-xs text-red-500">{errors.description}</p>
@@ -255,10 +267,11 @@ export default function CreateEventModal({
           value={formData.endDate}
           onChange={(e) => handleInputChange("endDate", e.target.value)}
           type="date"
-          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.endDate
-            ? "border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:ring-[#8cbf70]"
-            }`}
+          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+            errors.endDate
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-[#8cbf70]"
+          }`}
         />
         {errors.endDate && (
           <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>
@@ -277,7 +290,7 @@ export default function CreateEventModal({
           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#8cbf70]"
         />
 
-        <div className="mt-4 flex items-start gap-3 rounded-lg border border-gray-200 p-3">
+        <div className="mt-4 flex items-start gap-3 rounded-lg border-2 border-gray-200 p-3">
           <input
             id="checkSiblingRoles"
             type="checkbox"
@@ -285,9 +298,12 @@ export default function CreateEventModal({
             onChange={(e) =>
               handleInputChange("checkSiblingRoles", e.target.checked)
             }
-            className="mt-1 size-4 rounded border-gray-300"
+            className="h-5 w-5 mt-0.5 cursor-pointer accent-primary flex-shrink-0"
           />
-          <label htmlFor="checkSiblingRoles" className="text-sm">
+          <label
+            htmlFor="checkSiblingRoles"
+            className="text-left text-sm text-gray-700 leading-relaxed cursor-pointer"
+          >
             Big-Little pairing mode
             <span className="block text-xs text-gray-600">
               When enabled, participants are assigned Big/Little sibling roles.
@@ -296,8 +312,9 @@ export default function CreateEventModal({
         </div>
 
         <PearButton
-          className={`w-full px-3 py-2 mt-6 ${submitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+          className={`w-full px-3 py-2 mt-6 ${
+            submitting ? "opacity-70 cursor-not-allowed" : ""
+          }`}
           text={submitting ? "Submitting..." : "Submit Program"}
           onClick={handleSubmit}
         />
@@ -305,4 +322,3 @@ export default function CreateEventModal({
     </div>
   );
 }
-
