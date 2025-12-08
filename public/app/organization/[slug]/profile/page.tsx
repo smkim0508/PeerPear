@@ -113,14 +113,13 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
     const newErrors: { [key: string]: boolean } = {};
     if (!editName.trim()) newErrors.org_name = true;
-    if (editName.length > 30) newErrors.nameTooLong = true;
+    if (editName.length > 50) newErrors.nameTooLong = true;
     if (!orgDescription.trim()) newErrors.description = true;
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      if (newErrors.org_name)
-      {
+      if (newErrors.org_name) {
         setMessage("Organization Name is required");
       }
       else if (newErrors.nameTooLong) {
@@ -230,22 +229,21 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                     onChange={(e) => {
                       const value = e.target.value;
                       setEditName(value);
-                      if (value.length > 30)
+                      if (value.length > 50)
                         setErrors((prev) => ({ ...prev, nameTooLong: true }));
                       else
                         setErrors((prev) => ({ ...prev, nameTooLong: false }));
                     }}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                      errors.org_name || errors.nameTooLong
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${errors.org_name || errors.nameTooLong
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 bg-transparent focus:border-green"
+                      }`}
                     placeholder="Enter organization name"
                     maxLength={50}
                   />
                   {errors.nameTooLong && (
                     <p className="text-red-600 text-sm mt-1">
-                      Organization name must be 30 characters or fewer.
+                      Organization name must be 50 characters or fewer.
                     </p>
                   )}
                 </div>
@@ -264,11 +262,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                     value={orgDescription}
                     onChange={(e) => setOrgDescription(e.target.value)}
                     rows={4}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors resize-none ${
-                      errors.description
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors resize-none ${errors.description
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 bg-transparent focus:border-green"
+                      }`}
                     placeholder="Tell us about your organization..."
                     maxLength={500}
                   />
@@ -277,11 +274,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                 {/* Message */}
                 {message && (
                   <div
-                    className={`p-3 rounded-lg text-center font-medium ${
-                      message.includes("success")
-                        ? "bg-green text-nav-dark"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`p-3 rounded-lg text-center font-medium ${message.includes("success")
+                      ? "bg-green text-nav-dark"
+                      : "bg-red-100 text-red-800"
+                      }`}
                   >
                     {message}
                   </div>
@@ -291,7 +287,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                 <div className="flex justify-center mt-6">
                   <PearButton
                     text={isLoading ? "Saving..." : "Save Changes"}
-                    onClick={() => {}}
+                    onClick={() => { }}
                     className="px-5 py-5 text-md hover:scale-105 hover:shadow-lg"
                   />
                 </div>
