@@ -1,6 +1,6 @@
 from db.supabase_client import upload_event_image
 from db.crud.events_crud import validate_event_and_admin, update_event_image
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from sqlalchemy import select
 from db.models.events import EventTable, EventRegistrationsTable
 from db.models.organizations import OrganizationTable
@@ -45,6 +45,13 @@ def get_event_details(event_id: int):
             questions_result = session.execute(questions_query).all()
             questions = [q[0] for q in questions_result]
 
+            # get default image from buckets
+            media_url = current_app.config.get("MEDIA_URL", None)
+            if media_url is None:
+                default_image_url = f"{request.host_url}static/peerpear_logo.png"
+            else:
+                default_image_url = f"{media_url}/peerpear_logo.png"
+
             # Format response
             event_data = {
                 "id": event.id,
@@ -58,7 +65,7 @@ def get_event_details(event_id: int):
                 "description": event.description,
                 "matches": event.matches,
                 "check_sibling_roles": event.check_sibling_roles,
-                "image_url": event.image_url,
+                "image_url": event.image_url or default_image_url,
                 "organizations": {
                     "id": organization.id,
                     "org_name": organization.org_name,
@@ -102,6 +109,13 @@ def get_active_events():
 
             results = session.execute(query).all()
 
+            # get default image from buckets
+            media_url = current_app.config.get("MEDIA_URL", None)
+            if media_url is None:
+                default_image_url = f"{request.host_url}static/peerpear_logo.png"
+            else:
+                default_image_url = f"{media_url}/peerpear_logo.png"
+
             events = []
             for event, organization in results:
                 # Get questions for each event
@@ -120,7 +134,7 @@ def get_active_events():
                     "title": event.title,
                     "description": event.description,
                     "matches": event.matches,
-                    "image_url": event.image_url,
+                    "image_url": event.image_url or default_image_url,
                     "organizations": {
                         "id": organization.id,
                         "org_name": organization.org_name,
@@ -486,7 +500,7 @@ def update_event_image_route(event_id: int):
         if error:
             return jsonify(error), error["status"]
 
-        old_image_url = event.image_url
+        old_image_url = event.image_url if event else None # NOTE: obsolete
 
     # Get uploaded file
     if "file" not in request.files:
