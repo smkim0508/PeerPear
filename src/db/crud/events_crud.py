@@ -5,7 +5,7 @@ from db.models.user import UserTable
 from sqlalchemy import inspect, select, or_
 from api.dependencies import get_db_sessionmaker, get_llm
 from app_types.api.response.event_browse_response import EventBrowseResponse, PublishedEvent
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from datetime import datetime, timedelta, timezone, date
 from sqlalchemy import func
 from common.types.pairing_event import PairingEvent
@@ -60,6 +60,14 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
         )
 
         published_events: list[PublishedEvent] = []
+
+        # get default image from buckets
+        media_url = current_app.config.get("MEDIA_URL", None)
+        if media_url is None:
+            default_image_url = f"{request.host_url}static/peerpear_logo.png"
+        else:
+            default_image_url = f"{media_url}/peerpear_logo.png"
+
         for event, org in rows:
             published_events.append(
                 PublishedEvent(
@@ -67,7 +75,8 @@ def get_all_active_events(user_id: int) -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
+                    image_url=event.image_url or default_image_url,
+                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date
                 )
@@ -99,6 +108,13 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
             .all()
         )
 
+        # get default image from buckets
+        media_url = current_app.config.get("MEDIA_URL", None)
+        if media_url is None:
+            default_image_url = f"{request.host_url}static/peerpear_logo.png"
+        else:
+            default_image_url = f"{media_url}/peerpear_logo.png"
+
         published_events: list[PublishedEvent] = []
         for event, org in rows:
             published_events.append(
@@ -107,7 +123,8 @@ def get_all_active_events_unfiltered() -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
+                    image_url=event.image_url or default_image_url,
+                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date
                 )
@@ -128,6 +145,13 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
         rows = session.execute(stmt).all()
 
         published_events: list[PublishedEvent] = []
+        
+        # get default image from buckets
+        media_url = current_app.config.get("MEDIA_URL", None)
+        if media_url is None:
+            default_image_url = f"{request.host_url}static/peerpear_logo.png"
+        else:
+            default_image_url = f"{media_url}/peerpear_logo.png"
 
         for event, org in rows:
             published_events.append(
@@ -136,8 +160,8 @@ def get_organization_events(organization_id: int) -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=event.image_url
-                    or f"{request.host_url}static/peerpear_logo.png",
+                    image_url=event.image_url or default_image_url,
+                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     end_date=event.end_date or datetime.now(timezone.utc),
                     status=event.status
                 )
@@ -162,6 +186,13 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
 
         published_events: list[PublishedEvent] = []
 
+        # get default image from buckets
+        media_url = current_app.config.get("MEDIA_URL", None)
+        if media_url is None:
+            default_image_url = f"{request.host_url}static/peerpear_logo.png"
+        else:
+            default_image_url = f"{media_url}/peerpear_logo.png"
+        
         for event, org in rows:
             published_events.append(
                 PublishedEvent(
@@ -169,7 +200,8 @@ def get_user_events(user_id: int) -> list[PublishedEvent]:
                     title=event.title or "Untitled Event",
                     description=event.description or "",
                     organization_name=org.org_name or "Unknown Organization",
-                    image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
+                    image_url=event.image_url or default_image_url,
+                    # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                     status=event.status,
                     end_date=event.end_date
                 )
@@ -193,12 +225,20 @@ def get_event_by_id(event_id: int) -> PublishedEvent | None:
             event, org = result
             org_name = org.org_name if org else "Unknown Organization"
 
+            # get default image from buckets
+            media_url = current_app.config.get("MEDIA_URL", None)
+            if media_url is None:
+                default_image_url = f"{request.host_url}static/peerpear_logo.png"
+            else:
+                default_image_url = f"{media_url}/peerpear_logo.png"
+                
             return PublishedEvent(
                 id=event.id,
                 title=event.title or "Untitled Event",
                 description=event.description or "",
                 organization_name=org_name,
-                image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
+                image_url=event.image_url or default_image_url,
+                # image_url=event.image_url or f"{request.host_url}static/peerpear_logo.png",
                 end_date=event.end_date or datetime.now(timezone.utc),
                 status=event.status
             )

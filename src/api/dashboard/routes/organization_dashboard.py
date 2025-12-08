@@ -1,5 +1,5 @@
 # main landing page for organizations after logging in
-from flask import Blueprint, request, jsonify, session, g
+from flask import Blueprint, request, jsonify, session, g, current_app
 from app_types.api.response.event_browse_response import EventBrowseResponse
 from db.crud.events_crud import get_organization_events, create_new_event
 from common.logging import logger
@@ -206,8 +206,6 @@ def student_events():
         logger.error(f"Error retrieving events for student: {e}")
         return jsonify(generic_error_response), 500
 
-
-
 @org_dashboard_bp.post("/create-event")
 @require_auth
 def create_event():
@@ -263,6 +261,13 @@ def create_event():
     uploaded_file = request.files.get("image")
     image_url = None
 
+    # get default image from buckets
+    media_url = current_app.config.get("MEDIA_URL", None)
+    if media_url is None:
+        default_image_url = f"{request.host_url}static/peerpear_logo.png"
+    else:
+        default_image_url = f"{media_url}/peerpear_logo.png"
+
     if uploaded_file:
         file_bytes = uploaded_file.read()
         content_type = uploaded_file.content_type
@@ -270,7 +275,8 @@ def create_event():
 
         image_url = upload_new_image(file_bytes, filename, content_type)
     else:
-        image_url = f"{request.host_url}static/peerpear_logo.png"
+        image_url = default_image_url
+        # image_url = f"{request.host_url}static/peerpear_logo.png"
 
     # NOTE: need to make sure FE integrates properly with the new payload, start_date is removed
     today = datetime.now(timezone.utc)

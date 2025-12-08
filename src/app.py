@@ -82,11 +82,11 @@ def create_app() -> Flask:
     )
 
     if app.config["MAIN_DB_URL"] is None:
-        logger.info(f"DATABASE IS NOT SET")
+        logger.error(f"DATABASE IS NOT SET")
         raise
 
     if app.config["GOOGLE_API_KEY"] is None:
-        logger.info(f"GOOGLE API IS NOT SET")
+        logger.error(f"GOOGLE API IS NOT SET")
         raise
 
     # store the dependencies in app.extensions to link them with flask instance
@@ -97,6 +97,14 @@ def create_app() -> Flask:
     # store llm client in app.extensions to link them with flask instance
     llm_client = AsyncGenAITypedClient(api_key=app.config["GOOGLE_API_KEY"])
     app.extensions["llm_client"] = llm_client
+
+    # store media URL to fetch from Supabase buckets
+    MEDIA_URL = os.environ.get("MEDIA_URL", None)
+
+    app.config.update(MEDIA_URL=MEDIA_URL)
+    if app.config["MEDIA_URL"] is None:
+        logger.error(f"MEDIA URL IS NOT SET")
+        raise
 
     # TODO: need to dispose of all app lifetime dependencies
 
