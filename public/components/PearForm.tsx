@@ -57,6 +57,12 @@ export default function PearForm({
                 newErrors.options = "Please provide at least 2 options for multiple choice";
                 valid = false;
             }
+
+            const uniqueOptions = new Set(validOptions.map(opt => opt.trim().toLowerCase()));
+        if (uniqueOptions.size !== validOptions.length) {
+            newErrors.options = "Duplicate options are not allowed. Please ensure all options are unique.";
+            valid = false;
+        }
         }
 
         setErrors(newErrors);
