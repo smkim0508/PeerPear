@@ -14,12 +14,13 @@ export default function PearSwitch({
   return (
     <div
       className={`
-        w-full sm:w-auto flex flex-col sm:flex-row      /* vertical on mobile, horizontal on sm+ */
+       flex flex-col sm:flex-row      /* vertical on mobile, horizontal on sm+ */
         bg-[#CCCEC1]
         rounded-xl
         p-2
         gap-2
-        
+        w-fit               
+        mx-auto             
         ${className || ""}
       `}
     >
