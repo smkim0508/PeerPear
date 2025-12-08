@@ -139,13 +139,10 @@ def create_app() -> Flask:
         if request.path not in PUBLIC_ROUTES and request.method != 'OPTIONS':
             # check if user is authenticated via flask session
             if not is_authenticated():
-                # Return 401 for all unauthenticated requests to protected routes
-                # Frontend should catch this and redirect to /auth/login
-                # Only /auth/login route itself handles CAS redirect
-                return jsonify({
-                    "error": "Unauthorized",
-                    "message": "Authentication required. Please log in."
-                }), 401
+                # return 401 for all unauthenticated requests to protected routes
+                # TODO: frontend should catch this and redirect to /auth/login
+                # only /auth/login route itself handles CAS redirect
+                return jsonify({"error": "Unauthorized; Authentication is required. Please log in.",}), 401
 
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
