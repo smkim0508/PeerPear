@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2, Edit2, Plus, X, FileQuestion } from "lucide-react";
 import PearButton from "./PearButton";
 
@@ -40,6 +40,15 @@ export default function PearForm({
         question: "",
         options: "",
     });
+
+    useEffect(() => {
+        if (errors.question || errors.options) {
+            const timer = setTimeout(() => {
+                setErrors({ question: "", options: "" });
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [errors]);
 
     const validate = () => {
         let newErrors = { question: "", options: "" };
