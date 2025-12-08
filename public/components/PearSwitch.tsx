@@ -15,7 +15,7 @@ export default function PearSwitch({
     <div
       className={`
        flex flex-col sm:flex-row      /* vertical on mobile, horizontal on sm+ */
-        bg-[#CCCEC1]
+        bg-[#f0f3f7]
         rounded-xl
         p-2
         gap-2

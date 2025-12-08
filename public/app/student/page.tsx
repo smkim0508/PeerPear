@@ -8,6 +8,7 @@ import SearchBar from "@/components/SearchBar";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
 import { checkUserRegistration } from "@/lib/events";
+import { Squiggle } from "@/components/ui/Squiggle";
 
 export default function StudentDashBoard() {
   const { user } = useAuth();
@@ -109,14 +110,22 @@ export default function StudentDashBoard() {
         <Navbar userType="student" />
 
         <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
-          <div className="max-w-7xl mx-auto px-2 sm:px-0 mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">
-              Dashboard
+          <div className="max-w-7xl mx-auto mb-9 text-center">
+            <h1 className="text-4xl sm:text-6xl font-extrabold text-nav-dark mb-5">
+              <div className=" relative inline-block whitespace-nowrap ">
+                Dashboard
+                <Squiggle
+                  width={320}
+                  className="left-0 right-0 -bottom-3 hidden lg:flex"
+                />
+              </div>
             </h1>
-            <p className="text-foreground/70 mt-1">
+
+            <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed mb-8">
               Browse active programs or search by organization.
             </p>
           </div>
+          
           {/* Search + event/org filter */}
           <div className="max-w-328 mx-auto mb-6">
             <SearchBar

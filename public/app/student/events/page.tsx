@@ -9,6 +9,7 @@ import PearSwitch from "@/components/PearSwitch";
 import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
 import { isPast, parseISO } from "date-fns";
+import { Squiggle } from "@/components/ui/Squiggle";
 
 export default function StudentDashBoard() {
   const router = useRouter();
@@ -97,17 +98,23 @@ export default function StudentDashBoard() {
         <Navbar userType="student" />
 
         <main className="m-2 sm:m-4 p-4 sm:p-6 flex-1 min-h-screen">
-          <div className="max-w-7xl mx-auto mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">My Registered Programs</h1>
-            <div className="mt-1 flex items-center justify-between">
-              <p className="text-foreground/70">View and filter programs you’ve joined.</p>
+          <div className="max-w-7xl mx-auto mb-9 text-center">
+            <h1 className="text-4xl sm:text-6xl font-extrabold text-nav-dark mb-5">My {" "}
+              <div className=" relative inline-block whitespace-nowrap ">
+                Registered Programs
+              <Squiggle width = {400} className="left-0 right-0 -bottom-4 hidden lg:flex"/>
+              
+              </div>
+            </h1>
+           
+              <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed mb-8">View and filter programs you’ve joined.</p>
               <PearSwitch
                 options={["All Programs", "Active", "Ended", "Results Available"]}
                 activeOption={filterOption}
                 onOptionChange={(opt) => setFilterOption(opt)}
                 className="shrink-0"
               />
-            </div>
+         
           </div>
 
           {/* Event Cards */}

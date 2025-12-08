@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import JoinOrganizationModal from "@/components/JoinOrganizationModal";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
+import { Building } from 'lucide-react';
 import PearButton
  from "@/components/PearButton";
 interface Organization {
@@ -127,11 +128,14 @@ export default function OrganizationPage() {
         )}
 
         <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-green p-6">
-            <h1 className="text-2xl font-bold text-black text-center">
-              Select an Organization
+          <div className="bg-primary/90 p-6 flex flex-col items-center text-center ">
+          <div className="bg-nav-dark rounded-full p-4 mb-4">
+            <Building className="text-white w-8 h-8"/>
+            </div>
+            <h1 className="text-3xl font-bold text-nav-dark text-center">
+              Select An Organization
             </h1>
-            <p className="text-black text-center mt-2">
+            <p className="text-gray-700 text-center mt-1">
               Choose an organization to view their dashboard
             </p>
           </div>
