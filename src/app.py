@@ -53,14 +53,17 @@ def create_app() -> Flask:
     )
 
     # Configure session for CAS authentication
-    # TODO: this needs changing
-    app.secret_key = os.getenv(
-        "SECRET_KEY", "blah-blah-change-for-prod-cos333")
-    app.config['SESSION_TYPE'] = 'filesystem'
-    # Set to True in production with HTTPS
-    app.config['SESSION_COOKIE_SECURE'] = True
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.secret_key = os.getenv("SECRET_KEY")
+    if not app.secret_key:
+        raise ValueError("SECRET_KEY environment variable must be set")
+
+    # Use cookie-based sessions (default Flask behavior, works everywhere)
+    # SESSION_TYPE is intentionally not set - uses signed cookies
+    app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS only
+    app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Changed from 'None'
+    app.config['SESSION_COOKIE_NAME'] = 'peerpear_session'
+    app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours
 
     # sets up core services/db/clients during app start up
     # TODO: add core configuration for env here
