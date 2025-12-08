@@ -59,6 +59,22 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const [participants, setParticipants] = useState<any[]>([]);
   const [allResponses, setAllResponses] = useState<any[]>([]);
 
+  useEffect(() => {
+    const checkEventStatus = async () => {
+      if (!event_id) return;
+      const event = await fetchEventById(event_id);
+      if (event) {
+        if (
+          event.status === "TERMINATED" ||
+          event.status === "PAIRING_PUBLISHED"
+        ) {
+          setIsReadOnly(true);
+        }
+      }
+    };
+    checkEventStatus();
+  }, [event_id]);
+
   // Determine user type - STRICTLY from localStorage only
   const getUserType = (): "student" | "organization" => {
     if (typeof window !== 'undefined') {
