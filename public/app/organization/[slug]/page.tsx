@@ -14,6 +14,7 @@ import { useEffect, useState, use } from "react";
   import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
   import { parseISO, isPast } from "date-fns";
   import { Plus } from "lucide-react";
+  import { Squiggle } from "@/components/ui/Squiggle";
 
 interface OrganizationDashboardProps {
   params: Promise<{ slug: string }>;
@@ -190,13 +191,25 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
             </div>
           </main>
         ) : (
+          <>
+          {/* Header Section */}
+                      <div className="bg-linear-to-br from-light-beige to-dark-beige relative overflow-hidden">
+                        <div className="max-w-6xl mx-auto px-8 py-16 text-center">
+                          <h1 className="text-[56px] font-extrabold text-[#0a0a0a] relative inline-block tracking-tight mb-5">
+                            My Programs
+                            <Squiggle
+                              width={350}
+                              className=" hidden sm:flex left-1/2 -translate-x-1/2 -bottom-2"
+                            />
+                          </h1>
+                          <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+                            Create and manage programs for your organization.
+             
+                          </p>
+                        </div>
+                      </div>
           <main className="m-4 p-6 flex-1 min-h-screen">
-            <div className="max-w-7xl mx-auto mb-6">
-              <div className="text-center mb-6">
-                <h1 className="text-6xl sm:text-4xl font-extrabold text-nav-dark">My Programs</h1>
-                <p className="text-foreground/70">Create and manage programs for your organization.</p>
-              </div>
-            </div>
+           
 
             <div className="flex justify-center mb-8">
               <PearSwitch
@@ -233,9 +246,11 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
               </div>
             )}
           </main>
+          </>
         )}
         <Footer />
       </div>
+      
     </ProtectedRoute>
   );
 }

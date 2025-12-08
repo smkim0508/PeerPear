@@ -205,7 +205,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                     Organization
                     <Squiggle
                       width={450}
-                      className="left-0 right-0 -bottom-2 top-19"
+                      className=" hidden sm:flex left-0 right-0 -bottom-2 top-19 "
                     />
                   </span>
                 </h1>

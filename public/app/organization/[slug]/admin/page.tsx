@@ -359,7 +359,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                   Organization Admins
                   <Squiggle
                     width={530}
-                    className="left-1/2 -translate-x-1/2 -bottom-2"
+                    className=" hidden sm:flex left-1/2 -translate-x-1/2 -bottom-2"
                   />
                 </h1>
                 <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
