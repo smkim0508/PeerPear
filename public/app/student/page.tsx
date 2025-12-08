@@ -9,6 +9,7 @@ import { PairingEvent } from "@/types/events";
 import { useEffect, useState } from "react";
 import { checkUserRegistration } from "@/lib/events";
 import { Squiggle } from "@/components/ui/Squiggle";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function StudentDashBoard() {
   const { user } = useAuth();
@@ -125,7 +126,7 @@ export default function StudentDashBoard() {
               Browse active programs or search by organization.
             </p>
           </div>
-          
+
           {/* Search + event/org filter */}
           <div className="max-w-328 mx-auto mb-6">
             <SearchBar
@@ -151,15 +152,25 @@ export default function StudentDashBoard() {
               No programs found.
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  isRegistered={registeredEvents.has(event.id)}
-                />
-              ))}
-            </div>
+            <AnimatePresence mode="popLayout">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-7xl mx-auto">
+                {filteredEvents.map((event) => (
+                  <motion.div
+                    key={event.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <EventCard
+                      event={event}
+                      isRegistered={registeredEvents.has(event.id)}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </AnimatePresence>
           )}
         </main>
 
