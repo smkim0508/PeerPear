@@ -44,11 +44,15 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
       if (response.ok) {
         setIsAuthorized(true);
       } else if (response.status === 401) {
-        setMessage("Please log in to access this organization profile. Redirecting...");
+        setMessage(
+          "Please log in to access this organization profile. Redirecting..."
+        );
         setIsAuthorized(false);
         setTimeout(() => router.push("/organization"), 2000);
       } else if (response.status === 403) {
-        setMessage("You do not have admin access to this organization. Redirecting...");
+        setMessage(
+          "You do not have admin access to this organization. Redirecting..."
+        );
         setIsAuthorized(false);
         setTimeout(() => router.push("/organization"), 2000);
       } else {
@@ -63,7 +67,6 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
       );
       setIsAuthorized(false);
       setTimeout(() => router.push("/organization"), 2000);
-
     }
   };
 
@@ -116,7 +119,16 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      setMessage("Some required fields are empty. Please fill them in.");
+      if (newErrors.org_name)
+      {
+        setMessage("Organization Name is required");
+      }
+      else if (newErrors.nameTooLong) {
+        setMessage("Please enter a shorter organization name");
+      }
+      else {
+        setMessage("An organization description is required");
+      }
       return;
     }
 
@@ -184,63 +196,108 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
             </div>
           </main>
         ) : (
-          <main className="flex-1 p-6 sm:p-8 max-w-4xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">Organization Profile</h1>
-            <p className="text-foreground/70 mt-1">Update your organization's name and description.</p>
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-nav-dark mb-1">Organization Name <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setEditName(value);
-                    if (value.length > 30) setErrors((prev) => ({ ...prev, nameTooLong: true }));
-                    else setErrors((prev) => ({ ...prev, nameTooLong: false }));
-                  }}
-                  className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${errors.org_name || errors.nameTooLong ? "border-red-500 bg-red-50" : "border-gray-200 bg-transparent focus:border-green"
+          <ul>
+            <div className="bg-linear-to-br from-light-beige to-dark-beige relative overflow-hidden">
+              <div className="max-w-6xl mx-auto px-8 py-16 text-center">
+                <h1 className="text-6xl md:text-7xl font-extrabold text-nav-dark tracking-tight mb-6">
+                  Your{" "}
+                  <span className="relative inline-block whitespace-nowrap">
+                    Organization
+                    <Squiggle
+                      width={450}
+                      className="left-0 right-0 -bottom-2 top-19"
+                    />
+                  </span>
+                </h1>
+                <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+                  Update the details of your organization!
+                </p>
+              </div>
+            </div>
+            <main className="flex-1 p-6 sm:p-8 max-w-4xl mx-auto">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Organization Name */}
+                <div className="space-y-2">
+                  <label className="block text-2xl font-semibold text-nav-dark">
+                    Organization Name <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-sm text-foreground/70">
+                    The name of your organization as it will appear publicly.
+                  </p>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setEditName(value);
+                      if (value.length > 30)
+                        setErrors((prev) => ({ ...prev, nameTooLong: true }));
+                      else
+                        setErrors((prev) => ({ ...prev, nameTooLong: false }));
+                    }}
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
+                      errors.org_name || errors.nameTooLong
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 bg-transparent focus:border-green"
                     }`}
-                  placeholder="Enter organization name"
-                  maxLength={50}
-                />
-                {errors.nameTooLong && (
-                  <p className="text-red-600 text-sm mt-1">Organization name must be 30 characters or fewer.</p>
+                    placeholder="Enter organization name"
+                    maxLength={50}
+                  />
+                  {errors.nameTooLong && (
+                    <p className="text-red-600 text-sm mt-1">
+                      Organization name must be 30 characters or fewer.
+                    </p>
+                  )}
+                </div>
+
+                <hr className="border-gray-300" />
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <label className="block text-2xl font-semibold text-nav-dark">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-sm text-foreground/70">
+                    A brief description of your organization.
+                  </p>
+                  <textarea
+                    value={orgDescription}
+                    onChange={(e) => setOrgDescription(e.target.value)}
+                    rows={4}
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors resize-none ${
+                      errors.description
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 bg-transparent focus:border-green"
+                    }`}
+                    placeholder="Tell us about your organization..."
+                    maxLength={500}
+                  />
+                </div>
+
+                {/* Message */}
+                {message && (
+                  <div
+                    className={`p-3 rounded-lg text-center font-medium ${
+                      message.includes("success")
+                        ? "bg-green text-nav-dark"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {message}
+                  </div>
                 )}
-              </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-nav-dark mb-1">Description <span className="text-red-500">*</span></label>
-                <textarea
-                  value={orgDescription}
-                  onChange={(e) => setOrgDescription(e.target.value)}
-                  rows={4}
-                  className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors resize-none ${errors.description ? "border-red-500 bg-red-50" : "border-gray-200 bg-transparent focus:border-green"
-                    }`}
-                  placeholder="Tell us about your organization..."
-                  maxLength={500}
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <PearButton text={isLoading ? "Saving..." : "Save Changes"} onClick={() => { }} />
-                <PearButton
-                  text="Cancel"
-                  variant="outline"
-                  onClick={() => {
-                    setEditName(orgName);
-                    setMessage(null);
-                    setErrors({});
-                  }}
-                />
-              </div>
-
-              {message && (
-                <div className={`p-3 rounded-lg text-center font-medium ${message.includes("success") ? "bg-green text-nav-dark" : "bg-red-100 text-red-800"}`}>{message}</div>
-              )}
-            </form>
-          </main>
+                {/* Save Button Centered */}
+                <div className="flex justify-center mt-6">
+                  <PearButton
+                    text={isLoading ? "Saving..." : "Save Changes"}
+                    onClick={() => {}}
+                    className="px-5 py-3 text-md"
+                  />
+                </div>
+              </form>
+            </main>
+          </ul>
         )}
         <Footer />
       </div>

@@ -125,7 +125,7 @@ export default function OrganizationPage() {
           </div>
         )}
 
-            <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-green p-6">
             <h1 className="text-2xl font-bold text-black text-center">
               Select an Organization
@@ -166,12 +166,22 @@ export default function OrganizationPage() {
               organizations.map((org) => (
                 <div
                   key={org.id}
-                  className="flex items-center p-4 rounded-xl border-1 border-primary bg-white hover:bg-green cursor-pointer transition-colors"
+                  className="
+      flex items-center p-4
+      rounded-xl
+      border border-primary/20
+      bg-white
+      shadow-sm
+      cursor-pointer
+      transition-transform transition-shadow duration-200
+      hover:shadow-md
+      hover:-translate-y-1
+    "
                   onClick={() =>
                     (window.location.href = `/organization/${org.id}`)
                   }
                 >
-                  <div className="relative w-16 h-16 rounded-full overflow-hidden">
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                     <img
                       src={org.image}
                       alt={`${org.name} logo`}

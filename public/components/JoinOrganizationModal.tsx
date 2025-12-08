@@ -148,16 +148,19 @@ export default function JoinOrganizationModal({
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-[#D7FF9C] p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${
+        className={`bg-[#EBECE4] rounded-2xl border-4 border-primary p-6 max-w-[420px] w-full mx-4 shadow-2xl transition-all duration-300 ${
           isAnimating
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a]">
-          Request to join an organization
+        <h2 className="text-xl font-bold mb-1.5 text-[#1a1a1a] text-center">
+          Join An Organization
         </h2>
+        <h3 className="text-m font-semibold mb-1.5 text-gray-600 text-center mb-5">
+          Send a request to join an organization.
+        </h3>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm text-left">
@@ -171,13 +174,41 @@ export default function JoinOrganizationModal({
           </div>
         )}
         {/* Search bar */}
-        <input
-          type="text"
-          placeholder="Search organizations..."
-          className="w-full px-3 py-2 rounded-md bg-white border border-gray-300 text-sm mb-4"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="relative w-full mb-4">
+          <input
+            type="text"
+            placeholder="Search organizations..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="
+      w-full h-12 px-4 pr-12
+      rounded-xl
+      bg-white
+      border border-gray-300
+      shadow-sm
+      text-sm
+      focus:ring-2 focus:ring-primary/40
+      focus:border-primary/60
+      transition-all
+      outline-none
+    "
+          />
+
+          <svg
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+
         <div className="max-h-64 overflow-y-auto space-y-3">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-6 text-gray-600">
@@ -192,7 +223,17 @@ export default function JoinOrganizationModal({
             filtered.map((org) => (
               <div
                 key={org.id}
-                className="p-3 border rounded-lg bg-white shadow-sm flex justify-between items-center"
+                className="
+    p-4
+    border border-gray-200
+    rounded-xl
+    bg-white
+    shadow-sm
+    flex justify-between items-center
+    transition-all
+    hover:shadow-md
+    hover:-translate-y-0.5
+  "
               >
                 <div className="text-left">
                   <h3 className="font-semibold text-black">{org.title}</h3>
@@ -200,7 +241,7 @@ export default function JoinOrganizationModal({
                 </div>
 
                 <button
-                  className="bg-green hover:bg-green transition-colors text-black px-3 py-1 rounded-lg text-sm font-medium"
+                  className="bg-primary hover:bg-primary/90 cursor-pointer transition-colors text-black px-3 py-1 rounded-lg text-sm font-medium"
                   onClick={() => {
                     handleRequest(org.id);
                   }}
@@ -216,7 +257,17 @@ export default function JoinOrganizationModal({
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 transition"
+            className="
+      px-4 py-2
+      rounded-lg
+      bg-gray-100
+      text-gray-700
+      border border-gray-300
+      shadow-sm
+      hover:bg-gray-200
+      active:bg-gray-300
+      transition-all
+    "
           >
             Close
           </button>

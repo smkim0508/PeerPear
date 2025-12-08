@@ -124,7 +124,7 @@ class QuestionniarePairingPrompts:
     - Determinism & Formatting
         - Be deterministic; break ties by ascending student_id.
         - Return only the JSON for PairingLLMOutput (with groups) and reasoning.
-    - Make the reasoning clear and concise. Refer to students by name, not id when you output.
+    - Make the reasoning clear and concise. Refer to students by name, not id when you output. Use smooth, natural language to justify, not parameter names (e.g. "group size of ..." instead of "group_size = ...").
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for you to reference and guide your reasoning for new data.
@@ -167,7 +167,7 @@ class QuestionniarePairingPrompts:
             [101, 103, 104],
             [102, 105, 106]
         ],
-        "reasoning": "Event description emphasizes interdisciplinary pre-med project groups mixing clinical and technical themes. Questionnaire responses naturally split students into (1) technical healthcare innovation and (2) clinical/policy/ethics. Group 1 (Ava, Priya, Sora) aligns with ML-for-healthcare, patient-centered design, and predictive modeling—high event-aligned cohesion. Group 2 (Marco, Jon, Mina) aligns on healthcare economics, uncertainty modeling, and clinical narrative discussions. Group sizes meet group_size=3 with no singletons. Fairness pass confirmed maximizing minimum satisfaction under event context."
+        "reasoning": "Event description emphasizes interdisciplinary pre-med project groups mixing clinical and technical themes. Questionnaire responses naturally split students into (1) technical healthcare innovation and (2) clinical/policy/ethics. Group 1 (Ava, Priya, Sora) aligns with ML-for-healthcare, patient-centered design, and predictive modeling—high event-aligned cohesion. Group 2 (Marco, Jon, Mina) aligns on healthcare economics, uncertainty modeling, and clinical narrative discussions. Group sizes meet group size of 3 with no singletons. Fairness pass confirmed maximizing minimum satisfaction under event context."
     }}
 
     2)
@@ -203,7 +203,7 @@ class QuestionniarePairingPrompts:
             [201, 202, 205],
             [203, 204]
         ],
-        "reasoning": "With group_size=2 and 5 students, the groups should be split into 2 and 3 to avoid singleton. The event context and questionnaire responses yield 2 natural groups: (Riley, Nora, Elena) for conservation/field monitoring with tech and data, (Samir, Ivy) for sustainability-focused media production. There are no singletons, and each group shares clear event-aligned project interests."
+        "reasoning": "With group size of 2 and 5 students, the groups should be split into 2 and 3 to avoid singleton. The event context and questionnaire responses yield 2 natural groups: (Riley, Nora, Elena) for conservation/field monitoring with tech and data, (Samir, Ivy) for sustainability-focused media production. There are no singletons, and each group shares clear event-aligned project interests."
     }}
 
     3)
@@ -253,7 +253,7 @@ class QuestionniarePairingPrompts:
             [305, 306],
             [307, 308]
         ],
-        "reasoning": "Event is about pair-based strategic/tactical sessions. Questionnaire responses for each domain (strategy games, basketball drills, cooking, choreography) strongly favor tightly coupled pairs. Profile summaries reinforce, but questionnaire dominates. All pairs meet group_size=2; no remainder. (Oliver, Sofia) for strategy games, (Devin, Amara) for basketball, (Gianna, Noah) for cooking, (Yuna, Marcus) for choreography."
+        "reasoning": "Event is about pair-based strategic/tactical sessions. Questionnaire responses for each domain (strategy games, basketball drills, cooking, choreography) strongly favor tightly coupled pairs. Profile summaries reinforce, but questionnaire dominates. All pairs meet group size of 2; no remainder. (Oliver, Sofia) for strategy games, (Devin, Amara) for basketball, (Gianna, Noah) for cooking, (Yuna, Marcus) for choreography."
     }}
 
     4)
@@ -293,7 +293,7 @@ class QuestionniarePairingPrompts:
             [401, 403, 405],
             [402, 404, 406]
         ],
-        "reasoning": "Event is a low-structure social bonding context. Questionnaire responses are uniformly vague ('open to anything'), providing almost no differentiating signals. Thus profile_summary was used to form coherent social micro-communities aligned to the event: Group 1 (Emily, Hana, Sophia) clusters reflective/arts/culture interests (music, museums, visual arts), while Group 2 (Daniel, Kevin, Brian) clusters social/active hobbies (gaming, badminton, cooking, board games). This grouping avoids singletons and maximizes satisfaction given minimal questionnaire guidance."
+        "reasoning": "Event is a low-structure social bonding context. Questionnaire responses are uniformly vague ('open to anything'), providing almost no differentiating signals. Thus profile_summary was used to form coherent social micro-communities aligned to the event: Group 1 (Emily, Hana, Sophia) clusters reflective/arts/culture interests (music, museums, visual arts), while Group 2 (Daniel, Kevin, Brian) clusters social/active hobbies (gaming, badminton, cooking, board games). This grouping avoids singletons and maximizes satisfaction given minimal questionnaire guidance with group size of 3."
     }}
     </FEW-SHOT EXAMPLES>
     """

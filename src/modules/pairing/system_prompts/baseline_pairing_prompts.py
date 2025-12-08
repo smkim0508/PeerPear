@@ -111,7 +111,7 @@ class BaselinePairingPrompts:
     - If two students share no clear commonalities with anyone, place them where they minimally lower group satisfaction.
     - Deterministic tie-breaking by ascending student_id.
     - Return ONLY the required JSON.
-    - Make the reasoning clear and concise. Refer to students by name, not id when you output.
+    - Make the reasoning clear and concise. Refer to students by name, not id when you output. Use smooth, natural language to justify, not parameter names (e.g. "group size of ..." instead of "group_size = ...").
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for reference. DO NOT copy their results directly; reason fresh on new data.
@@ -136,7 +136,7 @@ class BaselinePairingPrompts:
             [101, 103, 104],
             [102, 105, 106]
         ],
-        "reasoning": "Event theme emphasizes tech/design/quant. Group 1 (Ava, Priya, Sora) clusters CS/ML/HCI and product interests. Group 2 (Marco, Jon, Mina) groups quant/finance interests with casual hobbies. Sizes meet group_size=3 with no singletons."
+        "reasoning": "Event theme emphasizes tech/design/quant. Group 1 (Ava, Priya, Sora) clusters CS/ML/HCI and product interests. Group 2 (Marco, Jon, Mina) groups quant/finance interests with casual hobbies. Sizes meet group size of 3 with no singletons."
     }}
 
     2)
@@ -164,7 +164,7 @@ class BaselinePairingPrompts:
             [205, 206, 207, 208],
             [209, 210]
         ],
-        "reasoning": "Event context highlights sustainability, field-work, and creative environmental media. Group 1 (Riley, Elena, Mateo, Nora) aligns on environmental/ecology/climate themes. Group 2 (Samir, Ivy, Leo, Harper) aligns on film/audio/stagecraft creative work. Group 3 (Quinn, Zara) aligns on product/UX. Sizes satisfy group_size=4 with no singletons."
+        "reasoning": "Event context highlights sustainability, field-work, and creative environmental media. Group 1 (Riley, Elena, Mateo, Nora) aligns on environmental/ecology/climate themes. Group 2 (Samir, Ivy, Leo, Harper) aligns on film/audio/stagecraft creative work. Group 3 (Quinn, Zara) aligns on product/UX. Sizes satisfy group size of 4 with no singletons."
     }}
 
     3)

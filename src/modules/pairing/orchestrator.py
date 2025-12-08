@@ -230,14 +230,19 @@ class PairingOrchestrator(PairingRepository):
         """
 
         # parse answer and map to question
+        # parse answer and map to question
         questions_map = {question.id: question for question in questions}
-        question_answer_pairs = [
-            QuestionAnswerPair(
-                question=questions_map[answer.question_id].question,
-                answer=answer.answer
-            )
-            for answer in response
-        ]
+        question_answer_pairs = []
+        for answer in response:
+            if answer.question_id in questions_map:
+                question_answer_pairs.append(
+                    QuestionAnswerPair(
+                        question=questions_map[answer.question_id].question,
+                        answer=answer.answer
+                    )
+                )
+            else:
+                logger.warning(f"Question ID {answer.question_id} not found in event questions.")
 
         logger.info(f"Question-Answer Pairs: {question_answer_pairs}")
 

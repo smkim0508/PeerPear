@@ -193,7 +193,7 @@ export default function OrganizationDashBoard({ params }: OrganizationDashboardP
           <main className="m-4 p-6 flex-1 min-h-screen">
             <div className="max-w-7xl mx-auto mb-6">
               <div className="text-center mb-6">
-                <h1 className="text-3xl sm:text-4xl font-bold text-nav-dark">My Programs</h1>
+                <h1 className="text-6xl sm:text-4xl font-extrabold text-nav-dark">My Programs</h1>
                 <p className="text-foreground/70">Create and manage programs for your organization.</p>
               </div>
             </div>

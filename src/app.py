@@ -12,7 +12,7 @@ from sqlalchemy import text
 from services.llm_service.llm_clients.google_genai_client import AsyncGenAITypedClient
 import uuid
 from common.logging import logger, session_id_var
-from auth.routes.auth import authenticate
+from auth.routes.auth import authenticate, is_authenticated
 
 # routes
 from api.pairing.routes.pairing import pairing_bp
@@ -82,11 +82,11 @@ def create_app() -> Flask:
     )
 
     if app.config["MAIN_DB_URL"] is None:
-        logger.info(f"DATABASE IS NOT SET")
+        logger.error(f"DATABASE IS NOT SET")
         raise
 
     if app.config["GOOGLE_API_KEY"] is None:
-        logger.info(f"GOOGLE API IS NOT SET")
+        logger.error(f"GOOGLE API IS NOT SET")
         raise
 
     # store the dependencies in app.extensions to link them with flask instance
@@ -97,6 +97,14 @@ def create_app() -> Flask:
     # store llm client in app.extensions to link them with flask instance
     llm_client = AsyncGenAITypedClient(api_key=app.config["GOOGLE_API_KEY"])
     app.extensions["llm_client"] = llm_client
+
+    # store media URL to fetch from Supabase buckets
+    MEDIA_URL = os.environ.get("MEDIA_URL", None)
+
+    app.config.update(MEDIA_URL=MEDIA_URL)
+    if app.config["MEDIA_URL"] is None:
+        logger.error(f"MEDIA URL IS NOT SET")
+        raise
 
     # TODO: need to dispose of all app lifetime dependencies
 
@@ -117,7 +125,23 @@ def create_app() -> Flask:
         session_id_var.set(f"session_id: {session_id}")
         logger.info(f"Starting session for request.")
 
-        # authenticate() # authenticate user on every request
+        # routes that don't require authentication
+        PUBLIC_ROUTES = [
+            '/health',
+            '/auth/login',
+            '/auth/logout',
+            '/auth/logout-cas',
+            '/auth/status',
+            '/auth/user',
+        ]
+
+        # skip authentication for public routes and OPTIONS preflight requests (for FE AJAX)
+        if request.path not in PUBLIC_ROUTES and request.method != 'OPTIONS':
+            # otherwise, check if user is authenticated via flask session
+            # NOTE: this guards against direct API route access
+            if not is_authenticated():
+                # if not authenticated, authenticate user (will redirect to CAS and back)
+                authenticate()
 
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal

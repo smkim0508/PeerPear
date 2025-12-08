@@ -121,7 +121,7 @@ export default function ProtectedRoute({
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-green">
+      <div className="flex items-center justify-center min-h-screen bg-primary">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-2 text-gray-600">Checking authentication...</p>
@@ -133,7 +133,7 @@ export default function ProtectedRoute({
   // Show loading while verifying organization access
   if (isAuthenticated && requiredRole === "organization" && !orgVerificationChecked) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-green">
+      <div className="flex items-center justify-center min-h-screen bg-primary">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-2 text-gray-600">Verifying organization access...</p>
@@ -144,7 +144,7 @@ export default function ProtectedRoute({
 
   if (isAuthenticated && !profileChecked) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-green">
+      <div className="flex items-center justify-center min-h-screen bg-primary">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-2 text-gray-600">Preparing your workspace...</p>
@@ -164,7 +164,7 @@ export default function ProtectedRoute({
     if (requiredRole && storedUserType && storedUserType !== requiredRole) {
       // Show loading while redirect is happening
       return (
-        <div className="flex items-center justify-center min-h-screen bg-[#C3DD90]">
+        <div className="flex items-center justify-center min-h-screen bg-primary">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
             <p className="mt-2 text-gray-600">Redirecting to your dashboard...</p>
@@ -177,7 +177,7 @@ export default function ProtectedRoute({
 
   // Show loading while redirect is happening
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#C3DD90]">
+    <div className="flex items-center justify-center min-h-screen bg-primary">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
         <p className="mt-2 text-gray-600">Redirecting to login...</p>

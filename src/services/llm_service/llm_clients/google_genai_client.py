@@ -19,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 class AsyncGenAITypedClient(TypedLLMProtocol, ProvidesProviderInfo):
     def __init__(
         self,
-        model_name: str = "gemini-2.0-flash", # given from documentation, could be swapped depending on rate limits / pricing
+        model_name: str = "gemini-2.5-flash-lite", # given from documentation, could be swapped depending on rate limits / pricing
         *,
         api_key: str | None = None,
         retry_attempts: int = 2,
