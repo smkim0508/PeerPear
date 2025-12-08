@@ -416,7 +416,7 @@ export default function ProfilePage() {
                     }
                   />
 
-                  <PearButton text="Add" onClick={handleAddHobby} />
+                  <PearButton text="Add" onClick={handleAddHobby} className="hover:scale-105" />
                 </div>
 
                 {hobbyError && (
@@ -455,7 +455,7 @@ export default function ProfilePage() {
 
             {/* Save Button */}
             <div className="text-center">
-              <PearButton text={isLoading ? "Saving Profile..." : "Save Profile"} disabled={isLoading} />
+              <PearButton text={isLoading ? "Saving Profile..." : "Save Profile"} disabled={isLoading} className="hover:scale-105" />
             </div>
           </form>
         </main>

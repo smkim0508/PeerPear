@@ -121,7 +121,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </div>
 
         <PearButton
-          className="w-full cursor-pointer"
+          className="w-full cursor-pointer hover:scale-105 hover:shadow-lg"
           text="Continue with CAS"
           onClick={handleLogin}
         />

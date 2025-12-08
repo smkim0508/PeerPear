@@ -180,7 +180,7 @@ export default function CreateEventModal({
           <PearButton
             text="×"
             onClick={onClose}
-            className="w-8 h-8 p-0 text-lg font-bold leading-none rounded-full bg-[#8cbf70] hover:bg-[#8cbf70] shadow-md"
+            className="w-8 h-8 p-0 text-lg font-bold leading-none rounded-full bg-[#8cbf70] hover:bg-[#8cbf70] shadow-md hover:scale-105 hover:shadow-lg "
           />
         </div>
         <div className="flex flex-col items-center text-center mb-6">
@@ -216,7 +216,7 @@ export default function CreateEventModal({
               {submitError}
             </AlertDescription>
             <button
-              className="absolute top-2 right-3 text-red-500 hover:text-red-700"
+              className="absolute top-2 right-3 text-red-500 hover:text-red-700 "
               onClick={() => setSubmitError(null)}
             >
               ×
@@ -313,7 +313,7 @@ export default function CreateEventModal({
 
         <PearButton
           className={`w-full px-3 py-2 mt-6 ${
-            submitting ? "opacity-70 cursor-not-allowed" : ""
+            submitting ? "opacity-70 cursor-not-allowed" : "hover:scale-105 hover:shadow-lg hover:-translate-y-1"
           }`}
           text={submitting ? "Submitting..." : "Submit Program"}
           onClick={handleSubmit}

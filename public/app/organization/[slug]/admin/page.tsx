@@ -449,7 +449,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => openPromoteModal(admin)}
-                            className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition"
+                            className="hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90  hover:scale-105 transition"
                           >
                             Promote to Owner
                           </button>
@@ -458,7 +458,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                           <button
                             onClick={() => openPromoteModal(admin)}
                             className="
-      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 transition
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 hover:scale-105 transition
     "
                           >
                             <ChevronUpCircleIcon className="w-5 h-5 text-white" />
@@ -466,7 +466,7 @@ export default function AdminPage({ params }: AdminPageProps) {
 
                           <button
                             onClick={() => openRemoveModal(admin)}
-                            className="hidden sm:flex px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition"
+                            className="hidden sm:flex px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 hover:scale-105 transition"
                           >
                             Remove
                           </button>
@@ -475,7 +475,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                           <button
                             onClick={() => openRemoveModal(admin)}
                             className="
-      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 transition
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 hover:scale-105 transition
     "
                           >
                             <X className="w-5 h-5 text-red-600" />
@@ -525,7 +525,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                           <button
                             onClick={() => openAcceptModal(req)}
                             className="
-      hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition
+      hidden sm:flex px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:scale-105 hover:bg-primary/90 transition
     "
                           >
                             Accept
@@ -535,7 +535,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                           <button
                             onClick={() => openAcceptModal(req)}
                             className="
-      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 transition
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 hover:scale-105 transition
     "
                           >
                             <CheckCircle className="w-5 h-5 text-white" />
@@ -545,7 +545,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                           <button
                             onClick={() => openDenyModal(req)}
                             className="
-      hidden sm:flex px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition
+      hidden sm:flex px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:scale-105 hover:bg-red-100 transition
     "
                           >
                             Deny
@@ -555,7 +555,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                           <button
                             onClick={() => openDenyModal(req)}
                             className="
-      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 transition
+      sm:hidden w-9 h-9 flex items-center justify-center rounded-full bg-red-100 hover:scale-105 hover:bg-red-200 transition
     "
                           >
                             <X className="w-5 h-5 text-red-600" />

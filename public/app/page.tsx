@@ -91,7 +91,7 @@ export default function Home() {
               Ready to simplify your pairings?
             </h3>
             <div className="mt-5">
-              <PearButton text="Get started" onClick={openLoginModal} className="cursor-pointer" />
+              <PearButton text="Get started" onClick={openLoginModal} className="cursor-pointer hover:scale-105 transition duration-300" />
             </div>
           </div>
         </section>

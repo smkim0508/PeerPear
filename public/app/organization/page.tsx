@@ -214,7 +214,7 @@ export default function OrganizationPage() {
                       setCurrentOrgToLeave(org);
                       setConfirmOpen(true);
                     }}
-                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors "
                   >
                     Leave
                   </button>
@@ -234,9 +234,11 @@ export default function OrganizationPage() {
         {/* Join Organization Button */}
         <div className="flex justify-center mb-4">
           <PearButton
-                    className="w-full cursor-pointer p-6 text-md"
+                    className="w-full cursor-pointer p-6 text-md hover:scale-105
+                    hover:shadow-lg hover:-translate-y-2"
                     text="Join An Organization"
                     onClick={ () => {setIsModalOpen(true)}}
+                    
                   />
         </div>
       </div>

@@ -307,7 +307,7 @@ export default function Navbar({
                               </li>
                             ))}
                           </ul>
-                          <ul className="grid w-[230px] gap-2 mt-3 bg-primary rounded-md shadow-md">
+                          <ul className="grid w-[230px] gap-2 mt-3 bg-primary rounded-md shadow-md hover:scale-103 hover:shadow-lg transition duration:300">
                             <NavigationMenuLink asChild>
                               <Link
                                 href={`/organization/`}

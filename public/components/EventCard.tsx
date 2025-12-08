@@ -126,7 +126,7 @@ export default function EventCard({ event, isRegistered = false }: EventCardProp
           <PearButton
             text="View Details"
             onClick={handleViewDetails}
-            className="w-full cursor-pointer"
+            className="w-full cursor-pointer hover:scale-105 "
           />
         </CardFooter>
       </div>
