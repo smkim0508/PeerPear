@@ -179,6 +179,8 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           `${apiUrl}/question_management/update-question/${data.id}`,
           {
             method: "PATCH",
+            credentials: "include",
+
             headers: {
               "Content-Type": "application/json",
             },
@@ -192,6 +194,8 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
         //Endpoint is:  POST /create-question
         res = await fetch(`${apiUrl}/question_management/create-question`, {
           method: "POST",
+          credentials: "include",
+
           headers: {
             "Content-Type": "application/json",
           },
@@ -233,6 +237,7 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
         `${apiUrl}/question_management/delete-question/${questionId}`,
         {
           method: "DELETE",
+          credentials: "include",
         }
       );
 
@@ -315,11 +320,13 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
 
             {/* Status Box */}
             <div className="w-full max-w-2xl">
-              <Card className={`shadow-lg border-2 ${
-                edit && !isEditingDisabled 
-                  ? 'border-green-400 bg-green-50' 
-                  : 'border-amber-400 bg-amber-50'
-              }`}>
+              <Card
+                className={`shadow-lg border-2 ${
+                  edit && !isEditingDisabled
+                    ? "border-green-400 bg-green-50"
+                    : "border-amber-400 bg-amber-50"
+                }`}
+              >
                 <CardContent className="py-6 px-8">
                   <div className="flex items-center justify-center gap-3">
                     {edit && !isEditingDisabled ? (
@@ -355,8 +362,6 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {successMessage && (
             <PearAlert type="success" message={successMessage} />
           )}
-
-          
 
           {showAddForm && (
             <PearForm
