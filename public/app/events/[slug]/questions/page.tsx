@@ -313,45 +313,11 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
                   {organization.org_name}
                 </h2>
               )}
-            </div>
-
-            {/* Divider */}
-            <div className="w-full max-w-2xl border-t-2 border-gray-200 my-5"></div>
-
-            {/* Status Box */}
-            <div className="w-full max-w-2xl">
-              <Card
-                className={`shadow-lg border-2 ${
-                  edit && !isEditingDisabled
-                    ? "border-green-400 bg-green-50"
-                    : "border-amber-400 bg-amber-50"
-                }`}
-              >
-                <CardContent className="py-6 px-8">
-                  <div className="flex items-center justify-center gap-3">
-                    {edit && !isEditingDisabled ? (
-                      <>
-                        <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-                        <p className="text-lg font-semibold text-green-900">
-                          Edit Access Enabled
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                        <p className="text-lg font-semibold text-amber-900">
-                          View Only Mode
-                        </p>
-                      </>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-700 mt-3 text-center">
-                    {edit && !isEditingDisabled
-                      ? "You can manage the questions participants will answer for this program"
-                      : "The program has begun and you can no longer edit questions"}
-                  </p>
-                </CardContent>
-              </Card>
+              <p className="text-gray-600 mb-8">
+                {edit && !isEditingDisabled
+                  ? "You are able to manage the questions participants will answer for this program before the program begins"
+                  : "The program has begun and you are no longer able to edit the program"}
+              </p>
             </div>
 
             {/* Divider */}
@@ -361,6 +327,19 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
           {error && <PearAlert type="error" message={error} />}
           {successMessage && (
             <PearAlert type="success" message={successMessage} />
+          )}
+
+          {isEditingDisabled && (
+            <div className="mb-6">
+              <PearAlert
+                type="warning"
+                message={
+                  eventStatus === "TERMINATED"
+                    ? "This event has ended. You can no longer edit questions."
+                    : "Pairings have been published. You can no longer edit questions."
+                }
+              />
+            </div>
           )}
 
           {showAddForm && (
