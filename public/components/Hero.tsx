@@ -15,7 +15,7 @@ export default function Hero({ onTryNowClick }: HeroProps) {
             <span className="relative inline-block">
               smarter
               <Squiggle
-                width={220}
+                width={275}
                 className="left-0 right-0 -bottom-1 hidden sm:flex"
               />
             </span>
@@ -23,7 +23,7 @@ export default function Hero({ onTryNowClick }: HeroProps) {
             <span className="relative inline-block">
               stronger communities
               <Squiggle
-                width={520}
+                width={750}
                 className="left-0 right-0 -bottom-1 hidden sm:flex"
               />
             </span>
