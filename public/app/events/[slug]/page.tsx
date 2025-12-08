@@ -697,9 +697,10 @@ export default function EventPage2({ params }: EventPageProps) {
                 <p className="font-bold text-lg mb-2 text-white">
                   Time Remaining
                 </p>
-                <p className="text-2xl font-mono text-white">
-                  {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m{" "}
-                  {timeLeft.seconds}s
+                <p className="text-2xl font-mono text-white flex justify-center gap-2">
+                  <span className="inline-block w-16 text-center">{timeLeft.days}d</span>
+                  <span className="inline-block w-12 text-center">{timeLeft.hours}h</span>
+                  <span className="inline-block w-14 text-center">{timeLeft.minutes}m</span>
                 </p>
               </div>
               <div className="mt-4 text-center text-gray-700">
