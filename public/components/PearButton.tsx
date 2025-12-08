@@ -28,7 +28,7 @@ export default function PearButton({
       size={resolvedSize}
       onClick={onClick}
       disabled={!!disabled}
-      className={`font-semibold ${className || ""}`}
+      className={`font-semibold cursor-pointer ${className || ""}`}
     >
       {text}
     </Button>
