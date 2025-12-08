@@ -69,7 +69,9 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   const fetchOrganization = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const res = await fetch(`${apiUrl}/events/${event_id}/organization`);
+      const res = await fetch(`${apiUrl}/events/${event_id}/organization`, {
+        credentials: "include",
+      });
       const data = await res.json();
       if (res.ok) {
         setOrganization(data.organization || null);
@@ -143,7 +145,9 @@ export default function EventQuestionsPage({ params }: QuestionnairePageProps) {
   const fetchQuestions = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
-      const res = await fetch(`${apiUrl}/question_management/${event_id}`);
+      const res = await fetch(`${apiUrl}/question_management/${event_id}`, {
+        credentials: "include",
+      });
       const data = await res.json();
       if (res.ok) {
         setQuestions(data.questions || []);
