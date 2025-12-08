@@ -420,6 +420,7 @@ class BigLittlePairingPrompts:
         - Be deterministic; break ties by ascending student_id.
         - Return only the JSON for PairingLLMOutput (with groups) and reasoning.
     - Make the reasoning clear and concise. Refer to students by name, not id when you output. Use smooth, natural language to justify, not parameter names (e.g. "group size of ..." instead of "group_size = ...").
+    - Also make sure to refer to each sibling role in the reasoning field as "little sibling" and "big sibling", instead of the enum "LITTLE_SIBLING" and "BIG_SIBLING".
 
     <FEW-SHOT EXAMPLES>
     Below are few-shot examples for you to reference and guide your reasoning for new data.

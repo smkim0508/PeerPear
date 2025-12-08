@@ -53,7 +53,7 @@ export default function PearQuestion({
         <div className="ml-14">
           <InputGroup>
             <InputGroupTextarea
-              placeholder="Share your thousghts here."
+              placeholder="Share your thoughts here."
               value={value}
               onChange={(e) => onChange(questionId, e.target.value)}
               maxLength={maxLength}
