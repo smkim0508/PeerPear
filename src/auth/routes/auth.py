@@ -11,7 +11,7 @@ from db.models.orgadmin import OrgAdminTable
 from api.dependencies import get_db_sessionmaker
 
 # fetch the default redirection URL for log in, prod is set on heroku
-_REDIRECT_URL = os.environ.get("REDIRECT_URL", "http://localhost:3000/")
+_REDIRECT_URL = os.environ.get("REDIRECTION_URL", "http://localhost:3000/")
 
 #-----------------------------------------------------------------------
 
