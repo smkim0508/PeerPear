@@ -13,7 +13,6 @@ if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-
 def upload_event_image(
     event_id: int,
     file_bytes: bytes,
