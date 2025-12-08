@@ -10,6 +10,7 @@ import { PearAlert } from "@/components/PearAlert";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft } from "lucide-react";
+import { fetchEventById } from "@/lib/events";
 
 interface QuestionnairePageProps {
   params: Promise<{ slug: string }>;
@@ -49,6 +50,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     message: string;
   } | null>(null);
   const [validRegistration, setValidRegistration] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(false);
   const event_id = parseInt(slug);
   const user_id = user?.id;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
@@ -74,6 +76,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const isOrganizationUser = userType === "organization";
 
   const handleAnswerChange = (questionId: number, newValue: string) => {
+    if (isReadOnly) return;
     setAnswers((prev) => ({
       ...prev,
       [questionId]: newValue,
@@ -153,10 +156,22 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   };
 
   useEffect(() => {
+    const checkEventStatus = async () => {
+      if (!event_id) return;
+      const event = await fetchEventById(event_id);
+      if (event) {
+        if (event.status === "TERMINATED" || event.status === "PAIRING_PUBLISHED") {
+          setIsReadOnly(true);
+        }
+      }
+    };
+
     const verify_registration = async () => {
       if (!user_id) {
         return;
       }
+
+      await checkEventStatus();
 
       // For organization users, skip registration check and load questions directly
       if (isOrganizationUser) {
@@ -202,6 +217,8 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
 
 
   const handleSubmit = async () => {
+    if (isReadOnly) return;
+
     if (!user_id) {
       setAlert({
         type: "error",
@@ -322,12 +339,14 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
           </div>
           <div className="text-center mb-8 max-w-2xl">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              {isOrganizationUser ? "Program Responses" : "Questionnaire Form"}
+              {isOrganizationUser ? "Program Responses" : isReadOnly ? "Your Questionnaire Responses" : "Questionnaire Form"}
             </h1>
             <p className="text-lg text-gray-600 leading-relaxed mb-3">
               {isOrganizationUser
                 ? "View all participant responses for this program."
-                : "Help us find the perfect peer match for you by answering a few questions about your preferences and goals."}
+                : isReadOnly
+                  ? "View the responses you submitted for this program."
+                  : "Help us find the perfect peer match for you by answering a few questions about your preferences and goals."}
             </p>
             {alert && <PearAlert type={alert.type} message={alert.message} />}
           </div>
@@ -403,11 +422,12 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                         options={q.options || []}
                         value={answers[q.id] || ""}
                         onChange={handleAnswerChange}
+                        disabled={isReadOnly}
                       />
                     ))
                   )}
 
-                  {!loading && !error && questions.length > 0 && (
+                  {!loading && !error && questions.length > 0 && !isReadOnly && (
                     <div className="border-t border-gray-200 pt-8 mt-8">
                       <div className="bg-gray-50 rounded-xl p-6 mb-6">
                         <p className="text-sm text-gray-600 mb-4 leading-relaxed">
@@ -443,6 +463,19 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                           className="px-8 py-6 text-lg font-semibold min-w-[200px] cursor-pointer"
                         />
                       </div>
+                    </div>
+                  )}
+
+                  {isReadOnly && (
+                    <div className="text-center pt-8">
+                      <p className="text-gray-600 mb-4">
+                        This questionnaire is closed for editing.
+                      </p>
+                      <PearButton
+                        text="Back to Program"
+                        onClick={() => router.push(`/events/${event_id}`)}
+                        dark
+                      />
                     </div>
                   )}
                 </div>

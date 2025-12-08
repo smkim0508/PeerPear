@@ -312,9 +312,11 @@ export default function Navbar({
                                         "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
                                     }}
                                   />
-                                  <span className="text-sm font-medium text-black truncate min-w-0">
-                                    {org.name}
-                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-sm font-medium text-black whitespace-normal break-all block">
+                                      {org.name}
+                                    </span>
+                                  </div>
                                 </Link>
                               </NavigationMenuLink>
                             </li>

@@ -225,15 +225,6 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
 
               <div className="flex gap-3">
                 <PearButton text={isLoading ? "Saving..." : "Save Changes"} onClick={() => { }} />
-                <PearButton
-                  text="Cancel"
-                  variant="outline"
-                  onClick={() => {
-                    setEditName(orgName);
-                    setMessage(null);
-                    setErrors({});
-                  }}
-                />
               </div>
 
               {message && (

@@ -17,7 +17,7 @@ interface PearQuestionProps {
   options?: string[];
 
   value: string;
-  onChange: (questionId:number,newValue: string) => void;
+  onChange: (questionId: number, newValue: string) => void;
 }
 
 export default function PearQuestion({
@@ -29,7 +29,8 @@ export default function PearQuestion({
   options = [],
   value,
   onChange,
-}: PearQuestionProps) {
+  disabled = false,
+}: PearQuestionProps & { disabled?: boolean }) {
   const charactersLeft = maxLength - value.length;
 
   return (
@@ -43,14 +44,14 @@ export default function PearQuestion({
           <InputGroupTextarea
             placeholder="Enter your message"
             value={value}
-            onChange={(e) => onChange(questionId,e.target.value)}
+            onChange={(e) => onChange(questionId, e.target.value)}
             maxLength={maxLength}
+            disabled={disabled}
           />
           <InputGroupAddon align="block-end">
             <InputGroupText
-              className={`text-xs ${
-                charactersLeft < 20 ? "text-red-500" : "text-muted-foreground"
-              }`}
+              className={`text-xs ${charactersLeft < 20 ? "text-red-500" : "text-muted-foreground"
+                }`}
             >
               {charactersLeft} characters left
             </InputGroupText>
@@ -59,12 +60,13 @@ export default function PearQuestion({
       ) : (
         <RadioGroup
           value={value}
-          onValueChange={(val) => onChange(questionId,val)}
+          onValueChange={(val) => onChange(questionId, val)}
           className="gap-3"
+          disabled={disabled}
         >
           {options.map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
-              <RadioGroupItem value={option} id={`${number}-${index}`} />
+              <RadioGroupItem value={option} id={`${number}-${index}`} disabled={disabled} />
               <Label
                 htmlFor={`${number}-${index}`}
                 className="text-sm font-normal cursor-pointer"
