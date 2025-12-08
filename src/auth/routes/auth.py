@@ -1,5 +1,6 @@
 import urllib.request
 import urllib.parse
+import os
 import re
 import json
 from functools import wraps
@@ -8,6 +9,9 @@ from sqlalchemy import select
 from db.crud.user_crud import get_or_create_user
 from db.models.orgadmin import OrgAdminTable
 from api.dependencies import get_db_sessionmaker
+
+# fetch the default redirection URL for log in, prod is set on heroku
+_REDIRECT_URL = os.environ.get("REDIRECT_URL", "http://localhost:3000/")
 
 #-----------------------------------------------------------------------
 
@@ -216,7 +220,7 @@ def require_auth(f):
 def login():
     """Force CAS authentication with optional redirect"""
     # Get redirect URL from query parameter, default to frontend root
-    redirect_url = request.args.get("redirect_url", "http://localhost:3000/")
+    redirect_url = request.args.get("redirect_url", _REDIRECT_URL)
     
     # If user is already authenticated, redirect immediately
     if is_authenticated():

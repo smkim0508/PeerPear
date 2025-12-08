@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from urllib.parse import urlsplit
 import os
-from flask import Flask, g, jsonify, send_from_directory, current_app, request, redirect
+from flask import Flask, g, jsonify, send_from_directory, current_app, request, redirect, session
 from flask_cors import CORS
 from db.models.base.main_db import create_engine_and_sessionmaker
 from dotenv import load_dotenv
@@ -137,11 +137,15 @@ def create_app() -> Flask:
 
         # skip authentication for public routes and OPTIONS preflight requests (for FE AJAX)
         if request.path not in PUBLIC_ROUTES and request.method != 'OPTIONS':
-            # otherwise, check if user is authenticated via flask session
-            # NOTE: this guards against direct API route access
+            # check if user is authenticated via flask session
             if not is_authenticated():
-                # if not authenticated, authenticate user (will redirect to CAS and back)
-                authenticate()
+                # Return 401 for all unauthenticated requests to protected routes
+                # Frontend should catch this and redirect to /auth/login
+                # Only /auth/login route itself handles CAS redirect
+                return jsonify({
+                    "error": "Unauthorized",
+                    "message": "Authentication required. Please log in."
+                }), 401
 
         SessionLocal = current_app.extensions["db"]["SessionLocal"]
         g.db = SessionLocal
