@@ -9,8 +9,9 @@ import { use, useEffect, useState } from "react";
 import { PearAlert } from "@/components/PearAlert";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { fetchEventById } from "@/lib/events";
+
 
 interface QuestionnairePageProps {
   params: Promise<{ slug: string }>;
@@ -54,6 +55,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const event_id = parseInt(slug);
   const user_id = user?.id;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Organization-specific state
   const [participants, setParticipants] = useState<any[]>([]);
@@ -262,6 +264,8 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
       return;
     }
 
+    setIsSubmitting(true);
+
     // Validate answers
     const invalidQuestions = validateAnswers(questions, answers);
     if (invalidQuestions.length > 0) {
@@ -271,6 +275,8 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
           ", "
         )}`,
       });
+      setIsSubmitting(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -296,6 +302,7 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
         if (!validRegistration) {
           handleValidateRegistration();
         }
+        window.scrollTo({ top: 0, behavior: "smooth" });
         setAlert({
           type: "success",
           message: "Questionnaire submitted successfully!",
@@ -308,12 +315,14 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
           type: "error",
           message: data.error || "Failed to submit questionnaire.",
         });
+        setIsSubmitting(false);
       }
     } catch (err) {
       setAlert({
         type: "error",
         message: "Server error. Please try again later.",
       });
+      setIsSubmitting(false);
     }
   };
 
@@ -495,15 +504,20 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
                         </div>
 
                         <div className="flex justify-center">
-                          <PearButton
-                            onClick={handleSubmit}
-                            text={
-                              validRegistration
-                                ? "Update Questionnaire"
+                        <PearButton
+                          onClick={handleSubmit}
+                          disabled={isSubmitting}
+                          className={`px-8 py-6 text-lg font-semibold min-w-[200px] ${
+                            isSubmitting ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                          }`}
+                          text={
+                            isSubmitting 
+                              ? "Updating..." 
+                              : validRegistration 
+                                ? "Update Questionnaire" 
                                 : "Submit Questionnaire"
-                            }
-                            className="px-8 py-6 text-lg font-semibold min-w-[200px] cursor-pointer"
-                          />
+                          }
+                        />
                         </div>
                       </div>
                     )}
