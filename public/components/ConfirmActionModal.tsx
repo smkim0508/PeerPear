@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface ConfirmActionModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface ConfirmActionModalProps {
   cancelText?: string;
   onConfirm: () => Promise<void> | void;
   checkbox?: string;
+  variant?: "warning" | "success" | "danger";
 }
 
 export default function ConfirmActionModal({
@@ -20,6 +22,7 @@ export default function ConfirmActionModal({
   cancelText = "No",
   onConfirm,
   checkbox,
+  variant = "warning",
 }: ConfirmActionModalProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
@@ -31,7 +34,7 @@ export default function ConfirmActionModal({
     } else {
       document.body.style.overflow = "auto";
       setIsAnimating(false);
-      setIsChecked(false); // reset state when closed
+      setIsChecked(false);
     }
     return () => {
       document.body.style.overflow = "auto";
@@ -40,53 +43,93 @@ export default function ConfirmActionModal({
 
   if (!isOpen) return null;
 
+  const variantStyles = {
+    warning: {
+      icon: <AlertCircle className="w-12 h-12 text-amber-500" />,
+      iconBg: "bg-amber-100",
+      border: "border-amber-300",
+    },
+    success: {
+      icon: <CheckCircle2 className="w-12 h-12 text-green-500" />,
+      iconBg: "bg-green-100",
+      border: "border-green-300",
+    },
+    danger: {
+      icon: <AlertCircle className="w-12 h-12 text-red-500" />,
+      iconBg: "bg-red-100",
+      border: "border-red-300",
+    },
+  };
+
+  const currentVariant = variantStyles[variant];
+
   return (
     <div
-      className={`fixed inset-0 bg-[#0000003c] flex items-center justify-center text-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
         isAnimating ? "opacity-100" : "opacity-0"
       }`}
       onClick={onClose}
     >
       <div
-        className={`bg-[#EBECE4] rounded-2xl border-4 border-primary p-6 max-w-sm w-full mx-4 shadow-2xl transition-all duration-300 ${
+        className={`bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl transition-all duration-300 ${
           isAnimating
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-4"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold text-[#1a1a1a] mb-4">{message}</h2>
+        <div className="flex flex-col items-center text-center">
+          <div className={`${currentVariant.iconBg} rounded-full p-4 mb-4`}>
+            {currentVariant.icon}
+          </div>
 
-        {/* Acknowledgement checkbox */}
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Are you sure?
+          </h2>
+          
+          <p className="text-gray-600 text-base leading-relaxed mb-6">
+            {message}
+          </p>
+        </div>
+
         {checkbox && (
-          <div className="flex items-center justify-start gap-3 mt-4">
+          <div className={`flex items-start gap-3 p-4 rounded-lg border-2 ${currentVariant.border} bg-gray-50 mb-6`}>
             <input
               type="checkbox"
               checked={isChecked}
               onChange={(e) => setIsChecked(e.target.checked)}
-              className="h-5 w-5"
+              className="h-5 w-5 mt-0.5 cursor-pointer accent-primary flex-shrink-0"
+              id="confirmation-checkbox"
             />
-            <label className="text-left text-sm text-gray-700">
+            <label 
+              htmlFor="confirmation-checkbox"
+              className="text-left text-sm text-gray-700 leading-relaxed cursor-pointer"
+            >
               {checkbox}
             </label>
           </div>
         )}
 
-        <div className="flex justify-center gap-10 mt-6">
+        <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 transition"
+            className="flex-1 px-6 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-all hover:scale-105 active:scale-95"
           >
             {cancelText}
           </button>
 
-          <button disabled = {false}
+          <button
+            disabled={checkbox ? !isChecked : false}
             onClick={async () => {
               if (checkbox && !isChecked) return;
               await onConfirm();
               onClose();
             }}
-            className={`px-4 py-2 rounded-md text-white transition bg-primary hover:bg-primary/90 cursor-pointer`}
+            className={`flex-1 px-6 py-3 rounded-lg text-white font-semibold transition-all ${
+              checkbox && !isChecked
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 cursor-pointer"
+            }`}
           >
             {confirmText}
           </button>
