@@ -19,11 +19,11 @@ from db.models.orgadmin_requests import OrgAdminRequestTable
 from common.types.event_enums import EventStatus, EventRole
 from common.types.user import ClassYear
 
-# NOTE: Demo Case 3 - Kung Fu Tea Pairing Event
+# NOTE: Demo Case 3 - Two Events: Kung Fu Tea & PPMS Premed Mentorship
 """
 OVERVIEW:
 
-Event: "Kung Fu Tea Pairing" - AASA boba tea matching event
+Event 1: "Kung Fu Tea Pairing" - AASA boba tea matching event
 - 8 participants (4 BIG_SIBLING, 4 LITTLE_SIBLING)
 - Sungmin is the org admin
 - Gary is already registered as a student
@@ -33,6 +33,17 @@ Intended pairings (all size 2):
 2. DK (BIG) + Jaden (LITTLE): Both milk tea lovers, exploration toppings/goals
 3. Alice (BIG) + Brian (LITTLE): Both fruit tea, cultural exchange focus
 4. Carol (BIG) + David (LITTLE): Both milk tea, mentorship focus
+
+Event 2: "PPMS Premed Mentorship Program" - PPMS premed mentorship pairing
+- 8 participants (same users, 4 BIG_SIBLING, 4 LITTLE_SIBLING)
+- Sungmin is the org admin/owner
+- Different role assignments and pairing opportunities
+
+Intended pairings (all size 2):
+1. Alice (BIG) + Nadula (LITTLE): Both interested in Surgery, Clinical Practice
+2. Gary (BIG) + Brian (LITTLE): Both interested in Primary Care/Public Health
+3. Carol (BIG) + David (LITTLE): Both interested in Research/Academic Medicine
+4. DK (BIG) + Jaden (LITTLE): Both interested in Psychiatry/Mental Health
 """
 
 def create_user_data(session):
@@ -108,7 +119,7 @@ def create_user_data(session):
     print("Dummy users added.")
 
 def create_organization_data(session):
-    """Create organizations (same as before)"""
+    """Create organizations including PPMS for premed mentorship"""
     organizations = [
         OrganizationTable(
             org_name="AASA",
@@ -121,6 +132,10 @@ def create_organization_data(session):
         OrganizationTable(
             org_name="Jocelyn's Test Org",
             description="Demo Test Org for Jocelyn."
+        ),
+        OrganizationTable(
+            org_name="PPMS",
+            description="Princeton Premedical Society"
         )
     ]
 
@@ -132,7 +147,7 @@ def create_organization_data(session):
 def create_orgadmin_data(session):
     """
     All team members (Gary, Sungmin, Nadula, Jaden, DK) are owners of both AASA and KSAP
-    Sungmin manages the Kung Fu Tea event for AASA
+    Sungmin manages the Kung Fu Tea event for AASA and PPMS Premed Mentorship Program
     """
     org_admins = [
         # Gary - owner of both orgs
@@ -146,7 +161,7 @@ def create_orgadmin_data(session):
             organization_id=2,  # KSAP
             is_owner=True
         ),
-        # Sungmin - owner of both orgs, manages Kung Fu Tea event
+        # Sungmin - owner of AASA, KSAP, and PPMS
         OrgAdminTable(
             user_id=2,  # sungmin
             organization_id=1,  # AASA
@@ -155,6 +170,11 @@ def create_orgadmin_data(session):
         OrgAdminTable(
             user_id=2,  # sungmin
             organization_id=2,  # KSAP
+            is_owner=True
+        ),
+        OrgAdminTable(
+            user_id=2,  # sungmin
+            organization_id=4,  # PPMS
             is_owner=True
         ),
         # Nadula - owner of both orgs
@@ -199,7 +219,9 @@ def create_orgadmin_data(session):
 
 def create_event_data(session):
     """
-    Create the Kung Fu Tea Pairing event for AASA
+    Create two events:
+    1. Kung Fu Tea Pairing for AASA
+    2. PPMS Premed Mentorship Program for PPMS
     """
     events = [
         EventTable(  # event_id=1
@@ -207,6 +229,14 @@ def create_event_data(session):
             description="Get paired up for free boba tea with your group!",
             end_date=datetime.now() + timedelta(weeks=4),
             organization_id=1,  # AASA
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
+        ),
+        EventTable(  # event_id=2
+            title="PPMS Premed Mentorship Program",
+            description="Get paired up with a student mentor to help your premed journey!",
+            end_date=datetime.now() + timedelta(weeks=4),
+            organization_id=4,  # PPMS
             status=EventStatus.STARTED,
             check_sibling_roles=True
         )
@@ -219,13 +249,18 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     """
-    Register 8 users for the Kung Fu Tea event:
+    Register 8 users for both events with different role assignments.
+
+    Kung Fu Tea event (event_id=1):
     - 4 BIG_SIBLING: Gary, DK, Alice, Carol
     - 4 LITTLE_SIBLING: Nadula, Jaden, Brian, David
 
-    response_summary reflects their answers to the 3 questions
+    PPMS Premed Mentorship event (event_id=2):
+    - 4 BIG_SIBLING: Alice, Gary, Carol, DK
+    - 4 LITTLE_SIBLING: Nadula, Brian, David, Jaden
     """
     registrations = [
+        # ===== KUNG FU TEA EVENT (event_id=1) =====
         # BIG_SIBLING registrations
         EventRegistrationsTable(
             user_id=1,  # gary
@@ -283,6 +318,66 @@ def create_event_registration_data(session):
             role=EventRole.LITTLE_SIBLING,
             valid_registration=True,
             response_summary="Loves milk tea with regular pearls. Looking to find a mentor."
+        ),
+
+        # ===== PPMS PREMED MENTORSHIP EVENT (event_id=2) =====
+        # BIG_SIBLING registrations
+        EventRegistrationsTable(
+            user_id=6,  # alice
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Interested in Surgery with clinical practice focus. Active in hospital volunteering and anatomy research. Wants to mentor students interested in surgical specialties."
+        ),
+        EventRegistrationsTable(
+            user_id=1,  # gary
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Focused on Primary Care and public health. Volunteers at community clinics. Wants to guide students interested in serving underserved communities."
+        ),
+        EventRegistrationsTable(
+            user_id=8,  # carol
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Passionate about Research and Academic Medicine. Works in immunology lab. Wants to mentor students interested in MD-PhD or research careers."
+        ),
+        EventRegistrationsTable(
+            user_id=5,  # dk
+            event_id=2,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Interested in Psychiatry and mental health. Volunteers at crisis hotline. Wants to mentor students passionate about behavioral health."
+        ),
+        # LITTLE_SIBLING registrations
+        EventRegistrationsTable(
+            user_id=3,  # nadula
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Aspiring surgeon interested in clinical practice. Shadowing orthopedic surgeons. Looking for guidance on surgical residency preparation."
+        ),
+        EventRegistrationsTable(
+            user_id=7,  # brian
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Interested in Primary Care and global health. Volunteers at free clinic. Wants mentorship on pursuing medicine with public health focus."
+        ),
+        EventRegistrationsTable(
+            user_id=9,  # david
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Passionate about research and academic medicine. Working in biochemistry lab. Looking for mentor to guide MD-PhD pathway."
+        ),
+        EventRegistrationsTable(
+            user_id=4,  # jaden
+            event_id=2,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Interested in Psychiatry and mental health. Volunteers at peer counseling center. Seeking guidance on psychiatry residency and mental health career."
         )
     ]
 
@@ -362,24 +457,58 @@ def create_user_profile_data(session):
 
 def create_question_data(session):
     """
-    Create 3 questions for the Kung Fu Tea event:
+    Create questions for both events.
+
+    Kung Fu Tea event (3 questions):
     1. Multiple choice: Which boba tea do you like?
     2. Text: What are your favorite toppings?
     3. Text: What do you hope to get out of this program?
+
+    PPMS Premed Mentorship event (5 questions):
+    1. Multiple choice: What medical specialty are you most interested in?
+    2. Multiple choice: Are you more interested in clinical practice or research?
+    3. Text: What are your main pre-med extracurriculars?
+    4. Text: What academic subjects do you enjoy most?
+    5. Text: What do you hope to gain from this mentorship program?
     """
     questions = [
-        QuestionTable(
+        # ===== KUNG FU TEA EVENT QUESTIONS (event_id=1) =====
+        QuestionTable(  # question_id=1
             question="Which boba tea do you like?",
             options=["fruit tea", "milk tea"],
             event_id=1
         ),
-        QuestionTable(
+        QuestionTable(  # question_id=2
             question="What are your favorite toppings?",
             event_id=1
         ),
-        QuestionTable(
+        QuestionTable(  # question_id=3
             question="What do you hope to get out of this program?",
             event_id=1
+        ),
+
+        # ===== PPMS PREMED MENTORSHIP EVENT QUESTIONS (event_id=2) =====
+        QuestionTable(  # question_id=4
+            question="What medical specialty are you most interested in?",
+            options=["Primary Care", "Surgery", "Pediatrics", "Psychiatry", "Research/Academic Medicine"],
+            event_id=2
+        ),
+        QuestionTable(  # question_id=5
+            question="Are you more interested in clinical practice or research?",
+            options=["Clinical Practice", "Research", "Both Equally"],
+            event_id=2
+        ),
+        QuestionTable(  # question_id=6
+            question="What are your main pre-med extracurriculars?",
+            event_id=2
+        ),
+        QuestionTable(  # question_id=7
+            question="What academic subjects do you enjoy most?",
+            event_id=2
+        ),
+        QuestionTable(  # question_id=8
+            question="What do you hope to gain from this mentorship program?",
+            event_id=2
         )
     ]
 
@@ -390,14 +519,22 @@ def create_question_data(session):
 
 def create_response_data(session):
     """
-    Create responses for all 8 participants to enable clear pairings:
+    Create responses for all 8 participants to enable clear pairings.
 
-    Pair 1: Gary + Nadula (fruit tea, similar toppings, social)
-    Pair 2: DK + Jaden (milk tea, similar toppings, exploration)
-    Pair 3: Alice + Brian (fruit tea, similar toppings, cultural)
-    Pair 4: Carol + David (milk tea, classic toppings, mentorship)
+    Kung Fu Tea event pairings:
+    - Pair 1: Gary + Nadula (fruit tea, similar toppings, social)
+    - Pair 2: DK + Jaden (milk tea, similar toppings, exploration)
+    - Pair 3: Alice + Brian (fruit tea, similar toppings, cultural)
+    - Pair 4: Carol + David (milk tea, classic toppings, mentorship)
+
+    PPMS Premed Mentorship pairings:
+    - Pair 1: Alice + Nadula (Surgery, Clinical Practice)
+    - Pair 2: Gary + Brian (Primary Care, Public Health)
+    - Pair 3: Carol + David (Research/Academic Medicine)
+    - Pair 4: DK + Jaden (Psychiatry, Mental Health)
     """
     responses = [
+        # ===== KUNG FU TEA EVENT RESPONSES =====
         # Gary's responses (BIG)
         ResponseTable(user_id=1, question_id=1, answer="fruit tea"),
         ResponseTable(user_id=1, question_id=2, answer="Popping boba and lychee jelly"),
@@ -436,7 +573,64 @@ def create_response_data(session):
         # David's responses (LITTLE) - matches Carol
         ResponseTable(user_id=9, question_id=1, answer="milk tea"),
         ResponseTable(user_id=9, question_id=2, answer="Regular tapioca pearls"),
-        ResponseTable(user_id=9, question_id=3, answer="Hoping to find a mentor who can guide me through college.")
+        ResponseTable(user_id=9, question_id=3, answer="Hoping to find a mentor who can guide me through college."),
+
+        # ===== PPMS PREMED MENTORSHIP EVENT RESPONSES =====
+        # Alice's responses (BIG) - Surgery, Clinical Practice
+        ResponseTable(user_id=6, question_id=4, answer="Surgery"),
+        ResponseTable(user_id=6, question_id=5, answer="Clinical Practice"),
+        ResponseTable(user_id=6, question_id=6, answer="Hospital volunteering, shadowing surgeons, anatomy research assistant"),
+        ResponseTable(user_id=6, question_id=7, answer="Anatomy, physiology, and biomechanics"),
+        ResponseTable(user_id=6, question_id=8, answer="Looking to mentor students interested in surgical specialties and share my clinical experiences."),
+
+        # Nadula's responses (LITTLE) - matches Alice on Surgery, Clinical Practice
+        ResponseTable(user_id=3, question_id=4, answer="Surgery"),
+        ResponseTable(user_id=3, question_id=5, answer="Clinical Practice"),
+        ResponseTable(user_id=3, question_id=6, answer="Shadowing orthopedic surgeons, ER volunteering"),
+        ResponseTable(user_id=3, question_id=7, answer="Anatomy, pathology, and surgical techniques"),
+        ResponseTable(user_id=3, question_id=8, answer="Want guidance on preparing for surgical residency and clinical rotations."),
+
+        # Gary's responses (BIG) - Primary Care, Public Health
+        ResponseTable(user_id=1, question_id=4, answer="Primary Care"),
+        ResponseTable(user_id=1, question_id=5, answer="Clinical Practice"),
+        ResponseTable(user_id=1, question_id=6, answer="Community clinic volunteering, health education outreach"),
+        ResponseTable(user_id=1, question_id=7, answer="Public health, epidemiology, and community medicine"),
+        ResponseTable(user_id=1, question_id=8, answer="Want to guide students interested in serving underserved communities."),
+
+        # Brian's responses (LITTLE) - matches Gary on Primary Care, Public Health
+        ResponseTable(user_id=7, question_id=4, answer="Primary Care"),
+        ResponseTable(user_id=7, question_id=5, answer="Clinical Practice"),
+        ResponseTable(user_id=7, question_id=6, answer="Free clinic volunteering, global health initiatives"),
+        ResponseTable(user_id=7, question_id=7, answer="Public health, preventive medicine, and health policy"),
+        ResponseTable(user_id=7, question_id=8, answer="Seeking mentorship on pursuing medicine with a public health focus."),
+
+        # Carol's responses (BIG) - Research/Academic Medicine
+        ResponseTable(user_id=8, question_id=4, answer="Research/Academic Medicine"),
+        ResponseTable(user_id=8, question_id=5, answer="Research"),
+        ResponseTable(user_id=8, question_id=6, answer="Immunology lab research, scientific publications"),
+        ResponseTable(user_id=8, question_id=7, answer="Molecular biology, immunology, and research methodology"),
+        ResponseTable(user_id=8, question_id=8, answer="Want to mentor students interested in MD-PhD programs and research careers."),
+
+        # David's responses (LITTLE) - matches Carol on Research/Academic Medicine
+        ResponseTable(user_id=9, question_id=4, answer="Research/Academic Medicine"),
+        ResponseTable(user_id=9, question_id=5, answer="Research"),
+        ResponseTable(user_id=9, question_id=6, answer="Biochemistry lab work, poster presentations"),
+        ResponseTable(user_id=9, question_id=7, answer="Biochemistry, molecular biology, and genetics"),
+        ResponseTable(user_id=9, question_id=8, answer="Looking for guidance on the MD-PhD pathway and research opportunities."),
+
+        # DK's responses (BIG) - Psychiatry, Mental Health
+        ResponseTable(user_id=5, question_id=4, answer="Psychiatry"),
+        ResponseTable(user_id=5, question_id=5, answer="Clinical Practice"),
+        ResponseTable(user_id=5, question_id=6, answer="Crisis hotline volunteering, mental health awareness campaigns"),
+        ResponseTable(user_id=5, question_id=7, answer="Psychology, neuroscience, and behavioral health"),
+        ResponseTable(user_id=5, question_id=8, answer="Want to mentor students passionate about mental health and psychiatry."),
+
+        # Jaden's responses (LITTLE) - matches DK on Psychiatry, Mental Health
+        ResponseTable(user_id=4, question_id=4, answer="Psychiatry"),
+        ResponseTable(user_id=4, question_id=5, answer="Clinical Practice"),
+        ResponseTable(user_id=4, question_id=6, answer="Peer counseling, mental health first aid training"),
+        ResponseTable(user_id=4, question_id=7, answer="Psychology, neuroscience, and cognitive science"),
+        ResponseTable(user_id=4, question_id=8, answer="Seeking guidance on psychiatry residency and mental health career paths.")
     ]
 
     for response in responses:
@@ -452,7 +646,7 @@ def fill_all_tables(engine):
     # Warn users before committing
     print(
         f"""
-        CREATING DEMO CASE 3 DATA (KUNG FU TEA PAIRING) IN 3 SEC...
+        CREATING DEMO CASE 3 DATA (KUNG FU TEA & PPMS PREMED MENTORSHIP) IN 3 SEC...
         PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
         """
     )

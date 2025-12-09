@@ -38,7 +38,7 @@ if __name__ == "__main__":
         print("Using DEMO_CASE 2: 4 students with Sungmin as admin")
     elif DEMO_CASE == "3":
         from scripts.db.update_dummy_vals_demo_testing_case3 import fill_all_tables
-        print("Using DEMO_CASE 3: Kung Fu Tea Pairing (8 students)")
+        print("Using DEMO_CASE 3: Kung Fu Tea Pairing & PPMS Premed Mentorship (8 students, 2 events)")
     else:
         print(f"Invalid DEMO_CASE value: {DEMO_CASE}. Defaulting to DEMO_CASE 1.")
         from scripts.db.update_dummy_vals_demo_testing_case1 import fill_all_tables
