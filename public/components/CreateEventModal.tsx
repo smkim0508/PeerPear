@@ -96,6 +96,9 @@ export default function CreateEventModal({
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+    if (successMessage) return;
+
     if (!validateForm()) {
       return;
     }
