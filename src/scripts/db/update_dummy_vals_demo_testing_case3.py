@@ -385,7 +385,7 @@ def create_event_data(session):
         ),
         EventTable(  # event_id=3
             title="KSAP Gajok Pairing 2026 Spring",
-            description="KSAP Gajok Pairing 2026 Spring",
+            description="Korean Student's Association of Princeton Gajok (Big/Little Family) Pairing",
             end_date=datetime.now() + timedelta(weeks=4),
             organization_id=2,  # KSAP
             status=EventStatus.STARTED,
@@ -393,7 +393,7 @@ def create_event_data(session):
         ),
         EventTable(  # event_id=4
             title="PSV Mentorship Program",
-            description="PSV Mentorship Program",
+            description="Princeton Student Venture's Mentorship Program to learn more about venture capital and the investing world.",
             end_date=datetime.now() + timedelta(weeks=4),
             organization_id=5,  # PSV
             status=EventStatus.STARTED,
