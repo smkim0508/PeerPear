@@ -248,19 +248,19 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
   const handleSubmit = async () => {
     if (isReadOnly) return;
 
+    const handleError = (message: string) => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setAlert({ type: "error", message });
+      setIsSubmitting(false);
+    };
+
     if (!user_id) {
-      setAlert({
-        type: "error",
-        message: "User not authenticated. Please log in and try again.",
-      });
+      handleError("User not authenticated. Please log in and try again.");
       return;
     }
 
     if (!termsAccepted) {
-      setAlert({
-        type: "error",
-        message: "You must accept the terms and conditions to proceed.",
-      });
+      handleError("You must accept the terms and conditions to proceed.");
       return;
     }
 
@@ -269,14 +269,11 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
     // Validate answers
     const invalidQuestions = validateAnswers(questions, answers);
     if (invalidQuestions.length > 0) {
-      setAlert({
-        type: "error",
-        message: `Please answer all required questions. Missing responses for question(s): ${invalidQuestions.join(
+      handleError(
+        `Please answer all required questions. Missing responses for question(s): ${invalidQuestions.join(
           ", "
-        )}`,
-      });
-      setIsSubmitting(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+        )}`
+      );
       return;
     }
 
@@ -311,18 +308,10 @@ export default function QuestionnairePage({ params }: QuestionnairePageProps) {
           router.push(`/events/${event_id}`);
         }, 2000);
       } else {
-        setAlert({
-          type: "error",
-          message: data.error || "Failed to submit questionnaire.",
-        });
-        setIsSubmitting(false);
+        handleError(data.error || "Failed to submit questionnaire.");
       }
     } catch (err) {
-      setAlert({
-        type: "error",
-        message: "Server error. Please try again later.",
-      });
-      setIsSubmitting(false);
+      handleError("Server error. Please try again later.");
     }
   };
 
