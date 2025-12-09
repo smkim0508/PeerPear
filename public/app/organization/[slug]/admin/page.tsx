@@ -363,7 +363,7 @@ export default function AdminPage({ params }: AdminPageProps) {
                   />
                 </h1>
                 <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
-                  Update the details of your organization!
+                  Manage your organization admins!
                 </p>
               </div>
             </div>
