@@ -1,3 +1,14 @@
+"""
+DEPRECATED: This file has been split into separate case files for better organization.
+
+Please use the following files instead:
+- update_dummy_vals_demo_testing_case1.py for DEMO_CASE 1 (6 students with Jocelyn)
+- update_dummy_vals_demo_testing_case2.py for DEMO_CASE 2 (4 students with Sungmin as admin)
+- update_dummy_vals_demo_testing_case3.py for DEMO_CASE 3 (Kung Fu Tea Pairing, 8 students)
+
+The reset_db.py script now automatically selects the appropriate case file based on the DEMO_CASE environment variable.
+"""
+
 from datetime import datetime, time, timedelta
 from requests import Session
 from sqlalchemy import create_engine
@@ -48,44 +59,46 @@ C. Toggle between the two demo cases with the following environmental variable:
 # fetch the demo case, default 1 (6 students) 
 DEMO_CASE = str(os.getenv("DEMO_CASE", 1))
 
-print(f"DEMO CASE: {DEMO_CASE}, type: {type(DEMO_CASE)}")
-
 def create_user_data(session):
-    users = [
-        UserTable(
-            username="gy4937",
-            first_name="Gary",
-            last_name="Yang",
-            email="gy4937@princeton.edu"
-        ),
-        UserTable(
-            username="sk3378",
-            first_name="Sungmin",
-            last_name="Kim",
-            email="sk3378@prineton.edu",
-        ),
-        UserTable(
-            username="ng3922",
-            first_name="Nadula",
-            last_name="Gardiyehewa",
-            email="ng3922@princeton.edu"
-        ),
-        UserTable(
-            username="jc3311",
-            first_name="Jaden",
-            last_name="Cutinha",
-            email="jc3311@princeton.edu"
-        ),
-        UserTable(
-            username="dl2635",
-            first_name="Dongkon",
-            last_name="Lee",
-            email="dl2635@princeton.edu"
-        )
-    ]
+    """
+    Create user accounts for demo testing.
 
-    if DEMO_CASE == "1": # with jocelyn, 6 people
-        users.extend([
+    DEMO_CASE 1: 6 students + Jocelyn's org admin account
+    DEMO_CASE 2: 4 students (no Gary, no DK, Sungmin is org admin)
+    """
+    if DEMO_CASE == "1":
+        # DEMO_CASE 1: 6 students with Jocelyn
+        users = [
+            UserTable(
+                username="gy4937",
+                first_name="Gary",
+                last_name="Yang",
+                email="gy4937@princeton.edu"
+            ),
+            UserTable(
+                username="sk3378",
+                first_name="Sungmin",
+                last_name="Kim",
+                email="sk3378@prineton.edu",
+            ),
+            UserTable(
+                username="ng3922",
+                first_name="Nadula",
+                last_name="Gardiyehewa",
+                email="ng3922@princeton.edu"
+            ),
+            UserTable(
+                username="jc3311",
+                first_name="Jaden",
+                last_name="Cutinha",
+                email="jc3311@princeton.edu"
+            ),
+            UserTable(
+                username="dl2635",
+                first_name="Dongkon",
+                last_name="Lee",
+                email="dl2635@princeton.edu"
+            ),
             # NOTE: id 6 -> student account
             UserTable(
                 username="jw5134",
@@ -100,8 +113,42 @@ def create_user_data(session):
                 last_name="Wang",
                 email="cs-jw5134@princeton.edu"
             )
-        ])
-    
+        ]
+    else:  # DEMO_CASE == "2"
+        # DEMO_CASE 2: 4 students (no Gary, no DK, Sungmin acts as org admin)
+        users = [
+            UserTable(
+                username="gy4937",
+                first_name="Gary",
+                last_name="Yang",
+                email="gy4937@princeton.edu"
+            ),
+            UserTable(
+                username="sk3378",
+                first_name="Sungmin",
+                last_name="Kim",
+                email="sk3378@prineton.edu",
+            ),
+            UserTable(
+                username="ng3922",
+                first_name="Nadula",
+                last_name="Gardiyehewa",
+                email="ng3922@princeton.edu"
+            ),
+            UserTable(
+                username="jc3311",
+                first_name="Jaden",
+                last_name="Cutinha",
+                email="jc3311@princeton.edu"
+            ),
+            UserTable(
+                username="dl2635",
+                first_name="Dongkon",
+                last_name="Lee",
+                email="dl2635@princeton.edu"
+            )
+        ]
+
     for user in users:
         session.add(user)
     session.commit()
@@ -129,71 +176,116 @@ def create_organization_data(session):
     print("Dummy organizations added.")
 
 def create_orgadmin_data(session):
-    # Fetch organizations to link with org admins
-    organizations = session.query(OrganizationTable).all()
-    org_admins = [
-        OrgAdminTable(
-            user_id=1, # gary
-            organization_id=1, # AASA
-            is_owner=True
-        ),
-        OrgAdminTable(
-            user_id=1, # gary
-            organization_id=2 # KSAP
-        ),
-        OrgAdminTable(
-            user_id=2, # sungmin
-            organization_id=1, # AASA
-            is_owner=True
-        ),
-        OrgAdminTable(
-            user_id=2, # sungmin
-            organization_id=2, # KSAP
-            is_owner=True
-        ),
-        OrgAdminTable(
-            user_id=3, # nadula
-            organization_id=1 # AASA
-        ),
-        OrgAdminTable(
-            user_id=3, # nadula
-            organization_id=2 # KSAP
-        ),
-        OrgAdminTable(
-            user_id=4, # jaden
-            organization_id=1 # AASA
-        ),
-        OrgAdminTable(
-            user_id=4, # jaden
-            organization_id=2 # KSAP
-        ),
-        OrgAdminTable(
-            user_id=5, # dk
-            organization_id=1 # AASA
-        ),
-        OrgAdminTable(
-            user_id=5, # dk
-            organization_id=2 # KSAP
-        )
-    ]
+    """
+    Create organization admin relationships.
 
+    DEMO_CASE 1: Jocelyn (user_id=7) owns the demo org (org_id=3)
+    DEMO_CASE 2: Sungmin (user_id=2) owns the demo org (org_id=3)
+    """
     if DEMO_CASE == "1":
-        org_admins.extend([
+        # DEMO_CASE 1: Jocelyn owns the demo org
+        org_admins = [
             OrgAdminTable(
-                user_id=7, # jocelyn - org
-                organization_id=3, # demo org
+                user_id=1, # gary
+                organization_id=1, # AASA
                 is_owner=True
             ),
-        ])
-    
-    if DEMO_CASE == "2":
-        org_admins.extend([
+            OrgAdminTable(
+                user_id=1, # gary
+                organization_id=2 # KSAP
+            ),
             OrgAdminTable(
                 user_id=2, # sungmin
-                organization_id=3, # NOTE: Jocelyn's Test Org, simulating as demo org owner
+                organization_id=1, # AASA
                 is_owner=True
             ),
-        ])
+            OrgAdminTable(
+                user_id=2, # sungmin
+                organization_id=2, # KSAP
+                is_owner=True
+            ),
+            OrgAdminTable(
+                user_id=3, # nadula
+                organization_id=1 # AASA
+            ),
+            OrgAdminTable(
+                user_id=3, # nadula
+                organization_id=2 # KSAP
+            ),
+            OrgAdminTable(
+                user_id=4, # jaden
+                organization_id=1 # AASA
+            ),
+            OrgAdminTable(
+                user_id=4, # jaden
+                organization_id=2 # KSAP
+            ),
+            OrgAdminTable(
+                user_id=5, # dk
+                organization_id=1 # AASA
+            ),
+            OrgAdminTable(
+                user_id=5, # dk
+                organization_id=2 # KSAP
+            ),
+            OrgAdminTable(
+                user_id=7, # jocelyn - org admin account
+                organization_id=3, # Jocelyn's Test Org
+                is_owner=True
+            )
+        ]
+    else:  # DEMO_CASE == "2"
+        # DEMO_CASE 2: Sungmin owns the demo org (simulating Jocelyn's role)
+        org_admins = [
+            OrgAdminTable(
+                user_id=1, # gary
+                organization_id=1, # AASA
+                is_owner=True
+            ),
+            OrgAdminTable(
+                user_id=1, # gary
+                organization_id=2 # KSAP
+            ),
+            OrgAdminTable(
+                user_id=2, # sungmin
+                organization_id=1, # AASA
+                is_owner=True
+            ),
+            OrgAdminTable(
+                user_id=2, # sungmin
+                organization_id=2, # KSAP
+                is_owner=True
+            ),
+            OrgAdminTable(
+                user_id=2, # sungmin
+                organization_id=3, # Jocelyn's Test Org (Sungmin simulates demo org owner)
+                is_owner=True
+            ),
+            OrgAdminTable(
+                user_id=3, # nadula
+                organization_id=1 # AASA
+            ),
+            OrgAdminTable(
+                user_id=3, # nadula
+                organization_id=2 # KSAP
+            ),
+            OrgAdminTable(
+                user_id=4, # jaden
+                organization_id=1 # AASA
+            ),
+            OrgAdminTable(
+                user_id=4, # jaden
+                organization_id=2 # KSAP
+            ),
+            OrgAdminTable(
+                user_id=5, # dk
+                organization_id=1 # AASA
+            ),
+            OrgAdminTable(
+                user_id=5, # dk
+                organization_id=2 # KSAP
+            )
+        ]
 
     for admin in org_admins:
         session.add(admin)
@@ -242,30 +334,22 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     """
-    "response_summary" field is supposed to be populated by LLM after semantically summarizing each student's questionnaire responses.
-    However, for demo purposes, we will populate it manually.
-    """
-    registrations = [
-        # demo test event registrations
-        EventRegistrationsTable(
-            user_id=2, # sungmin
-            event_id=4,
-            role=EventRole.BIG_SIBLING,
-            valid_registration=True,
-            response_summary="Enjoys Sushi and Facebook."
-        ),
-        EventRegistrationsTable(
-            user_id=3, # nadula
-            event_id=4,
-            role=EventRole.LITTLE_SIBLING,
-            valid_registration=True,
-            response_summary="Enjoys Hamburger and Instagram."
-        )
-    ]
+    Create event registrations for the demo test event.
 
+    "response_summary" field is populated manually for demo purposes.
+
+    DEMO_CASE 1 (6 students):
+    - Gary (BIG) -> pairs with Nadula (LITTLE)
+    - Sungmin (BIG) -> pairs with Jocelyn (LITTLE, but Jocelyn not in DB)
+    - DK (BIG) -> pairs with Jaden (LITTLE)
+
+    DEMO_CASE 2 (4 students):
+    - Gary (BIG) -> pairs with Nadula (LITTLE)
+    - Sungmin (BIG) -> pairs with Jaden (LITTLE)
+    """
     if DEMO_CASE == "1":
-        # if jocelyn's included, gary and dk should be registered
-        registrations.extend([
+        # DEMO_CASE 1: 6 students registered (Gary, Sungmin, Nadula, Jaden, DK + Jocelyn simulated)
+        registrations = [
             EventRegistrationsTable(
                 user_id=1, # gary
                 event_id=4,
@@ -274,11 +358,18 @@ def create_event_registration_data(session):
                 response_summary="Enjoys Pizza and Instagram."
             ),
             EventRegistrationsTable(
-                user_id=5, # dk
+                user_id=2, # sungmin
                 event_id=4,
                 role=EventRole.BIG_SIBLING,
                 valid_registration=True,
-                response_summary="Enjoys Waffles and TikTok."
+                response_summary="Enjoys Sushi and Facebook."
+            ),
+            EventRegistrationsTable(
+                user_id=3, # nadula
+                event_id=4,
+                role=EventRole.LITTLE_SIBLING,
+                valid_registration=True,
+                response_summary="Enjoys Hamburger and Instagram."
             ),
             EventRegistrationsTable(
                 user_id=4, # jaden
@@ -286,20 +377,40 @@ def create_event_registration_data(session):
                 role=EventRole.LITTLE_SIBLING,
                 valid_registration=True,
                 response_summary="Enjoys Pancakes and TikTok."
-            )
-        ])
-
-    # if demo case 2, only 3 people are registered, and jaden should be paired with sungmin
-    if DEMO_CASE == "2":
-        registrations.extend([
+            ),
             EventRegistrationsTable(
-            user_id=4, # jaden
-            event_id=4,
-            role=EventRole.LITTLE_SIBLING,
-            valid_registration=True,
-            response_summary="Enjoys Sashimi and Facebook."
-        )
-        ])
+                user_id=5, # dk
+                event_id=4,
+                role=EventRole.BIG_SIBLING,
+                valid_registration=True,
+                response_summary="Enjoys Waffles and TikTok."
+            )
+        ]
+    else:  # DEMO_CASE == "2"
+        # DEMO_CASE 2: 4 students registered (Sungmin, Nadula, Jaden only, no Gary/DK)
+        registrations = [
+            EventRegistrationsTable(
+                user_id=2, # sungmin
+                event_id=4,
+                role=EventRole.BIG_SIBLING,
+                valid_registration=True,
+                response_summary="Enjoys Sushi and Facebook."
+            ),
+            EventRegistrationsTable(
+                user_id=3, # nadula
+                event_id=4,
+                role=EventRole.LITTLE_SIBLING,
+                valid_registration=True,
+                response_summary="Enjoys Hamburger and Instagram."
+            ),
+            EventRegistrationsTable(
+                user_id=4, # jaden
+                event_id=4,
+                role=EventRole.LITTLE_SIBLING,
+                valid_registration=True,
+                response_summary="Enjoys Sashimi and Facebook."
+            )
+        ]
 
     for registration in registrations:
         session.add(registration)
@@ -307,53 +418,15 @@ def create_event_registration_data(session):
     print("Dummy event registrations added.")
 
 def create_user_profile_data(session):
-    profiles = [
-        UserProfileTable(
-            user_id=2, # sungmin
-            gender="Male",
-            class_year=ClassYear.JUNIOR,
-            major="Computer Engineering",
-            hobbies=["Machine Learning", "Large Language Models", "Coding", "AI"]
-        ),
-        UserProfileTable(
-            user_id=3, # nadula
-            gender="Male",
-            class_year=ClassYear.SOPHOMORE,
-            major="Design",
-            hobbies=["Graphic Design", "Typography", "Product Design"]
-        ),
-        UserProfileTable(
-            user_id=4, # jaden, NOTE: should be a mix of coding & sport interests
-            gender="Male",
-            class_year=ClassYear.SOPHOMORE,
-            major="Computer Science",
-            hobbies=["Basketball", "Coding Competitions", "Football", "Computer Architecture"]
-        ),
-        UserProfileTable(
-            user_id=5, # dk
-            gender="Male",
-            class_year=ClassYear.JUNIOR,
-            major="Economics",
-            hobbies=["Basketball", "Scooter", "Sports Racing", "Soccer"]
-        )
-    ]
+    """
+    Create user profile data.
 
+    DEMO_CASE 1: Gary has profile (6 students total)
+    DEMO_CASE 2: Gary doesn't have profile (simulating fewer active participants)
+    """
     if DEMO_CASE == "1":
-        # if jocelyn's included, add her student account to profile
-        # profiles.extend([
-        #     UserProfileTable(
-        #         user_id=6, # jocelyn - student account
-        #         gender="Female",
-        #         class_year=ClassYear.FRESHMAN,
-        #         major="Computer Science",
-        #         hobbies=["Neural Networks", "Artificial Intelligence", "Deep Learning", "Natural Language Processing"]
-        #     )
-        # ])
-        pass
-
-    # in case 2, gary shouldn't have profile
-    if DEMO_CASE == "1":
-        profiles.extend([
+        # DEMO_CASE 1: All 6 students have profiles including Gary
+        profiles = [
             UserProfileTable(
                 user_id=1, # gary
                 gender="Male",
@@ -361,7 +434,67 @@ def create_user_profile_data(session):
                 major="Art",
                 hobbies=["Graphic Design", "Art", "Painting", "Drawing"]
             ),
-        ])
+            UserProfileTable(
+                user_id=2, # sungmin
+                gender="Male",
+                class_year=ClassYear.JUNIOR,
+                major="Computer Engineering",
+                hobbies=["Machine Learning", "Large Language Models", "Coding", "AI"]
+            ),
+            UserProfileTable(
+                user_id=3, # nadula
+                gender="Male",
+                class_year=ClassYear.SOPHOMORE,
+                major="Design",
+                hobbies=["Graphic Design", "Typography", "Product Design"]
+            ),
+            UserProfileTable(
+                user_id=4, # jaden
+                gender="Male",
+                class_year=ClassYear.SOPHOMORE,
+                major="Computer Science",
+                hobbies=["Basketball", "Coding Competitions", "Football", "Computer Architecture"]
+            ),
+            UserProfileTable(
+                user_id=5, # dk
+                gender="Male",
+                class_year=ClassYear.JUNIOR,
+                major="Economics",
+                hobbies=["Basketball", "Scooter", "Sports Racing", "Soccer"]
+            )
+        ]
+    else:  # DEMO_CASE == "2"
+        # DEMO_CASE 2: Gary doesn't have profile (only Sungmin, Nadula, Jaden, DK)
+        profiles = [
+            UserProfileTable(
+                user_id=2, # sungmin
+                gender="Male",
+                class_year=ClassYear.JUNIOR,
+                major="Computer Engineering",
+                hobbies=["Machine Learning", "Large Language Models", "Coding", "AI"]
+            ),
+            UserProfileTable(
+                user_id=3, # nadula
+                gender="Male",
+                class_year=ClassYear.SOPHOMORE,
+                major="Design",
+                hobbies=["Graphic Design", "Typography", "Product Design"]
+            ),
+            UserProfileTable(
+                user_id=4, # jaden
+                gender="Male",
+                class_year=ClassYear.SOPHOMORE,
+                major="Computer Science",
+                hobbies=["Basketball", "Coding Competitions", "Football", "Computer Architecture"]
+            ),
+            UserProfileTable(
+                user_id=5, # dk
+                gender="Male",
+                class_year=ClassYear.JUNIOR,
+                major="Economics",
+                hobbies=["Basketball", "Scooter", "Sports Racing", "Soccer"]
+            )
+        ]
 
     for profile in profiles:
         session.add(profile)
@@ -390,62 +523,51 @@ def create_question_data(session):
 
 def create_response_data(session):
     """
-    As a reminder, the intended pairings are:
+    Create questionnaire responses for demo test event.
 
-    1) (6 students)
-    gary - nadula
-    sungmin - jocelyn
-    dk - jaden
+    Intended pairings:
 
-    2) (4 students)
-    gary - nadula
-    sungmin - jaden
+    DEMO_CASE 1 (6 students):
+    - Gary (Pizza, Instagram) -> Nadula (Hamburger, Instagram)
+    - Sungmin (Sushi, Facebook) -> Jocelyn (simulated)
+    - DK (Waffles, TikTok) -> Jaden (Pancakes, TikTok)
+
+    DEMO_CASE 2 (4 students):
+    - Gary -> Nadula (not registered, but Gary simulated by profile)
+    - Sungmin (Sushi, Facebook) -> Jaden (Sashimi, Facebook)
     """
-    responses = [
-        ResponseTable(
-            user_id=2, # sungmin
-            question_id=1,
-            answer="Sushi"
-        ),
-        ResponseTable(
-            user_id=2, # sungmin
-            question_id=2, # open-ended question, favorite food?
-            answer="Facebook"
-        ),
-        ResponseTable(
-            user_id=3, # nadula
-            question_id=1,
-            answer="Hamburger"
-        ),
-        ResponseTable(
-            user_id=3, # nadula
-            question_id=2,
-            answer="Instagram"
-        )
-    ]
-
     if DEMO_CASE == "1":
-        # add gary and dk, and encourage jaden to be paired with dk
-        responses.extend([
+        # DEMO_CASE 1: Gary, Sungmin, Nadula, Jaden, DK all respond
+        responses = [
             ResponseTable(
                 user_id=1, # gary
-                question_id=1, # open-ended question, favorite food?
+                question_id=1,
                 answer="Pizza"
             ),
             ResponseTable(
                 user_id=1, # gary
-                question_id=2, # mcq
+                question_id=2,
                 answer="Instagram"
             ),
             ResponseTable(
-                user_id=5, # dk
+                user_id=2, # sungmin
                 question_id=1,
-                answer="Waffles"
+                answer="Sushi"
             ),
             ResponseTable(
-                user_id=5, # dk
+                user_id=2, # sungmin
                 question_id=2,
-                answer="TikTok"
+                answer="Facebook"
+            ),
+            ResponseTable(
+                user_id=3, # nadula
+                question_id=1,
+                answer="Hamburger"
+            ),
+            ResponseTable(
+                user_id=3, # nadula
+                question_id=2,
+                answer="Instagram"
             ),
             ResponseTable(
                 user_id=4, # jaden
@@ -456,12 +578,42 @@ def create_response_data(session):
                 user_id=4, # jaden
                 question_id=2,
                 answer="TikTok"
+            ),
+            ResponseTable(
+                user_id=5, # dk
+                question_id=1,
+                answer="Waffles"
+            ),
+            ResponseTable(
+                user_id=5, # dk
+                question_id=2,
+                answer="TikTok"
             )
-        ])
-
-    if DEMO_CASE == "2":
-        # remove gary and dk, and encourage jaden to be paired with sungmin
-        responses.extend([
+        ]
+    else:  # DEMO_CASE == "2"
+        # DEMO_CASE 2: Only Sungmin, Nadula, Jaden respond (no Gary, no DK)
+        # Jaden's answers align with Sungmin to encourage pairing
+        responses = [
+            ResponseTable(
+                user_id=2, # sungmin
+                question_id=1,
+                answer="Sushi"
+            ),
+            ResponseTable(
+                user_id=2, # sungmin
+                question_id=2,
+                answer="Facebook"
+            ),
+            ResponseTable(
+                user_id=3, # nadula
+                question_id=1,
+                answer="Hamburger"
+            ),
+            ResponseTable(
+                user_id=3, # nadula
+                question_id=2,
+                answer="Instagram"
+            ),
             ResponseTable(
                 user_id=4, # jaden
                 question_id=1,
@@ -472,7 +624,7 @@ def create_response_data(session):
                 question_id=2,
                 answer="Facebook"
             )
-        ])
+        ]
 
     for response in responses:
         session.add(response)
