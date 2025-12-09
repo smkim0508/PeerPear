@@ -12,11 +12,14 @@ class QuestionTable(MainDB_Base):
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
-    
+
     question: Mapped[str] = mapped_column(String, nullable=False)
 
     # list of string or None for open-ended questions
     options: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
 
     event_id: Mapped[int] = mapped_column(
-        ForeignKey("events.id"), nullable=False)
+        ForeignKey("events.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )

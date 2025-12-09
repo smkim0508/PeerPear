@@ -17,6 +17,7 @@ from db.models.orgadmin_requests import OrgAdminRequestTable
 
 from scripts.db.create_tables import create_all_tables
 from scripts.db.delete_tables import delete_all_tables, delete_table, delete_all_tables_ordered
+from scripts.db.truncate_tables import truncate_all_tables
 
 if __name__ == "__main__":
     load_dotenv()
@@ -57,4 +58,7 @@ if __name__ == "__main__":
     # delete_all_tables_ordered(engine)
     delete_all_tables(engine)
     create_all_tables(engine)
+
+    # try to reset tables instead of dropping everything and creating from scratch
+    # truncate_all_tables(engine)
     fill_all_tables(engine)

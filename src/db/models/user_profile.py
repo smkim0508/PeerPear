@@ -17,7 +17,12 @@ class UserProfileTable(MainDB_Base):
     __tablename__ = "user_profiles"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"),nullable = False, unique = True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete='CASCADE'),
+        nullable=False,
+        unique=True,
+        index=True
+    )
     gender: Mapped[str] = mapped_column(String,nullable = True)
     class_year: Mapped[ClassYear] = mapped_column(
         SAEnum(ClassYear, name="class_year_enum"),

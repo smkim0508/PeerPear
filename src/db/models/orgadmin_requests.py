@@ -13,10 +13,17 @@ class OrgAdminRequestTable(MainDB_Base):
         Integer, primary_key=True, autoincrement=True)
 
     organization_id: Mapped[int] = mapped_column(
-        ForeignKey("organizations.id"), nullable=False)
+        ForeignKey("organizations.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"), nullable=False)
+        ForeignKey("users.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
 
     __table_args__ = (
         UniqueConstraint("user_id", "organization_id", name="uq_user_org_request"),
+        Index('ix_org_admin_requests_user_org', 'user_id', 'organization_id'),
     )

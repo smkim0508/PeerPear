@@ -11,14 +11,27 @@ class OrgAdminTable(MainDB_Base):
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
-    
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    organization_id: Mapped[int] = mapped_column(ForeignKey("organizations.id"), nullable=False)
-    
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
+    organization_id: Mapped[int] = mapped_column(
+        ForeignKey("organizations.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
+
     is_owner: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
         default=False,
         server_default="false", # since supabase has defaults too
+    )
+
+    # Composite index for faster lookups by user+org combination
+    __table_args__ = (
+        Index('ix_orgadmins_user_org', 'user_id', 'organization_id'),
     )
  

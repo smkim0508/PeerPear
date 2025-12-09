@@ -37,7 +37,10 @@ class EventTable(MainDB_Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
     organization_id: Mapped[int] = mapped_column(
-        ForeignKey("organizations.id"), nullable=False)
+        ForeignKey("organizations.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
 
     # NOTE: start date is now deprecated
     end_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
@@ -72,9 +75,15 @@ class EventRegistrationsTable(MainDB_Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"), nullable=False)
+        ForeignKey("users.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
     event_id: Mapped[int] = mapped_column(
-        ForeignKey("events.id"), nullable=False)
+        ForeignKey("events.id", ondelete='CASCADE'),
+        nullable=False,
+        index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now(), nullable=False
     )
@@ -89,3 +98,8 @@ class EventRegistrationsTable(MainDB_Base):
     )
     # LLM parsed response summary for the user
     response_summary: Mapped[str] = mapped_column(String, nullable=True)
+
+    # Composite index for faster lookups by event+user combination
+    __table_args__ = (
+        Index('ix_event_registrations_event_user', 'event_id', 'user_id'),
+    )
