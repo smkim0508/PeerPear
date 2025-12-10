@@ -262,7 +262,7 @@ export default function Navbar({
                   <NavigationMenu>
                     <NavigationMenuList>
                       <NavigationMenuItem>
-                        <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent max-w-[220px]">
+                        <NavigationMenuTrigger className="bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent max-w-[200px]">
                           <div className="flex items-center gap-2 text-black font-medium whitespace-nowrap overflow-hidden">
                             <img
                               src={currentOrganization.image}
@@ -274,8 +274,10 @@ export default function Navbar({
                                   "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
                               }}
                             />
-                            <span className="truncate">
-                              {currentOrganization.name}
+                            <span className="truncate max-w-[150px]">
+                              {currentOrganization.name.length > 20
+                                ? `${currentOrganization.name.substring(0, 20)}...`
+                                : currentOrganization.name}
                             </span>
                           </div>
                         </NavigationMenuTrigger>
@@ -299,8 +301,10 @@ export default function Navbar({
                                           "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=40&h=40&fit=crop&crop=center";
                                       }}
                                     />
-                                    <span className="text-sm font-medium text-black truncate min-w-0">
-                                      {org.name}
+                                    <span className="text-sm font-medium text-black truncate min-w-0 max-w-[180px]">
+                                      {org.name.length > 20
+                                        ? `${org.name.substring(0, 20)}...`
+                                        : org.name}
                                     </span>
                                   </Link>
                                 </NavigationMenuLink>
@@ -380,9 +384,8 @@ export default function Navbar({
 
       {/* Mobile navigation */}
       <div
-        className={`md:hidden overflow-hidden transition-[max-height] duration-300 border-t border-gray-100 ${
-          isMobileMenuOpen ? "max-h-[600px]" : "max-h-0"
-        }`}
+        className={`md:hidden overflow-hidden transition-[max-height] duration-300 border-t border-gray-100 ${isMobileMenuOpen ? "max-h-[600px]" : "max-h-0"
+          }`}
       >
         <div className="px-4 py-4 space-y-4 bg-white shadow-sm">
           {isAuthenticated ? (
@@ -433,11 +436,10 @@ export default function Navbar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                    item.active
-                      ? "bg-green text-white"
-                      : "text-nav-dark hover:bg-gray-100"
-                  }`}
+                  className={`block px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${item.active
+                    ? "bg-green text-white"
+                    : "text-nav-dark hover:bg-gray-100"
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.label}
