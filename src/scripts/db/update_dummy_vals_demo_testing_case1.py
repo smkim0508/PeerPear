@@ -27,9 +27,11 @@ Event: "Jocelyn's Test Program" - Demo test program with 6 students
 - 6 student participants (Gary, Sungmin, Nadula, Jaden, DK, Jocelyn)
 - Jocelyn has separate org admin account (cs-jw5134)
 
+NOTE: Reflects the grader's guide.
+
 Intended pairings (all size 2):
 1. Gary (BIG) + Nadula (LITTLE): Both Instagram users
-2. Sungmin (BIG) + Jocelyn (LITTLE): Both Facebook users (Jocelyn simulated)
+2. Sungmin (BIG) + Grader (e.g. Jocelyn) (LITTLE): Both Facebook users (Jocelyn simulated)
 3. DK (BIG) + Jaden (LITTLE): Both TikTok users
 """
 
@@ -93,7 +95,10 @@ def create_user_data(session):
     print("Dummy users added.")
 
 def create_organization_data(session):
-    """Create 3 organizations"""
+    """
+    Create 5 organizations.
+    2 for default testing, 3 for each grader.
+    """
     organizations = [
         OrganizationTable(
             org_name="AASA",
