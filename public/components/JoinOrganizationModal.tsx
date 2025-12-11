@@ -6,7 +6,6 @@ import { loginWithCAS } from "@/lib/auth";
 import PearButton from "./PearButton";
 import { LogIn, User, Building2, X } from "lucide-react";
 
-
 interface JoinOrganizationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -73,6 +72,17 @@ export default function JoinOrganizationModal({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccess(null);
+      }, 3000); // disappears after 3 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, success]);
 
   useEffect(() => {
     fetchOrganizations();
@@ -168,7 +178,7 @@ export default function JoinOrganizationModal({
           <div className="bg-primary/10 rounded-full p-4 mb-4">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
-          
+
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Join An Organization
           </h2>
@@ -177,8 +187,6 @@ export default function JoinOrganizationModal({
           </p>
         </div>
 
-        
-        
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded mb-3 text-sm text-left">
             {error}
@@ -269,8 +277,6 @@ export default function JoinOrganizationModal({
             ))
           )}
         </div>
-
-       
       </div>
     </div>
   );

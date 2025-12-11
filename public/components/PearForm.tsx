@@ -328,7 +328,14 @@ export default function PearForm({
             )}
 
             <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-                
+                {isEditing && (
+                    <button
+                        onClick={handleCancel}
+                        className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all hover:scale-105 active:scale-95"
+                    >
+                        Cancel
+                    </button>
+                )}
                 <PearButton text="Save Question" onClick={handleSave} />
             </div>
         </div>

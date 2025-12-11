@@ -5,9 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import JoinOrganizationModal from "@/components/JoinOrganizationModal";
 import ConfirmActionModal from "@/components/ConfirmActionModal";
-import { Building } from 'lucide-react';
-import PearButton
- from "@/components/PearButton";
+import { Building } from "lucide-react";
+import PearButton from "@/components/PearButton";
 interface Organization {
   id: number;
   name: string;
@@ -106,6 +105,18 @@ export default function OrganizationPage() {
     fetchOrganizations();
   }, []);
 
+  // Auto-hide success and error messages after leaving organization
+  useEffect(() => {
+    if (confirmError || confirmSuccess) {
+      const timer = setTimeout(() => {
+        setConfirmError(null);
+        setConfirmSuccess(null);
+      }, 3000); // disappear after 3 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [confirmError, confirmSuccess]);
+
   return (
     <div className="min-h-screen bg-dark-beige from-[#F5F7F0] via-[#8cbf70] to-[#8cbf70] flex items-center justify-center p-6">
       <button
@@ -129,8 +140,8 @@ export default function OrganizationPage() {
 
         <div className="bg-[#CCCEC1] w-full max-w-2xl rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-primary/90 p-6 flex flex-col items-center text-center ">
-          <div className="bg-nav-dark rounded-full p-4 mb-4">
-            <Building className="text-white w-8 h-8"/>
+            <div className="bg-nav-dark rounded-full p-4 mb-4">
+              <Building className="text-white w-8 h-8" />
             </div>
             <h1 className="text-3xl font-bold text-nav-dark text-center">
               Select An Organization
@@ -234,12 +245,13 @@ export default function OrganizationPage() {
         {/* Join Organization Button */}
         <div className="flex justify-center mb-4">
           <PearButton
-                    className="w-full cursor-pointer p-6 text-md hover:scale-105
+            className="w-full cursor-pointer p-6 text-md hover:scale-105
                     hover:shadow-lg hover:-translate-y-2"
-                    text="Join An Organization"
-                    onClick={ () => {setIsModalOpen(true)}}
-                    
-                  />
+            text="Join An Organization"
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+          />
         </div>
       </div>
       <JoinOrganizationModal
