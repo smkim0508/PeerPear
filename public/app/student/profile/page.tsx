@@ -200,7 +200,7 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        setSaveMessage("Profile saved successfully! 🎉");
+        setSaveMessage("Profile saved successfully!");
         await refreshAuth();
       } else {
         setSaveMessage("Error saving profile. Please try again.");
