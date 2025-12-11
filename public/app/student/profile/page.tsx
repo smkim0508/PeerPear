@@ -32,7 +32,6 @@ export default function ProfilePage() {
     first: false,
     last: false,
   });
-  const [phoneError, setPhoneError] = useState(false);
   const [hobbyError, setHobbyError] = useState(false);
 
   useEffect(() => {
@@ -105,39 +104,37 @@ export default function ProfilePage() {
     }
     if (name === "phone_number") {
       let digits = value.replace(/\D/g, "");
-  
-      setPhoneError(digits.length > 10);
-  
+
       digits = digits.slice(0, 10);
-  
+
       let formatted = digits;
-  
+
       if (digits.length > 3) {
         formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
       }
       if (digits.length > 6) {
         formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
       }
-  
+
       setProfile((prev) =>
         prev ? { ...prev, [name]: formatted } : prev
       );
       return;
-    }  
+    }
     setProfile((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
-  
+
 
   // Add hobby
   const handleAddHobby = () => {
     const trimmed = newHobby.trim();
-  
+
     if (trimmed.length > 15) {
       setHobbyError(true);
       return;
     }
     setHobbyError(false);
-  
+
     if (trimmed && profile && !profile.hobbies.includes(trimmed)) {
       setProfile((prev) =>
         prev ? { ...prev, hobbies: [...prev.hobbies, trimmed] } : prev
@@ -145,7 +142,7 @@ export default function ProfilePage() {
       setNewHobby("");
     }
   };
-  
+
 
   // Remove hobby
   const handleRemoveHobby = (hobby: string) => {
@@ -256,8 +253,8 @@ export default function ProfilePage() {
           {saveMessage && (
             <div
               className={`p-4 mb-8 rounded-lg text-center font-semibold ${saveMessage.includes("successfully")
-                  ? "bg-green text-nav-dark"
-                  : "bg-red-100 text-red-800"
+                ? "bg-green text-nav-dark"
+                : "bg-red-100 text-red-800"
                 }`}
             >
               {saveMessage}
@@ -293,11 +290,10 @@ export default function ProfilePage() {
                       name={name}
                       value={(profile as any)[name]}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
-                        isFieldError(label)
-                          ? "border-red-500 bg-red-50"
-                          : "border-gray-200 bg-transparent focus:border-green"
-                      }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError(label)
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 bg-transparent focus:border-green"
+                        }`}
                       placeholder={`Enter your ${label.toLowerCase()}`}
                       maxLength={name === "phone_number" ? 20 : 10}
                     />
@@ -311,11 +307,7 @@ export default function ProfilePage() {
                         Last name must be 10 characters or fewer.
                       </p>
                     )}
-                    {name === "phone_number" && phoneError && (
-                      <p className="text-red-600 text-sm">
-                        Phone number must contain only 10 digits.
-                      </p>
-                    )}
+
                   </div>
                 ))}
                 <div className="space-y-2">
@@ -352,8 +344,8 @@ export default function ProfilePage() {
                     value={profile.class_year || ""}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Class Year")
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 bg-transparent focus:border-green"
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 bg-transparent focus:border-green"
                       }`}
                   >
                     <option value="" disabled>
@@ -377,8 +369,8 @@ export default function ProfilePage() {
                     value={profile.major}
                     onChange={handleChange}
                     className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Major")
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 bg-transparent focus:border-green"
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 bg-transparent focus:border-green"
                       }`}
                     placeholder="Your field of study"
                   />
