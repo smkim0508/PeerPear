@@ -15,7 +15,7 @@ export default function StudentDashBoard() {
   const { user } = useAuth();
 
   // SearchBar filters
-  const [eventTab, setEventTab] = useState<"event" | "organization">("event");
+  const [eventTab, setEventTab] = useState<"program" | "organization">("program");
   const [searchQuery, setSearchQuery] = useState("");
 
   const [events, setEvents] = useState<PairingEvent[]>([]);
@@ -95,7 +95,7 @@ export default function StudentDashBoard() {
 
   // Search & org/event filter
   const filteredEvents =
-    eventTab === "event"
+    eventTab === "program"
       ? events.filter((event) =>
           event.title.toLowerCase().includes(searchQuery.toLowerCase())
         )
