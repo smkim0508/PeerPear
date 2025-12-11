@@ -4,8 +4,8 @@ import { useState } from "react";
 import PearSwitch from "./PearSwitch";
 
 type SearchBarProps = {
-  activeTab: "event" | "organization";
-  setActiveTab: (tab: "event" | "organization") => void;
+  activeTab: "program" | "organization";
+  setActiveTab: (tab: "program" | "organization") => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
 };
@@ -29,7 +29,7 @@ export default function SearchBar({
               <input
                 id="search"
                 type="text"
-                placeholder={`Search by ${activeTab === "event" ? "event" : "organization"
+                placeholder={`Search by ${activeTab === "program" ? "program" : "organization"
                   }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -54,10 +54,10 @@ export default function SearchBar({
 
           {/* Filter buttons (right, fixed width) */}
           <PearSwitch
-            options={["event", "organization"]}
+            options={["program", "organization"]}
             activeOption={activeTab}
             onOptionChange={(option) =>
-              setActiveTab(option as "event" | "organization")
+              setActiveTab(option as "program" | "organization")
             }
             className="shrink-0"
           />
