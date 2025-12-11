@@ -123,7 +123,7 @@ export default function OrganizationPage() {
         onClick={logout}
         className="flex flex-row fixed top-0 left-0 m-6 hover:font-bold cursor-pointer items-center gap-2"
       >
-        <ArrowLeft className="w-4 h-4" /> Logout
+        <ArrowLeft className="w-4 h-4" /> Log out
       </button>
       <div className="flex flex-col w-full items-center">
         {confirmSuccess && (
