@@ -37,9 +37,9 @@ def delete_all_tables_ordered(engine):
             print(f"Dropping {table_name}...")
             table = MainDB_Base.metadata.tables[table_name]
             table.drop(engine, checkfirst=True)
-            print(f"✓ Dropped {table_name}")
+            print(f"SUCCESS: Dropped {table_name}")
         except Exception as e:
-            print(f"✗ Error dropping {table_name}: {e}")
+            print(f"WARNING: Error dropping {table_name}: {e}")
 
 # helper to delete all tables
 def delete_all_tables(engine):
@@ -56,8 +56,8 @@ def delete_all_tables(engine):
     try:
         MainDB_Base.metadata.drop_all(engine, checkfirst=True)
     except Exception as e:
-        print(f"✗ Error: {e}")
-        print("\nTrying alternative method...")
+        print(f"Error: {e}")
+        print("Trying alternative method...")
         
         # Fallback: drop each table individually with CASCADE
         for table_name in reversed(list(MainDB_Base.metadata.tables.keys())):
@@ -65,9 +65,9 @@ def delete_all_tables(engine):
                 with engine.connect() as conn:
                     conn.execute(text(f"DROP TABLE IF EXISTS {table_name} CASCADE;"))
                     conn.commit()
-                print(f"✓ Dropped {table_name}")
+                print(f"SUCCESS: Dropped {table_name}")
             except Exception as e2:
-                print(f"✗ Error dropping {table_name}: {e2}")
+                print(f"WARNING: Error dropping {table_name}: {e2}")
 
 # helper to delete a single table
 def delete_table(table_name, engine):
@@ -105,13 +105,12 @@ if __name__ == "__main__":
         exit(1)
 
     # NOTE: change below to determine which table(s) to delete
-    # delete_all_tables(engine)
+    delete_all_tables(engine)
     # delete_table("event_registrations", engine)
-    delete_table("orgadmins", engine)
-    delete_table("users", engine)
+    # delete_table("orgadmins", engine)
+    # delete_table("users", engine)
     # delete_table("user_profiles", engine)
-    delete_table("organizations", engine)
-
+    # delete_table("organizations", engine)
     # delete_table("org_admin_requests", engine)
     # delete_table("questions", engine)
     # delete_table("responses", engine)
