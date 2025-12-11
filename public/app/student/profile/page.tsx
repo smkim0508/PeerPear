@@ -33,6 +33,7 @@ export default function ProfilePage() {
     last: false,
   });
   const [hobbyError, setHobbyError] = useState(false);
+  const [majorError, setMajorError] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -101,6 +102,9 @@ export default function ProfilePage() {
     }
     if (name === "last_name") {
       setNameErrors((prev) => ({ ...prev, last: value.length > 10 }));
+    }
+    if (name === "major") {
+      setMajorError(value.length > 30);
     }
     if (name === "phone_number") {
       let digits = value.replace(/\D/g, "");
@@ -373,7 +377,13 @@ export default function ProfilePage() {
                       : "border-gray-200 bg-transparent focus:border-green"
                       }`}
                     placeholder="Your field of study"
+                    maxLength={30}
                   />
+                  {majorError && (
+                    <p className="text-red-600 text-sm">
+                      Major must be 30 characters or fewer.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -402,7 +412,7 @@ export default function ProfilePage() {
                     }}
                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green"
                     placeholder="Add a hobby or interest..."
-                    maxLength={20}
+                    maxLength={15}
                     onKeyPress={(e) =>
                       e.key === "Enter" && (e.preventDefault(), handleAddHobby())
                     }
