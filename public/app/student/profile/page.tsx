@@ -420,7 +420,7 @@ export default function ProfilePage() {
                 {profile.hobbies.length > 0 && (
                   <div className="space-y-3">
                     <p className="text-lg font-semibold text-nav-dark">
-                      Your hobbies:
+                      Your interests:
                     </p>
                     <div className="flex flex-wrap gap-3">
                       {profile.hobbies.map((hobby) => (
