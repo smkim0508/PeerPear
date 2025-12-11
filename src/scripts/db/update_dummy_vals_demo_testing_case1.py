@@ -23,24 +23,32 @@ from common.types.user import ClassYear
 """
 OVERVIEW:
 
-Event: "Jocelyn's Test Program" - Demo test program with 6 students
-- 6 student participants (Gary, Sungmin, Nadula, Jaden, DK, Jocelyn)
-- Jocelyn has separate org admin account (cs-jw5134)
+Three test programs for graders:
+1. "Jocelyn's Test Program" - Demo test program with 5 students
+2. "Bob's Test Program" - Demo test program with 5 students
+3. "Oyu's Test Program" - Demo test program with 5 students
+
+- 5 student participants per event (Gary, Sungmin, Nadula, Jaden, DK)
+- Each grader has separate student and org admin accounts:
+  - Jocelyn: jw5134 (student), cs-jw5134 (org admin)
+  - Bob: rdondero (student), cs-rdondero (org admin)
+  - Oyu: oe7583 (student), cs-oe7583 (org admin)
 
 NOTE: Reflects the grader's guide.
 
-Intended pairings (all size 2):
+Intended pairings (all size 2, same for all three events):
 1. Gary (BIG) + Nadula (LITTLE): Both Instagram users
-2. Sungmin (BIG) + Grader (e.g. Jocelyn) (LITTLE): Both Facebook users (Jocelyn simulated)
+2. Sungmin (BIG) + Grader (LITTLE): Both Facebook users (Grader simulated)
 3. DK (BIG) + Jaden (LITTLE): Both TikTok users
 """
 
 def create_user_data(session):
     """
-    Create 7 users total:
+    Create 11 users total:
     - Gary, Sungmin, Nadula, Jaden, DK (5 students)
-    - Jocelyn (student account)
-    - Jocelyn 2 (org admin account)
+    - Jocelyn (student account + org admin account)
+    - Bob (student account + org admin account)
+    - Oyu (student account + org admin account)
     """
     users = [
         UserTable(
@@ -73,19 +81,47 @@ def create_user_data(session):
             last_name="Lee",
             email="dl2635@princeton.edu"
         ),
-        # NOTE: id 6 -> student account
+        # NOTE: id 6 -> Jocelyn student account
         UserTable(
             username="jw5134",
             first_name="Jocelyn",
             last_name="Wang",
             email="jw5134@princeton.edu"
         ),
-        # NOTE: id 7 -> org admin account
+        # NOTE: id 7 -> Jocelyn org admin account
         UserTable(
             username="cs-jw5134",
             first_name="Jocelyn 2",
             last_name="Wang",
             email="cs-jw5134@princeton.edu"
+        ),
+        # NOTE: id 8 -> Bob student account
+        UserTable(
+            username="rdondero",
+            first_name="Bob",
+            last_name="Dondero",
+            email="rdondero@princeton.edu"
+        ),
+        # NOTE: id 9 -> Bob org admin account
+        UserTable(
+            username="cs-rdondero",
+            first_name="Bob 2",
+            last_name="Dondero",
+            email="cs-rdondero@princeton.edu"
+        ),
+        # NOTE: id 10 -> Oyu student account
+        UserTable(
+            username="oe7583",
+            first_name="Oyu",
+            last_name="Enkhbold",
+            email="oe7583@princeton.edu"
+        ),
+        # NOTE: id 11 -> Oyu org admin account
+        UserTable(
+            username="cs-oe7583",
+            first_name="Oyu 2",
+            last_name="Enkhbold",
+            email="cs-oe7583@princeton.edu"
         )
     ]
 
@@ -97,7 +133,8 @@ def create_user_data(session):
 def create_organization_data(session):
     """
     Create 5 organizations.
-    2 for default testing, 3 for each grader.
+    - 2 for default testing (AASA, KSAP)
+    - 3 for graders (Jocelyn, Bob, Oyu)
     """
     organizations = [
         OrganizationTable(
@@ -111,6 +148,14 @@ def create_organization_data(session):
         OrganizationTable(
             org_name="Jocelyn's Test Org",
             description="Demo Test Org for Jocelyn."
+        ),
+        OrganizationTable(
+            org_name="Bob's Test Org",
+            description="Demo Test Org for Bob."
+        ),
+        OrganizationTable(
+            org_name="Oyu's Test Org",
+            description="Demo Test Org for Oyu."
         )
     ]
 
@@ -125,6 +170,8 @@ def create_orgadmin_data(session):
 
     - Gary, Sungmin, Nadula, Jaden, DK: admins of AASA and KSAP
     - Jocelyn (cs-jw5134, user_id=7): owner of Jocelyn's Test Org
+    - Bob (cs-rdondero, user_id=9): owner of Bob's Test Org
+    - Oyu (cs-oe7583, user_id=11): owner of Oyu's Test Org
     """
     org_admins = [
         OrgAdminTable(
@@ -174,6 +221,16 @@ def create_orgadmin_data(session):
             user_id=7,  # jocelyn - org admin account
             organization_id=3,  # Jocelyn's Test Org
             is_owner=True
+        ),
+        OrgAdminTable(
+            user_id=9,  # bob - org admin account
+            organization_id=4,  # Bob's Test Org
+            is_owner=True
+        ),
+        OrgAdminTable(
+            user_id=11,  # oyu - org admin account
+            organization_id=5,  # Oyu's Test Org
+            is_owner=True
         )
     ]
 
@@ -183,7 +240,11 @@ def create_orgadmin_data(session):
     print("Dummy org admins added.")
 
 def create_event_data(session):
-    """Create 4 events"""
+    """
+    Create 6 events:
+    - 3 for default testing (AASA #1, AASA #2, KSAP)
+    - 3 for graders (Jocelyn, Bob, Oyu)
+    """
     events = [
         EventTable(
             title="Asian American Students Big Little Family",
@@ -216,6 +277,22 @@ def create_event_data(session):
             organization_id=3,
             status=EventStatus.STARTED,
             check_sibling_roles=True
+        ),
+        EventTable(
+            title="Bob's Test Program",
+            description="Demo Test Program for Bob.",
+            end_date=datetime.now() + timedelta(weeks=52),
+            organization_id=4,
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
+        ),
+        EventTable(
+            title="Oyu's Test Program",
+            description="Demo Test Program for Oyu.",
+            end_date=datetime.now() + timedelta(weeks=52),
+            organization_id=5,
+            status=EventStatus.STARTED,
+            check_sibling_roles=True
         )
     ]
     for event in events:
@@ -225,9 +302,9 @@ def create_event_data(session):
 
 def create_event_registration_data(session):
     """
-    Register 5 students for the demo test event (event_id=4).
+    Register 5 students for all three demo test events (event_id=4, 5, 6).
 
-    Participants:
+    Participants (same for all three events):
     - Gary (BIG_SIBLING): Pizza, Instagram
     - Sungmin (BIG_SIBLING): Sushi, Facebook
     - Nadula (LITTLE_SIBLING): Hamburger, Instagram
@@ -235,6 +312,7 @@ def create_event_registration_data(session):
     - DK (BIG_SIBLING): Waffles, TikTok
     """
     registrations = [
+        # ===== JOCELYN'S TEST PROGRAM (event_id=4) =====
         EventRegistrationsTable(
             user_id=1,  # gary
             event_id=4,
@@ -266,6 +344,80 @@ def create_event_registration_data(session):
         EventRegistrationsTable(
             user_id=5,  # dk
             event_id=4,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Waffles and TikTok."
+        ),
+
+        # ===== BOB'S TEST PROGRAM (event_id=5) =====
+        EventRegistrationsTable(
+            user_id=1,  # gary
+            event_id=5,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Pizza and Instagram."
+        ),
+        EventRegistrationsTable(
+            user_id=2,  # sungmin
+            event_id=5,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Sushi and Facebook."
+        ),
+        EventRegistrationsTable(
+            user_id=3,  # nadula
+            event_id=5,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Hamburger and Instagram."
+        ),
+        EventRegistrationsTable(
+            user_id=4,  # jaden
+            event_id=5,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Pancakes and TikTok."
+        ),
+        EventRegistrationsTable(
+            user_id=5,  # dk
+            event_id=5,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Waffles and TikTok."
+        ),
+
+        # ===== OYU'S TEST PROGRAM (event_id=6) =====
+        EventRegistrationsTable(
+            user_id=1,  # gary
+            event_id=6,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Pizza and Instagram."
+        ),
+        EventRegistrationsTable(
+            user_id=2,  # sungmin
+            event_id=6,
+            role=EventRole.BIG_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Sushi and Facebook."
+        ),
+        EventRegistrationsTable(
+            user_id=3,  # nadula
+            event_id=6,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Hamburger and Instagram."
+        ),
+        EventRegistrationsTable(
+            user_id=4,  # jaden
+            event_id=6,
+            role=EventRole.LITTLE_SIBLING,
+            valid_registration=True,
+            response_summary="Enjoys Pancakes and TikTok."
+        ),
+        EventRegistrationsTable(
+            user_id=5,  # dk
+            event_id=6,
             role=EventRole.BIG_SIBLING,
             valid_registration=True,
             response_summary="Enjoys Waffles and TikTok."
@@ -327,11 +479,12 @@ def create_user_profile_data(session):
 
 def create_question_data(session):
     """
-    Create 2 questions for the demo test event:
+    Create 2 questions for each demo test event (events 4, 5, 6):
     1. Text: What's your favorite food?
     2. Multiple choice: What's your favorite social media app?
     """
     questions = [
+        # ===== JOCELYN'S TEST PROGRAM (event_id=4) =====
         QuestionTable(
             question="What's your favorite food?",
             event_id=4
@@ -340,6 +493,28 @@ def create_question_data(session):
             question="What's your favorite social media app?",
             options=["Instagram", "Facebook", "TikTok", "Snapchat"],
             event_id=4
+        ),
+
+        # ===== BOB'S TEST PROGRAM (event_id=5) =====
+        QuestionTable(
+            question="What's your favorite food?",
+            event_id=5
+        ),
+        QuestionTable(
+            question="What's your favorite social media app?",
+            options=["Instagram", "Facebook", "TikTok", "Snapchat"],
+            event_id=5
+        ),
+
+        # ===== OYU'S TEST PROGRAM (event_id=6) =====
+        QuestionTable(
+            question="What's your favorite food?",
+            event_id=6
+        ),
+        QuestionTable(
+            question="What's your favorite social media app?",
+            options=["Instagram", "Facebook", "TikTok", "Snapchat"],
+            event_id=6
         )
     ]
 
@@ -352,11 +527,13 @@ def create_response_data(session):
     """
     Create responses for all 5 participants to enable clear pairings:
 
-    Pair 1: Gary + Nadula (both Instagram)
-    Pair 2: Sungmin + Jocelyn (both Facebook, Jocelyn simulated)
-    Pair 3: DK + Jaden (both TikTok)
+    Intended pairings (same for all three events):
+    - Pair 1: Gary + Nadula (both Instagram)
+    - Pair 2: Sungmin + Grader (both Facebook, Grader simulated)
+    - Pair 3: DK + Jaden (both TikTok)
     """
     responses = [
+        # ===== JOCELYN'S TEST PROGRAM (event_id=4, question_id=1,2) =====
         # Gary's responses (BIG)
         ResponseTable(user_id=1, question_id=1, answer="Pizza"),
         ResponseTable(user_id=1, question_id=2, answer="Instagram"),
@@ -375,7 +552,49 @@ def create_response_data(session):
 
         # DK's responses (BIG) - matches Jaden on TikTok
         ResponseTable(user_id=5, question_id=1, answer="Waffles"),
-        ResponseTable(user_id=5, question_id=2, answer="TikTok")
+        ResponseTable(user_id=5, question_id=2, answer="TikTok"),
+
+        # ===== BOB'S TEST PROGRAM (event_id=5, question_id=3,4) =====
+        # Gary's responses (BIG)
+        ResponseTable(user_id=1, question_id=3, answer="Pizza"),
+        ResponseTable(user_id=1, question_id=4, answer="Instagram"),
+
+        # Sungmin's responses (BIG)
+        ResponseTable(user_id=2, question_id=3, answer="Sushi"),
+        ResponseTable(user_id=2, question_id=4, answer="Facebook"),
+
+        # Nadula's responses (LITTLE) - matches Gary on Instagram
+        ResponseTable(user_id=3, question_id=3, answer="Hamburger"),
+        ResponseTable(user_id=3, question_id=4, answer="Instagram"),
+
+        # Jaden's responses (LITTLE) - matches DK on TikTok
+        ResponseTable(user_id=4, question_id=3, answer="Pancakes"),
+        ResponseTable(user_id=4, question_id=4, answer="TikTok"),
+
+        # DK's responses (BIG) - matches Jaden on TikTok
+        ResponseTable(user_id=5, question_id=3, answer="Waffles"),
+        ResponseTable(user_id=5, question_id=4, answer="TikTok"),
+
+        # ===== OYU'S TEST PROGRAM (event_id=6, question_id=5,6) =====
+        # Gary's responses (BIG)
+        ResponseTable(user_id=1, question_id=5, answer="Pizza"),
+        ResponseTable(user_id=1, question_id=6, answer="Instagram"),
+
+        # Sungmin's responses (BIG)
+        ResponseTable(user_id=2, question_id=5, answer="Sushi"),
+        ResponseTable(user_id=2, question_id=6, answer="Facebook"),
+
+        # Nadula's responses (LITTLE) - matches Gary on Instagram
+        ResponseTable(user_id=3, question_id=5, answer="Hamburger"),
+        ResponseTable(user_id=3, question_id=6, answer="Instagram"),
+
+        # Jaden's responses (LITTLE) - matches DK on TikTok
+        ResponseTable(user_id=4, question_id=5, answer="Pancakes"),
+        ResponseTable(user_id=4, question_id=6, answer="TikTok"),
+
+        # DK's responses (BIG) - matches Jaden on TikTok
+        ResponseTable(user_id=5, question_id=5, answer="Waffles"),
+        ResponseTable(user_id=5, question_id=6, answer="TikTok")
     ]
 
     for response in responses:
@@ -391,7 +610,7 @@ def fill_all_tables(engine):
     # Warn users before committing
     print(
         f"""
-        CREATING DEMO CASE 1 DATA (6 STUDENTS) IN 3 SEC...
+        CREATING DEMO CASE 1 DATA (11 USERS, 3 GRADER TEST PROGRAMS) IN 3 SEC...
         PLEASE ABORT NOW IF YOU'D LIKE TO STOP!!!
         """
     )
