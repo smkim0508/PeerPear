@@ -698,9 +698,15 @@ export default function EventPage2({ params }: EventPageProps) {
                   Time Remaining
                 </p>
                 <p className="text-2xl font-mono text-white flex justify-center gap-2">
-                  <span className="inline-block w-16 text-center">{timeLeft.days}d</span>
-                  <span className="inline-block w-12 text-center">{timeLeft.hours}h</span>
-                  <span className="inline-block w-14 text-center">{timeLeft.minutes}m</span>
+                  <span className="inline-block w-16 text-center">
+                    {timeLeft.days}d
+                  </span>
+                  <span className="inline-block w-12 text-center">
+                    {timeLeft.hours}h
+                  </span>
+                  <span className="inline-block w-14 text-center">
+                    {timeLeft.minutes}m
+                  </span>
                 </p>
               </div>
               <div className="mt-4 text-center text-gray-700">
@@ -878,11 +884,11 @@ export default function EventPage2({ params }: EventPageProps) {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark truncate">
+                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark break-words">
                       {event.title}
                     </h1>
                     {event.description && (
-                      <p className="text-lg text-gray-700 max-w-2xl leading-relaxed truncate">
+                      <p className="text-lg text-gray-700 max-w-2xl leading-relaxed break-words">
                         {event.description}
                       </p>
                     )}
@@ -1035,11 +1041,10 @@ export default function EventPage2({ params }: EventPageProps) {
                                   <div
                                     key={studentIndex}
                                     className={`flex items-center justify-between p-3 rounded-md border ${student.id === user?.id
-                                      ? "bg-blue-100 border-blue-300"
-                                      : "bg-white border-gray-200"
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-white border-gray-200"
                                       }`}
                                   >
-
                                     <div className="flex items-center gap-3">
                                       <div className="flex items-center gap-2">
                                         {student.role === "BIG_SIBLING" ? (
@@ -1061,8 +1066,8 @@ export default function EventPage2({ params }: EventPageProps) {
                                     {event.check_sibling_roles && (
                                       <span
                                         className={`px-2 py-1 text-xs font-medium rounded-full border ${student.role === "BIG_SIBLING"
-                                          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                          : "bg-blue-100 text-blue-800 border-blue-200"
+                                            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                            : "bg-blue-100 text-blue-800 border-blue-200"
                                           }`}
                                       >
                                         {student.role === "BIG_SIBLING"
@@ -1095,7 +1100,9 @@ export default function EventPage2({ params }: EventPageProps) {
                   event?.status === "PAIRING_PUBLISHED") && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-2xl mt-4">Registration</CardTitle>
+                      <CardTitle className="text-2xl mt-4">
+                        Registration
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="pb-4">
                       {isRegistered ? (
@@ -1110,25 +1117,32 @@ export default function EventPage2({ params }: EventPageProps) {
 
                             {event?.questions?.length > 0 && (
                               <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">Questionnaire Status</h3>
+                                <h3 className="font-semibold text-lg">
+                                  Questionnaire Status
+                                </h3>
                                 <div className="flex items-center gap-2 text-green">
                                   <CheckCircle className="h-5 w-5" />
                                   <span className="font-medium">Completed</span>
                                 </div>
-                                {(event.status === "TERMINATED" || event.status === "PAIRING_PUBLISHED") && (
-                                  <PearButton
-                                    text="View Questionnaire"
-                                    onClick={() =>
-                                      router.push(`/events/${eventId}/questionnaire`)
-                                    }
-                                    className="w-full bg-green hover:bg-green/90 mt-2"
-                                  />
-                                )}
+                                {(event.status === "TERMINATED" ||
+                                  event.status === "PAIRING_PUBLISHED") && (
+                                    <PearButton
+                                      text="View Questionnaire"
+                                      onClick={() =>
+                                        router.push(
+                                          `/events/${eventId}/questionnaire`
+                                        )
+                                      }
+                                      className="w-full bg-green hover:bg-green/90 mt-2"
+                                    />
+                                  )}
                                 {event.status === "STARTED" && (
                                   <PearButton
                                     text="Edit/View Questionnaire"
                                     onClick={() =>
-                                      router.push(`/events/${eventId}/questionnaire`)
+                                      router.push(
+                                        `/events/${eventId}/questionnaire`
+                                      )
                                     }
                                     className="w-full mt-2"
                                   />
@@ -1138,7 +1152,9 @@ export default function EventPage2({ params }: EventPageProps) {
                             {event.status === "STARTED" && (
                               <PearButton
                                 text={
-                                  isRegistering ? "Unregistering..." : "Unregister"
+                                  isRegistering
+                                    ? "Unregistering..."
+                                    : "Unregister"
                                 }
                                 onClick={
                                   isRegistering ? () => { } : openUnregisterModal
@@ -1159,14 +1175,21 @@ export default function EventPage2({ params }: EventPageProps) {
                             </div>
                             {event?.questions?.length > 0 && (
                               <div className="space-y-3">
-                                <h3 className="font-semibold text-lg">Questionnaire Status</h3>
+                                <h3 className="font-semibold text-lg">
+                                  Questionnaire Status
+                                </h3>
                                 <div className="space-y-3">
                                   <p className="text-gray-700">
-                                    You are not eligible for a match until you complete the questionnaire below.
+                                    You are not eligible for a match until you
+                                    complete the questionnaire below.
                                   </p>
                                   <PearButton
                                     text="Edit Questionnaire"
-                                    onClick={() => router.push(`/events/${eventId}/questionnaire`)}
+                                    onClick={() =>
+                                      router.push(
+                                        `/events/${eventId}/questionnaire`
+                                      )
+                                    }
                                     className="w-full"
                                   />
                                 </div>
@@ -1175,9 +1198,17 @@ export default function EventPage2({ params }: EventPageProps) {
 
                             {event.status === "STARTED" && (
                               <PearButton
-                                text={isRegistering ? "Unregistering..." : "Unregister"}
-                                onClick={isRegistering ? () => { } : openUnregisterModal}
-                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                                text={
+                                  isRegistering
+                                    ? "Unregistering..."
+                                    : "Unregister"
+                                }
+                                onClick={
+                                  isRegistering ? () => { } : openUnregisterModal
+                                }
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${isRegistering
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                   }`}
                               />
                             )}
@@ -1185,11 +1216,17 @@ export default function EventPage2({ params }: EventPageProps) {
                         )
                       ) : (
                         <div className="space-y-4">
-                          <p className="text-gray-700">Register to participate in this program.</p>
+                          <p className="text-gray-700">
+                            Register to participate in this program.
+                          </p>
                           <PearButton
                             text={isRegistering ? "Registering..." : "Register"}
-                            onClick={isRegistering ? () => { } : openRegisterModal}
-                            className={`w-full bg-green mb-4 cursor-pointer ${isRegistering ? "opacity-50 cursor-not-allowed" : ""
+                            onClick={
+                              isRegistering ? () => { } : openRegisterModal
+                            }
+                            className={`w-full bg-green mb-4 cursor-pointer ${isRegistering
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                               }`}
                           />
                         </div>
@@ -1250,8 +1287,8 @@ export default function EventPage2({ params }: EventPageProps) {
                           }
                           onClick={isStartingEvent ? () => { } : openStartModal}
                           className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
                             } cursor-pointer py-6`}
                         />
                       )}
@@ -1291,18 +1328,20 @@ export default function EventPage2({ params }: EventPageProps) {
                               text={
                                 isTriggeringPairing
                                   ? "Creating Pairings..."
-                                  : participants.length < 2
-                                    ? "Not Enough Participants (Min 2)"
+                                  : participants.length < groupSize
+                                    ? `Not Enough Participants (Min ${groupSize})`
                                     : "Create Pairings"
                               }
                               onClick={
-                                isTriggeringPairing || participants.length < 2
+                                isTriggeringPairing ||
+                                  participants.length < groupSize
                                   ? () => { }
                                   : openPairingModal
                               }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing || participants.length < 2
-                                ? "opacity-50 cursor-not-allowed hover:scale-100 hover:bg-green-600 hover:shadow-none"
-                                : ""
+                              className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing ||
+                                  participants.length < groupSize
+                                  ? "opacity-50 cursor-not-allowed hover:scale-100 hover:bg-green-600 hover:shadow-none"
+                                  : ""
                                 }`}
                             />
                             {pairingData && (
@@ -1318,8 +1357,8 @@ export default function EventPage2({ params }: EventPageProps) {
                                     : openPublishModal
                                 }
                                 className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                   }`}
                               />
                             )}
@@ -1342,8 +1381,8 @@ export default function EventPage2({ params }: EventPageProps) {
                                   : openPublishModal
                               }
                               className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
                                 }`}
                             />
                           </>

@@ -5,7 +5,14 @@ import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { Squiggle } from "@/components/ui/Squiggle";
-import { User, Mail, Phone, BookOpen, GraduationCap, Heart } from "lucide-react";
+import {
+  User,
+  Mail,
+  Phone,
+  BookOpen,
+  GraduationCap,
+  Heart,
+} from "lucide-react";
 import PearButton from "@/components/PearButton";
 
 interface Profile {
@@ -75,8 +82,7 @@ export default function ProfilePage() {
             first_name: data.profile.first_name || prev?.first_name || "",
             last_name: data.profile.last_name || prev?.last_name || "",
             email: data.profile.email || prev?.email || "",
-            phone_number:
-              data.profile.phone_number || prev?.phone_number || "",
+            phone_number: data.profile.phone_number || prev?.phone_number || "",
             gender: data.profile.gender || "",
             other_gender: "",
             class_year: data.profile.class_year || "",
@@ -117,17 +123,17 @@ export default function ProfilePage() {
         formatted = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
       }
       if (digits.length > 6) {
-        formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+        formatted = `(${digits.slice(0, 3)}) ${digits.slice(
+          3,
+          6
+        )}-${digits.slice(6)}`;
       }
 
-      setProfile((prev) =>
-        prev ? { ...prev, [name]: formatted } : prev
-      );
+      setProfile((prev) => (prev ? { ...prev, [name]: formatted } : prev));
       return;
     }
     setProfile((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
-
 
   // Add hobby
   const handleAddHobby = () => {
@@ -146,7 +152,6 @@ export default function ProfilePage() {
       setNewHobby("");
     }
   };
-
 
   // Remove hobby
   const handleRemoveHobby = (hobby: string) => {
@@ -187,14 +192,15 @@ export default function ProfilePage() {
     if (missing.length > 0) {
       setErrors(missing);
       setSaveMessage("Please fill in all required fields.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
       setIsLoading(false);
       return;
     }
 
     try {
       const payload = { ...profile, class_year: profile.class_year || null };
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
       const res = await fetch(`${apiUrl}/user-profile/update-profile`, {
         method: "POST",
@@ -208,10 +214,12 @@ export default function ProfilePage() {
         await refreshAuth();
       } else {
         setSaveMessage("Error saving profile. Please try again.");
+        window.scrollTo({ top: 0, behavior: "smooth" }); 
       }
     } catch (err) {
       console.error("Error updating profile:", err);
       setSaveMessage("Error saving profile. Please try again.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsLoading(false);
     }
@@ -245,21 +253,21 @@ export default function ProfilePage() {
               </span>
             </h1>
             <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
-              Tell us about yourself! This information helps us create better matches
-              and makes you part of the PeerPear community.
+              Tell us about yourself! This information helps us create better
+              matches and makes you part of the PeerPear community.
             </p>
           </div>
         </div>
 
         <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
-
           {/* 🔥 Moved success/error message to top */}
           {saveMessage && (
             <div
-              className={`p-4 mb-8 rounded-lg text-center font-semibold ${saveMessage.includes("successfully")
-                ? "bg-green text-nav-dark"
-                : "bg-red-100 text-red-800"
-                }`}
+              className={`p-4 mb-8 rounded-lg text-center font-semibold ${
+                saveMessage.includes("successfully")
+                  ? "bg-green text-nav-dark"
+                  : "bg-red-100 text-red-800"
+              }`}
             >
               {saveMessage}
             </div>
@@ -275,7 +283,9 @@ export default function ProfilePage() {
             <div className="border-t border-gray-200 pt-6">
               <div className="flex items-center gap-3 mb-4">
                 <User className="w-6 h-6 text-green" />
-                <h2 className="text-2xl font-semibold text-nav-dark">Personal Information</h2>
+                <h2 className="text-2xl font-semibold text-nav-dark">
+                  Personal Information
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -294,10 +304,11 @@ export default function ProfilePage() {
                       name={name}
                       value={(profile as any)[name]}
                       onChange={handleChange}
-                      className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError(label)
-                        ? "border-red-500 bg-red-50"
-                        : "border-gray-200 bg-transparent focus:border-green"
-                        }`}
+                      className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
+                        isFieldError(label)
+                          ? "border-red-500 bg-red-50"
+                          : "border-gray-200 bg-transparent focus:border-green"
+                      }`}
                       placeholder={`Enter your ${label.toLowerCase()}`}
                       maxLength={name === "phone_number" ? 20 : 10}
                     />
@@ -311,7 +322,6 @@ export default function ProfilePage() {
                         Last name must be 10 characters or fewer.
                       </p>
                     )}
-
                   </div>
                 ))}
                 <div className="space-y-2">
@@ -333,7 +343,9 @@ export default function ProfilePage() {
             <div className="border-t border-gray-200 pt-6">
               <div className="flex items-center gap-3 mb-4">
                 <GraduationCap className="w-6 h-6 text-green" />
-                <h2 className="text-2xl font-semibold text-nav-dark">Academic Information</h2>
+                <h2 className="text-2xl font-semibold text-nav-dark">
+                  Academic Information
+                </h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -347,10 +359,11 @@ export default function ProfilePage() {
                     name="class_year"
                     value={profile.class_year || ""}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Class Year")
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-200 bg-transparent focus:border-green"
-                      }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
+                      isFieldError("Class Year")
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 bg-transparent focus:border-green"
+                    }`}
                   >
                     <option value="" disabled>
                       Select your class year
@@ -372,10 +385,11 @@ export default function ProfilePage() {
                     name="major"
                     value={profile.major}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${isFieldError("Major")
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-200 bg-transparent focus:border-green"
-                      }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg text-lg focus:outline-none transition-colors ${
+                      isFieldError("Major")
+                        ? "border-red-500 bg-red-50"
+                        : "border-gray-200 bg-transparent focus:border-green"
+                    }`}
                     placeholder="Your field of study"
                     maxLength={30}
                   />
@@ -414,11 +428,17 @@ export default function ProfilePage() {
                     placeholder="Add a hobby or interest..."
                     maxLength={15}
                     onKeyPress={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), handleAddHobby())
+                      e.key === "Enter" &&
+                      (e.preventDefault(), handleAddHobby())
                     }
                   />
-
-                  <PearButton text="Add" onClick={handleAddHobby} className="hover:scale-105" />
+                  <button
+                    type="button"
+                    onClick={handleAddHobby}
+                    className="px-6 py-3 bg-green text-nav-dark font-semibold rounded-lg hover:scale-105 transition-transform"
+                  >
+                    Add
+                  </button>{" "}
                 </div>
 
                 {hobbyError && (
@@ -457,7 +477,11 @@ export default function ProfilePage() {
 
             {/* Save Button */}
             <div className="text-center">
-              <PearButton text={isLoading ? "Saving Profile..." : "Save Profile"} disabled={isLoading} className="hover:scale-105" />
+              <PearButton
+                text={isLoading ? "Saving Profile..." : "Save Profile"}
+                disabled={isLoading}
+                className="hover:scale-105"
+              />
             </div>
           </form>
         </main>

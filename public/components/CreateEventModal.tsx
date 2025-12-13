@@ -66,10 +66,16 @@ export default function CreateEventModal({
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
       isValid = false;
+    } else if (formData.title.length > 30) {
+      newErrors.title = "Title must be 30 characters or fewer";
+      isValid = false;
     }
 
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
+      isValid = false;
+    } else if (formData.description.length > 100) {
+      newErrors.description = "Description must be 100 characters or fewer";
       isValid = false;
     }
 
@@ -159,26 +165,42 @@ export default function CreateEventModal({
     field: string,
     value: string | File | null | boolean
   ) => {
-    setFormData({ ...formData, [field]: value });
-    // Clear error for this field if it exists
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (typeof value === "string") {
+      const newErrors = { ...errors };
+      if (field === "title") {
+        if (value.length > 30) {
+          newErrors.title = "Max character limit reached (30)";
+        } else {
+          delete newErrors.title; // Remove error if back within limit
+        }
+      }
+      if (field === "description") {
+        if (value.length > 100) {
+          newErrors.description = "Max character limit reached (100)";
+        } else {
+          delete newErrors.description;
+        }
+      }
+      if (!newErrors[field] && errors[field]) {
+         delete newErrors[field];
+      }
+      
+      setErrors(newErrors);
     }
   };
 
   return (
     <div
-      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${
-        isAnimating ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
+        }`}
       onClick={onClose}
     >
       <div
-        className={`bg-white rounded-2xl  p-7 max-w-md w-full mx-4 shadow-2xl transition-all duration-300  relative ${
-          isAnimating
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 translate-y-4"
-        }`}
+        className={`bg-white rounded-2xl  p-7 max-w-md w-full mx-4 shadow-2xl transition-all duration-300  relative ${isAnimating
+          ? "opacity-100 scale-100 translate-y-0"
+          : "opacity-0 scale-95 translate-y-4"
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={"absolute top-5 right-5 "}>
@@ -237,15 +259,22 @@ export default function CreateEventModal({
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
           placeholder="Enter program title"
-          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-            errors.title
-              ? "border-red-500 focus:ring-red-200"
-              : "border-gray-300 focus:ring-[#8cbf70]"
+          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.title
+            ? "border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:ring-[#8cbf70]"
+            }`}
+        />        
+        <div 
+          className={`text-right text-xs mt-1 ${
+            formData.title.length > 30 ? "text-red-500 font-bold" : "text-gray-500"
           }`}
-        />
+        >
+          {formData.title.length}/30 characters
+        </div>
         {errors.title && (
-          <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+          <p className="mt-1 text-xs text-red-500 font-medium">{errors.title}</p>
         )}
+
 
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Description
@@ -255,12 +284,15 @@ export default function CreateEventModal({
           rows={3}
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
-          className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${
-            errors.description
-              ? "border-red-500 focus:ring-red-200"
-              : "border-gray-300 focus:ring-[#8cbf70]"
-          }`}
+          className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${errors.description
+            ? "border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:ring-[#8cbf70]"
+            }`}
+          maxLength={100}
         />
+        <div className="text-right text-xs text-gray-500 mt-1">
+          {formData.description.length}/100 characters
+        </div>
         {errors.description && (
           <p className="mt-1 text-xs text-red-500">{errors.description}</p>
         )}
@@ -272,11 +304,10 @@ export default function CreateEventModal({
           value={formData.endDate}
           onChange={(e) => handleInputChange("endDate", e.target.value)}
           type="date"
-          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-            errors.endDate
-              ? "border-red-500 focus:ring-red-200"
-              : "border-gray-300 focus:ring-[#8cbf70]"
-          }`}
+          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.endDate
+            ? "border-red-500 focus:ring-red-200"
+            : "border-gray-300 focus:ring-[#8cbf70]"
+            }`}
         />
         {errors.endDate && (
           <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>
@@ -337,11 +368,10 @@ export default function CreateEventModal({
         </div>
 
         <PearButton
-          className={`w-full px-3 py-2 mt-6 ${
-            submitting
-              ? "opacity-70 cursor-not-allowed"
-              : "hover:scale-105 hover:shadow-lg hover:-translate-y-1"
-          }`}
+          className={`w-full px-3 py-2 mt-6 ${submitting
+            ? "opacity-70 cursor-not-allowed"
+            : "hover:scale-105 hover:shadow-lg hover:-translate-y-1"
+            }`}
           text={submitting ? "Submitting..." : "Submit Program"}
           onClick={handleSubmit}
         />
