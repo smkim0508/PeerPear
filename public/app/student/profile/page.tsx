@@ -139,7 +139,7 @@ export default function ProfilePage() {
   const handleAddHobby = () => {
     const trimmed = newHobby.trim();
 
-    if (trimmed.length > 15) {
+    if (trimmed.length > 50) {
       setHobbyError(true);
       return;
     }
@@ -418,7 +418,7 @@ export default function ProfilePage() {
                       const val = e.target.value;
                       setNewHobby(val);
 
-                      if (val.length > 15) {
+                      if (val.length > 50) {
                         setHobbyError(true);
                       } else {
                         setHobbyError(false);
@@ -426,7 +426,7 @@ export default function ProfilePage() {
                     }}
                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg bg-transparent text-lg focus:outline-none focus:border-green"
                     placeholder="Add a hobby or interest..."
-                    maxLength={15}
+                    maxLength={50}
                     onKeyPress={(e) =>
                       e.key === "Enter" &&
                       (e.preventDefault(), handleAddHobby())
@@ -443,7 +443,7 @@ export default function ProfilePage() {
 
                 {hobbyError && (
                   <p className="text-red-600 text-sm">
-                    Hobbies must be 15 characters or fewer.
+                    Hobbies must be 50 characters or fewer.
                   </p>
                 )}
 
