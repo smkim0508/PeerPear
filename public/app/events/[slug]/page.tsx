@@ -778,7 +778,7 @@ export default function EventPage2({ params }: EventPageProps) {
                       {event.organizations.org_name}
                     </span>
                     {event.organizations?.description && (
-                      <div className="absolute left-0 top-full mt-2 w-72 p-3 rounded-lg border bg-white text-gray-700 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition">
+                      <div className="absolute left-0 top-full mt-2 w-2xl p-3 rounded-lg border bg-white text-gray-700 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition wrap-break-word">
                         {event.organizations.description}
                       </div>
                     )}
