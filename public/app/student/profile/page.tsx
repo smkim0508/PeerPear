@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const { user, refreshAuth } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [originalHobbies, setOriginalHobbies] = useState<string[]>([]);
+  const [removedHobbies, setRemovedHobbies] = useState<string[]>([]);
   const [newHobby, setNewHobby] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -158,23 +159,26 @@ export default function ProfilePage() {
 
   // Remove hobby
   const handleRemoveHobby = (hobby: string) => {
-    setProfile((prev) =>
-      prev
-        ? { ...prev, hobbies: prev.hobbies.filter((h) => h !== hobby) }
-        : prev
-    );
+    if (removedHobbies.includes(hobby)) {
+      // Un-remove the hobby
+      setRemovedHobbies((prev) => prev.filter((h) => h !== hobby));
+    } else {
+      // Mark as removed
+      setRemovedHobbies((prev) => [...prev, hobby]);
+    }
   };
 
   // Validation
   const validateProfile = (p: Profile): string[] => {
     const missing: string[] = [];
+    const activeHobbies = p.hobbies.filter((h) => !removedHobbies.includes(h));
 
     if (!p.first_name.trim()) missing.push("First Name");
     if (!p.last_name.trim()) missing.push("Last Name");
     if (!p.phone_number.trim()) missing.push("Phone Number");
     if (!p.class_year?.trim()) missing.push("Class Year");
     if (!p.major.trim()) missing.push("Major");
-    if (!p.hobbies || p.hobbies.length === 0) missing.push("Hobbies");
+    if (!activeHobbies || activeHobbies.length === 0) missing.push("Hobbies");
 
     return missing;
   };
@@ -202,7 +206,12 @@ export default function ProfilePage() {
     }
 
     try {
-      const payload = { ...profile, class_year: profile.class_year || null };
+      const activeHobbies = profile.hobbies.filter((h) => !removedHobbies.includes(h));
+      const payload = { 
+        ...profile, 
+        hobbies: activeHobbies,
+        class_year: profile.class_year || null 
+      };
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
       const res = await fetch(`${apiUrl}/user-profile/update-profile`, {
@@ -214,7 +223,9 @@ export default function ProfilePage() {
 
       if (res.ok) {
         setSaveMessage("Profile saved successfully!");
-        setOriginalHobbies(profile.hobbies);
+        setProfile((prev) => prev ? { ...prev, hobbies: activeHobbies } : prev);
+        setOriginalHobbies(activeHobbies);
+        setRemovedHobbies([]);
         await refreshAuth();
       } else {
         setSaveMessage("Error saving profile. Please try again.");
@@ -459,23 +470,34 @@ export default function ProfilePage() {
                     <div className="flex flex-wrap gap-3">
                       {profile.hobbies.map((hobby) => {
                         const isNew = !originalHobbies.includes(hobby);
+                        const isRemoved = removedHobbies.includes(hobby);
                         return (
                           <span
                             key={hobby}
                             className={`inline-flex items-center gap-2 px-4 py-2 border-2 rounded-full font-medium transition-all ${
-                              isNew
+                              isRemoved
+                                ? "bg-red-50 border-red-300 text-red-500 opacity-60"
+                                : isNew
                                 ? "bg-yellow-50 border-yellow-400 text-yellow-800"
                                 : "bg-green/20 border-green text-nav-dark"
                             }`}
                           >
                             <Heart className="w-4 h-4" />
-                            {hobby}
+                            <span className={isRemoved ? "line-through" : ""}>
+                              {hobby}
+                            </span>
+                            {isNew && !isRemoved && (
+                              <span className="text-xs font-bold ml-1 px-2 py-0.5 bg-yellow-200 rounded-full">
+                                new
+                              </span>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleRemoveHobby(hobby)}
                               className="w-5 h-5 rounded-full bg-nav-dark/20 hover:bg-nav-dark/40 flex items-center justify-center text-nav-dark font-bold"
+                              title={isRemoved ? "Undo remove" : "Remove hobby"}
                             >
-                              ×
+                              {isRemoved ? "⎌" : "×"}
                             </button>
                           </span>
                         );
