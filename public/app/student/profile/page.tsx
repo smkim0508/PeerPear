@@ -31,6 +31,7 @@ interface Profile {
 export default function ProfilePage() {
   const { user, refreshAuth } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [originalHobbies, setOriginalHobbies] = useState<string[]>([]);
   const [newHobby, setNewHobby] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +78,8 @@ export default function ProfilePage() {
         const data = await res.json();
 
         if (data.profile && Object.keys(data.profile).length > 0) {
+          const hobbies = data.profile.hobbies || [];
+          setOriginalHobbies(hobbies);
           setProfile((prev) => ({
             user_id: user.id ?? 0,
             first_name: data.profile.first_name || prev?.first_name || "",
@@ -87,7 +90,7 @@ export default function ProfilePage() {
             other_gender: "",
             class_year: data.profile.class_year || "",
             major: data.profile.major || "",
-            hobbies: data.profile.hobbies || [],
+            hobbies: hobbies,
           }));
         }
       } catch (err) {
@@ -211,6 +214,7 @@ export default function ProfilePage() {
 
       if (res.ok) {
         setSaveMessage("Profile saved successfully!");
+        setOriginalHobbies(profile.hobbies);
         await refreshAuth();
       } else {
         setSaveMessage("Error saving profile. Please try again.");
@@ -453,22 +457,29 @@ export default function ProfilePage() {
                       Your interests:
                     </p>
                     <div className="flex flex-wrap gap-3">
-                      {profile.hobbies.map((hobby) => (
-                        <span
-                          key={hobby}
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-green/20 border-2 border-green rounded-full text-nav-dark font-medium"
-                        >
-                          <Heart className="w-4 h-4" />
-                          {hobby}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveHobby(hobby)}
-                            className="w-5 h-5 rounded-full bg-nav-dark/20 hover:bg-nav-dark/40 flex items-center justify-center text-nav-dark font-bold"
+                      {profile.hobbies.map((hobby) => {
+                        const isNew = !originalHobbies.includes(hobby);
+                        return (
+                          <span
+                            key={hobby}
+                            className={`inline-flex items-center gap-2 px-4 py-2 border-2 rounded-full font-medium transition-all ${
+                              isNew
+                                ? "bg-yellow-50 border-yellow-400 text-yellow-800"
+                                : "bg-green/20 border-green text-nav-dark"
+                            }`}
                           >
-                            ×
-                          </button>
-                        </span>
-                      ))}
+                            <Heart className="w-4 h-4" />
+                            {hobby}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveHobby(hobby)}
+                              className="w-5 h-5 rounded-full bg-nav-dark/20 hover:bg-nav-dark/40 flex items-center justify-center text-nav-dark font-bold"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

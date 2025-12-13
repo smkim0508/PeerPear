@@ -115,7 +115,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
     if (!editName.trim()) newErrors.org_name = true;
     if (editName.length > 50) newErrors.nameTooLong = true;
     if (!orgDescription.trim()) newErrors.description = true;
-    if (orgDescription.length > 100) newErrors.descriptionTooLong = true;
+    if (orgDescription.length > 500) newErrors.descriptionTooLong = true;
 
     setErrors(newErrors);
 
