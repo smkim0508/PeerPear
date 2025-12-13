@@ -228,7 +228,7 @@ export default function EventPage2({ params }: EventPageProps) {
       try {
         const data = await getEventParticipants(eventId);
         setParticipants(data);
-      } catch {}
+      } catch { }
     };
     fetchParticipantsData();
   }, [eventId, isOrganizationUser]);
@@ -291,7 +291,7 @@ export default function EventPage2({ params }: EventPageProps) {
       } else {
         setQuestionnaireCompleted(false);
       }
-    } catch {}
+    } catch { }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,7 +313,7 @@ export default function EventPage2({ params }: EventPageProps) {
       );
       const statusData = await statusResponse.json();
       if (statusResponse.ok) setUserClassYear(statusData.class_year || null);
-    } catch {}
+    } catch { }
   };
 
   const openRegisterModal = () => {
@@ -416,10 +416,10 @@ export default function EventPage2({ params }: EventPageProps) {
       setEvent((prev) =>
         prev
           ? {
-              ...prev,
-              title: editEventData.title,
-              description: editEventData.description,
-            }
+            ...prev,
+            title: editEventData.title,
+            description: editEventData.description,
+          }
           : null
       );
       setIsEditingEvent(false);
@@ -674,8 +674,8 @@ export default function EventPage2({ params }: EventPageProps) {
     const color = expired
       ? "text-red-700 bg-red-100 border-red-300"
       : timeLeft.days < 2
-      ? "text-orange-700 bg-orange-100 border-orange-300"
-      : "text-green bg-green border-green";
+        ? "text-orange-700 bg-orange-100 border-orange-300"
+        : "text-green bg-green border-green";
     return (
       <Card className="border border-gray bg-white rounded-xl p-5 shadow">
         <CardHeader>
@@ -787,10 +787,10 @@ export default function EventPage2({ params }: EventPageProps) {
                     {currentStatus === "STARTED"
                       ? "Active"
                       : currentStatus === "TERMINATED"
-                      ? "Ended"
-                      : currentStatus === "PAIRING_PUBLISHED"
-                      ? "Pairings Published"
-                      : "Upcoming"}
+                        ? "Ended"
+                        : currentStatus === "PAIRING_PUBLISHED"
+                          ? "Pairings Published"
+                          : "Upcoming"}
                   </span>
                 </div>
 
@@ -884,11 +884,11 @@ export default function EventPage2({ params }: EventPageProps) {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark">
+                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark break-words">
                       {event.title}
                     </h1>
                     {event.description && (
-                      <p className="text-lg text-gray-700 max-w-2xl leading-relaxed">
+                      <p className="text-lg text-gray-700 max-w-2xl leading-relaxed break-words">
                         {event.description}
                       </p>
                     )}
@@ -1040,11 +1040,10 @@ export default function EventPage2({ params }: EventPageProps) {
                                 {group.students.map((student, studentIndex) => (
                                   <div
                                     key={studentIndex}
-                                    className={`flex items-center justify-between p-3 rounded-md border ${
-                                      student.id === user?.id
+                                    className={`flex items-center justify-between p-3 rounded-md border ${student.id === user?.id
                                         ? "bg-blue-100 border-blue-300"
                                         : "bg-white border-gray-200"
-                                    }`}
+                                      }`}
                                   >
                                     <div className="flex items-center gap-3">
                                       <div className="flex items-center gap-2">
@@ -1066,11 +1065,10 @@ export default function EventPage2({ params }: EventPageProps) {
                                     </div>
                                     {event.check_sibling_roles && (
                                       <span
-                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${
-                                          student.role === "BIG_SIBLING"
+                                        className={`px-2 py-1 text-xs font-medium rounded-full border ${student.role === "BIG_SIBLING"
                                             ? "bg-yellow-100 text-yellow-800 border-yellow-200"
                                             : "bg-blue-100 text-blue-800 border-blue-200"
-                                        }`}
+                                          }`}
                                       >
                                         {student.role === "BIG_SIBLING"
                                           ? "Big Sibling"
@@ -1128,16 +1126,16 @@ export default function EventPage2({ params }: EventPageProps) {
                                 </div>
                                 {(event.status === "TERMINATED" ||
                                   event.status === "PAIRING_PUBLISHED") && (
-                                  <PearButton
-                                    text="View Questionnaire"
-                                    onClick={() =>
-                                      router.push(
-                                        `/events/${eventId}/questionnaire`
-                                      )
-                                    }
-                                    className="w-full bg-green hover:bg-green/90 mt-2"
-                                  />
-                                )}
+                                    <PearButton
+                                      text="View Questionnaire"
+                                      onClick={() =>
+                                        router.push(
+                                          `/events/${eventId}/questionnaire`
+                                        )
+                                      }
+                                      className="w-full bg-green hover:bg-green/90 mt-2"
+                                    />
+                                  )}
                                 {event.status === "STARTED" && (
                                   <PearButton
                                     text="Edit/View Questionnaire"
@@ -1159,13 +1157,12 @@ export default function EventPage2({ params }: EventPageProps) {
                                     : "Unregister"
                                 }
                                 onClick={
-                                  isRegistering ? () => {} : openUnregisterModal
+                                  isRegistering ? () => { } : openUnregisterModal
                                 }
-                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${
-                                  isRegistering
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 ${isRegistering
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                                }`}
+                                  }`}
                               />
                             )}
                           </div>
@@ -1207,13 +1204,12 @@ export default function EventPage2({ params }: EventPageProps) {
                                     : "Unregister"
                                 }
                                 onClick={
-                                  isRegistering ? () => {} : openUnregisterModal
+                                  isRegistering ? () => { } : openUnregisterModal
                                 }
-                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${
-                                  isRegistering
+                                className={`cursor-pointer w-full bg-red-400 hover:bg-red-500 mt-2 ${isRegistering
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                                }`}
+                                  }`}
                               />
                             )}
                           </div>
@@ -1226,13 +1222,12 @@ export default function EventPage2({ params }: EventPageProps) {
                           <PearButton
                             text={isRegistering ? "Registering..." : "Register"}
                             onClick={
-                              isRegistering ? () => {} : openRegisterModal
+                              isRegistering ? () => { } : openRegisterModal
                             }
-                            className={`w-full bg-green mb-4 cursor-pointer ${
-                              isRegistering
+                            className={`w-full bg-green mb-4 cursor-pointer ${isRegistering
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                           />
                         </div>
                       )}
@@ -1290,12 +1285,11 @@ export default function EventPage2({ params }: EventPageProps) {
                               ? "Starting Program..."
                               : "Start Program"
                           }
-                          onClick={isStartingEvent ? () => {} : openStartModal}
-                          className={`w-full bg-green-600 hover:bg-green-700 ${
-                            isStartingEvent
+                          onClick={isStartingEvent ? () => { } : openStartModal}
+                          className={`w-full bg-green-600 hover:bg-green-700 ${isStartingEvent
                               ? "opacity-50 cursor-not-allowed"
                               : ""
-                          } cursor-pointer py-6`}
+                            } cursor-pointer py-6`}
                         />
                       )}
                       {currentStatus === "STARTED" && (
@@ -1303,10 +1297,9 @@ export default function EventPage2({ params }: EventPageProps) {
                           text={
                             isEndingEvent ? "Ending Program..." : "End Program"
                           }
-                          onClick={isEndingEvent ? () => {} : openEndModal}
-                          className={`w-full bg-red-400 hover:bg-red-500 ${
-                            isEndingEvent ? "opacity-50 cursor-not-allowed" : ""
-                          } cursor-pointer py-6`}
+                          onClick={isEndingEvent ? () => { } : openEndModal}
+                          className={`w-full bg-red-400 hover:bg-red-500 ${isEndingEvent ? "opacity-50 cursor-not-allowed" : ""
+                            } cursor-pointer py-6`}
                         />
                       )}
                       {currentStatus === "TERMINATED" &&
@@ -1336,21 +1329,20 @@ export default function EventPage2({ params }: EventPageProps) {
                                 isTriggeringPairing
                                   ? "Creating Pairings..."
                                   : participants.length < groupSize
-                                  ? `Not Enough Participants (Min ${groupSize})`
-                                  : "Create Pairings"
+                                    ? `Not Enough Participants (Min ${groupSize})`
+                                    : "Create Pairings"
                               }
                               onClick={
                                 isTriggeringPairing ||
-                                participants.length < groupSize
-                                  ? () => {}
+                                  participants.length < groupSize
+                                  ? () => { }
                                   : openPairingModal
                               }
-                              className={`w-full bg-green-600 hover:bg-green-700 ${
-                                isTriggeringPairing ||
-                                participants.length < groupSize
+                              className={`w-full bg-green-600 hover:bg-green-700 ${isTriggeringPairing ||
+                                  participants.length < groupSize
                                   ? "opacity-50 cursor-not-allowed hover:scale-100 hover:bg-green-600 hover:shadow-none"
                                   : ""
-                              }`}
+                                }`}
                             />
                             {pairingData && (
                               <PearButton
@@ -1361,14 +1353,13 @@ export default function EventPage2({ params }: EventPageProps) {
                                 }
                                 onClick={
                                   isPublishingPairings
-                                    ? () => {}
+                                    ? () => { }
                                     : openPublishModal
                                 }
-                                className={`w-full bg-blue-600 hover:bg-blue-700 ${
-                                  isPublishingPairings
+                                className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
                                     ? "opacity-50 cursor-not-allowed"
                                     : ""
-                                }`}
+                                  }`}
                               />
                             )}
                           </>
@@ -1386,14 +1377,13 @@ export default function EventPage2({ params }: EventPageProps) {
                               }
                               onClick={
                                 isPublishingPairings
-                                  ? () => {}
+                                  ? () => { }
                                   : openPublishModal
                               }
-                              className={`w-full bg-blue-600 hover:bg-blue-700 ${
-                                isPublishingPairings
+                              className={`w-full bg-blue-600 hover:bg-blue-700 ${isPublishingPairings
                                   ? "opacity-50 cursor-not-allowed"
                                   : ""
-                              }`}
+                                }`}
                             />
                           </>
                         )}
