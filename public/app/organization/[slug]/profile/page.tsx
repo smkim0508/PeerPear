@@ -127,7 +127,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
         setMessage("Please enter a shorter organization name");
       }
       else if (newErrors.descriptionTooLong) {
-        setMessage("Description must be 100 characters or fewer");
+        setMessage("Description must be 500 characters or fewer");
       }
       else {
         setMessage("An organization description is required");
@@ -271,10 +271,10 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                       : "border-gray-200 bg-transparent focus:border-green"
                       }`}
                     placeholder="Tell us about your organization..."
-                    maxLength={100}
+                    maxLength={500}
                   />
                   <div className="text-right text-sm text-gray-500 mt-1">
-                    {orgDescription.length}/100 characters
+                    {orgDescription.length}/500 characters
                   </div>
                 </div>
 
