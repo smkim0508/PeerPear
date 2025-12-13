@@ -211,11 +211,11 @@ export default function OrganizationPage() {
                     />
                   </div>
 
-                  <div className="ml-4 flex-grow">
-                    <h3 className="font-semibold text-black transition-colors">
+                  <div className="ml-4 flex-grow min-w-0">
+                    <h3 className="font-semibold text-black transition-colors break-words">
                       {org.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600 mt-1 break-words">
                       {org.description}
                     </p>
                   </div>
