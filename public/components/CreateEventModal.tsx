@@ -165,10 +165,28 @@ export default function CreateEventModal({
     field: string,
     value: string | File | null | boolean
   ) => {
-    setFormData({ ...formData, [field]: value });
-    // Clear error for this field if it exists
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (typeof value === "string") {
+      const newErrors = { ...errors };
+      if (field === "title") {
+        if (value.length > 30) {
+          newErrors.title = "Max character limit reached (30)";
+        } else {
+          delete newErrors.title; // Remove error if back within limit
+        }
+      }
+      if (field === "description") {
+        if (value.length > 100) {
+          newErrors.description = "Max character limit reached (100)";
+        } else {
+          delete newErrors.description;
+        }
+      }
+      if (!newErrors[field] && errors[field]) {
+         delete newErrors[field];
+      }
+      
+      setErrors(newErrors);
     }
   };
 
@@ -245,14 +263,18 @@ export default function CreateEventModal({
             ? "border-red-500 focus:ring-red-200"
             : "border-gray-300 focus:ring-[#8cbf70]"
             }`}
-          maxLength={30}
-        />
-        <div className="text-right text-xs text-gray-500 mt-1">
+        />        
+        <div 
+          className={`text-right text-xs mt-1 ${
+            formData.title.length > 30 ? "text-red-500 font-bold" : "text-gray-500"
+          }`}
+        >
           {formData.title.length}/30 characters
         </div>
         {errors.title && (
-          <p className="mt-1 text-xs text-red-500">{errors.title}</p>
+          <p className="mt-1 text-xs text-red-500 font-medium">{errors.title}</p>
         )}
+
 
         <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
           Description
