@@ -884,11 +884,11 @@ export default function EventPage2({ params }: EventPageProps) {
                   </Card>
                 ) : (
                   <div className="space-y-4">
-                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark break-words">
+                    <h1 className="text-4xl lg:text-5xl font-bold text-nav-dark wrap-break-word">
                       {event.title}
                     </h1>
                     {event.description && (
-                      <p className="text-lg text-gray-700 max-w-2xl leading-relaxed break-words">
+                      <p className="text-lg text-gray-700 max-w-2xl leading-relaxed wrap-break-word">
                         {event.description}
                       </p>
                     )}
