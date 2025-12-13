@@ -115,6 +115,7 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
     if (!editName.trim()) newErrors.org_name = true;
     if (editName.length > 50) newErrors.nameTooLong = true;
     if (!orgDescription.trim()) newErrors.description = true;
+    if (orgDescription.length > 100) newErrors.descriptionTooLong = true;
 
     setErrors(newErrors);
 
@@ -124,6 +125,9 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
       }
       else if (newErrors.nameTooLong) {
         setMessage("Please enter a shorter organization name");
+      }
+      else if (newErrors.descriptionTooLong) {
+        setMessage("Description must be 100 characters or fewer");
       }
       else {
         setMessage("An organization description is required");
@@ -267,8 +271,11 @@ export default function ProfilePage({ params }: OrganizationProfileProps) {
                       : "border-gray-200 bg-transparent focus:border-green"
                       }`}
                     placeholder="Tell us about your organization..."
-                    maxLength={500}
+                    maxLength={100}
                   />
+                  <div className="text-right text-sm text-gray-500 mt-1">
+                    {orgDescription.length}/100 characters
+                  </div>
                 </div>
 
                 {/* Message */}
