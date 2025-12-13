@@ -40,8 +40,10 @@ export default function CreateEventModal({
 
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = "hidden";
       setTimeout(() => setIsAnimating(true), 10);
     } else {
+      document.body.style.overflow = "unset";
       setIsAnimating(false);
       // Reset form and errors when closing
       setFormData({
@@ -55,6 +57,9 @@ export default function CreateEventModal({
       setSubmitError(null);
       setSuccessMessage(null);
     }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -183,198 +188,199 @@ export default function CreateEventModal({
         }
       }
       if (!newErrors[field] && errors[field]) {
-         delete newErrors[field];
+        delete newErrors[field];
       }
-      
+
       setErrors(newErrors);
     }
   };
 
   return (
     <div
-      className={`fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
+      className={`fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${isAnimating ? "opacity-100" : "opacity-0"
         }`}
       onClick={onClose}
     >
-      <div
-        className={`bg-white rounded-2xl  p-7 max-w-md w-full mx-4 shadow-2xl transition-all duration-300  relative ${isAnimating
-          ? "opacity-100 scale-100 translate-y-0"
-          : "opacity-0 scale-95 translate-y-4"
-          }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className={"absolute top-5 right-5 "}>
-          <PearButton
-            text="×"
-            onClick={onClose}
-            className="w-7 h-7 p-0 text-lg font-bold leading-none rounded-full bg-[#8cbf70] hover:bg-[#8cbf70] shadow-md hover:scale-105 hover:shadow-lg "
-          />
-        </div>
-        <div className="flex flex-col items-center text-center mb-4">
-          <div className="bg-primary/10 rounded-full p-4 mb-4">
-            <SquarePlus className="w-8 h-8 text-primary" />
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div
+          className={`bg-white rounded-2xl p-7 max-w-md w-full shadow-2xl transition-all duration-300 relative ${isAnimating
+            ? "opacity-100 scale-100 translate-y-0"
+            : "opacity-0 scale-95 translate-y-4"
+            }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={"absolute top-5 right-5 "}>
+            <PearButton
+              text="×"
+              onClick={onClose}
+              className="w-7 h-7 p-0 text-lg font-bold leading-none rounded-full bg-[#8cbf70] hover:bg-[#8cbf70] shadow-md hover:scale-105 hover:shadow-lg "
+            />
+          </div>
+          <div className="flex flex-col items-center text-center mb-4">
+            <div className="bg-primary/10 rounded-full p-4 mb-4">
+              <SquarePlus className="w-8 h-8 text-primary" />
+            </div>
+
+            <h2 className="text-3xl font-bold text-gray-900 mb-1">
+              Create New Program
+            </h2>
+            <p className="text-gray-600 text-base">
+              Enter the details of your program
+            </p>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">
-            Create New Program
-          </h2>
-          <p className="text-gray-600 text-base">
-            Enter the details of your program
-          </p>
-        </div>
-
-        {successMessage && (
-          <Alert className="mt-4 mb-4 border-green-400 bg-green-50">
-            <AlertTitle className="font-semibold text-green-700">
-              Success!
-            </AlertTitle>
-            <AlertDescription className="text-green-600">
-              {successMessage}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {submitError && (
-          <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
-            <AlertTitle className="font-semibold text-red-700">
-              Submission Failed
-            </AlertTitle>
-            <AlertDescription className="text-red-600">
-              {submitError}
-            </AlertDescription>
-            <button
-              className="absolute top-2 right-3 text-red-500 hover:text-red-700 "
-              onClick={() => setSubmitError(null)}
-            >
-              ×
-            </button>
-          </Alert>
-        )}
-
-        <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          Title
-        </label>
-        <input
-          type="text"
-          value={formData.title}
-          onChange={(e) => handleInputChange("title", e.target.value)}
-          placeholder="Enter program title"
-          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.title
-            ? "border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:ring-[#8cbf70]"
-            }`}
-        />        
-        <div 
-          className={`text-right text-xs mt-1 ${
-            formData.title.length > 30 ? "text-red-500 font-bold" : "text-gray-500"
-          }`}
-        >
-          {formData.title.length}/30 characters
-        </div>
-        {errors.title && (
-          <p className="mt-1 text-xs text-red-500 font-medium">{errors.title}</p>
-        )}
-
-
-        <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          Description
-        </label>
-        <textarea
-          placeholder="Describe your program"
-          rows={3}
-          value={formData.description}
-          onChange={(e) => handleInputChange("description", e.target.value)}
-          className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${errors.description
-            ? "border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:ring-[#8cbf70]"
-            }`}
-          maxLength={100}
-        />
-        <div className="text-right text-xs text-gray-500 mt-1">
-          {formData.description.length}/100 characters
-        </div>
-        {errors.description && (
-          <p className="mt-1 text-xs text-red-500">{errors.description}</p>
-        )}
-
-        <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          End Date
-        </label>
-        <input
-          value={formData.endDate}
-          onChange={(e) => handleInputChange("endDate", e.target.value)}
-          type="date"
-          className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.endDate
-            ? "border-red-500 focus:ring-red-200"
-            : "border-gray-300 focus:ring-[#8cbf70]"
-            }`}
-        />
-        {errors.endDate && (
-          <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>
-        )}
-
-        <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
-          Optional Program Image
-        </label>
-
-        <div
-          className="border-2  rounded-xl p-4 text-center cursor-pointer
-             hover:border-[#8cbf70] transition"
-          onClick={() => document.getElementById("event-image")?.click()}
-        >
-          {formData.imageFile ? (
-            <img
-              src={URL.createObjectURL(formData.imageFile)}
-              alt="Preview"
-              className="h-20 w-full object-cover rounded-lg shadow mx-auto"
-            />
-          ) : (
-            <p className="text-gray-500 text-sm">
-              Click to upload or drag & drop
-            </p>
+          {successMessage && (
+            <Alert className="mt-4 mb-4 border-green-400 bg-green-50">
+              <AlertTitle className="font-semibold text-green-700">
+                Success!
+              </AlertTitle>
+              <AlertDescription className="text-green-600">
+                {successMessage}
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
 
-        <input
-          id="event-image"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0] || null;
-            handleInputChange("imageFile", file);
-          }}
-        />
+          {submitError && (
+            <Alert className="mt-4 mb-4 border-red-400 bg-red-50">
+              <AlertTitle className="font-semibold text-red-700">
+                Submission Failed
+              </AlertTitle>
+              <AlertDescription className="text-red-600">
+                {submitError}
+              </AlertDescription>
+              <button
+                className="absolute top-2 right-3 text-red-500 hover:text-red-700 "
+                onClick={() => setSubmitError(null)}
+              >
+                ×
+              </button>
+            </Alert>
+          )}
 
-        <div className="mt-4 flex items-start gap-3 rounded-lg border-2 border-gray-200 p-3">
-          <input
-            id="checkSiblingRoles"
-            type="checkbox"
-            checked={formData.checkSiblingRoles}
-            onChange={(e) =>
-              handleInputChange("checkSiblingRoles", e.target.checked)
-            }
-            className="h-5 w-5 mt-0.5 cursor-pointer accent-primary flex-shrink-0"
-          />
-          <label
-            htmlFor="checkSiblingRoles"
-            className="text-left text-sm text-gray-700 leading-relaxed cursor-pointer"
-          >
-            Big-Little pairing mode
-            <span className="block text-xs text-gray-600">
-              When enabled, participants are assigned Big/Little sibling roles.
-            </span>
+          <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
+            Title
           </label>
-        </div>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => handleInputChange("title", e.target.value)}
+            placeholder="Enter program title"
+            className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.title
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-[#8cbf70]"
+              }`}
+          />
+          <div
+            className={`text-right text-xs mt-1 ${formData.title.length > 30 ? "text-red-500 font-bold" : "text-gray-500"
+              }`}
+          >
+            {formData.title.length}/30 characters
+          </div>
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-500 font-medium">{errors.title}</p>
+          )}
 
-        <PearButton
-          className={`w-full px-3 py-2 mt-6 ${submitting
-            ? "opacity-70 cursor-not-allowed"
-            : "hover:scale-105 hover:shadow-lg hover:-translate-y-1"
-            }`}
-          text={submitting ? "Submitting..." : "Submit Program"}
-          onClick={handleSubmit}
-        />
+
+          <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
+            Description
+          </label>
+          <textarea
+            placeholder="Describe your program"
+            rows={3}
+            value={formData.description}
+            onChange={(e) => handleInputChange("description", e.target.value)}
+            className={`w-full rounded-lg border px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 ${errors.description
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-[#8cbf70]"
+              }`}
+            maxLength={100}
+          />
+          <div className="text-right text-xs text-gray-500 mt-1">
+            {formData.description.length}/100 characters
+          </div>
+          {errors.description && (
+            <p className="mt-1 text-xs text-red-500">{errors.description}</p>
+          )}
+
+          <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
+            End Date
+          </label>
+          <input
+            value={formData.endDate}
+            onChange={(e) => handleInputChange("endDate", e.target.value)}
+            type="date"
+            className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.endDate
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-[#8cbf70]"
+              }`}
+          />
+          {errors.endDate && (
+            <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>
+          )}
+
+          <label className="block text-sm font-semibold text-[#1a1a1a] mt-4 mb-1">
+            Optional Program Image
+          </label>
+
+          <div
+            className="border-2  rounded-xl p-4 text-center cursor-pointer
+             hover:border-[#8cbf70] transition"
+            onClick={() => document.getElementById("event-image")?.click()}
+          >
+            {formData.imageFile ? (
+              <img
+                src={URL.createObjectURL(formData.imageFile)}
+                alt="Preview"
+                className="h-20 w-full object-cover rounded-lg shadow mx-auto"
+              />
+            ) : (
+              <p className="text-gray-500 text-sm">
+                Click to upload or drag & drop
+              </p>
+            )}
+          </div>
+
+          <input
+            id="event-image"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              handleInputChange("imageFile", file);
+            }}
+          />
+
+          <div className="mt-4 flex items-start gap-3 rounded-lg border-2 border-gray-200 p-3">
+            <input
+              id="checkSiblingRoles"
+              type="checkbox"
+              checked={formData.checkSiblingRoles}
+              onChange={(e) =>
+                handleInputChange("checkSiblingRoles", e.target.checked)
+              }
+              className="h-5 w-5 mt-0.5 cursor-pointer accent-primary flex-shrink-0"
+            />
+            <label
+              htmlFor="checkSiblingRoles"
+              className="text-left text-sm text-gray-700 leading-relaxed cursor-pointer"
+            >
+              Big-Little pairing mode
+              <span className="block text-xs text-gray-600">
+                When enabled, participants are assigned Big/Little sibling roles.
+              </span>
+            </label>
+          </div>
+
+          <PearButton
+            className={`w-full px-3 py-2 mt-6 ${submitting
+              ? "opacity-70 cursor-not-allowed"
+              : "hover:scale-105 hover:shadow-lg hover:-translate-y-1"
+              }`}
+            text={submitting ? "Submitting..." : "Submit Program"}
+            onClick={handleSubmit}
+          />
+        </div>
       </div>
     </div>
   );
