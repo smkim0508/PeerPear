@@ -351,7 +351,7 @@ export default function Navbar({
                 href="/about"
                 className="text-nav-dark font-medium hover:underline"
               >
-                About Us
+                About
               </Link>
               <button
                 onClick={onLoginClick}
@@ -419,7 +419,7 @@ export default function Navbar({
                 className="text-nav-dark font-medium hover:underline"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                About Us
+                About
               </Link>
               <button
                 onClick={onLoginClick}
