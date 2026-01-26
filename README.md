@@ -2,13 +2,13 @@
 #### Centralized, LLM-powered Group Pairing Platform for Student Organizations.
 Try PeerPear yourself at: https://peerpear.vercel.app/
 
-<div style="text-align: center">
+<div align="center">
 
-<img src="static/peerpear_landing.png" alt="peerpear-landing" width=400>
+<img src="static/peerpear_landing.png" alt="peerpear-landing" width=500>
 
 Home Page
 
-<img src="static/student_my_programs.png" alt="student-my-programs" width=400>
+<img src="static/student_my_programs.png" alt="student-my-programs" width=500>
 
 Student User - My Programs
 </div>
