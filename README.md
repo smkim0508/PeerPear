@@ -4,11 +4,11 @@ Try PeerPear yourself at: https://peerpear.vercel.app/
 
 <div align="center">
 
-<img src="static/peerpear_landing.png" alt="peerpear-landing" width=500>
+<img src="static/peerpear_landing.png" alt="peerpear-landing" width=450>
 
 Home Page
 
-<img src="static/student_my_programs.png" alt="student-my-programs" width=500>
+<img src="static/student_my_programs.png" alt="student-my-programs" width=450>
 
 Student User - My Programs
 </div>
