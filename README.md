@@ -44,7 +44,7 @@ Create a `.env` file in the `public` folder by referencing `public/.env.example`
 ## Deployment
 Our project's backend is currently hosted on [Heroku](https://www.heroku.com/), and frontend on [Vercel](https://vercel.com/). Our DB and image storage bucket uses [Supabase](https://supabase.com/?utm_source=google&utm_medium=cpc&utm_campaign=23317752603&device=c&gad_source=1&gad_campaignid=23317752603&gbraid=0AAAAA_fjjDk1sfXHF39m_F_kZ11vvVlbU&gclid=Cj0KCQiA9OnJBhD-ARIsAPV51xOcyVc7Dnx9JzwTb6tIlYUz6T_kz4ldmll7rAeDndM8iwymAbH0IegaAosjEALw_wcB) services.
 
-# Authentication
+## Authentication
 You must be authenticated via Princeton University's CAS Authentication System to log in as a student or an organization user. WIP: adding universal authentication methods.
 
 ## Google Gemini API
