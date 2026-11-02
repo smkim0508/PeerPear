@@ -9,6 +9,8 @@ import Footer from "../components/Footer";
 import LoginModal from "../components/LoginModal";
 import Navbar from "@/components/Navbar";
 import PearButton from "@/components/PearButton";
+import OfflineNotice from "@/components/OfflineNotice";
+import { SERVICE_OFFLINE } from "@/lib/siteStatus";
 
 
 export default function Home() {
@@ -22,6 +24,10 @@ export default function Home() {
 
   // Handle post-login redirects and check for auth errors
   useEffect(() => {
+    // While the service is offline there is no session to act on, and redirecting
+    // would drop visitors into a dashboard backed by a dead API.
+    if (SERVICE_OFFLINE) return;
+
     // Check for auth error message from localStorage
     const errorMessage = localStorage.getItem("authError");
     if (errorMessage) {
@@ -45,8 +51,10 @@ export default function Home() {
     }
   }, [isAuthenticated, isLoading, router, verifyAndRedirectToOrganization]);
 
-  // Show loading while checking authentication
-  if (isLoading) {
+  // Show loading while checking authentication. Skipped while the service is
+  // offline: the auth check hits a backend that is down, so this spinner would
+  // never resolve and the landing page would never paint.
+  if (!SERVICE_OFFLINE && isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-light-beige">
         <div className="text-center">
@@ -59,7 +67,13 @@ export default function Home() {
 
   return (
     <div className="font-sans min-h-screen flex flex-col bg-light-beige">
-      <Navbar onLoginClick={openLoginModal} userType="guest" />
+      <Navbar
+        onLoginClick={openLoginModal}
+        userType="guest"
+        disableLogin={SERVICE_OFFLINE}
+      />
+
+      {SERVICE_OFFLINE && <OfflineNotice />}
 
       {/* Error message display */}
       {authError && (
@@ -77,7 +91,7 @@ export default function Home() {
       )}
 
       <main className="flex-1">
-        <Hero onTryNowClick={openLoginModal} />
+        <Hero onTryNowClick={openLoginModal} serviceOffline={SERVICE_OFFLINE} />
         <Features />
 
         <section className="relative text-center bg-light-beige">
@@ -86,20 +100,33 @@ export default function Home() {
             <img src="/wave-2.svg" alt="" className="block w-full" />
           </div>
 
-          <div className="px-4 sm:px-8 py-10 sm:py-12 bg-light-beige">
-            <h3 className="text-3xl sm:text-4xl m-0 mt-2 font-extrabold text-nav-dark tracking-tight">
-              Ready to simplify your pairings?
-            </h3>
-            <div className="mt-5">
-              <PearButton text="Get started" onClick={openLoginModal} className="cursor-pointer hover:scale-105 transition duration-300" />
+          {/* The closing CTA invites a sign-up that can't happen while the
+              service is offline, so it's dropped. The wave above stays — it's
+              the visual transition into the footer. */}
+          {!SERVICE_OFFLINE ? (
+            <div className="px-4 sm:px-8 py-10 sm:py-12 bg-light-beige">
+              <h3 className="text-3xl sm:text-4xl m-0 mt-2 font-extrabold text-nav-dark tracking-tight">
+                Ready to simplify your pairings?
+              </h3>
+              <div className="mt-5">
+                <PearButton
+                  text="Get started"
+                  onClick={openLoginModal}
+                  className="cursor-pointer hover:scale-105 transition duration-300"
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="pb-6 bg-light-beige" />
+          )}
         </section>
       </main>
 
 
       <Footer />
-      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      {!SERVICE_OFFLINE && (
+        <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      )}
     </div>
   );
 }

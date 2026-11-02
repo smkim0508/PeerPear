@@ -3,9 +3,12 @@ import { Squiggle } from "./ui/Squiggle";
 
 interface HeroProps {
   onTryNowClick: () => void;
+  /** When true, "Try now" would open a sign-in flow backed by a dead API, so
+   *  it is hidden and only "Learn more" remains. */
+  serviceOffline?: boolean;
 }
 
-export default function Hero({ onTryNowClick }: HeroProps) {
+export default function Hero({ onTryNowClick, serviceOffline }: HeroProps) {
   return (
     <section className="bg-light-beige relative font-sans">
       <div className="max-w-5xl lg:max-w-[1200px] mx-auto px-4 sm:px-8 py-16 sm:py-20 pb-14 sm:pb-16">
@@ -37,16 +40,18 @@ export default function Hero({ onTryNowClick }: HeroProps) {
           </p>
 
           <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto">
-            <PearButton
-              text="Try now"
-              onClick={onTryNowClick}
-              className="cursor-pointer w-full sm:w-auto  hover:scale-105 transition duration-300 p-5 text-md"
-            />
+            {!serviceOffline && (
+              <PearButton
+                text="Try now"
+                onClick={onTryNowClick}
+                className="cursor-pointer w-full sm:w-auto  hover:scale-105 transition duration-300 p-5 text-md"
+              />
+            )}
             <a href="#features" className="w-full sm:w-auto ">
               <PearButton
                 text="Learn more"
                 onClick={() => {}}
-                dark
+                dark={!serviceOffline}
                 className="cursor-pointer w-full sm:w-auto hover:scale-105 transition duration-300 p-5 text-md"
               />
             </a>

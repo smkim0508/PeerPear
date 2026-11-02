@@ -7,6 +7,7 @@ import LoginModal from "@/components/LoginModal";
 import OrganizationCarousel from "@/components/OrganizationCarousel";
 import Link from "next/link";
 import { ArrowLeft, Laptop, UsersRound, Handshake } from "lucide-react";
+import { SERVICE_OFFLINE } from "@/lib/siteStatus";
 
 export default function About() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -24,7 +25,11 @@ export default function About() {
 
   return (
     <div className="font-sans min-h-screen flex flex-col">
-      <Navbar onLoginClick={openLoginModal} userType="guest" />
+      <Navbar
+        onLoginClick={openLoginModal}
+        userType="guest"
+        disableLogin={SERVICE_OFFLINE}
+      />
 
       <main className="flex-1 bg-white">
         {/* Hero Section */}
@@ -129,7 +134,9 @@ export default function About() {
       </main>
 
       <Footer />
-      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      {!SERVICE_OFFLINE && (
+        <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      )}
     </div>
   );
 }

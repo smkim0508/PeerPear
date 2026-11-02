@@ -15,6 +15,7 @@ import {
   handleCASRedirect,
   verifyOrganizationAccess,
 } from "@/lib/auth";
+import { SERVICE_OFFLINE } from "@/lib/siteStatus";
 
 interface AuthContextType {
   user: User | null;
@@ -30,7 +31,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Start settled while the service is offline — there is no backend to ask, so
+  // nothing should ever wait on an auth check.
+  const [isLoading, setIsLoading] = useState(!SERVICE_OFFLINE);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const refreshAuth = async () => {
@@ -108,6 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Skip the whole handshake while the service is offline: the auth endpoints
+    // are down, so this would only produce failed requests and console errors
+    // on every page load.
+    if (SERVICE_OFFLINE) return;
+
     // Handle CAS redirects when component mounts
     handleCASRedirect();
 
