@@ -19,6 +19,10 @@ interface NavbarProps {
   onLogoutClick?: () => void;
   userType?: "student" | "organization" | "guest";
   organizationId?: number;
+  /** Greys out the guest "Log in" buttons while the backend (and therefore CAS
+   *  sign-in) is offline. Kept visible rather than hidden so it's clear the
+   *  product has accounts and they're simply unavailable right now. */
+  disableLogin?: boolean;
 }
 
 interface OrganizationInfo {
@@ -31,6 +35,7 @@ export default function Navbar({
   onLoginClick,
   userType: propUserType,
   organizationId: propOrganizationId,
+  disableLogin,
 }: NavbarProps) {
   const { isAuthenticated, logout, user } = useAuth();
   const pathname = usePathname();
@@ -353,13 +358,29 @@ export default function Navbar({
               >
                 About
               </Link>
-              <button
-                onClick={onLoginClick}
-                className="px-4 py-2.5 rounded-lg bg-nav-dark text-white font-medium hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer whitespace-nowrap"
+              {/* Wrapper carries the tooltip: a disabled <button> swallows
+                  pointer events, so title= on it alone never shows. */}
+              <span
+                title={
+                  disableLogin
+                    ? "Login is unavailable while PeerPear is offline"
+                    : undefined
+                }
+                className="inline-flex"
               >
-                Log in
-                <CircleUserRound size={18} />
-              </button>
+                <button
+                  onClick={disableLogin ? undefined : onLoginClick}
+                  disabled={disableLogin}
+                  className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                    disableLogin
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-nav-dark text-white hover:bg-opacity-90 shadow-md hover:shadow-lg cursor-pointer"
+                  }`}
+                >
+                  Log in
+                  <CircleUserRound size={18} />
+                </button>
+              </span>
             </div>
           ) : (
             <button
@@ -421,12 +442,26 @@ export default function Navbar({
               >
                 About
               </Link>
-              <button
-                onClick={onLoginClick}
-                className="px-4 py-2 rounded-md bg-nav-dark text-white text-sm font-semibold hover:bg-opacity-90"
+              <span
+                title={
+                  disableLogin
+                    ? "Login is unavailable while PeerPear is offline"
+                    : undefined
+                }
+                className="inline-flex"
               >
-                Log in
-              </button>
+                <button
+                  onClick={disableLogin ? undefined : onLoginClick}
+                  disabled={disableLogin}
+                  className={`px-4 py-2 rounded-md text-sm font-semibold ${
+                    disableLogin
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-nav-dark text-white hover:bg-opacity-90"
+                  }`}
+                >
+                  Log in
+                </button>
+              </span>
             </div>
           )}
 
